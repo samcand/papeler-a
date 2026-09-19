@@ -261,6 +261,7 @@ export function instrumentsView(root, { navigate, params }) {
         el('h1', {}, song.title),
         el('p', { class: 'muted' }, 'Guía por instrumento')),
       el('div', { class: 'row wrap' },
+        button('🔥 Calentar', () => navigate(`/calentamiento/${tab === 'voz' ? 'canto' : tab}`)),
         button('← Volver a la canción', () => navigate(`/cancion/${song.id}`)),
         button('Sincronizar con YouTube', () => navigate(`/sync/${song.id}`), { variant: 'primary' }))),
     tabsRow, body);

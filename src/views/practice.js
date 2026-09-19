@@ -257,6 +257,7 @@ export function practiceView(root, { navigate, params }) {
         el('p', { class: 'muted' }, song ? `${song.key} · ${song.bpm} BPM · ${song.timeSignature}` : 'Metrónomo y ejercicios')),
       el('div', { class: 'row wrap' },
         song ? button('← Canción', () => navigate(`/cancion/${song.id}`)) : button('Repertorio', () => navigate('/')),
+        button('🔥 Calentar primero', () => navigate('/calentamiento'), { variant: 'primary' }),
         button('Academia', () => navigate('/academia')))),
     metronomeCard, micCard, trainerCard, progressHost, pathHost, logCard);
 

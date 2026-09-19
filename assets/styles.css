@@ -530,3 +530,21 @@ body.modo-atril .app { max-width: none; padding: 0; }
   .atril-hoja.dos-columnas .sheet { column-count: 1; }
   .mic-objetivo { font-size: 2.2rem; }
 }
+
+/* ---------- Calentamiento ---------- */
+.cal-layout { display: grid; grid-template-columns: 1fr minmax(240px, 320px); gap: 16px; align-items: start; }
+.cal-cabecera { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; }
+.cal-cabecera h2 { margin: 2px 0 6px; }
+.cal-tiempo { font-size: 3rem; font-weight: 800; color: var(--accent); line-height: 1; font-variant-numeric: tabular-nums; }
+.cal-contexto { margin-top: 14px; padding: 10px 12px; background: var(--bg-soft); border-radius: 12px; border-left: 3px solid var(--accent-2); }
+.cal-vocal { margin-top: 10px; }
+.cal-pasos { list-style: none; margin: 0; padding: 0; counter-reset: paso; }
+.cal-pasos li {
+  display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 10px;
+  cursor: pointer; border-left: 3px solid transparent;
+}
+.cal-pasos li:hover { background: var(--bg-soft); }
+.cal-pasos li.activo { background: var(--bg-soft); border-left-color: var(--accent); font-weight: 600; }
+.cal-pasos li.hecho { opacity: .5; }
+.cal-min { color: var(--accent); font-variant-numeric: tabular-nums; min-width: 28px; }
+@media (max-width: 800px) { .cal-layout { grid-template-columns: 1fr; } }

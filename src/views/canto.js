@@ -356,7 +356,9 @@ export function cantoView(root, { navigate, params }) {
         el('ol', { class: 'path' },
           RUTINA.map((r) => el('li', {},
             el('h4', {}, `Minuto ${r.min}: ${r.titulo}`),
-            el('p', { class: 'muted' }, r.detalle))))));
+            el('p', { class: 'muted' }, r.detalle)))),
+        el('div', { class: 'row' },
+          button('Hacerla con cronómetro', () => navigate('/calentamiento/canto'), { variant: 'primary' }))));
   };
 
   // -------------------------------------------------------------- ARMONÍAS
@@ -485,6 +487,7 @@ export function cantoView(root, { navigate, params }) {
         el('h1', {}, 'Canto'),
         el('p', { class: 'muted' }, 'Rango, tonalidad, afinación, vocalizaciones, armonías y cuidado de la voz')),
       el('div', { class: 'row wrap' },
+        button('🔥 Calentar la voz', () => navigate('/calentamiento/canto'), { variant: 'primary' }),
         button('Academia', () => navigate('/academia')),
         button('Practicar', () => navigate('/practica')))),
     tabs, cuerpo);

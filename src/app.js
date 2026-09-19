@@ -16,6 +16,7 @@ import { atrilView } from './views/atril.js';
 import { cantoView } from './views/canto.js';
 import { importarView } from './views/importar.js';
 import { historialView } from './views/historial.js';
+import { calentamientoView } from './views/calentamiento.js';
 
 const ROUTES = [
   { path: /^\/?$/, view: libraryView, nav: 'repertorio' },
@@ -30,6 +31,7 @@ const ROUTES = [
   { path: /^\/atril\/set\/([^/]+)$/, view: atrilView, keys: ['setlistId'] },
   { path: /^\/atril\/([^/]+)$/, view: atrilView, keys: ['id'] },
   { path: /^\/historial$/, view: historialView, nav: 'historial' },
+  { path: /^\/calentamiento(?:\/([^/]+))?$/, view: calentamientoView, keys: ['instrumento'], nav: 'calentamiento' },
   { path: /^\/importar$/, view: importarView },
   { path: /^\/listas$/, view: setlistsView, nav: 'listas' },
   { path: /^\/ideas$/, view: ideasView, nav: 'ideas' },
@@ -39,6 +41,7 @@ const NAV = [
   { href: '#/', label: 'Repertorio', id: 'repertorio' },
   { href: '#/listas', label: 'Listas', id: 'listas' },
   { href: '#/practica', label: 'Practicar', id: 'practica' },
+  { href: '#/calentamiento', label: 'Calentar', id: 'calentamiento' },
   { href: '#/canto', label: 'Canto', id: 'canto' },
   { href: '#/afinador', label: 'Afinador', id: 'afinador' },
   { href: '#/estudio', label: 'Estudio', id: 'estudio' },
@@ -149,4 +152,5 @@ window.addEventListener('keydown', (e) => {
   if (e.key === 't') navigate('/afinador');
   if (e.key === 'e') navigate('/estudio');
   if (e.key === 'c') navigate('/canto');
+  if (e.key === 'w') navigate('/calentamiento');
 });
