@@ -11,16 +11,28 @@ Todo se guarda en tu dispositivo.
 ## Cómo abrirla
 
 ```bash
-npm start          # sirve la carpeta en http://localhost:8080
+git clone https://github.com/samcand/papeler-a.git
+cd papeler-a
+git checkout claude/praise-songs-management-app-51979y
+npm start          # http://localhost:8080
 ```
+
+No hay que instalar nada (`npm install` no hace falta: el proyecto no tiene
+dependencias). Solo necesitas **Node 18 o superior**, que trae el servidor de
+desarrollo incluido en `tools/servidor.mjs`. Si prefieres otro:
+
+```bash
+npm start -- 3000                 # otro puerto
+npm run serve:python              # con Python, si lo tienes
+npx serve .                       # o cualquier servidor estático
+```
+
+Debe abrirse por `http://`, no con doble clic en el archivo: el navegador
+bloquea los módulos de JavaScript cargados desde `file://`.
 
 Se puede **instalar como app** (Chrome/Edge/Android: "Instalar"; iPhone: Compartir →
 "Añadir a pantalla de inicio"). Una vez instalada funciona **sin internet**: lo único que
 necesita red es el video de YouTube.
-
-O cualquier servidor estático (`npx serve`, extensión Live Server, etc.).
-Debe abrirse por `http://`, no con doble clic en el archivo: el navegador
-bloquea los módulos de JavaScript cargados desde `file://`.
 
 También se puede publicar tal cual en GitHub Pages: son archivos estáticos.
 
@@ -277,12 +289,13 @@ src/views/            Pantallas
 tests/                Pruebas: teoría musical, señal (acordes y afinación),
                       digitaciones y formato de hoja
 tools/gen-docs.mjs    Genera el documento de las 100 ideas
+tools/servidor.mjs    Servidor estático para desarrollo (sin dependencias)
 ```
 
 ## Comandos
 
 ```bash
-npm start    # servidor local
+npm start    # servidor local (Node, sin dependencias)
 npm test     # 64 pruebas: teoría, señal, digitaciones, formato de hoja,
              # voz, estiramiento de tiempo, clic, QR, compartir e historial
 npm run docs # regenera docs/100-ideas-alabanza.md desde src/ideas.js
