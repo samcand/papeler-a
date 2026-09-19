@@ -38,6 +38,7 @@ También se puede publicar tal cual en GitHub Pages: son archivos estáticos.
 | **Modo atril** | La pantalla del domingo: letra grande, sin menús, la pantalla no se apaga, auto-scroll atado al BPM real y avance con pedal Bluetooth o teclado. Una o dos columnas. |
 | **Proyección** | Segunda ventana o proyector con **solo la letra** para la congregación, controlada desde el atril (tecla B para pantalla en negro). |
 | **Canto** | Módulo completo de voz: medir tu rango con el micrófono, elegir la tonalidad según quién canta, afinación en vivo, vocalizaciones guiadas, entrenador de armonías, reparto de voces del equipo y cuidado vocal. |
+| **Anotaciones a mano** | Marcar la hoja con el dedo o el lápiz de la tablet: círculos, flechas, resaltador. Cada músico tiene su propio perfil de marcas sobre la misma canción, y salen impresas con la hoja. |
 | **Calentamiento** | Rutina guiada con cronómetro para guitarra, ukelele, bajo, piano, batería, voz y equipo completo. Se ajusta al tiempo que tengas (5 a 20 min), pone el metrónomo al tempo de cada ejercicio y usa la canción del domingo en los ejercicios que lo piden. |
 | **Historial** | Qué se cantó cada domingo, hace cuánto no se canta algo, cuántas veces seguidas va una canción nueva y qué tonalidades se repiten. |
 | **Afinador** | Afinador cromático por micrófono para guitarra, ukelele, bajo (4 y 5 cuerdas), cuatro y afinaciones alternativas (Drop D, DADGAD). Aguja en cents, notas de referencia y guía de cómo afinar. |
@@ -74,6 +75,23 @@ por sección) y la hoja en números de Nashville.
 `🥁 Pistas de clic y pads` genera archivos .wav: el clic lleva un compás de cuenta de entrada
 y un golpe agudo al empezar cada sección marcada, y el pad es un colchón sostenido en la
 tonalidad para los momentos de oración.
+
+## Anotaciones a mano
+
+Lo que todos hacen con lápiz sobre el papel, pero sin papel. Se activa con `✎ Anotar`
+en la canción o en el modo atril:
+
+- **Lápiz, resaltador y borrador**, cinco colores, deshacer y ocultar/mostrar las marcas.
+- **Rechazo de palma**: al detectar un lápiz activo se ignoran los dedos, para que apoyar
+  la mano en la tablet no deje manchas.
+- **Un perfil por músico**: las marcas del guitarrista y las del bajista conviven sobre la
+  misma canción sin pisarse.
+- **Se imprimen con la hoja**: la barra de herramientas no, las marcas sí.
+
+El detalle que lo hace útil de verdad: cada trazo se **ancla a la sección** sobre la que se
+dibujó y se guarda en coordenadas relativas a ella. Si transpones la canción o cambias el
+tamaño de letra, la hoja se reacomoda y la marca **viaja con su verso** en vez de quedarse
+flotando en el sitio equivocado.
 
 ## Calentamiento
 
@@ -207,6 +225,7 @@ src/docx.js + zip.js  Generación del .docx en el navegador
 src/hojasequipo.js    Una hoja distinta por músico
 src/vocal.js          Rango vocal, tonalidad por cantante, vocalizaciones y armonías
 src/calentamiento.js  Rutinas de calentamiento por instrumento y para la voz
+src/anotaciones.js    Marcas a mano: trazos, simplificación, borrador
 src/escucha.js        Escucha por micrófono y reconoce acordes o notas
 src/timestretch.js    Velocidad lenta sin cambiar el tono (WSOLA)
 src/clicktrack.js     Pistas de clic, pads y exportación a .wav
@@ -229,7 +248,7 @@ tools/gen-docs.mjs    Genera el documento de las 100 ideas
 
 ```bash
 npm start    # servidor local
-npm test     # 48 pruebas: teoría, señal, digitaciones, formato de hoja,
+npm test     # 55 pruebas: teoría, señal, digitaciones, formato de hoja,
              # voz, estiramiento de tiempo, clic, QR, compartir e historial
 npm run docs # regenera docs/100-ideas-alabanza.md desde src/ideas.js
 ```

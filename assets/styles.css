@@ -548,3 +548,26 @@ body.modo-atril .app { max-width: none; padding: 0; }
 .cal-pasos li.hecho { opacity: .5; }
 .cal-min { color: var(--accent); font-variant-numeric: tabular-nums; min-width: 28px; }
 @media (max-width: 800px) { .cal-layout { grid-template-columns: 1fr; } }
+
+/* ---------- Anotaciones a mano ---------- */
+.sheet-host.con-lienzo, .atril-hoja.con-lienzo { position: relative; }
+.lienzo { position: absolute; inset: 0; pointer-events: none; z-index: 5; touch-action: auto; }
+.lienzo.activo { pointer-events: auto; touch-action: none; cursor: crosshair; }
+.lienzo.activo.borrando { cursor: cell; }
+.anotando .chord { pointer-events: none; }
+.lienzo-host { margin-bottom: 10px; }
+.lienzo-barra { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.lienzo-barra.compacta .btn { padding: 5px 8px; }
+.lienzo-barra .colores { gap: 4px; }
+.color-punto {
+  width: 22px; height: 22px; border-radius: 50%; cursor: pointer;
+  background: var(--punto); border: 2px solid transparent; padding: 0;
+}
+.color-punto.activo { border-color: var(--text); transform: scale(1.12); }
+.color-punto:hover { filter: brightness(1.15); }
+
+@media print {
+  /* Las marcas se imprimen con la hoja: es su razón de ser */
+  .lienzo { display: block !important; }
+  .lienzo-host, .lienzo-barra { display: none !important; }
+}

@@ -14,6 +14,7 @@ const DEFAULT_STATE = {
   setlists: [],
   practice: {},   // { [songId]: { chordsLearned: [], minutes: 0, lastAt: null } }
   cantantes: [],  // { id, nombre, min, max, comoda:[min,max], tipo, notas }
+  anotaciones: {},// { [songId]: { [perfil]: trazos[] } }  marcas a mano sobre la hoja
   ideasDone: [],  // números de ideas marcadas
   settings: {
     instrument: 'guitarra',
@@ -164,6 +165,37 @@ class Store {
   addPracticeMinutes(songId, minutes) {
     const p = this.practiceFor(songId);
     this.state.practice[songId] = { ...p, minutes: p.minutes + minutes, lastAt: Date.now() };
+    this.save();
+  }
+
+  // --- Anotaciones a mano sobre la hoja ---
+  anotacionesDe(songId, perfil = 'Mis notas') {
+    return this.state.anotaciones?.[songId]?.[perfil] || [];
+  }
+
+  guardarAnotaciones(songId, perfil, trazos) {
+    if (!this.state.anotaciones) this.state.anotaciones = {};
+    if (!this.state.anotaciones[songId]) this.state.anotaciones[songId] = {};
+    if (trazos.length) this.state.anotaciones[songId][perfil] = trazos;
+    else delete this.state.anotaciones[songId][perfil];
+    if (!Object.keys(this.state.anotaciones[songId]).length) delete this.state.anotaciones[songId];
+    this.save();
+  }
+
+  /** Perfiles con marcas: cada músico tiene las suyas sobre la misma canción. */
+  perfilesDeAnotaciones(songId = null) {
+    const nombres = new Set(['Mis notas']);
+    const fuentes = songId
+      ? [this.state.anotaciones?.[songId] || {}]
+      : Object.values(this.state.anotaciones || {});
+    for (const porPerfil of fuentes) for (const nombre of Object.keys(porPerfil)) nombres.add(nombre);
+    return [...nombres];
+  }
+
+  borrarAnotaciones(songId, perfil) {
+    if (!this.state.anotaciones?.[songId]) return;
+    delete this.state.anotaciones[songId][perfil];
+    if (!Object.keys(this.state.anotaciones[songId]).length) delete this.state.anotaciones[songId];
     this.save();
   }
 

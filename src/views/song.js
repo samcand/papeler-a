@@ -3,6 +3,7 @@
 import { el, button, input, select, textarea, toast, copyText, download, chip, section, field, drawer } from '../ui.js';
 import { store } from '../store.js';
 import { renderSheet, semitonesFor, openChordDrawer } from './sheet.js';
+import { montarLienzo, barraLienzo } from './lienzo.js';
 import { chordsUsed, lyricsOnly, transposeSource } from '../chordpro.js';
 import { toHojaTexto, toHojaJSON } from '../hoja.js';
 import { buildDocx, docxFileName } from '../docx.js';
@@ -25,6 +26,10 @@ export function songView(root, { navigate, params }) {
   let scrollRaf = null;
 
   const sheetHost = el('div', { class: 'sheet-host' });
+  const lienzoHost = el('div', { class: 'lienzo-host' });
+  let lienzo = null;
+  let barra = null;
+  let perfilAnotacion = store.state.settings.perfilAnotaciones || 'Mis notas';
   const capoHost = el('div', { class: 'capo-host' });
   const chordBar = el('div', { class: 'chord-bar' });
 
@@ -69,6 +74,29 @@ export function songView(root, { navigate, params }) {
         : [el('span', { class: 'muted small' }, 'Sin posición cómoda con capo: usa cejilla o cambia de tonalidad.')]));
   };
 
+  /** Monta (o vuelve a colgar) la capa de anotaciones sobre la hoja. */
+  const prepararLienzo = () => {
+    if (editing) { lienzo?.destruir(); lienzo = null; lienzoHost.replaceChildren(); return; }
+    if (!lienzo) {
+      lienzo = montarLienzo(sheetHost, { songId: song.id, perfil: perfilAnotacion });
+      barra = barraLienzo(lienzo, {
+        perfiles: store.perfilesDeAnotaciones(song.id),
+        onPerfil: (nombre) => {
+          perfilAnotacion = nombre;
+          store.setSetting('perfilAnotaciones', nombre);
+          lienzo.setPerfil(nombre);
+          barra.nodo.replaceWith(barraLienzo(lienzo, {
+            perfiles: store.perfilesDeAnotaciones(song.id),
+            onPerfil: (n) => { perfilAnotacion = n; store.setSetting('perfilAnotaciones', n); lienzo.setPerfil(n); },
+          }).nodo);
+        },
+      });
+      lienzoHost.replaceChildren(barra.nodo);
+    } else {
+      lienzo.reanclar();
+    }
+  };
+
   const renderSheetHost = () => {
     const semis = semitonesFor(song, displayKey);
     sheetHost.style.fontSize = fontSize + 'px';
@@ -83,6 +111,7 @@ export function songView(root, { navigate, params }) {
               }, { variant: 'primary' }),
               button('Cancelar', () => { editing = false; renderAll(); })))
         : renderSheet(song, { semitones: semis, notation, key: displayKey }));
+    prepararLienzo();
   };
 
   /** La canción tal como se ve ahora (ya transpuesta), sin tocar la guardada. */
@@ -214,8 +243,8 @@ export function songView(root, { navigate, params }) {
     renderCapo();
   };
 
-  root.replaceChildren(header, controls, chordBar, capoHost, sheetHost, meta);
+  root.replaceChildren(header, controls, chordBar, capoHost, lienzoHost, sheetHost, meta);
   renderAll();
 
-  return () => stopScroll();
+  return () => { stopScroll(); lienzo?.destruir(); };
 }

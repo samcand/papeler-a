@@ -10,6 +10,7 @@ import { renderSheet, semitonesFor } from './sheet.js';
 import { parseSong } from '../chordpro.js';
 import { keyInfo, transposeChord, keyPrefersFlats, preferredKeyName, noteToPc, formatTime } from '../music.js';
 import { Metronome } from '../metronome.js';
+import { montarLienzo, barraLienzo } from './lienzo.js';
 
 const CANAL = 'alabanza-proyeccion';
 
@@ -35,6 +36,9 @@ export function atrilView(root, { navigate, params }) {
   let seccionActual = 0;
   let canal = null;
   const metro = new Metronome({ bpm: canciones[0].song.bpm || 80 });
+  let lienzo = null;
+  let barraAnotar = null;
+  const perfilAnotacion = store.state.settings.perfilAnotaciones || 'Mis notas';
 
   try { canal = new BroadcastChannel(CANAL); } catch { canal = null; }
 
@@ -112,6 +116,9 @@ export function atrilView(root, { navigate, params }) {
     displayKey = canciones[indice].key || canciones[indice].song.key;
     seccionActual = 0;
     metro.setBpm(cancion().bpm || 80);
+    lienzo?.destruir();
+    lienzo = null;
+    barraAnotar = null;
     velocidad = 0; parar();
     pintar();
     hoja.scrollTop = 0;
@@ -135,6 +142,7 @@ export function atrilView(root, { navigate, params }) {
     const nodo = hoja.querySelectorAll('.sheet-section')[secciones[seccionActual]?.indiceEnHoja ?? 0];
     nodo?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     marcarSeccion();
+    prepararLienzo();
     pintarBarra();
   };
 
@@ -164,6 +172,16 @@ export function atrilView(root, { navigate, params }) {
   // --- Pintado ---
   const barra = el('div', { class: 'atril-barra' });
   const hoja = el('div', { class: 'atril-hoja' });
+
+  /** La capa de anotaciones se cuelga de la hoja del atril. */
+  const prepararLienzo = () => {
+    if (!lienzo) {
+      lienzo = montarLienzo(hoja, { songId: cancion().id, perfil: perfilAnotacion });
+      barraAnotar = barraLienzo(lienzo, { compacta: true });
+    } else {
+      lienzo.reanclar();
+    }
+  };
 
   const pintarBarra = () => {
     const song = cancion();
@@ -199,6 +217,7 @@ export function atrilView(root, { navigate, params }) {
         }),
         canciones.length > 1 ? button('◀', () => irA(indice - 1), { title: 'Canción anterior' }) : null,
         canciones.length > 1 ? button('▶', () => irA(indice + 1), { title: 'Canción siguiente' }) : null,
+        barraAnotar ? barraAnotar.nodo : null,
         button('✕ Salir', salir, { variant: 'ghost' })));
   };
 
@@ -219,6 +238,7 @@ export function atrilView(root, { navigate, params }) {
         : null,
       song.notes ? el('p', { class: 'atril-nota muted' }, song.notes) : null);
     marcarSeccion();
+    prepararLienzo();
     pintarBarra();
   };
 
@@ -237,6 +257,7 @@ export function atrilView(root, { navigate, params }) {
     document.removeEventListener('keydown', teclado);
     parar();
     metro.stop();
+    lienzo?.destruir();
     wakeLock?.release?.().catch(() => {});
     canal?.close?.();
   };
