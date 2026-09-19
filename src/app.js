@@ -10,6 +10,8 @@ import { practiceView } from './views/practice.js';
 import { academyView } from './views/academy.js';
 import { setlistsView } from './views/setlists.js';
 import { ideasView } from './views/ideas.js';
+import { afinadorView } from './views/afinador.js';
+import { estudioView } from './views/estudio.js';
 
 const ROUTES = [
   { path: /^\/?$/, view: libraryView, nav: 'repertorio' },
@@ -18,6 +20,8 @@ const ROUTES = [
   { path: /^\/sync\/([^/]+)$/, view: syncView, keys: ['id'] },
   { path: /^\/practica(?:\/([^/]+))?$/, view: practiceView, keys: ['id'], nav: 'practica' },
   { path: /^\/academia$/, view: academyView, nav: 'academia' },
+  { path: /^\/afinador$/, view: afinadorView, nav: 'afinador' },
+  { path: /^\/estudio$/, view: estudioView, nav: 'estudio' },
   { path: /^\/listas$/, view: setlistsView, nav: 'listas' },
   { path: /^\/ideas$/, view: ideasView, nav: 'ideas' },
 ];
@@ -26,6 +30,8 @@ const NAV = [
   { href: '#/', label: 'Repertorio', id: 'repertorio' },
   { href: '#/listas', label: 'Listas', id: 'listas' },
   { href: '#/practica', label: 'Practicar', id: 'practica' },
+  { href: '#/afinador', label: 'Afinador', id: 'afinador' },
+  { href: '#/estudio', label: 'Estudio', id: 'estudio' },
   { href: '#/academia', label: 'Academia', id: 'academia' },
   { href: '#/ideas', label: '100 ideas', id: 'ideas' },
 ];
@@ -107,4 +113,6 @@ window.addEventListener('keydown', (e) => {
   if (e.key === '/') { e.preventDefault(); navigate('/'); }
   if (e.key === 'a') navigate('/academia');
   if (e.key === 'p') navigate('/practica');
+  if (e.key === 't') navigate('/afinador');
+  if (e.key === 'e') navigate('/estudio');
 });

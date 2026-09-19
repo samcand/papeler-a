@@ -4,6 +4,38 @@ import { el, button, input, toast, download, confirmDialog, chip } from '../ui.j
 import { store } from '../store.js';
 import { chordsUsed } from '../chordpro.js';
 import { keyInfo } from '../music.js';
+import { parseHoja } from '../hoja.js';
+import { el as elem, textarea, drawer } from '../ui.js';
+
+/** Pega una hoja en el formato del equipo (acordes sobre la letra) y la convierte en canción. */
+function abrirPegado(navigate) {
+  let texto = '';
+  const area = textarea('', (v) => { texto = v; }, {
+    rows: 16,
+    placeholder: `10.000 RAZONES (G)\nMatt Redman\n\nCORO\nC           G           D/F#         Em\nAlma mía bendice, bendice al señor`,
+  });
+  const panel = drawer('Pegar hoja de acordes',
+    elem('div', { class: 'drawer-content' },
+      elem('p', { class: 'muted' },
+        'Pega la hoja tal como la tienes: título con la tonalidad entre paréntesis, autor debajo, ' +
+        'las etiquetas de sección (CORO, VERSO I…) y los acordes en la línea de encima de la letra. ' +
+        'La app entiende ese formato y coloca cada acorde en su sílaba.'),
+      area,
+      elem('div', { class: 'row' },
+        button('Crear canción', () => {
+          if (!texto.trim()) return toast('Pega primero la hoja', 'warn');
+          const datos = parseHoja(texto);
+          const song = store.newSong({
+            title: datos.titulo || 'Canción pegada',
+            author: datos.autor,
+            key: datos.tonalidad,
+            body: datos.body,
+          });
+          panel.remove();
+          toast(`"${song.title}" importada en ${song.key}`, 'ok');
+          navigate(`/cancion/${song.id}`);
+        }, { variant: 'primary' }))));
+}
 
 export function libraryView(root, { navigate }) {
   let query = '';
@@ -89,7 +121,8 @@ export function libraryView(root, { navigate }) {
         el('p', { class: 'muted' }, `${store.songs.length} canciones guardadas en este dispositivo`)),
       el('div', { class: 'row wrap' },
         button('+ Nueva canción', () => { const s = store.newSong(); navigate(`/cancion/${s.id}`); }, { variant: 'primary' }),
-        button('Importar', () => importFile.click()),
+        button('Importar respaldo', () => importFile.click()),
+        button('Pegar hoja de acordes', () => abrirPegado(navigate)),
         button('Exportar todo', () => download('alabanza-respaldo.json', store.exportJSON())),
         importFile)),
     el('div', { class: 'toolbar' },

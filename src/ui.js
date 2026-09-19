@@ -82,7 +82,8 @@ export function chip(label, opts = {}) {
 }
 
 export function download(filename, content, type = 'application/json') {
-  const blob = new Blob([content], { type });
+  // content puede ser texto o bytes (por ejemplo un .docx generado en el navegador)
+  const blob = new Blob([content instanceof Uint8Array ? content : String(content)], { type });
   const url = URL.createObjectURL(blob);
   const a = el('a', { href: url, download: filename });
   document.body.append(a);

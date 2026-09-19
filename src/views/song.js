@@ -1,9 +1,11 @@
 /** song.js — Vista de canción: letra con acordes, transposición y edición. */
 
-import { el, button, input, select, textarea, toast, copyText, download, chip, section, field } from '../ui.js';
+import { el, button, input, select, textarea, toast, copyText, download, chip, section, field, drawer } from '../ui.js';
 import { store } from '../store.js';
 import { renderSheet, semitonesFor, openChordDrawer } from './sheet.js';
 import { chordsUsed, lyricsOnly, transposeSource } from '../chordpro.js';
+import { toHojaTexto, toHojaJSON } from '../hoja.js';
+import { buildDocx, docxFileName } from '../docx.js';
 import { keyInfo, capoSuggestions, intervalBetweenKeys, keyPrefersFlats, transposeChord, normalizeKeyName, preferredKeyName, noteToPc, MAJOR_KEY_NAMES, MINOR_KEY_NAMES } from '../music.js';
 
 const KEY_OPTIONS = [...MAJOR_KEY_NAMES, ...MINOR_KEY_NAMES];
@@ -81,6 +83,13 @@ export function songView(root, { navigate, params }) {
               }, { variant: 'primary' }),
               button('Cancelar', () => { editing = false; renderAll(); })))
         : renderSheet(song, { semitones: semis, notation, key: displayKey }));
+  };
+
+  /** La canción tal como se ve ahora (ya transpuesta), sin tocar la guardada. */
+  const cancionMostrada = () => {
+    const semis = semitonesFor(song, displayKey);
+    if (!semis) return song;
+    return { ...song, key: displayKey, body: transposeSource(song.body, semis, keyPrefersFlats(displayKey)) };
   };
 
   const transposeBy = (n) => {
@@ -168,7 +177,36 @@ export function songView(root, { navigate, params }) {
         field('Notas generales del arreglo', textarea(song.notes, (v) => store.updateSong(song.id, { notes: v }), { rows: 3 })),
         el('div', { class: 'row wrap' },
           button('Exportar canción', () => download(`${song.title}.json`, JSON.stringify(song, null, 2))),
-          button('Copiar hoja de acordes', () => copyText(song.body)))));
+          button('Copiar hoja de acordes', () => copyText(song.body)))),
+      section('Hoja en el formato del equipo',
+        el('p', { class: 'muted' },
+          'Título con la tonalidad, autor debajo, acordes en negrita sobre la sílaba y las repeticiones ' +
+          'abreviadas con "(Igual)". Se exporta en la tonalidad que estés viendo ahora' +
+          (semis ? ` (${displayKey})` : '') + '.'),
+        el('div', { class: 'row wrap' },
+          button('Ver / copiar como texto', () => {
+            const texto = toHojaTexto(cancionMostrada(), { tonalidad: displayKey });
+            drawer('Hoja de acordes — ' + song.title,
+              el('div', { class: 'drawer-content' },
+                el('pre', { class: 'code hoja' }, texto),
+                el('div', { class: 'row' }, button('Copiar', () => copyText(texto), { variant: 'primary' }))));
+          }),
+          button('Descargar .docx', () => {
+            const doc = toHojaJSON(cancionMostrada(), { tonalidad: displayKey });
+            const bytes = buildDocx(doc, { mono: store.state.settings.docxMono || false });
+            download(docxFileName(doc), bytes, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+            toast('Documento descargado', 'ok');
+          }, { variant: 'primary' }),
+          button('JSON para generar_docx.py', () => {
+            const doc = toHojaJSON(cancionMostrada(), { tonalidad: displayKey });
+            download(`${song.title}.json`, JSON.stringify(doc, null, 2));
+          }),
+          el('label', { class: 'field inline' },
+            el('span', { class: 'field-label' }, 'Fuente monoespaciada'),
+            el('input', {
+              type: 'checkbox', checked: store.state.settings.docxMono || false,
+              onChange: (e) => store.setSetting('docxMono', e.target.checked),
+            })))));
 
     renderSheetHost();
     renderChordBar();

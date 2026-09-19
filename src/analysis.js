@@ -9,7 +9,7 @@
  */
 
 /** Envolvente de energía (RMS) en ventanas de ~50 ms. */
-function energyEnvelope(buffer, hop = 0.05) {
+export function energyEnvelope(buffer, hop = 0.05) {
   const data = buffer.getChannelData(0);
   const sr = buffer.sampleRate;
   const win = Math.floor(sr * hop);
@@ -23,14 +23,14 @@ function energyEnvelope(buffer, hop = 0.05) {
 }
 
 /** Flujo espectral simplificado: subidas de energía = posibles golpes. */
-function onsetCurve(env) {
+export function onsetCurve(env) {
   const out = [0];
   for (let i = 1; i < env.length; i++) out.push(Math.max(0, env[i] - env[i - 1]));
   return out;
 }
 
 /** Estima BPM por autocorrelación de la curva de ataques. */
-function estimateBpm(onsets, hop) {
+export function estimateBpm(onsets, hop) {
   const minBpm = 60, maxBpm = 180;
   const minLag = Math.round(60 / maxBpm / hop);
   const maxLag = Math.round(60 / minBpm / hop);
@@ -51,7 +51,7 @@ function estimateBpm(onsets, hop) {
  * Detecta cambios grandes de energía sostenidos: normalmente coinciden con
  * entradas de coro, puentes y bajadas.
  */
-function detectSections(env, hop, minGap = 12) {
+export function detectSections(env, hop, minGap = 12) {
   const smooth = [];
   const w = 20; // ~1 s
   for (let i = 0; i < env.length; i++) {

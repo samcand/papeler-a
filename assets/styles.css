@@ -401,3 +401,63 @@ a { color: var(--accent-2); }
 .sheet-line.bars .seg { display: inline; }
 .sheet-line.bars .chord.inline { display: inline; font-size: 1em; }
 .sheet-line.bars .lyr { color: var(--muted); }
+
+/* ---------- Afinador ---------- */
+.tuner { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.tuner-note { font-size: 4.2rem; font-weight: 800; line-height: 1; color: var(--muted); }
+.tuner-note.ok { color: var(--ok); text-shadow: 0 0 26px color-mix(in oklab, var(--ok) 45%, transparent); }
+.tuner-note.bajo, .tuner-note.alto { color: var(--warn); }
+.tuner-scale { width: min(520px, 100%); }
+.tuner-track {
+  position: relative; height: 16px; border-radius: 999px;
+  background: linear-gradient(90deg, var(--warn) 0%, var(--bg-soft) 42%, var(--ok) 50%, var(--bg-soft) 58%, var(--warn) 100%);
+  border: 1px solid var(--line);
+}
+.needle {
+  position: absolute; top: -7px; left: 50%; width: 4px; height: 30px; border-radius: 3px;
+  background: var(--text); transform: translateX(-50%); transition: left .1s linear;
+}
+.needle.ok { background: var(--ok); }
+.needle.bajo, .needle.alto { background: var(--warn); }
+.tuner-marks { display: flex; justify-content: space-between; font-size: .7rem; color: var(--muted); margin-top: 4px; }
+.tuner-detail { text-align: center; min-height: 1.4em; }
+.strings-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.string-btn { white-space: pre-line; text-align: center; min-width: 64px; line-height: 1.25; }
+.string-btn.afinada { box-shadow: 0 0 0 2px var(--ok) inset; }
+.row.center { justify-content: center; }
+
+/* ---------- Estudio de audio ---------- */
+.acordes-barra { display: flex; height: 46px; border-radius: 10px; overflow: hidden; border: 1px solid var(--line); margin: 10px 0; }
+.acorde-seg {
+  display: grid; place-items: center; min-width: 2px; cursor: pointer;
+  background: color-mix(in oklab, var(--accent-2) 55%, var(--bg-soft));
+  border-right: 1px solid var(--bg); font-size: .78rem; overflow: hidden; white-space: nowrap;
+}
+.acorde-seg:hover { filter: brightness(1.2); }
+.acorde-seg.activo { background: var(--accent); color: #12161d; font-weight: 700; }
+.progress-bar.clickable { cursor: pointer; height: 10px; }
+.btn.vel-activa { background: var(--accent); color: #12161d; border-color: transparent; }
+.pianoroll { width: 100%; background: var(--bg-soft); border-radius: 10px; }
+.roll-row { fill: var(--card); }
+.roll-row.black { fill: color-mix(in oklab, var(--bg) 70%, var(--card)); }
+.roll-note { fill: var(--accent); }
+
+/* ---------- Tablatura y mástil ---------- */
+.code.tab { font-size: .82rem; line-height: 1.5; }
+.code.hoja { white-space: pre; font-size: .85rem; line-height: 1.45; max-height: 60vh; overflow: auto; }
+.neck-wrap { overflow-x: auto; }
+.neck { min-width: 620px; }
+.cd-nut-line { stroke: var(--text); stroke-width: 3; }
+.cd-dot.root { fill: var(--accent-2); }
+.input.auto { width: auto; min-width: 150px; }
+
+/* Los desplegables dentro de una fila no deben ocupar todo el ancho */
+.row > select.input, .page-head select.input, .field.inline select.input { width: auto; min-width: 150px; max-width: 100%; }
+.tuner-note { min-height: 1.1em; }
+
+@media (max-width: 560px) {
+  /* En el celular la barra se desplaza en horizontal: no roba alto a la hoja */
+  .topbar { gap: 10px; padding: 8px 12px; }
+  .nav { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; max-width: 100%; }
+  .nav::-webkit-scrollbar { display: none; }
+}

@@ -7,6 +7,7 @@ import { el, drawer, button, toast } from '../ui.js';
 import { parseSong } from '../chordpro.js';
 import { transposeChord, toNashville, toLatin, keyPrefersFlats, chordNotes, intervalBetweenKeys } from '../music.js';
 import { chordShapes, chordDiagramSVG, chordTechnique as guitarTechnique, chordDifficulty } from '../guitar.js';
+import { buscarDigitaciones, diagramaSVG, INSTRUMENTOS } from '../fretboard.js';
 import { pianoSVG, chordMidi, voicings, chordTechnique as pianoTechnique } from '../piano.js';
 import { store } from '../store.js';
 
@@ -21,16 +22,55 @@ export function displayChord(chord, { semitones = 0, notation = 'americana', key
 
 /** Panel con todo lo necesario para ejecutar un acorde. */
 export function openChordDrawer(chord, songId) {
-  const shapes = chordShapes(chord);
   const learned = songId ? store.practiceFor(songId).chordsLearned.includes(chord) : false;
+  const diagramas = el('div', {});
+  const consejos = el('ul', { class: 'tips' });
+  let instrumentoId = store.state.settings.instrumentoTrastes || 'guitarra';
 
-  const diagrams = el('div', { class: 'shape-row' },
-    shapes.slice(0, 3).map((shape) => el('figure', { class: 'shape' },
-      el('div', { html: chordDiagramSVG(shape, { name: chord }) }),
-      el('figcaption', {}, shape.label))));
+  const pintarTrastes = () => {
+    store.setSetting('instrumentoTrastes', instrumentoId);
+    // Para la guitarra estándar se usan las digitaciones de siempre; para el resto
+    // de instrumentos y afinaciones se calculan sobre el mástil.
+    if (instrumentoId === 'guitarra') {
+      const formas = chordShapes(chord);
+      diagramas.replaceChildren(el('div', { class: 'shape-row' },
+        formas.slice(0, 3).map((forma) => el('figure', { class: 'shape' },
+          el('div', { html: chordDiagramSVG(forma, { name: chord }) }),
+          el('figcaption', {}, forma.label)))));
+      consejos.replaceChildren(...guitarTechnique(chord, formas[0]).map((t) => el('li', {}, t)));
+    } else {
+      const formas = buscarDigitaciones(chord, instrumentoId, { max: 3 });
+      diagramas.replaceChildren(formas.length
+        ? el('div', { class: 'shape-row' },
+            formas.map((forma, i) => el('figure', { class: 'shape' },
+              el('div', { html: diagramaSVG(forma, { nombre: chord, instrumentoId }) }),
+              el('figcaption', {}, i === 0 ? 'Posición más fácil' : `Alternativa ${i}`))))
+        : el('p', { class: 'muted' }, 'Este acorde no cae cómodo en este instrumento: prueba otra inversión o simplifícalo.'));
+      consejos.replaceChildren(...tecnicaTrastes(chord, formas[0], instrumentoId).map((t) => el('li', {}, t)));
+    }
+  };
 
-  const guitarTips = el('ul', { class: 'tips' },
-    guitarTechnique(chord, shapes[0]).map((t) => el('li', {}, t)));
+  const selector = el('div', { class: 'row wrap' },
+    ['guitarra', 'ukelele', 'bajo', 'cuatro'].map((id) => {
+      const b = button(INSTRUMENTOS[id].nombre.split(' ')[0], () => { instrumentoId = id; pintarTrastes(); pintarSelector(); },
+        { variant: id === instrumentoId ? 'ok' : 'chip' });
+      b.dataset.inst = id;
+      return b;
+    }),
+    (() => {
+      const otras = Object.entries(INSTRUMENTOS).filter(([id]) => !['guitarra', 'ukelele', 'bajo', 'cuatro'].includes(id));
+      const sel = el('select', { class: 'input auto', onChange: (e) => { instrumentoId = e.target.value; pintarTrastes(); pintarSelector(); } },
+        el('option', { value: '' }, 'Otra afinación…'),
+        otras.map(([id, inst]) => el('option', { value: id, selected: id === instrumentoId }, inst.nombre)));
+      return sel;
+    })());
+
+  const pintarSelector = () => {
+    selector.querySelectorAll('[data-inst]').forEach((b) => {
+      b.classList.toggle('ok', b.dataset.inst === instrumentoId);
+      b.classList.toggle('chip', b.dataset.inst !== instrumentoId);
+    });
+  };
 
   const vs = voicings(chord);
   const pianoBox = el('div', { class: 'voicings' },
@@ -51,12 +91,46 @@ export function openChordDrawer(chord, songId) {
     toast(now ? `${chord} marcado como aprendido` : `${chord} vuelve a práctica`);
   }, { variant: learned ? 'ok' : '' });
 
+  pintarTrastes();
+
   return drawer(`Acorde ${chord}`,
     el('div', { class: 'drawer-content' },
       el('p', { class: 'muted' }, `Notas: ${chordNotes(chord, /b/.test(chord)).join(' – ')} · Dificultad estimada: ${'★'.repeat(chordDifficulty(chord))}${'☆'.repeat(5 - chordDifficulty(chord))}`),
-      el('h4', {}, 'Guitarra'), diagrams, guitarTips,
+      el('h4', {}, 'Instrumentos de cuerda'), selector, diagramas, consejos,
       el('h4', {}, 'Piano / teclado'), pianoBox, pianoTips,
       el('div', { class: 'row' }, learnBtn)));
+}
+
+const NOMBRE_DEDO = { 1: 'índice', 2: 'medio', 3: 'anular', 4: 'meñique' };
+
+/** Consejos de ejecución para instrumentos calculados sobre el mástil. */
+function tecnicaTrastes(chord, forma, instrumentoId) {
+  const inst = INSTRUMENTOS[instrumentoId];
+  if (!forma) return [`En ${inst.nombre} este acorde no tiene una posición cómoda cerca de la cejuela.`];
+  const tips = [];
+  const puestos = forma.frets
+    .map((f, i) => ({ f, i, dedo: forma.fingers?.[i] }))
+    .filter((x) => x.f > 0);
+  const enCejilla = forma.barre
+    ? puestos.filter((x) => x.f === forma.barre.fret && x.i >= forma.barre.from && x.i <= forma.barre.to)
+    : [];
+  const sueltos = puestos.filter((x) => !enCejilla.includes(x));
+  if (puestos.length) {
+    const partes = [];
+    if (enCejilla.length) {
+      partes.push(`índice haciendo cejilla en el traste ${forma.barre.fret} (de la ${inst.etiquetas[enCejilla[0].i]} a la ${inst.etiquetas[enCejilla[enCejilla.length - 1].i]})`);
+    }
+    partes.push(...sueltos.map((p) => `${NOMBRE_DEDO[p.dedo] || 'dedo ' + p.dedo} en la ${inst.etiquetas[p.i]}, traste ${p.f}`));
+    tips.push('Digitación: ' + partes.join('; ') + '.');
+  } else {
+    tips.push('Todas las cuerdas van al aire: solo rasguea.');
+  }
+  const mudas = forma.frets.map((f, i) => (f === -1 ? inst.etiquetas[i] : null)).filter(Boolean);
+  if (mudas.length) tips.push(`No toques la ${mudas.join(' ni la ')}.`);
+  if (forma.barre) tips.push(`La cejilla se hace con el índice recto y el pulgar detrás del mástil; si zumba, acércalo un poco más al traste antes de apretar más fuerte.`);
+  if (inst.reentrante) tips.push('Este instrumento es reentrante: la cuerda más gruesa no es la más grave, así que el acorde suena "abierto" aunque la fundamental no esté abajo.');
+  if (inst.grave) tips.push('En el bajo casi nunca se tocan acordes completos: lo normal es fundamental y quinta, y dejar la armonía a los demás.');
+  return tips;
 }
 
 /**
