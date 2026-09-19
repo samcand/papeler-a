@@ -1,6 +1,6 @@
 /** afinador.js (vista) — Afinador por micrófono para guitarra, ukelele y bajo. */
 
-import { el, button, select, chip, section, toast } from '../ui.js';
+import { el, button, select, chip, section, toast, render } from '../ui.js';
 import { store } from '../store.js';
 import { Afinador, AFINACIONES, cuerdaMasCercana, tocarNota, estadoAfinacion } from '../afinador.js';
 import { INSTRUMENTOS } from '../fretboard.js';
@@ -23,7 +23,7 @@ export function afinadorView(root, { navigate }) {
 
   const pintarCuerdas = (indiceActivo = null, cents = null) => {
     const inst = INSTRUMENTOS[instrumentoId];
-    cuerdasHost.replaceChildren(
+    render(cuerdasHost, 
       ...inst.cuerdas.map((midi, i) => {
         const b = button(
           `${inst.etiquetas[i].split(' ').pop()}\n${pcName(midi)}${Math.floor(midi / 12) - 1}`,
@@ -85,7 +85,7 @@ export function afinadorView(root, { navigate }) {
 
   pintarCuerdas();
 
-  root.replaceChildren(
+  render(root, 
     el('div', { class: 'page-head' },
       el('div', {},
         el('h1', {}, 'Afinador'),

@@ -18,6 +18,20 @@ export function el(tag, props = {}, ...children) {
   return node;
 }
 
+/**
+ * Reemplaza el contenido de un nodo filtrando nulos.
+ *
+ * `Node.replaceChildren` convierte cualquier cosa que no sea un nodo en texto,
+ * así que un `condicion ? algo : null` acaba pintando la palabra "null" en la
+ * pantalla. Esta función se comporta como `el()`: descarta null, undefined y
+ * false, y aplana arrays.
+ */
+export function render(nodo, ...hijos) {
+  const limpios = hijos.flat(Infinity).filter((h) => h != null && h !== false);
+  nodo.replaceChildren(...limpios);
+  return nodo;
+}
+
 export const $ = (sel, root = document) => root.querySelector(sel);
 export const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
 

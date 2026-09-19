@@ -1,6 +1,6 @@
 /** practice.js — Modo de práctica: metrónomo, entrenador de acordes y rutas. */
 
-import { el, button, select, toast, chip, section } from '../ui.js';
+import { el, button, select, toast, chip, section, render } from '../ui.js';
 import { store } from '../store.js';
 import { Metronome, TapTempo } from '../metronome.js';
 import { chordsUsed } from '../chordpro.js';
@@ -24,7 +24,7 @@ export function practiceView(root, { navigate, params }) {
   const bpmLabel = el('strong', { class: 'bpm-value' }, String(metro.bpm));
 
   const paintBeats = (active = -1) => {
-    beatsHost.replaceChildren(
+    render(beatsHost, 
       ...Array.from({ length: metro.beatsPerBar }, (_, i) =>
         el('span', { class: `beat-dot${i === active ? ' on' : ''}${i === 0 ? ' first' : ''}` })));
   };
@@ -72,12 +72,12 @@ export function practiceView(root, { navigate, params }) {
   let trainerIndex = 0;
   const paintTrainer = () => {
     if (!chords.length) {
-      trainerBox.replaceChildren(el('p', { class: 'muted' }, 'Abre una canción para entrenar sus acordes.'));
+      render(trainerBox, el('p', { class: 'muted' }, 'Abre una canción para entrenar sus acordes.'));
       return;
     }
     const chord = chords[trainerIndex % chords.length];
     const shape = chordShapes(chord)[0];
-    trainerBox.replaceChildren(
+    render(trainerBox, 
       el('div', { class: 'trainer-card' },
         el('h3', {}, chord),
         instrument === 'piano'
@@ -166,7 +166,7 @@ export function practiceView(root, { navigate, params }) {
           escucha.detener(); escucha = null;
           e.target.textContent = '🎤 Empezar a escuchar';
           e.target.classList.remove('ok');
-          micEstado.replaceChildren(el('span', { class: 'muted' }, 'Micrófono apagado'));
+          render(micEstado, el('span', { class: 'muted' }, 'Micrófono apagado'));
           return;
         }
         if (!chords.length) return toast('Abre una canción para practicar sus acordes', 'warn');
@@ -175,7 +175,7 @@ export function practiceView(root, { navigate, params }) {
           await escucha.iniciar();
           e.target.textContent = '⏹ Detener';
           e.target.classList.add('ok');
-          micEstado.replaceChildren(el('span', { class: 'ok-text' }, 'Escuchando'));
+          render(micEstado, el('span', { class: 'ok-text' }, 'Escuchando'));
           pintarObjetivo();
         } catch (err) {
           toast('No se pudo usar el micrófono: ' + (err.name === 'NotAllowedError' ? 'permiso denegado' : err.message), 'warn');
@@ -192,10 +192,10 @@ export function practiceView(root, { navigate, params }) {
   // --- Progreso de acordes ---
   const progressHost = el('div', {});
   const paintProgress = () => {
-    if (!song) { progressHost.replaceChildren(); return; }
+    if (!song) { render(progressHost); return; }
     const learned = new Set(store.practiceFor(song.id).chordsLearned);
     const pct = chords.length ? Math.round((chords.filter((c) => learned.has(c)).length / chords.length) * 100) : 0;
-    progressHost.replaceChildren(
+    render(progressHost, 
       section(`Acordes de "${song.title}" — ${pct} % dominados`,
         el('div', { class: 'progress-bar' }, el('div', { class: 'progress-fill', style: `width:${pct}%` })),
         el('div', { class: 'chip-list' },
@@ -213,7 +213,7 @@ export function practiceView(root, { navigate, params }) {
   const pathHost = el('div', {});
   const paintPath = () => {
     const path = PATHS[instrument] || PATHS.guitarra;
-    pathHost.replaceChildren(
+    render(pathHost, 
       section('Ruta de aprendizaje',
         el('div', { class: 'row wrap' },
           Object.keys(PATHS).map((k) => {
@@ -242,15 +242,15 @@ export function practiceView(root, { navigate, params }) {
 
   const paintLog = () => {
     const host = logCard.querySelector('#practice-log');
-    if (!song) { host.replaceChildren(el('p', { class: 'muted' }, 'Sin canción seleccionada.')); return; }
+    if (!song) { render(host, el('p', { class: 'muted' }, 'Sin canción seleccionada.')); return; }
     const p = store.practiceFor(song.id);
-    host.replaceChildren(el('p', {},
+    render(host, el('p', {},
       `Total acumulado en "${song.title}": `, el('strong', {}, `${p.minutes} minutos`),
       p.lastAt ? ` · última vez: ${new Date(p.lastAt).toLocaleDateString('es')}` : ''));
   };
   paintLog();
 
-  root.replaceChildren(
+  render(root, 
     el('div', { class: 'page-head' },
       el('div', {},
         el('h1', {}, song ? `Practicar: ${song.title}` : 'Practicar'),

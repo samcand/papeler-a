@@ -1,10 +1,11 @@
 /** library.js — Repertorio: buscar, crear, importar y exportar canciones. */
 
-import { el, button, input, toast, download, confirmDialog, chip } from '../ui.js';
+import { el, button, input, toast, download, confirmDialog, chip, render as pintarEn } from '../ui.js';
 import { store } from '../store.js';
 import { chordsUsed } from '../chordpro.js';
 import { keyInfo } from '../music.js';
 import { parseHoja } from '../hoja.js';
+import { abrirImportador, activarArrastre, EXTENSIONES_ACEPTADAS } from './importador.js';
 import { el as elem, textarea, drawer } from '../ui.js';
 
 /** Pega una hoja en el formato del equipo (acordes sobre la letra) y la convierte en canción. */
@@ -44,7 +45,7 @@ export function libraryView(root, { navigate }) {
   const list = el('div', { class: 'song-grid' });
 
   const render = () => {
-    list.replaceChildren();
+    pintarEn(list);
     const q = query.trim().toLowerCase();
     const songs = store.songs.filter((s) => {
       const matchQ = !q || [s.title, s.author, (s.tags || []).join(' '), s.body]
@@ -101,27 +102,41 @@ export function libraryView(root, { navigate }) {
 
   const allTags = [...new Set(store.songs.flatMap((s) => s.tags || []))].sort();
 
-  const importFile = el('input', { type: 'file', accept: '.json', class: 'hidden' });
-  importFile.addEventListener('change', async () => {
-    const file = importFile.files?.[0];
-    if (!file) return;
-    try {
-      const count = store.importJSON(await file.text());
-      toast(`Importado. Ahora tienes ${count} canciones.`, 'ok');
-      render();
-    } catch (err) {
-      toast('Archivo inválido: ' + err.message, 'warn');
+  // Archivos de otras apps (ChordPro, OnSong, .zip) y respaldos de esta
+  const importFile = el('input', { type: 'file', accept: EXTENSIONES_ACEPTADAS, multiple: true, class: 'hidden' });
+  importFile.addEventListener('change', () => {
+    const archivos = [...(importFile.files || [])];
+    if (!archivos.length) return;
+    // Un respaldo completo de la app se restaura entero; lo demás pasa por la vista previa
+    const respaldoCompleto = archivos.length === 1 && /\.json$/i.test(archivos[0].name);
+    if (respaldoCompleto) {
+      archivos[0].text().then((texto) => {
+        try {
+          const datos = JSON.parse(texto);
+          if (datos && Array.isArray(datos.songs) && datos.settings) {
+            const total = store.importJSON(texto);
+            toast(`Respaldo restaurado. Ahora tienes ${total} canciones.`, 'ok');
+            render();
+            return;
+          }
+        } catch { /* no era un respaldo: se trata como archivo suelto */ }
+        abrirImportador(archivos, { navigate, onListo: render });
+      });
+      importFile.value = '';
+      return;
     }
+    abrirImportador(archivos, { navigate, onListo: render });
+    importFile.value = '';
   });
 
-  root.replaceChildren(
+  pintarEn(root, 
     el('div', { class: 'page-head' },
       el('div', {},
         el('h1', {}, 'Mi repertorio'),
         el('p', { class: 'muted' }, `${store.songs.length} canciones guardadas en este dispositivo`)),
       el('div', { class: 'row wrap' },
         button('+ Nueva canción', () => { const s = store.newSong(); navigate(`/cancion/${s.id}`); }, { variant: 'primary' }),
-        button('Importar respaldo', () => importFile.click()),
+        button('Importar archivos', () => importFile.click(), { title: 'ChordPro, OnSong, .zip o un respaldo .json' }),
         button('Pegar hoja de acordes', () => abrirPegado(navigate)),
         button('Exportar todo', () => download('alabanza-respaldo.json', store.exportJSON())),
         importFile)),
@@ -139,6 +154,13 @@ export function libraryView(root, { navigate }) {
           return c;
         }))),
     list,
+    el('div', { class: 'card tip-card zona-soltar' },
+      el('h2', { class: 'card-title' }, 'Traer canciones de otra app'),
+      el('p', {}, 'Arrastra aquí tus archivos, o pulsa "Importar archivos".'),
+      el('p', { class: 'muted small' },
+        'Se leen ChordPro (.cho, .chopro, .pro, .crd), OnSong (.onsong), texto con acordes (.txt), ' +
+        'un .zip o .onsongarchive con la biblioteca entera, y respaldos .json de esta app. ' +
+        'Sirven igual las exportaciones de SongSelect, Planning Center o Songbook Pro.')),
     el('div', { class: 'card tip-card' },
       el('h2', { class: 'card-title' }, 'Cómo escribir una canción aquí'),
       el('pre', { class: 'code' }, `{Verso 1}
@@ -152,4 +174,5 @@ justo antes de la sílaba donde cam[Em7]bia
   );
 
   render();
+  return activarArrastre(root, { navigate, onListo: render });
 }

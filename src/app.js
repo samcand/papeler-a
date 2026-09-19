@@ -1,6 +1,6 @@
 /** app.js — Router y armazón de la aplicación. */
 
-import { el, $, toast } from './ui.js';
+import { el, $, toast, render as pintar } from './ui.js';
 import { store } from './store.js';
 import { libraryView } from './views/library.js';
 import { songView } from './views/song.js';
@@ -78,7 +78,7 @@ function render() {
   const path = currentPath();
   cleanup?.();
   cleanup = null;
-  root.replaceChildren();
+  pintar(root);
   window.scrollTo(0, 0);
 
   for (const route of ROUTES) {
@@ -90,14 +90,14 @@ function render() {
       cleanup = route.view(root, { navigate, params, query: currentQuery() }) || null;
     } catch (err) {
       console.error(err);
-      root.replaceChildren(el('div', { class: 'card' },
+      pintar(root, el('div', { class: 'card' },
         el('h2', {}, 'Algo falló al dibujar esta pantalla'),
         el('pre', { class: 'code' }, String(err && err.stack || err))));
     }
     highlightNav(route.nav || path.split('/')[1]);
     return;
   }
-  root.replaceChildren(el('div', { class: 'card' },
+  pintar(root, el('div', { class: 'card' },
     el('h2', {}, 'Página no encontrada'),
     el('a', { href: '#/' }, 'Volver al repertorio')));
 }

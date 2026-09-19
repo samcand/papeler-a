@@ -4,7 +4,7 @@
  * Lo único que necesita red es el video de YouTube.
  */
 
-const VERSION = 'alabanza-v3';
+const VERSION = 'alabanza-v4';
 const ARCHIVOS = [
   './', './index.html', './proyeccion.html', './manifest.webmanifest',
   './assets/styles.css', './assets/icono.svg',
@@ -15,12 +15,14 @@ const ARCHIVOS = [
   './src/audiolab.js', './src/hoja.js', './src/docx.js', './src/zip.js',
   './src/vocal.js', './src/timestretch.js', './src/clicktrack.js', './src/share.js',
   './src/qr.js', './src/qr-tables.js', './src/historial.js', './src/escucha.js',
-  './src/hojasequipo.js', './src/proyeccion.js',
+  './src/hojasequipo.js', './src/proyeccion.js', './src/anotaciones.js',
+  './src/calentamiento.js', './src/formatos.js', './src/zipread.js',
   './src/views/library.js', './src/views/song.js', './src/views/sheet.js',
   './src/views/instruments.js', './src/views/sync.js', './src/views/practice.js',
   './src/views/academy.js', './src/views/setlists.js', './src/views/ideas.js',
   './src/views/afinador.js', './src/views/estudio.js', './src/views/atril.js',
   './src/views/canto.js', './src/views/importar.js', './src/views/historial.js',
+  './src/views/calentamiento.js', './src/views/lienzo.js', './src/views/importador.js',
 ];
 
 self.addEventListener('install', (e) => {

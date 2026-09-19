@@ -1,12 +1,13 @@
 /** song.js — Vista de canción: letra con acordes, transposición y edición. */
 
-import { el, button, input, select, textarea, toast, copyText, download, chip, section, field, drawer } from '../ui.js';
+import { el, button, input, select, textarea, toast, copyText, download, chip, section, field, drawer, render } from '../ui.js';
 import { store } from '../store.js';
 import { renderSheet, semitonesFor, openChordDrawer } from './sheet.js';
 import { montarLienzo, barraLienzo } from './lienzo.js';
 import { chordsUsed, lyricsOnly, transposeSource } from '../chordpro.js';
 import { toHojaTexto, toHojaJSON } from '../hoja.js';
 import { buildDocx, docxFileName } from '../docx.js';
+import { aChordPro } from '../formatos.js';
 import { keyInfo, capoSuggestions, intervalBetweenKeys, keyPrefersFlats, transposeChord, normalizeKeyName, preferredKeyName, noteToPc, MAJOR_KEY_NAMES, MINOR_KEY_NAMES } from '../music.js';
 
 const KEY_OPTIONS = [...MAJOR_KEY_NAMES, ...MINOR_KEY_NAMES];
@@ -14,7 +15,7 @@ const KEY_OPTIONS = [...MAJOR_KEY_NAMES, ...MINOR_KEY_NAMES];
 export function songView(root, { navigate, params }) {
   const song = store.song(params.id);
   if (!song) {
-    root.replaceChildren(el('p', {}, 'Esa canción ya no existe. '), button('Volver al repertorio', () => navigate('/')));
+    render(root, el('p', {}, 'Esa canción ya no existe. '), button('Volver al repertorio', () => navigate('/')));
     return;
   }
 
@@ -50,7 +51,7 @@ export function songView(root, { navigate, params }) {
     const semis = semitonesFor(song, displayKey);
     const flats = keyPrefersFlats(displayKey);
     const learned = new Set(store.practiceFor(song.id).chordsLearned);
-    chordBar.replaceChildren(
+    render(chordBar, 
       el('span', { class: 'muted small' }, 'Acordes de la canción:'),
       ...chordsUsed(song.body).map((c) => {
         const shown = semis ? transposeChord(c, semis, flats) : c;
@@ -61,7 +62,7 @@ export function songView(root, { navigate, params }) {
 
   const renderCapo = () => {
     const suggestions = capoSuggestions(displayKey);
-    capoHost.replaceChildren(
+    render(capoHost, 
       el('span', { class: 'muted small' }, 'Cejilla sugerida (guitarra):'),
       ...(suggestions.length
         ? suggestions.map((s) => {
@@ -76,7 +77,7 @@ export function songView(root, { navigate, params }) {
 
   /** Monta (o vuelve a colgar) la capa de anotaciones sobre la hoja. */
   const prepararLienzo = () => {
-    if (editing) { lienzo?.destruir(); lienzo = null; lienzoHost.replaceChildren(); return; }
+    if (editing) { lienzo?.destruir(); lienzo = null; render(lienzoHost); return; }
     if (!lienzo) {
       lienzo = montarLienzo(sheetHost, { songId: song.id, perfil: perfilAnotacion });
       barra = barraLienzo(lienzo, {
@@ -91,7 +92,7 @@ export function songView(root, { navigate, params }) {
           }).nodo);
         },
       });
-      lienzoHost.replaceChildren(barra.nodo);
+      render(lienzoHost, barra.nodo);
     } else {
       lienzo.reanclar();
     }
@@ -100,7 +101,7 @@ export function songView(root, { navigate, params }) {
   const renderSheetHost = () => {
     const semis = semitonesFor(song, displayKey);
     sheetHost.style.fontSize = fontSize + 'px';
-    sheetHost.replaceChildren(
+    render(sheetHost, 
       editing
         ? el('div', { class: 'editor' },
             textarea(song.body, (v) => { song.body = v; }, { rows: 24, placeholder: 'Letra con [acordes]' }),
@@ -136,7 +137,7 @@ export function songView(root, { navigate, params }) {
     const info = keyInfo(displayKey);
     const semis = semitonesFor(song, displayKey);
 
-    header.replaceChildren(
+    render(header, 
       el('div', {},
         el('h1', { class: 'editable', title: 'Haz clic para renombrar', onClick: () => {
           const v = prompt('Título de la canción', song.title);
@@ -155,7 +156,7 @@ export function songView(root, { navigate, params }) {
         button('Practicar', () => navigate(`/practica/${song.id}`)),
         button('▶ Modo atril', () => navigate(`/atril/${song.id}`), { variant: 'primary' })));
 
-    controls.replaceChildren(
+    render(controls, 
       el('div', { class: 'control-group' },
         el('span', { class: 'ctl-label' }, 'Tono'),
         button('−', () => transposeBy(-1), { title: 'Bajar medio tono' }),
@@ -192,7 +193,7 @@ export function songView(root, { navigate, params }) {
         button('⎙ Imprimir', () => window.print()),
         button('Copiar solo letra', () => copyText(lyricsOnly(song.body)))));
 
-    meta.replaceChildren(
+    render(meta, 
       section('Datos de la canción',
         el('div', { class: 'grid-2' },
           field('Autor', input(song.author, (v) => store.updateSong(song.id, { author: v }))),
@@ -207,7 +208,11 @@ export function songView(root, { navigate, params }) {
         field('Notas generales del arreglo', textarea(song.notes, (v) => store.updateSong(song.id, { notes: v }), { rows: 3 })),
         el('div', { class: 'row wrap' },
           button('Exportar canción', () => download(`${song.title}.json`, JSON.stringify(song, null, 2))),
-          button('Copiar hoja de acordes', () => copyText(song.body)))),
+          button('Copiar hoja de acordes', () => copyText(song.body)),
+          button('Exportar ChordPro', () => {
+            const texto = aChordPro(cancionMostrada(), { tonalidad: displayKey });
+            download(`${song.title}.cho`, texto, 'text/plain');
+          }, { title: 'Formato estándar: lo abre OnSong, Songbook Pro, Planning Center…' }))),
       section('Hoja en el formato del equipo',
         el('p', { class: 'muted' },
           'Título con la tonalidad, autor debajo, acordes en negrita sobre la sílaba y las repeticiones ' +
@@ -243,7 +248,7 @@ export function songView(root, { navigate, params }) {
     renderCapo();
   };
 
-  root.replaceChildren(header, controls, chordBar, capoHost, lienzoHost, sheetHost, meta);
+  render(root, header, controls, chordBar, capoHost, lienzoHost, sheetHost, meta);
   renderAll();
 
   return () => { stopScroll(); lienzo?.destruir(); };

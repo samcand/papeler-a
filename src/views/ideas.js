@@ -1,6 +1,6 @@
 /** ideas.js (vista) — Las 100 ideas como lista de chequeo por categoría. */
 
-import { el, button, chip, section, copyText, download } from '../ui.js';
+import { el, button, chip, section, copyText, download, render as pintarEn } from '../ui.js';
 import { store } from '../store.js';
 import { IDEAS, CATEGORIES } from '../ideas.js';
 
@@ -11,7 +11,7 @@ export function ideasView(root) {
   const render = () => {
     const done = new Set(store.state.ideasDone);
     const cats = CATEGORIES.filter((c) => !filter || c.id === filter);
-    host.replaceChildren(
+    pintarEn(host, 
       el('div', { class: 'row wrap tags' },
         (() => { const c = chip('Todas'); c.classList.toggle('active', !filter); c.addEventListener('click', () => { filter = ''; render(); }); return c; })(),
         CATEGORIES.map((cat) => {
@@ -41,7 +41,7 @@ export function ideasView(root) {
     `## ${cat.name}\n` + IDEAS.filter((i) => i.c === cat.id).map((i) => `${i.n}. ${i.t}: ${i.d}`).join('\n')
   ).join('\n\n');
 
-  root.replaceChildren(
+  pintarEn(root, 
     el('div', { class: 'page-head' },
       el('div', {},
         el('h1', {}, '100 ideas para ejecutar bien la alabanza'),

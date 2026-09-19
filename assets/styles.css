@@ -571,3 +571,15 @@ body.modo-atril .app { max-width: none; padding: 0; }
   .lienzo { display: block !important; }
   .lienzo-host, .lienzo-barra { display: none !important; }
 }
+
+/* ---------- Importar de otras apps ---------- */
+.zona-soltar { border: 1px dashed var(--line); transition: border-color .15s ease, background .15s ease; }
+.soltando .zona-soltar, .zona-soltar.soltando { border-color: var(--accent); background: color-mix(in oklab, var(--accent) 8%, var(--card)); }
+.importar-lista { display: flex; flex-direction: column; gap: 8px; margin: 12px 0; max-height: 52vh; overflow-y: auto; }
+.importar-fila {
+  display: flex; gap: 10px; align-items: flex-start; cursor: pointer;
+  background: var(--bg-soft); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px;
+}
+.importar-fila:hover { border-color: var(--accent); }
+.importar-fila.repetida { opacity: .8; }
+.importar-fila input { margin-top: 4px; }

@@ -1,6 +1,6 @@
 /** historial.js — Qué se cantó, cuándo, y qué conviene hacer con el repertorio. */
 
-import { el, button, chip, section } from '../ui.js';
+import { el, button, chip, section, render } from '../ui.js';
 import { store } from '../store.js';
 import { resumen, historialPorCancion, sugerencias } from '../historial.js';
 
@@ -15,7 +15,7 @@ export function historialView(root, { navigate }) {
 
   const fechaCorta = (iso) => (iso ? new Date(iso + 'T12:00:00').toLocaleDateString('es', { day: 'numeric', month: 'short', year: '2-digit' }) : '—');
 
-  root.replaceChildren(
+  render(root, 
     el('div', { class: 'page-head' },
       el('div', {},
         el('h1', {}, 'Historial del repertorio'),

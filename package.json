@@ -6,7 +6,7 @@
   "private": true,
   "scripts": {
     "start": "python3 -m http.server 8080",
-    "test": "node tests/music.test.js && node tests/dsp.test.js && node tests/fretboard.test.js && node tests/hoja.test.js && node tests/vocal.test.js && node tests/audio-extra.test.js && node tests/calentamiento.test.js && node tests/anotaciones.test.js",
+    "test": "node tests/music.test.js && node tests/dsp.test.js && node tests/fretboard.test.js && node tests/hoja.test.js && node tests/vocal.test.js && node tests/audio-extra.test.js && node tests/calentamiento.test.js && node tests/anotaciones.test.js && node tests/formatos.test.js",
     "docs": "node tools/gen-docs.mjs"
   }
 }

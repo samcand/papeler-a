@@ -4,7 +4,7 @@
  * en bucle y sin voz.
  */
 
-import { el, button, select, chip, section, toast, copyText, download } from '../ui.js';
+import { el, button, select, chip, section, toast, copyText, download, render } from '../ui.js';
 import { store } from '../store.js';
 import { analizarArchivo, acordesABody, pianoRollSVG, transcribirMelodia } from '../transcribe.js';
 import { EstudioAudio, MODOS } from '../audiolab.js';
@@ -61,7 +61,7 @@ export function estudioView(root, { navigate }) {
 
   const pintarResumen = () => {
     if (!analisis) return;
-    resumen.replaceChildren(section('Lo que encontró la app',
+    render(resumen, section('Lo que encontró la app',
       el('div', { class: 'row wrap' },
         chip(`${analisis.bpm} BPM`, { class: 'key' }),
         chip(`Tonalidad ${analisis.tonalidad}`, { class: 'key' }),
@@ -95,7 +95,7 @@ export function estudioView(root, { navigate }) {
             const mono = buffer.getChannelData(0);
             const notas = transcribirMelodia(mono, buffer.sampleRate);
             ctx.close?.();
-            melodiaHost.replaceChildren(section('Melodía detectada (nota por nota)',
+            render(melodiaHost, section('Melodía detectada (nota por nota)',
               el('p', { class: 'muted small' }, 'Detección monofónica: funciona con una voz o una línea sola. Si suena toda la banda, tómalo como orientación.'),
               el('div', { html: pianoRollSVG(notas, { duracion: analisis.duracion }) }),
               el('p', { class: 'progression small' }, notas.slice(0, 40).map((n) => `${n.nota}${n.octava}`).join(' ')),
@@ -114,7 +114,7 @@ export function estudioView(root, { navigate }) {
   const pintarAcordes = () => {
     if (!analisis?.acordes?.length) return;
     const dur = analisis.duracion || 1;
-    acordesHost.replaceChildren(section('Acordes en el tiempo',
+    render(acordesHost, section('Acordes en el tiempo',
       el('div', { class: 'acordes-barra' },
         analisis.acordes.map((a) => {
           const seg = el('div', {
@@ -133,7 +133,7 @@ export function estudioView(root, { navigate }) {
   };
 
   const pintarTransporte = () => {
-    transporte.replaceChildren(section('Reproductor de estudio',
+    render(transporte, section('Reproductor de estudio',
       el('div', { class: 'row wrap' },
         button('⏯ Reproducir / Pausa', () => (lab.reproduciendo ? lab.parar() : lab.reproducir()), { variant: 'primary' }),
         button('⏪ 5s', () => lab.buscar(lab.tiempo() - 5)),
@@ -191,7 +191,7 @@ export function estudioView(root, { navigate }) {
       !lab.estereo ? el('p', { class: 'muted small' }, 'Este archivo es mono: el modo karaoke no puede funcionar (no hay dos canales que restar).') : null));
   };
 
-  root.replaceChildren(
+  render(root, 
     el('div', { class: 'page-head' },
       el('div', {},
         el('h1', {}, 'Estudio de audio'),

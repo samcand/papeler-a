@@ -6,7 +6,7 @@
  * trazo, lo ancla a la sección sobre la que dibujaste y lo guarda.
  */
 
-import { el } from '../ui.js';
+import { el, render } from '../ui.js';
 import { store } from '../store.js';
 import { crearTrazo, pathDeTrazo, borrarEn, estiloDeTrazo, HERRAMIENTAS, COLORES } from '../anotaciones.js';
 
@@ -78,7 +78,7 @@ export function montarLienzo(hoja, { songId, perfil = 'Mis notas', onCambio = nu
 
   // --- Pintado ---
   const redibujar = () => {
-    svg.replaceChildren();
+    render(svg);
     svg.setAttribute('width', hoja.scrollWidth);
     svg.setAttribute('height', hoja.scrollHeight);
     svg.setAttribute('viewBox', `0 0 ${hoja.scrollWidth} ${hoja.scrollHeight}`);
@@ -267,7 +267,7 @@ export function barraLienzo(lienzo, { compacta = false, onPerfil = null, perfile
   const barra = el('div', { class: `lienzo-barra${compacta ? ' compacta' : ''}` });
 
   const pintar = () => {
-    barra.replaceChildren(
+    render(barra, 
       el('button', {
         class: `btn ${lienzo.activo ? 'ok' : ''}`, type: 'button',
         title: 'Dibujar sobre la hoja',

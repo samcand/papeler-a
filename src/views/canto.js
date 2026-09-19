@@ -4,7 +4,7 @@
  * equipo y cuidado de la voz.
  */
 
-import { el, button, select, input, textarea, chip, section, toast, confirmDialog } from '../ui.js';
+import { el, button, select, input, textarea, chip, section, toast, confirmDialog, render } from '../ui.js';
 import { store } from '../store.js';
 import {
   TESITURAS, RANGO_CONGREGACION, clasificarVoz, nombreNota, nombreANota,
@@ -44,9 +44,9 @@ export function cantoView(root, { navigate, params }) {
     const resultado = el('div', {});
 
     const pintarResultado = () => {
-      if (medidoMin == null) { resultado.replaceChildren(); return; }
+      if (medidoMin == null) { render(resultado); return; }
       const clas = clasificarVoz(medidoMin, medidoMax);
-      resultado.replaceChildren(
+      render(resultado, 
         el('div', { class: 'row wrap' },
           chip(`Grave: ${nombreNota(medidoMin)}`, { class: 'key' }),
           chip(`Aguda: ${nombreNota(medidoMax)}`, { class: 'key' }),
@@ -151,13 +151,13 @@ export function cantoView(root, { navigate, params }) {
 
     const pintarRecomendacion = () => {
       const song = store.song(songId);
-      if (!song) { salida.replaceChildren(el('p', { class: 'muted' }, 'Elige una canción.')); return; }
+      if (!song) { render(salida, el('p', { class: 'muted' }, 'Elige una canción.')); return; }
       store.setSetting('cantoCancion', songId);
       const cantante = cantanteActivo();
       const r = tonalidadesRecomendadas(song, cantante);
       const rango = r.rango;
 
-      salida.replaceChildren(
+      render(salida, 
         el('div', { class: 'row wrap' },
           chip(`Melodía: ${nombreNota(rango.min)} – ${nombreNota(rango.max)}`, { class: 'key' }),
           chip(rango.fuente),
@@ -299,7 +299,7 @@ export function cantoView(root, { navigate, params }) {
       const pasos = secuenciaEjercicio(ejercicio, { desde, hasta });
       paso = Math.min(paso, pasos.length - 1);
       const actual = pasos[paso];
-      detalle.replaceChildren(
+      render(detalle, 
         el('h4', {}, ejercicio.nombre),
         el('p', {}, el('strong', {}, 'Objetivo: '), ejercicio.objetivo),
         el('p', {}, el('strong', {}, 'Cómo: '), ejercicio.como),
@@ -374,7 +374,7 @@ export function cantoView(root, { navigate, params }) {
       const key = song?.key || 'C';
       const armonia = notaArmonia(melodia, key, tipo);
       const info = ARMONIAS.find((a) => a.id === tipo);
-      salida.replaceChildren(
+      render(salida, 
         el('div', { class: 'row wrap' },
           chip(`Tonalidad ${key}`, { class: 'key' }),
           chip(`Melodía: ${nombreNota(melodia)}`),
@@ -420,7 +420,7 @@ export function cantoView(root, { navigate, params }) {
     const pintar3 = () => {
       const song = store.song(songId);
       const reparto = repartirVoces(store.cantantes, song || {});
-      salida.replaceChildren(
+      render(salida, 
         reparto.length
           ? el('div', { class: 'cantantes' },
               reparto.map((c) => el('div', { class: 'cantante' },
@@ -477,11 +477,11 @@ export function cantoView(root, { navigate, params }) {
   const pintar = () => {
     detener();
     store.setSetting('cantoPestana', pestaña);
-    cuerpo.replaceChildren(vistas[pestaña]());
+    render(cuerpo, vistas[pestaña]());
     [...tabs.children].forEach((b) => b.classList.toggle('active', b.dataset.tab === pestaña));
   };
 
-  root.replaceChildren(
+  render(root, 
     el('div', { class: 'page-head' },
       el('div', {},
         el('h1', {}, 'Canto'),

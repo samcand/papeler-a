@@ -1,6 +1,6 @@
 /** setlists.js — Listas de servicio: orden, tonalidades y flujo. */
 
-import { el, button, input, select, textarea, toast, copyText, chip, section, confirmDialog, drawer, download } from '../ui.js';
+import { el, button, input, select, textarea, toast, copyText, chip, section, confirmDialog, drawer, download, render as pintarEn } from '../ui.js';
 import { store } from '../store.js';
 import { crearCodigo, crearEnlace, evaluarEnlace } from '../share.js';
 import { qrSVG } from '../qr.js';
@@ -36,7 +36,7 @@ async function abrirCompartir(setlist) {
     }
     const evaluacionQR = evaluarEnlace(enlaceQR);
 
-    contenido.replaceChildren(
+    pintarEn(contenido, 
       el('p', { class: 'muted' },
         'Quien abra este enlace (o escanee el QR) recibe las canciones en su dispositivo. ' +
         'Todo viaja dentro del propio enlace: no se sube nada a ningún servidor.'),
@@ -175,7 +175,7 @@ export function setlistsView(root, { navigate }) {
         })));
 
     if (!current) {
-      host.replaceChildren(el('div', { class: 'setlist-layout' }, listPanel,
+      pintarEn(host, el('div', { class: 'setlist-layout' }, listPanel,
         el('div', {}, el('p', { class: 'muted' }, 'Crea una lista para planear el servicio.'))));
       return;
     }
@@ -230,7 +230,7 @@ export function setlistsView(root, { navigate }) {
       current.notes ? '\n' + current.notes : '',
     ].join('\n');
 
-    host.replaceChildren(el('div', { class: 'setlist-layout' }, listPanel,
+    pintarEn(host, el('div', { class: 'setlist-layout' }, listPanel,
       el('div', {},
         section('',
           el('div', { class: 'row wrap' },
@@ -266,7 +266,7 @@ export function setlistsView(root, { navigate }) {
             el('li', {}, 'Ten preparada una canción extra por si el momento se alarga.'))))));
   };
 
-  root.replaceChildren(
+  pintarEn(root, 
     el('div', { class: 'page-head' },
       el('div', {}, el('h1', {}, 'Listas de servicio'), el('p', { class: 'muted' }, 'Planea el orden, las tonalidades y las transiciones')),
       el('div', {}, button('Repertorio', () => navigate('/')))),

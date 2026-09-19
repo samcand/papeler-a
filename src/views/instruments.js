@@ -1,6 +1,6 @@
 /** instruments.js — Qué hace cada instrumento, sección por sección. */
 
-import { el, button, textarea, chip, section, toast, select } from '../ui.js';
+import { el, button, textarea, chip, section, toast, select, render } from '../ui.js';
 import { store } from '../store.js';
 import { sectionProgressions, chordsUsed } from '../chordpro.js';
 import { keyInfo, chordNotes, keyPrefersFlats, transposeChord } from '../music.js';
@@ -22,7 +22,7 @@ const TABS = [
 
 export function instrumentsView(root, { navigate, params }) {
   const song = store.song(params.id);
-  if (!song) { root.replaceChildren(el('p', {}, 'Canción no encontrada.')); return; }
+  if (!song) { render(root, el('p', {}, 'Canción no encontrada.')); return; }
 
   let tab = store.state.settings.instrument || 'guitarra';
   let afinacionGuitarra = store.state.settings.afinacionGuitarra || 'guitarra';
@@ -244,7 +244,7 @@ export function instrumentsView(root, { navigate, params }) {
   const renderTab = () => {
     store.setSetting('instrument', tab);
     store.setSetting('afinacionGuitarra', afinacionGuitarra);
-    body.replaceChildren(renderers[tab]());
+    render(body, renderers[tab]());
     [...tabsRow.children].forEach((b) => b.classList.toggle('active', b.dataset.tab === tab));
   };
 
@@ -255,7 +255,7 @@ export function instrumentsView(root, { navigate, params }) {
       return b;
     }));
 
-  root.replaceChildren(
+  render(root, 
     el('div', { class: 'page-head' },
       el('div', {},
         el('h1', {}, song.title),

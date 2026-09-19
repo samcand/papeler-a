@@ -3,7 +3,7 @@
  * Se usa en la vista de canción y en la de sincronización con YouTube.
  */
 
-import { el, drawer, button, toast } from '../ui.js';
+import { el, drawer, button, toast, render } from '../ui.js';
 import { parseSong } from '../chordpro.js';
 import { transposeChord, toNashville, toLatin, keyPrefersFlats, chordNotes, intervalBetweenKeys } from '../music.js';
 import { chordShapes, chordDiagramSVG, chordTechnique as guitarTechnique, chordDifficulty } from '../guitar.js';
@@ -33,20 +33,20 @@ export function openChordDrawer(chord, songId) {
     // de instrumentos y afinaciones se calculan sobre el mástil.
     if (instrumentoId === 'guitarra') {
       const formas = chordShapes(chord);
-      diagramas.replaceChildren(el('div', { class: 'shape-row' },
+      render(diagramas, el('div', { class: 'shape-row' },
         formas.slice(0, 3).map((forma) => el('figure', { class: 'shape' },
           el('div', { html: chordDiagramSVG(forma, { name: chord }) }),
           el('figcaption', {}, forma.label)))));
-      consejos.replaceChildren(...guitarTechnique(chord, formas[0]).map((t) => el('li', {}, t)));
+      render(consejos, ...guitarTechnique(chord, formas[0]).map((t) => el('li', {}, t)));
     } else {
       const formas = buscarDigitaciones(chord, instrumentoId, { max: 3 });
-      diagramas.replaceChildren(formas.length
+      render(diagramas, formas.length
         ? el('div', { class: 'shape-row' },
             formas.map((forma, i) => el('figure', { class: 'shape' },
               el('div', { html: diagramaSVG(forma, { nombre: chord, instrumentoId }) }),
               el('figcaption', {}, i === 0 ? 'Posición más fácil' : `Alternativa ${i}`))))
         : el('p', { class: 'muted' }, 'Este acorde no cae cómodo en este instrumento: prueba otra inversión o simplifícalo.'));
-      consejos.replaceChildren(...tecnicaTrastes(chord, formas[0], instrumentoId).map((t) => el('li', {}, t)));
+      render(consejos, ...tecnicaTrastes(chord, formas[0], instrumentoId).map((t) => el('li', {}, t)));
     }
   };
 

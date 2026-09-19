@@ -38,6 +38,7 @@ También se puede publicar tal cual en GitHub Pages: son archivos estáticos.
 | **Modo atril** | La pantalla del domingo: letra grande, sin menús, la pantalla no se apaga, auto-scroll atado al BPM real y avance con pedal Bluetooth o teclado. Una o dos columnas. |
 | **Proyección** | Segunda ventana o proyector con **solo la letra** para la congregación, controlada desde el atril (tecla B para pantalla en negro). |
 | **Canto** | Módulo completo de voz: medir tu rango con el micrófono, elegir la tonalidad según quién canta, afinación en vivo, vocalizaciones guiadas, entrenador de armonías, reparto de voces del equipo y cuidado vocal. |
+| **Importar de otras apps** | Lee ChordPro (.cho, .chopro, .pro, .crd), OnSong (.onsong), texto con acordes (.txt) y un .zip o .onsongarchive con la biblioteca entera. Arrastra los archivos y revisa qué encontró antes de guardar nada. |
 | **Anotaciones a mano** | Marcar la hoja con el dedo o el lápiz de la tablet: círculos, flechas, resaltador. Cada músico tiene su propio perfil de marcas sobre la misma canción, y salen impresas con la hoja. |
 | **Calentamiento** | Rutina guiada con cronómetro para guitarra, ukelele, bajo, piano, batería, voz y equipo completo. Se ajusta al tiempo que tengas (5 a 20 min), pone el metrónomo al tempo de cada ejercicio y usa la canción del domingo en los ejercicios que lo piden. |
 | **Historial** | Qué se cantó cada domingo, hace cuánto no se canta algo, cuántas veces seguidas va una canción nueva y qué tonalidades se repiten. |
@@ -122,6 +123,38 @@ lesiona. Al elegir 5 minutos la app no borra lo esencial: lo acorta (mínimo un 
 Un detalle importante: si la canción no tiene la melodía medida, la app **no inventa**
 recomendaciones de tonalidad — lo dice y te pide anotar la nota más grave y la más aguda
 (o transcribir la melodía en el Estudio).
+
+## Traer tu repertorio de otra app
+
+`Importar archivos` en el repertorio, o arrastra los archivos sobre la página:
+
+| Formato | De dónde suele venir |
+| --- | --- |
+| **ChordPro** (.cho, .chopro, .chordpro, .pro, .crd, .chord) | El estándar de siempre. Es lo que exportan SongSelect, Planning Center, Songbook Pro, Chordii y casi todo lo demás. |
+| **OnSong** (.onsong) | OnSong, con su cabecera de metadatos (`Key: G`, `Tempo: 72`, `CCLI:`…) y los acordes escritos encima de la letra. |
+| **Texto con acordes** (.txt) | Cualquier hoja copiada de internet, con los acordes en la línea de encima. |
+| **.zip / .onsongarchive** | La biblioteca completa de golpe: se descomprime en el navegador y se importan todas las canciones que traiga. |
+| **.json** | Respaldos de esta misma app. |
+
+Qué hace al importar:
+
+- Lee las directivas de ChordPro con sus abreviaturas oficiales (`{t}`, `{st}`, `{c}`, `{soc}`/`{eoc}`,
+  `{sov}`/`{eov}`, `{sob}`, `{sot}`/`{eot}`, `{sop}`, `{ns}`…) y los metadatos
+  (title, subtitle, artist, composer, lyricist, key, tempo, time, capo, album, year,
+  copyright, duration, keywords y los personalizados `x_algo`).
+- **Traduce las secciones**: Verse → Verso, Chorus → Coro, Bridge → Puente, Pre-Chorus → Pre-Coro.
+- Coloca en su sílaba los acordes escritos encima de la letra (formato OnSong).
+- Si el archivo no trae tonalidad, la deduce del primer acorde; entiende también `Sol`, `G major` o `Bb minor`.
+- Separa en varias canciones los archivos con `{new_song}`.
+- Conserva las tablaturas (`{sot}`…`{eot}`) tal cual.
+- Muestra una **vista previa** con lo que encontró y avisa de las que ya tienes: nada se guarda hasta que lo confirmas.
+
+Y en sentido contrario, cada canción se exporta a **ChordPro** con un botón, en la tonalidad
+que estés viendo, para llevártela a cualquier otra herramienta.
+
+> La lista de directivas se contrastó con [ChordSheetJS](https://www.npmjs.com/package/chordsheetjs),
+> la implementación de referencia del formato: los metadatos y la secuencia de acordes coinciden
+> en los archivos de prueba.
 
 ## El formato de hoja del equipo (acordes sobre la letra)
 
@@ -226,6 +259,8 @@ src/hojasequipo.js    Una hoja distinta por músico
 src/vocal.js          Rango vocal, tonalidad por cantante, vocalizaciones y armonías
 src/calentamiento.js  Rutinas de calentamiento por instrumento y para la voz
 src/anotaciones.js    Marcas a mano: trazos, simplificación, borrador
+src/formatos.js       Importar ChordPro y OnSong, exportar ChordPro
+src/zipread.js        Lectura de .zip para importar bibliotecas enteras
 src/escucha.js        Escucha por micrófono y reconoce acordes o notas
 src/timestretch.js    Velocidad lenta sin cambiar el tono (WSOLA)
 src/clicktrack.js     Pistas de clic, pads y exportación a .wav
@@ -248,7 +283,7 @@ tools/gen-docs.mjs    Genera el documento de las 100 ideas
 
 ```bash
 npm start    # servidor local
-npm test     # 55 pruebas: teoría, señal, digitaciones, formato de hoja,
+npm test     # 64 pruebas: teoría, señal, digitaciones, formato de hoja,
              # voz, estiramiento de tiempo, clic, QR, compartir e historial
 npm run docs # regenera docs/100-ideas-alabanza.md desde src/ideas.js
 ```

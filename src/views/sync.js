@@ -3,7 +3,7 @@
  * el video y sigue en vivo qué debe tocar cada instrumento en cada instante.
  */
 
-import { el, button, input, select, toast, copyText, chip, section, confirmDialog } from '../ui.js';
+import { el, button, input, select, toast, copyText, chip, section, confirmDialog, render } from '../ui.js';
 import { store } from '../store.js';
 import { YouTubeSync, extractVideoId, buildTimeline, cueAt, timelineToText } from '../youtube.js';
 import { formatTime, keyPrefersFlats, transposeChord } from '../music.js';
@@ -16,7 +16,7 @@ import { openChordDrawer } from './sheet.js';
 
 export function syncView(root, { navigate, params }) {
   const song = store.song(params.id);
-  if (!song) { root.replaceChildren(el('p', {}, 'Canción no encontrada.')); return; }
+  if (!song) { render(root, el('p', {}, 'Canción no encontrada.')); return; }
 
   const yt = new YouTubeSync();
   let unsubscribe = null;
@@ -34,7 +34,7 @@ export function syncView(root, { navigate, params }) {
     const marks = song.timeline || [];
     const sectionNames = sectionProgressions(song.body).map((s) => s.name);
 
-    timelineHost.replaceChildren(
+    render(timelineHost, 
       section('Estructura marcada sobre el video',
         el('p', { class: 'muted' },
           marks.length
@@ -99,7 +99,7 @@ export function syncView(root, { navigate, params }) {
   const renderLive = (t) => {
     const cue = cueAt(song, t);
     if (!cue) {
-      livePanel.replaceChildren(el('p', { class: 'muted' },
+      render(livePanel, el('p', { class: 'muted' },
         'Marca las secciones o pon el BPM de la canción para ver la guía en vivo.'));
       return;
     }
@@ -129,7 +129,7 @@ export function syncView(root, { navigate, params }) {
       return el('div', { class: 'live-inst' }, el('p', {}, cue.guitar));
     };
 
-    livePanel.replaceChildren(
+    render(livePanel, 
       el('div', { class: 'live-head' },
         el('div', {},
           el('span', { class: 'live-label' }, 'Ahora'),
@@ -167,7 +167,7 @@ export function syncView(root, { navigate, params }) {
         const data = await analyzeAudioFile(file, { onProgress: (m) => { status.textContent = m; } });
         const names = guessSectionNames(data.segments);
         status.textContent = `Listo: ${formatTime(data.duration)} · tempo estimado ${data.bpm} BPM · ${data.segments.length} secciones detectadas.`;
-        result.replaceChildren(
+        render(result, 
           el('div', { class: 'row wrap' },
             button(`Usar ${data.bpm} BPM en la canción`, () => {
               store.updateSong(song.id, { bpm: data.bpm });
@@ -191,7 +191,7 @@ export function syncView(root, { navigate, params }) {
       }
     });
 
-    analysisHost.replaceChildren(
+    render(analysisHost, 
       section('Análisis automático de audio',
         el('p', { class: 'muted' },
           'El reproductor de YouTube no permite leer su audio desde el navegador (lo bloquea por seguridad). ' +
@@ -221,7 +221,7 @@ export function syncView(root, { navigate, params }) {
     }
   };
 
-  root.replaceChildren(
+  render(root, 
     el('div', { class: 'page-head' },
       el('div', {},
         el('h1', {}, song.title),

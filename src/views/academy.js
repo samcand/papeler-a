@@ -3,7 +3,7 @@
  * de teoría aplicada a la alabanza.
  */
 
-import { el, button, select, chip, section, toast } from '../ui.js';
+import { el, button, select, chip, section, toast, render } from '../ui.js';
 import { store } from '../store.js';
 import {
   CIRCLE, circleOfFifthsSVG, circleExplain, INTERVALS, MODES, modeNotes,
@@ -33,7 +33,7 @@ export function academyView(root, { navigate }) {
   };
 
   const paintCircle = () => {
-    circleHost.replaceChildren(el('div', { html: circleOfFifthsSVG(activeKey, 400) }));
+    render(circleHost, el('div', { html: circleOfFifthsSVG(activeKey, 400) }));
     circleHost.querySelectorAll('[data-key]').forEach((node) => {
       node.addEventListener('click', () => setKey(node.dataset.key));
       node.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setKey(node.dataset.key); } });
@@ -45,7 +45,7 @@ export function academyView(root, { navigate }) {
     const { entry, puntos } = circleExplain(activeKey);
     const root0 = noteToPc(info.tonic) || 0;
 
-    explainHost.replaceChildren(
+    render(explainHost, 
       el('div', { class: 'row wrap' },
         el('h3', {}, `Tonalidad de ${activeKey}`),
         chip(accText(entry)),
@@ -63,7 +63,7 @@ export function academyView(root, { navigate }) {
   };
 
   const paintProgressions = () => {
-    progHost.replaceChildren(
+    render(progHost, 
       section(`Progresiones que funcionan en ${activeKey}`,
         el('p', { class: 'muted' }, 'Los números son grados: 1 es la tonalidad, 5 el acorde que crea tensión y 6m el relativo menor. Aprender la progresión en números te deja cambiar de tonalidad sin volver a estudiar la canción.'),
         el('div', { class: 'prog-grid' },
@@ -85,7 +85,7 @@ export function academyView(root, { navigate }) {
   let score = { ok: 0, total: 0 };
   const paintEar = (feedback = '') => {
     const scoreLine = el('p', { class: 'muted small' }, score.total ? `Aciertos: ${score.ok} de ${score.total}` : 'Pulsa "Escuchar" y adivina el intervalo.');
-    earHost.replaceChildren(
+    render(earHost, 
       section('Entrenamiento de oído: intervalos',
         el('p', { class: 'muted' }, 'Reconocer intervalos es lo que te permite sacar una canción de oído y cantar segundas voces sin partitura.'),
         el('div', { class: 'row wrap' },
@@ -122,7 +122,7 @@ export function academyView(root, { navigate }) {
   const paintModes = () => {
     const tonic = keyInfo(activeKey).tonic;
     const rootFreq = 261.63 * Math.pow(2, ((noteToPc(tonic) || 0)) / 12);
-    modesHost.replaceChildren(
+    render(modesHost, 
       section('Escalas y modos',
         el('p', { class: 'muted' }, `Todos sobre la tónica ${tonic}. Cambiar de modo es cambiar el "color" sin cambiar de tonalidad.`),
         el('div', { class: 'mode-grid' },
@@ -169,7 +169,7 @@ export function academyView(root, { navigate }) {
         el('ol', {}, levels.map((l) => el('li', {}, el('strong', {}, l.name + ': '), l.goal))),
         button('Practicar esto', () => { store.setSetting('instrument', k); navigate('/practica'); }, { variant: 'chip' })))));
 
-  root.replaceChildren(
+  render(root, 
     el('div', { class: 'page-head' },
       el('div', {},
         el('h1', {}, 'Academia de música'),

@@ -4,7 +4,7 @@
  * avance con pedal o teclado y proyección para la congregación.
  */
 
-import { el, button, toast, chip } from '../ui.js';
+import { el, button, toast, chip, render } from '../ui.js';
 import { store } from '../store.js';
 import { renderSheet, semitonesFor } from './sheet.js';
 import { parseSong } from '../chordpro.js';
@@ -22,7 +22,7 @@ export function atrilView(root, { navigate, params }) {
     : [{ song: store.song(params.id), key: null, notas: '' }].filter((x) => x.song);
 
   if (!canciones.length) {
-    root.replaceChildren(el('p', {}, 'No hay canciones para el atril. '), button('Volver', () => navigate('/')));
+    render(root, el('p', {}, 'No hay canciones para el atril. '), button('Volver', () => navigate('/')));
     return;
   }
 
@@ -187,7 +187,7 @@ export function atrilView(root, { navigate, params }) {
     const song = cancion();
     const semis = semitonesFor(song, displayKey);
     const secciones = seccionesDeCancion();
-    barra.replaceChildren(
+    render(barra, 
       el('div', { class: 'atril-info' },
         el('strong', {}, song.title),
         chip(`${displayKey}${semis ? ' (transpuesta)' : ''}`, { class: 'key' }),
@@ -231,7 +231,7 @@ export function atrilView(root, { navigate, params }) {
     const semis = semitonesFor(song, displayKey);
     hoja.style.fontSize = `${tamano}px`;
     hoja.classList.toggle('dos-columnas', columnas === 2);
-    hoja.replaceChildren(
+    render(hoja, 
       renderSheet(song, { semitones: semis, notation: store.state.settings.notation, key: displayKey }),
       canciones[indice].notas
         ? el('p', { class: 'atril-nota' }, '✎ ' + canciones[indice].notas)
@@ -242,7 +242,7 @@ export function atrilView(root, { navigate, params }) {
     pintarBarra();
   };
 
-  root.replaceChildren(el('div', { class: 'atril' }, barra, hoja,
+  render(root, el('div', { class: 'atril' }, barra, hoja,
     el('p', { class: 'atril-ayuda muted small' },
       'Pedal o teclado: → siguiente sección · ← anterior · N/P canción · S scroll · M clic · B negro en proyección · +/− tamaño · Esc salir')));
 

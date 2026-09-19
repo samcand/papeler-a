@@ -4,7 +4,7 @@
  * que suenan para que los imites.
  */
 
-import { el, button, select, chip, section, toast } from '../ui.js';
+import { el, button, select, chip, section, toast, render } from '../ui.js';
 import { store } from '../store.js';
 import { INSTRUMENTOS_CALENTAMIENTO, RUTINAS, construirRutina, DURACIONES, PRINCIPIOS } from '../calentamiento.js';
 import { Metronome } from '../metronome.js';
@@ -141,12 +141,12 @@ export function calentamientoView(root, { navigate, params }) {
 
   const pintarGuia = () => {
     const ej = ejercicioActual();
-    if (!ej) { guiaHost.replaceChildren(); return; }
+    if (!ej) { render(guiaHost); return; }
     const progreso = rutina.minutos
       ? ((rutina.ejercicios.slice(0, paso).reduce((n, e) => n + e.minutos, 0) * 60 + (ej.minutos * 60 - restante)) / (rutina.minutos * 60)) * 100
       : 0;
 
-    guiaHost.replaceChildren(
+    render(guiaHost, 
       el('div', { class: 'cal-cabecera' },
         el('div', {},
           el('span', { class: 'ctl-label' }, `Paso ${paso + 1} de ${rutina.ejercicios.length}`),
@@ -181,7 +181,7 @@ export function calentamientoView(root, { navigate, params }) {
   };
 
   const pintarLista = () => {
-    listaHost.replaceChildren(
+    render(listaHost, 
       el('ol', { class: 'cal-pasos' },
         rutina.ejercicios.map((ej, i) => {
           const li = el('li', { class: i === paso ? 'activo' : i < paso ? 'hecho' : '' },
@@ -228,7 +228,7 @@ export function calentamientoView(root, { navigate, params }) {
       select(store.songs.map((s) => ({ value: s.id, label: `${s.title} (${s.key})` })), cancionId,
         (v) => { cancionId = v; rehacer(); })));
 
-  root.replaceChildren(
+  render(root, 
     el('div', { class: 'page-head' },
       el('div', {},
         el('h1', {}, 'Calentamiento'),
