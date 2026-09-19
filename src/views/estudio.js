@@ -142,12 +142,35 @@ export function estudioView(root, { navigate }) {
       barra,
       el('div', { class: 'row wrap' },
         el('span', { class: 'ctl-label' }, 'Velocidad'),
-        ...[0.5, 0.65, 0.75, 0.9, 1].map((v) => button(`${v}×`, (e) => {
+        ...[0.5, 0.65, 0.75, 0.9, 1].map((v) => button(`${v}×`, async (e) => {
           lab.setVelocidad(v);
           transporte.querySelectorAll('.btn').forEach((b) => b.classList.remove('vel-activa'));
           e.target.classList.add('vel-activa');
-        }))),
-      el('p', { class: 'muted small' }, 'Ojo: al bajar la velocidad también baja el tono (es audio puro, sin corrección). Para estudiar digitaciones va perfecto; para afinar con la canción, usa velocidad 1×.'),
+          if (lab.preservarTono && v !== 1) {
+            const texto = e.target.textContent;
+            e.target.textContent = '…';
+            await lab.setPreservarTono(true);
+            e.target.textContent = texto;
+          }
+        })),
+        el('label', { class: 'field inline' },
+          el('span', { class: 'field-label' }, 'Sin cambiar el tono'),
+          el('input', {
+            type: 'checkbox', checked: lab.preservarTono,
+            onChange: async (e) => {
+              const activo = e.target.checked;
+              e.target.disabled = true;
+              estado.textContent = activo ? 'Estirando el audio para que el tono no baje…' : '';
+              await lab.setPreservarTono(activo);
+              e.target.disabled = false;
+              estado.textContent = activo
+                ? 'Listo: ahora puedes tocar junto con la canción aunque vaya lenta.'
+                : 'Velocidad normal (al bajarla, el tono baja con ella).';
+            },
+          }))),
+      el('p', { class: 'muted small' },
+        'Con "sin cambiar el tono" activado puedes tocar junto a la grabación aunque vaya a 0.65×: ' +
+        'el audio se estira en vez de reproducirse lento. La primera vez que eliges una velocidad tarda un momento en calcularlo.'),
       el('div', { class: 'row wrap' },
         el('span', { class: 'ctl-label' }, 'Bucle A-B'),
         button('Marcar A', (e) => { marcaA = lab.tiempo(); e.target.textContent = `A: ${formatTime(marcaA)}`; }),

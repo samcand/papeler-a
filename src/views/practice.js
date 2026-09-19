@@ -7,6 +7,7 @@ import { chordsUsed } from '../chordpro.js';
 import { chordShapes, chordDiagramSVG, chordTechnique, chordDifficulty } from '../guitar.js';
 import { pianoSVG, chordMidi, chordTechnique as pianoTips } from '../piano.js';
 import { PATHS } from '../academy.js';
+import { Escucha, coincideAcorde } from '../escucha.js';
 import { openChordDrawer } from './sheet.js';
 
 export function practiceView(root, { navigate, params }) {
@@ -107,6 +108,87 @@ export function practiceView(root, { navigate, params }) {
       })),
     trainerBox);
 
+  // --- Practicar con el micrófono: la app escucha y corrige ---
+  let escucha = null;
+  let objetivoIdx = 0;
+  let aciertos = 0, fallos = 0;
+  const micEstado = el('div', { class: 'mic-estado' }, el('span', { class: 'muted' }, 'Micrófono apagado'));
+  const micObjetivo = el('div', { class: 'mic-objetivo' }, '—');
+  const micDetectado = el('div', { class: 'mic-detectado muted' }, 'Toca el acorde…');
+  const micMarcador = el('p', { class: 'muted small' }, '');
+
+  const objetivoActual = () => chords[objetivoIdx % (chords.length || 1)] || null;
+
+  const pintarObjetivo = () => {
+    micObjetivo.textContent = objetivoActual() || '—';
+    micDetectado.textContent = 'Toca el acorde…';
+    micDetectado.className = 'mic-detectado muted';
+  };
+
+  let ultimoAcierto = 0;
+  const onEscucha = (r) => {
+    if (!r || r.silencio) {
+      micDetectado.textContent = 'Escuchando…';
+      micDetectado.className = 'mic-detectado muted';
+      return;
+    }
+    const esperado = objetivoActual();
+    if (!esperado) return;
+    const acierta = coincideAcorde(r.acorde, esperado) && r.estabilidad > 0.5;
+    micDetectado.textContent = `Escucho: ${r.acorde}`;
+    micDetectado.className = `mic-detectado ${acierta ? 'ok' : 'mal'}`;
+    const ahora = performance.now();
+    if (acierta && ahora - ultimoAcierto > 1200) {
+      ultimoAcierto = ahora;
+      aciertos++;
+      objetivoIdx++;
+      pintarObjetivo();
+      micMarcador.textContent = `Aciertos: ${aciertos} · Fallos: ${fallos}`;
+      toast('✓ ' + esperado, 'ok');
+    } else if (!acierta && ahora - ultimoAcierto > 4000) {
+      ultimoAcierto = ahora;
+      fallos++;
+      micMarcador.textContent = `Aciertos: ${aciertos} · Fallos: ${fallos} — revisa la digitación de ${esperado}`;
+    }
+  };
+
+  const micCard = section('Practica y te corrijo',
+    el('p', { class: 'muted' },
+      'La app escucha por el micrófono lo que tocas y te dice si es el acorde correcto. ' +
+      'Funciona con guitarra, piano, ukelele o cualquier instrumento acústico; pon el micrófono cerca y evita ruido de fondo.'),
+    el('div', { class: 'mic-panel' },
+      el('div', {}, el('span', { class: 'ctl-label' }, 'Toca este acorde'), micObjetivo),
+      el('div', {}, micDetectado, micEstado)),
+    micMarcador,
+    el('div', { class: 'row wrap' },
+      button('🎤 Empezar a escuchar', async (e) => {
+        if (escucha) {
+          escucha.detener(); escucha = null;
+          e.target.textContent = '🎤 Empezar a escuchar';
+          e.target.classList.remove('ok');
+          micEstado.replaceChildren(el('span', { class: 'muted' }, 'Micrófono apagado'));
+          return;
+        }
+        if (!chords.length) return toast('Abre una canción para practicar sus acordes', 'warn');
+        try {
+          escucha = new Escucha({ modo: 'acorde', onResultado: onEscucha });
+          await escucha.iniciar();
+          e.target.textContent = '⏹ Detener';
+          e.target.classList.add('ok');
+          micEstado.replaceChildren(el('span', { class: 'ok-text' }, 'Escuchando'));
+          pintarObjetivo();
+        } catch (err) {
+          toast('No se pudo usar el micrófono: ' + (err.name === 'NotAllowedError' ? 'permiso denegado' : err.message), 'warn');
+        }
+      }, { variant: 'primary' }),
+      button('Saltar acorde', () => { objetivoIdx++; pintarObjetivo(); }),
+      button('Reiniciar marcador', () => { aciertos = 0; fallos = 0; micMarcador.textContent = ''; })),
+    el('p', { class: 'muted small' },
+      'Reconoce la familia del acorde (mayor, menor, sus) y su fundamental. ' +
+      'No distingue un Do de un Do con séptima si la séptima casi no suena: eso es normal, no es un fallo tuyo.'));
+
+  pintarObjetivo();
+
   // --- Progreso de acordes ---
   const progressHost = el('div', {});
   const paintProgress = () => {
@@ -176,7 +258,7 @@ export function practiceView(root, { navigate, params }) {
       el('div', { class: 'row wrap' },
         song ? button('← Canción', () => navigate(`/cancion/${song.id}`)) : button('Repertorio', () => navigate('/')),
         button('Academia', () => navigate('/academia')))),
-    metronomeCard, trainerCard, progressHost, pathHost, logCard);
+    metronomeCard, micCard, trainerCard, progressHost, pathHost, logCard);
 
-  return () => { metro.stop(); clearInterval(trainerTimer); };
+  return () => { metro.stop(); clearInterval(trainerTimer); escucha?.detener(); };
 }

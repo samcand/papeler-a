@@ -123,7 +123,8 @@ export function songView(root, { navigate, params }) {
       el('div', { class: 'row wrap' },
         button('Instrumentos', () => navigate(`/instrumentos/${song.id}`)),
         button('Sincronizar con YouTube', () => navigate(`/sync/${song.id}`)),
-        button('Practicar', () => navigate(`/practica/${song.id}`), { variant: 'primary' })));
+        button('Practicar', () => navigate(`/practica/${song.id}`)),
+        button('▶ Modo atril', () => navigate(`/atril/${song.id}`), { variant: 'primary' })));
 
     controls.replaceChildren(
       el('div', { class: 'control-group' },

@@ -13,6 +13,7 @@ const DEFAULT_STATE = {
   songs: [],
   setlists: [],
   practice: {},   // { [songId]: { chordsLearned: [], minutes: 0, lastAt: null } }
+  cantantes: [],  // { id, nombre, min, max, comoda:[min,max], tipo, notas }
   ideasDone: [],  // números de ideas marcadas
   settings: {
     instrument: 'guitarra',
@@ -163,6 +164,29 @@ class Store {
   addPracticeMinutes(songId, minutes) {
     const p = this.practiceFor(songId);
     this.state.practice[songId] = { ...p, minutes: p.minutes + minutes, lastAt: Date.now() };
+    this.save();
+  }
+
+  // --- Cantantes (módulo de canto) ---
+  get cantantes() { return this.state.cantantes; }
+
+  cantante(id) { return this.state.cantantes.find((c) => c.id === id) || null; }
+
+  guardarCantante(datos) {
+    const existente = datos.id ? this.cantante(datos.id) : null;
+    if (existente) {
+      Object.assign(existente, datos);
+      this.save();
+      return existente;
+    }
+    const nuevo = { id: uid(), nombre: 'Sin nombre', min: null, max: null, comoda: null, tipo: null, notas: '', ...datos };
+    this.state.cantantes.push(nuevo);
+    this.save();
+    return nuevo;
+  }
+
+  borrarCantante(id) {
+    this.state.cantantes = this.state.cantantes.filter((c) => c.id !== id);
     this.save();
   }
 

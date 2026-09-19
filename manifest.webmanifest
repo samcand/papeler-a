@@ -1,0 +1,22 @@
+{
+  "name": "Alabanza — canciones, acordes e instrumentos",
+  "short_name": "Alabanza",
+  "description": "Repertorio de alabanza con acordes, guías por instrumento, afinador, estudio de audio y modo atril. Funciona sin internet.",
+  "start_url": "./index.html#/",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0f1115",
+  "theme_color": "#0f1115",
+  "lang": "es",
+  "categories": ["music", "productivity", "education"],
+  "icons": [
+    { "src": "assets/icono.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "assets/icono.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Afinador", "url": "./index.html#/afinador" },
+    { "name": "Listas de servicio", "url": "./index.html#/listas" },
+    { "name": "Canto", "url": "./index.html#/canto" }
+  ]
+}

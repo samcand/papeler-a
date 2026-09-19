@@ -21,6 +21,8 @@ export const MODOS = [
 
 export class EstudioAudio {
   constructor() {
+    this.preservarTono = false;
+    this.cacheEstirado = new Map();
     this.ctx = null;
     this.buffers = new Map();
     this.original = null;
@@ -98,12 +100,41 @@ export class EstudioAudio {
     }
   }
 
+  /**
+   * Con esto activado, bajar la velocidad no baja el tono: el audio se estira
+   * (WSOLA) en vez de reproducirse más lento. Cuesta un momento de cálculo la
+   * primera vez para cada velocidad.
+   */
+  async setPreservarTono(valor, { onProgreso = null } = {}) {
+    this.preservarTono = valor;
+    if (valor && Math.abs(this.velocidad - 1) > 0.001) {
+      onProgreso?.('Estirando el audio…');
+      await this._prepararEstirado(this.velocidad);
+    }
+    if (this.reproduciendo) { const t = this.tiempo(); this.parar(); this.reproducir(t); }
+  }
+
+  async _prepararEstirado(velocidad) {
+    const clave = `${this.modo}@${velocidad}`;
+    if (this.cacheEstirado.has(clave)) return this.cacheEstirado.get(clave);
+    const { estirarBuffer } = await import('./timestretch.js');
+    const origen = this._bufferPara(this.modo);
+    // Dar un respiro al navegador para que no se congele la interfaz.
+    await new Promise((r) => setTimeout(r, 0));
+    const estirado = estirarBuffer(this.ctx, origen, velocidad);
+    this.cacheEstirado.set(clave, estirado);
+    return estirado;
+  }
+
   setBucle(a, b) {
     this.bucle = a != null && b != null && b > a ? { a, b } : null;
   }
 
   tiempo() {
     if (!this.reproduciendo) return this.offset;
+    // La cuenta es la misma con audio estirado o sin estirar: al estirarlo se
+    // reproduce a velocidad 1, pero cada segundo de reloj avanza `velocidad`
+    // segundos de canción, igual que al bajar el playbackRate.
     return this.offset + (this.ctx.currentTime - this.inicioCtx) * this.velocidad;
   }
 
@@ -111,20 +142,24 @@ export class EstudioAudio {
     if (!this.original) return;
     if (this.ctx.state === 'suspended') this.ctx.resume();
     this.parar(false);
-    const buffer = this._bufferPara(this.modo);
+    const clave = `${this.modo}@${this.velocidad}`;
+    const estirado = this.preservarTono ? this.cacheEstirado.get(clave) : null;
+    const buffer = estirado || this._bufferPara(this.modo);
     this.fuente = this.ctx.createBufferSource();
     this.fuente.buffer = buffer;
-    this.fuente.playbackRate.value = this.velocidad;
+    // Si el audio ya viene estirado, se reproduce a velocidad normal.
+    this.fuente.playbackRate.value = estirado ? 1 : this.velocidad;
     this.gain = this.ctx.createGain();
     this.fuente.connect(this.gain).connect(this.ctx.destination);
     this.offset = desde != null ? desde : this.offset;
+    const escala = estirado ? 1 / this.velocidad : 1;
     if (this.bucle) {
       this.fuente.loop = true;
-      this.fuente.loopStart = this.bucle.a;
-      this.fuente.loopEnd = this.bucle.b;
+      this.fuente.loopStart = this.bucle.a * escala;
+      this.fuente.loopEnd = this.bucle.b * escala;
       if (this.offset < this.bucle.a || this.offset > this.bucle.b) this.offset = this.bucle.a;
     }
-    this.fuente.start(0, this.offset);
+    this.fuente.start(0, this.offset * escala);
     this.inicioCtx = this.ctx.currentTime;
     this.reproduciendo = true;
     clearInterval(this.timer);

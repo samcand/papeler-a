@@ -14,6 +14,10 @@ Todo se guarda en tu dispositivo.
 npm start          # sirve la carpeta en http://localhost:8080
 ```
 
+Se puede **instalar como app** (Chrome/Edge/Android: "Instalar"; iPhone: Compartir →
+"Añadir a pantalla de inicio"). Una vez instalada funciona **sin internet**: lo único que
+necesita red es el video de YouTube.
+
 O cualquier servidor estático (`npx serve`, extensión Live Server, etc.).
 Debe abrirse por `http://`, no con doble clic en el archivo: el navegador
 bloquea los módulos de JavaScript cargados desde `file://`.
@@ -31,9 +35,60 @@ También se puede publicar tal cual en GitHub Pages: son archivos estáticos.
 | **Practicar** | Metrónomo con acentos, tap tempo, entrenador de cambios de acorde, progreso por acorde y rutas de aprendizaje por instrumento. |
 | **Academia** | Círculo de quintas interactivo, progresiones que funcionan, entrenamiento de oído, escalas y modos, lectura rítmica, cifrado Nashville y glosario. |
 | **Listas** | Orden del servicio, tonalidad por canción y avisos de transición entre canciones. |
+| **Modo atril** | La pantalla del domingo: letra grande, sin menús, la pantalla no se apaga, auto-scroll atado al BPM real y avance con pedal Bluetooth o teclado. Una o dos columnas. |
+| **Proyección** | Segunda ventana o proyector con **solo la letra** para la congregación, controlada desde el atril (tecla B para pantalla en negro). |
+| **Canto** | Módulo completo de voz: medir tu rango con el micrófono, elegir la tonalidad según quién canta, afinación en vivo, vocalizaciones guiadas, entrenador de armonías, reparto de voces del equipo y cuidado vocal. |
+| **Historial** | Qué se cantó cada domingo, hace cuánto no se canta algo, cuántas veces seguidas va una canción nueva y qué tonalidades se repiten. |
 | **Afinador** | Afinador cromático por micrófono para guitarra, ukelele, bajo (4 y 5 cuerdas), cuatro y afinaciones alternativas (Drop D, DADGAD). Aguja en cents, notas de referencia y guía de cómo afinar. |
 | **Estudio de audio** | Sube una canción y la app saca el tempo, la tonalidad y **los acordes con sus tiempos**; se estudia lento, en bucle A-B y con el modo karaoke. También transcribe una melodía nota por nota. |
 | **100 ideas** | Lista de chequeo para mejorar la ejecución del equipo ([documento](docs/100-ideas-alabanza.md)). |
+
+Además, desde una lista de servicio: **compartir el set por enlace o QR**, **una hoja distinta
+para cada músico** y **pistas de clic y pads** para los in-ears.
+
+## El domingo, en la plataforma
+
+- **Modo atril** (`▶ Modo atril` en la canción o en la lista): pantalla limpia, `Wake Lock`
+  para que no se apague, auto-scroll calculado desde el BPM y la duración real, y avance
+  con pedal. Los page-turners Bluetooth mandan teclas, así que funcionan sin configurar nada:
+  `→` siguiente sección, `←` anterior, `N`/`P` cambiar de canción, `S` scroll, `M` clic,
+  `B` proyección en negro, `+`/`−` tamaño, `Esc` salir.
+- **Proyección**: el botón `📺 Proyectar` abre una segunda ventana (arrástrala al proyector
+  y pulsa `F`). Muestra solo la letra de la sección en la que va el equipo, sin acordes.
+  Se sincroniza por `BroadcastChannel`, sin servidor.
+
+## Compartir con el equipo
+
+Desde la lista de servicio, `📤 Compartir`: la app comprime las canciones (gzip) y las mete
+**dentro del propio enlace**. Quien lo abre las importa en su dispositivo; no hay servidor,
+ni cuentas, ni nada que se suba a ningún lado. Si el enlace completo sale demasiado largo
+para un QR legible, el QR lleva la versión corta (títulos, tonalidades y notas) y lo dice
+claramente; el enlace completo se manda por chat.
+
+`📄 Hojas por músico` genera un .docx distinto por rol con el set completo, una canción por
+página: voces (solo letra), guitarra (acordes + digitación en trastes + rasgueo), piano
+(acordes con sus notas), bajo (fundamentales y escala), batería (groove, intensidad y aviso
+por sección) y la hoja en números de Nashville.
+
+`🥁 Pistas de clic y pads` genera archivos .wav: el clic lleva un compás de cuenta de entrada
+y un golpe agudo al empezar cada sección marcada, y el pad es un colchón sostenido en la
+tonalidad para los momentos de oración.
+
+## Módulo de canto
+
+| Herramienta | Qué hace |
+| --- | --- |
+| Medir mi rango | Cantas del grave al agudo y el micrófono anota tu nota más baja y más alta; clasifica la voz (soprano, mezzo, contralto, tenor, barítono, bajo) y calcula tu zona cómoda. |
+| Tonalidad ideal | Cruza el rango de la canción con el de quien canta **y con el de la congregación**, y ordena las tonalidades explicando qué pasa en cada una. Un clic la transpone. |
+| Afinación en vivo | La app toca una nota, tú la cantas y ves en cents si estás por encima o por debajo. Incluye el ejercicio de sostenerla 6 segundos. |
+| Vocalizaciones | Ocho ejercicios (labios, sirena, "ng", cinco notas, arpegios, staccato, sostener, dicción) que suben por semitonos **dentro de tu rango**, con objetivo y advertencia de cada uno. |
+| Armonías | Calcula la segunda voz **dentro de la tonalidad** (por eso a veces la tercera es mayor y a veces menor) y toca melodía y armonía para que las compares. |
+| Equipo | Reparte melodía y armonías según el rango real de cada persona. |
+| Cuidado vocal | Qué hacer y qué no, y las señales de alarma que hay que consultar con un médico. |
+
+Un detalle importante: si la canción no tiene la melodía medida, la app **no inventa**
+recomendaciones de tonalidad — lo dice y te pide anotar la nota más grave y la más aguda
+(o transcribir la melodía en el Estudio).
 
 ## El formato de hoja del equipo (acordes sobre la letra)
 
@@ -96,6 +151,7 @@ Es la parte donde conviene ser exacto, porque hay apps que prometen de más:
 | --- | --- |
 | **Sí** | Reconocer acordes (mayores, menores, 7, maj7, sus) de un archivo de audio con sus tiempos y su nivel de confianza; estimar tempo y tonalidad; transcribir una melodía de **una sola voz**; afinar cualquier instrumento de cuerda por micrófono. |
 | **A medias** | El modo "karaoke" resta los dos canales del estéreo: quita lo que esté al centro (normalmente la voz), pero se lleva parte del bombo y del bajo. En audio mono no hace nada. |
+| **Sí** | Bajar la velocidad **sin que baje el tono** (estiramiento WSOLA), para tocar junto a la grabación a 0.65×. |
 | **No** | Separar de verdad voz, batería, bajo y guitarra en pistas independientes (lo que hace Moises). Eso necesita un modelo de IA en un servidor; ninguna página web lo hace sola. Tampoco transcribe un piano tocando acordes: la detección de melodía es monofónica. |
 
 Todo el procesamiento ocurre dentro del navegador: **ningún archivo se sube a
@@ -133,6 +189,15 @@ src/transcribe.js     Audio -> acordes, tonalidad y melodía
 src/audiolab.js       Reproductor de estudio: velocidad, bucle A-B, karaoke
 src/hoja.js           Formato de hoja del equipo (importar y exportar)
 src/docx.js + zip.js  Generación del .docx en el navegador
+src/hojasequipo.js    Una hoja distinta por músico
+src/vocal.js          Rango vocal, tonalidad por cantante, vocalizaciones y armonías
+src/escucha.js        Escucha por micrófono y reconoce acordes o notas
+src/timestretch.js    Velocidad lenta sin cambiar el tono (WSOLA)
+src/clicktrack.js     Pistas de clic, pads y exportación a .wav
+src/share.js          Compartir el set dentro de un enlace comprimido
+src/qr.js             Generador de códigos QR
+src/historial.js      Qué se cantó y cuándo
+sw.js + manifest      Instalación y funcionamiento sin internet
 src/metronome.js      Metrónomo (Web Audio) y tap tempo
 src/analysis.js       Análisis de audio local
 src/youtube.js        Reproductor sincronizado y motor de "qué tocar ahora"
@@ -148,7 +213,8 @@ tools/gen-docs.mjs    Genera el documento de las 100 ideas
 
 ```bash
 npm start    # servidor local
-npm test     # 24 pruebas: teoría, señal, digitaciones y formato de hoja
+npm test     # 42 pruebas: teoría, señal, digitaciones, formato de hoja,
+             # voz, estiramiento de tiempo, clic, QR, compartir e historial
 npm run docs # regenera docs/100-ideas-alabanza.md desde src/ideas.js
 ```
 

@@ -12,6 +12,10 @@ import { setlistsView } from './views/setlists.js';
 import { ideasView } from './views/ideas.js';
 import { afinadorView } from './views/afinador.js';
 import { estudioView } from './views/estudio.js';
+import { atrilView } from './views/atril.js';
+import { cantoView } from './views/canto.js';
+import { importarView } from './views/importar.js';
+import { historialView } from './views/historial.js';
 
 const ROUTES = [
   { path: /^\/?$/, view: libraryView, nav: 'repertorio' },
@@ -22,6 +26,11 @@ const ROUTES = [
   { path: /^\/academia$/, view: academyView, nav: 'academia' },
   { path: /^\/afinador$/, view: afinadorView, nav: 'afinador' },
   { path: /^\/estudio$/, view: estudioView, nav: 'estudio' },
+  { path: /^\/canto(?:\/([^/]+))?$/, view: cantoView, keys: ['id'], nav: 'canto' },
+  { path: /^\/atril\/set\/([^/]+)$/, view: atrilView, keys: ['setlistId'] },
+  { path: /^\/atril\/([^/]+)$/, view: atrilView, keys: ['id'] },
+  { path: /^\/historial$/, view: historialView, nav: 'historial' },
+  { path: /^\/importar$/, view: importarView },
   { path: /^\/listas$/, view: setlistsView, nav: 'listas' },
   { path: /^\/ideas$/, view: ideasView, nav: 'ideas' },
 ];
@@ -30,8 +39,10 @@ const NAV = [
   { href: '#/', label: 'Repertorio', id: 'repertorio' },
   { href: '#/listas', label: 'Listas', id: 'listas' },
   { href: '#/practica', label: 'Practicar', id: 'practica' },
+  { href: '#/canto', label: 'Canto', id: 'canto' },
   { href: '#/afinador', label: 'Afinador', id: 'afinador' },
   { href: '#/estudio', label: 'Estudio', id: 'estudio' },
+  { href: '#/historial', label: 'Historial', id: 'historial' },
   { href: '#/academia', label: 'Academia', id: 'academia' },
   { href: '#/ideas', label: '100 ideas', id: 'ideas' },
 ];
@@ -43,7 +54,20 @@ function navigate(path) {
 }
 
 function currentPath() {
-  return (location.hash || '#/').slice(1) || '/';
+  return ((location.hash || '#/').slice(1) || '/').split('?')[0];
+}
+
+/** Parámetros después del "?" del hash (los usa el enlace para compartir). */
+function currentQuery() {
+  const partes = (location.hash || '').split('?');
+  if (partes.length < 2) return {};
+  const out = {};
+  for (const par of partes.slice(1).join('?').split('&')) {
+    const i = par.indexOf('=');
+    if (i === -1) out[decodeURIComponent(par)] = '';
+    else out[decodeURIComponent(par.slice(0, i))] = decodeURIComponent(par.slice(i + 1));
+  }
+  return out;
 }
 
 function render() {
@@ -60,7 +84,7 @@ function render() {
     const params = {};
     (route.keys || []).forEach((k, i) => { params[k] = match[i + 1]; });
     try {
-      cleanup = route.view(root, { navigate, params }) || null;
+      cleanup = route.view(root, { navigate, params, query: currentQuery() }) || null;
     } catch (err) {
       console.error(err);
       root.replaceChildren(el('div', { class: 'card' },
@@ -100,6 +124,15 @@ function mountShell() {
   document.body.prepend(header);
 }
 
+// Instalación y funcionamiento sin internet
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch((err) => {
+      console.info('La app funcionará igual, pero sin modo offline:', err.message);
+    });
+  });
+}
+
 window.addEventListener('hashchange', render);
 window.addEventListener('DOMContentLoaded', () => {
   document.documentElement.dataset.theme = store.state.settings.theme || 'dark';
@@ -115,4 +148,5 @@ window.addEventListener('keydown', (e) => {
   if (e.key === 'p') navigate('/practica');
   if (e.key === 't') navigate('/afinador');
   if (e.key === 'e') navigate('/estudio');
+  if (e.key === 'c') navigate('/canto');
 });

@@ -44,7 +44,7 @@ function bloquesXml(bloques, mono) {
 const SIN_BORDES = ['top', 'left', 'bottom', 'right', 'insideH', 'insideV']
   .map((lado) => `<w:${lado} w:val="none" w:sz="0" w:space="0"/>`).join('');
 
-function documentXml({ titulo, tonalidad, autor, bloques }, mono) {
+function cuerpoDeCancion({ titulo, tonalidad, autor, bloques }, mono) {
   const cabecera =
     `<w:p><w:pPr><w:spacing w:after="120"/></w:pPr>` +
     `<w:r><w:rPr><w:b/><w:sz w:val="32"/><w:szCs w:val="32"/></w:rPr>` +
@@ -70,9 +70,17 @@ function documentXml({ titulo, tonalidad, autor, bloques }, mono) {
       `<w:tr>${celdas}</w:tr></w:tbl><w:p/>`;
   }
 
+  return cabecera + cuerpo;
+}
+
+const SALTO_PAGINA = '<w:p><w:r><w:br w:type="page"/></w:r></w:p>';
+
+function documentXml(canciones, mono) {
+  const lista = Array.isArray(canciones) ? canciones : [canciones];
+  const cuerpo = lista.map((c) => cuerpoDeCancion(c, mono)).join(SALTO_PAGINA);
   return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
-<w:body>${cabecera}${cuerpo}<w:sectPr><w:pgSz w:w="12240" w:h="15840"/><w:pgMar w:top="1134" w:right="1134" w:bottom="1134" w:left="1134" w:header="709" w:footer="709" w:gutter="0"/></w:sectPr></w:body></w:document>`;
+<w:body>${cuerpo}<w:sectPr><w:pgSz w:w="12240" w:h="15840"/><w:pgMar w:top="1134" w:right="1134" w:bottom="1134" w:left="1134" w:header="709" w:footer="709" w:gutter="0"/></w:sectPr></w:body></w:document>`;
 }
 
 const CONTENT_TYPES = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -95,12 +103,17 @@ const coreXml = (titulo) => `<?xml version="1.0" encoding="UTF-8" standalone="ye
 <dcterms:created xsi:type="dcterms:W3CDTF">${new Date().toISOString().slice(0, 19)}Z</dcterms:created>
 </cp:coreProperties>`;
 
-/** Devuelve los bytes del .docx. */
+/**
+ * Devuelve los bytes del .docx.
+ * Acepta una canción o una lista (cada una empieza en una página nueva),
+ * que es lo que se usa para entregarle el set completo a cada músico.
+ */
 export function buildDocx(cancion, { mono = false } = {}) {
+  const primera = Array.isArray(cancion) ? cancion[0] : cancion;
   return zipSync([
     { name: '[Content_Types].xml', data: CONTENT_TYPES },
     { name: '_rels/.rels', data: RELS },
-    { name: 'docProps/core.xml', data: coreXml(cancion.titulo) },
+    { name: 'docProps/core.xml', data: coreXml(primera?.titulo || 'Alabanza') },
     { name: 'word/_rels/document.xml.rels', data: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"/>` },
     { name: 'word/document.xml', data: documentXml(cancion, mono) },
   ]);

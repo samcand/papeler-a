@@ -461,3 +461,72 @@ a { color: var(--accent-2); }
   .nav { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; max-width: 100%; }
   .nav::-webkit-scrollbar { display: none; }
 }
+
+/* ---------- Modo atril ---------- */
+body.modo-atril .topbar, body.modo-atril .footer { display: none; }
+body.modo-atril .app { max-width: none; padding: 0; }
+.atril { display: flex; flex-direction: column; height: 100vh; }
+.atril-barra {
+  display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;
+  padding: 8px 14px; border-bottom: 1px solid var(--line); background: var(--card);
+}
+.atril-info { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.atril-controles { display: flex; gap: 6px; flex-wrap: wrap; }
+.atril-controles .btn { padding: 6px 10px; }
+.atril-hoja { flex: 1; overflow-y: auto; padding: 18px 22px 40vh; scroll-behavior: smooth; }
+.atril-hoja.dos-columnas .sheet { column-count: 2; column-gap: 40px; }
+.atril-hoja.dos-columnas .sheet-section { break-inside: avoid; }
+.atril-hoja .sheet-section.active { background: color-mix(in oklab, var(--accent) 10%, transparent); }
+.atril-nota { margin-top: 1em; padding: 8px 12px; border-left: 3px solid var(--accent); background: var(--bg-soft); border-radius: 8px; }
+.atril-ayuda { padding: 6px 14px; border-top: 1px solid var(--line); margin: 0; }
+
+/* ---------- Canto ---------- */
+.canto-cuerpo { margin-top: 4px; }
+.cantantes { display: flex; flex-direction: column; gap: 8px; }
+.cantante {
+  display: flex; align-items: center; gap: 12px; padding: 10px 12px;
+  background: var(--bg-soft); border: 1px solid var(--line); border-radius: 12px;
+}
+.cantante.activo { border-color: var(--accent); }
+.tesituras { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; }
+.tesitura { background: var(--bg-soft); border: 1px solid var(--line); border-radius: 12px; padding: 10px; }
+.tesitura strong { display: block; color: var(--accent); }
+.objetivo { font-size: 1.8rem; color: var(--accent); min-width: 80px; text-align: center; }
+.tl-table tr.mejor { background: color-mix(in oklab, var(--ok) 12%, transparent); }
+
+/* ---------- Práctica con micrófono ---------- */
+.mic-panel {
+  display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;
+  background: var(--bg-soft); border: 1px solid var(--line); border-radius: 12px; padding: 14px; margin: 10px 0;
+}
+.mic-objetivo { font-size: 3rem; font-weight: 800; color: var(--accent); line-height: 1; }
+.mic-detectado { font-size: 1.3rem; }
+.mic-detectado.ok { color: var(--ok); }
+.mic-detectado.mal { color: var(--warn); }
+.ok-text { color: var(--ok); }
+
+/* ---------- Historial ---------- */
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 18px; }
+.stat {
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 14px; display: flex; flex-direction: column; gap: 2px;
+}
+.stat strong { font-size: 2rem; color: var(--accent); line-height: 1; }
+
+/* ---------- Compartir, hojas y pistas ---------- */
+.qr-wrap { display: flex; justify-content: center; padding: 14px; background: #fff; border-radius: 12px; margin: 12px 0; }
+.qr { display: block; }
+.roles { display: flex; flex-direction: column; gap: 8px; margin: 10px 0; }
+.rol {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  background: var(--bg-soft); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px;
+}
+.acciones-set { margin-bottom: 12px; }
+.lista-importar { margin: 0 0 1em 1.2em; }
+.lista-importar li { margin-bottom: .6em; }
+.lista-importar strong { margin-right: 8px; }
+
+@media (max-width: 700px) {
+  .atril-hoja.dos-columnas .sheet { column-count: 1; }
+  .mic-objetivo { font-size: 2.2rem; }
+}
