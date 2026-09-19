@@ -1,0 +1,12 @@
+{
+  "name": "alabanza-app",
+  "version": "1.0.0",
+  "description": "App para manejar canciones de alabanza: letras, acordes, guias de guitarra/piano/bateria, sincronizacion con YouTube y modo de aprendizaje.",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "python3 -m http.server 8080",
+    "test": "node tests/music.test.js",
+    "docs": "node tools/gen-docs.mjs"
+  }
+}
