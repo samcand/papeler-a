@@ -138,36 +138,36 @@ que al álgebra.
 
 | Lo que evalúan | Cómo está cubierto | Estado |
 | --- | --- | --- |
-| Lectura crítica / análisis textual | Lectura crítica (102 preguntas, 14 textos más gráficas) | Cubierto, incluidos textos discontinuos |
-| Matemáticas (numérico, geométrico, aleatorio) | Matemáticas (180) | Cubierto |
-| Razonamiento cuantitativo (Saber Pro) | Matemáticas + Vida cotidiana (100) | Cubierto |
-| Sociales: Constitución, Estado, participación, derechos | Política y ciudadanía (100) | Cubierto |
-| Sociales: espacio, territorio, ambiente y población | Geografía (121) | Cubierto |
+| Lectura crítica / análisis textual | Lectura crítica (168 preguntas, 14 textos más gráficas) | Cubierto, incluidos textos discontinuos |
+| Matemáticas (numérico, geométrico, aleatorio) | Matemáticas (265) | Cubierto |
+| Razonamiento cuantitativo (Saber Pro) | Matemáticas + Vida cotidiana (155) | Cubierto |
+| Sociales: Constitución, Estado, participación, derechos | Política y ciudadanía (152) | Cubierto |
+| Sociales: espacio, territorio, ambiente y población | Geografía (175) | Cubierto |
 | Competencias ciudadanas (Saber Pro) | Política y ciudadanía | Cubierto |
-| Inglés A1–B1 | Inglés (120) | Cubierto en contenido; faltan los formatos propios del Saber 11 |
-| Ciencias naturales: componente biológico | Biología y salud (140) | Cubierto, con ecología, evolución y biodiversidad |
-| Ciencias naturales: componente físico | Física (100) | Cubierto |
-| Ciencias naturales: componente químico | Química (100) | Cubierto |
-| Ciencias naturales: competencia de indagación | Biología y salud, tema de indagación (10) | Cubierto; CTS se trabaja desde geografía y vida cotidiana |
-| Historia de Colombia | Historia de Colombia (100) | Cubierto, del periodo prehispánico al presente |
-| Análisis de la imagen (UNAL) | Lectura crítica, tema de imagen (10) | Cubierto con planos, mapas y gráficos; sin fotografías ni obras |
+| Inglés A1–B1 | Inglés (183) | Cubierto en contenido; faltan los formatos propios del Saber 11 |
+| Ciencias naturales: componente biológico | Biología y salud (209) | Cubierto, con ecología, evolución y biodiversidad |
+| Ciencias naturales: componente físico | Física (150) | Cubierto |
+| Ciencias naturales: componente químico | Química (153) | Cubierto |
+| Ciencias naturales: competencia de indagación | Biología y salud, tema de indagación (16) | Cubierto; CTS se trabaja desde geografía y vida cotidiana |
+| Historia de Colombia | Historia de Colombia (161) | Cubierto, del periodo prehispánico al presente |
+| Análisis de la imagen (UNAL) | Lectura crítica, tema de imagen (15) | Cubierto con planos, mapas y gráficos; sin fotografías ni obras |
 | Comunicación escrita (Saber Pro) | Pantalla propia con consignas y rúbrica | Cubierto como ejercicio; la rúbrica es de autoevaluación |
 
 ### Lo que ya quedó cubierto
 
 Ciencias naturales era el hueco más grande: es la prueba con más preguntas del
 Saber 11 (58) y no tenía nada de física ni de química. Ahora están las tres
-áreas del componente, con 10 preguntas por tema como el resto del banco:
+áreas del componente:
 
-- **Física** (100): magnitudes y vectores, cinemática, leyes de Newton, trabajo
+- **Física** (150): magnitudes y vectores, cinemática, leyes de Newton, trabajo
   y energía, fluidos, ondas, calor, electricidad, magnetismo y gravitación.
-- **Química** (100): materia, átomo, tabla periódica, enlace, nomenclatura,
+- **Química** (153): materia, átomo, tabla periódica, enlace, nomenclatura,
   reacciones, estequiometría, soluciones, ácidos y bases y orgánica.
-- **Biología** (dentro de Biología y salud, 140): se añadieron ecología,
+- **Biología** (dentro de Biología y salud, 209): se añadieron ecología,
   evolución, biodiversidad e **indagación científica**, que es la competencia
   de leer un experimento, distinguir variables y evaluar una conclusión.
 
-También se cubrió **historia de Colombia** (100 preguntas, 10 temas), que el
+También se cubrió **historia de Colombia** (161 preguntas, 10 temas), que el
 Saber 11 evalúa dentro de sociales: del periodo prehispánico al acuerdo de paz,
 preguntando por causas y consecuencias y no por listas de fechas.
 
@@ -182,6 +182,17 @@ preguntando por causas y consecuencias y no por listas de fechas.
   30 o 40 minutos, contador de palabras y párrafos, autoguardado, y al
   terminar una rúbrica de cuatro criterios con tres niveles y una lista de
   relectura con los errores más frecuentes.
+- **Cuatro niveles de dificultad**: cada pregunta del banco está clasificada en
+  básico, intermedio, avanzado o experto, y ningún tema baja de tres preguntas
+  en cada nivel. Eso permite practicar un mismo tema de menor a mayor exigencia
+  en lugar de saltar directamente al ítem difícil, y es lo que llevó el banco
+  de 1 353 a 2 053 preguntas.
+  - **Básico**: aplicar una definición o una fórmula en un solo paso.
+  - **Intermedio**: dos pasos, o escoger el procedimiento correcto entre varios.
+  - **Avanzado**: combinar dos conceptos, interpretar un caso o evitar una
+    trampa frecuente.
+  - **Experto**: varios pasos encadenados, un caso límite, o distinguir entre
+    dos ideas que casi todo el mundo confunde.
 
 ### Límites que conviene tener presentes
 

@@ -10,7 +10,7 @@ Todo se guarda en tu dispositivo.
 
 Este repositorio también contiene una segunda app, independiente de esta:
 **[Ingreso](examen/README.md)**, una plataforma de preguntas para pruebas de
-admisión a la universidad: 1 353 preguntas con explicación en doce asignaturas
+admisión a la universidad: 2 053 preguntas con explicación en doce asignaturas
 —matemáticas, física, química, biología y salud, trigonometría, razonamiento
 abstracto, geografía, historia de Colombia, política y ciudadanía, vida
 cotidiana, lectura crítica e inglés—, más una pantalla de comunicación escrita

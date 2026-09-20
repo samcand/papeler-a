@@ -128,6 +128,26 @@ t('cada asignatura mezcla los cuatro niveles', () => {
 const MINIMO = 3;
 const META = 10;
 
+/**
+ * Suelo por nivel. La clasificación en cuatro niveles solo sirve si el
+ * estudiante puede practicar cualquiera de ellos en cualquier tema: si un tema
+ * tiene diez preguntas pero todas intermedias, el filtro por nivel no devuelve
+ * nada y la escala es decorativa.
+ */
+const POR_NIVEL = 3;
+
+t(`cada tema tiene al menos ${POR_NIVEL} preguntas de cada nivel`, () => {
+  const flojos = [];
+  for (const tm of todosLosTemas()) {
+    const suyas = BANCO.filter((p) => p.asignatura === tm.asignatura && p.tema === tm.id);
+    for (const nivel of [1, 2, 3, 4]) {
+      const n = suyas.filter((p) => p.dificultad === nivel).length;
+      if (n < POR_NIVEL) flojos.push(`${tm.asignatura}/${tm.id} nivel ${nivel} (${n})`);
+    }
+  }
+  assert.deepEqual(flojos, [], 'faltan preguntas por nivel: ' + flojos.join(', '));
+});
+
 t(`ningún tema baja de ${MINIMO} preguntas`, () => {
   const pobres = todosLosTemas()
     .map((tm) => ({ ...tm, n: BANCO.filter((p) => p.asignatura === tm.asignatura && p.tema === tm.id).length }))

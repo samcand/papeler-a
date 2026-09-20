@@ -1,7 +1,7 @@
 # Ingreso — plataforma de preguntas para la prueba de admisión
 
 Banco de preguntas y simulacros para preparar el examen de ingreso a la
-universidad, con **el temario de lo que preguntan** y **1 353 preguntas** con
+universidad, con **el temario de lo que preguntan** y **2 053 preguntas** con
 explicación en doce asignaturas, a razón de **10 por tema en todos los temas**:
 
 | Asignatura | Temas | Preguntas | Qué cubre |
@@ -133,9 +133,10 @@ La pregunta correcta no es "cuántas preguntas quedan bonitas", sino **cuántas
 hacen falta para que estudiar con el banco enseñe la materia en vez de enseñar
 el banco**. Hay tres restricciones que fijan el número, y la mayor manda.
 
-**1. Cubrir el temario, no solo tocarlo.** Son 135 temas y tres niveles de
-dificultad. Con solo dos preguntas por nivel ya hacen falta unas **810**. Por
-debajo de eso hay temas que solo se pueden practicar de una manera.
+**1. Cubrir el temario, no solo tocarlo.** Son 135 temas y cuatro niveles de
+dificultad (básico, intermedio, avanzado y experto). Con solo tres preguntas
+por nivel ya hacen falta **1 620**. Por debajo de eso hay temas que solo se
+pueden practicar de una manera, y el filtro por nivel devuelve listas vacías.
 
 **2. No memorizar la respuesta.** La investigación sobre práctica de
 recuperación (Karpicke y Roediger) muestra que lo que fija el aprendizaje es
@@ -163,35 +164,37 @@ Juntando las tres:
 | Nivel | Tamaño | Por tema | Para qué alcanza |
 | --- | --- | --- | --- |
 | Suelo usable | ~600 | 6 | Cubrir el temario y un mes de práctica |
-| **Meta recomendada** | **~1 000** | **10** | 3 meses de estudio serio y 6 simulacros sin repetir |
-| Gran alcance | ~1 700 | 17 | 6 meses, repaso espaciado completo y 9 simulacros |
+| Meta inicial | ~1 000 | 10 | 3 meses de estudio serio y 6 simulacros sin repetir |
+| **Gran alcance** | **~2 000** | **15** | 6 meses, repaso espaciado completo, 9 simulacros y los cuatro niveles practicables en todos los temas |
 
-Por eso la meta del proyecto son **10 preguntas por tema**, y el orden para
-llegar es: primero que ningún tema baje de 3 (eso ya lo verifica una prueba),
-después subir los temas que más pesan en el examen y solo al final los de
-relleno. `npm run test:examen` imprime el estado exacto:
+La meta original del proyecto eran **10 preguntas por tema**. Al clasificar
+cada pregunta en cuatro niveles apareció una exigencia nueva: que el filtro por
+nivel funcione en cualquier tema, no solo en los más trabajados. De ahí sale el
+suelo que hoy verifican dos pruebas: **ningún tema baja de 3 preguntas y
+ninguno baja de 3 preguntas en cada uno de los cuatro niveles**.
+`npm run test:examen` imprime el estado exacto:
 
 ```
 Cobertura por asignatura (meta: 10 preguntas por tema)
-  Matemáticas              180 preguntas · 18 temas · 10.0 por tema  → meta alcanzada
-  Trigonometría            100 preguntas · 10 temas · 10.0 por tema  → meta alcanzada
-  Razonamiento abstracto    90 preguntas ·  9 temas · 10.0 por tema  → meta alcanzada
-  Geografía                121 preguntas · 12 temas · 10.1 por tema  → meta alcanzada
-  Política y ciudadanía    100 preguntas · 10 temas · 10.0 por tema  → meta alcanzada
-  Biología y salud         140 preguntas · 14 temas · 10.0 por tema  → meta alcanzada
-  Vida cotidiana y cultura general 100 preguntas · 10 temas · 10.0 por tema  → meta alcanzada
-  Física                   100 preguntas · 10 temas · 10.0 por tema  → meta alcanzada
-  Química                  100 preguntas · 10 temas · 10.0 por tema  → meta alcanzada
-  Historia de Colombia     100 preguntas · 10 temas · 10.0 por tema  → meta alcanzada
-  Lectura crítica          102 preguntas · 10 temas · 10.2 por tema  → meta alcanzada
-  Inglés                   120 preguntas · 12 temas · 10.0 por tema  → meta alcanzada
-  TOTAL                   1353 preguntas · faltan 0 para la meta de 10 por tema
+  Matemáticas              265 preguntas · 18 temas · 14.7 por tema  → meta alcanzada
+  Trigonometría            147 preguntas · 10 temas · 14.7 por tema  → meta alcanzada
+  Razonamiento abstracto   135 preguntas ·  9 temas · 15.0 por tema  → meta alcanzada
+  Geografía                175 preguntas · 12 temas · 14.6 por tema  → meta alcanzada
+  Política y ciudadanía    152 preguntas · 10 temas · 15.2 por tema  → meta alcanzada
+  Biología y salud         209 preguntas · 14 temas · 14.9 por tema  → meta alcanzada
+  Vida cotidiana y cultura general 155 preguntas · 10 temas · 15.5 por tema  → meta alcanzada
+  Física                   150 preguntas · 10 temas · 15.0 por tema  → meta alcanzada
+  Química                  153 preguntas · 10 temas · 15.3 por tema  → meta alcanzada
+  Historia de Colombia     161 preguntas · 10 temas · 16.1 por tema  → meta alcanzada
+  Lectura crítica          168 preguntas · 10 temas · 16.8 por tema  → meta alcanzada
+  Inglés                   183 preguntas · 12 temas · 15.3 por tema  → meta alcanzada
+  TOTAL                   2053 preguntas · faltan 0 para la meta de 10 por tema
 ```
 
-Con 135 temas, la meta de 10 por tema son 1 350 preguntas: el banco está
-completo en ese nivel y dentro del rango de "gran alcance" de la tabla
-anterior. Alcanza para tres meses de estudio y varios simulacros sin repetir
-preguntas.
+Con 135 temas, exigir tres preguntas de cada uno de los cuatro niveles son
+1 620 como piso; el banco tiene 2 053 y una media de 15,2 por tema. Está en el
+rango de "gran alcance" de la tabla anterior: alcanza para seis meses de
+estudio con repaso espaciado y nueve simulacros sin repetir preguntas.
 
 Una advertencia que sale de la misma evidencia: el volumen solo ayuda si se
 leen las explicaciones. En los estudios sobre bancos de preguntas, lo que mejor
