@@ -14,7 +14,8 @@ import {
   informeFiscal, planDeAportes, proximosVencimientos, pruebaDeEstres, rMultiplo, rebalanceo,
   resultadoOperacion, resumenOperaciones, tamanoPosicion, tareasDeCartera, valoraCartera,
 } from '../inversiones.js';
-import { dato, tituloVista } from '../componentes.js';
+import { dato, tituloVista, vacio } from '../componentes.js';
+import { decisionNueva, decisionesARevisar, resumenDecisiones } from '../trabajo.js';
 import { importarMovimientosBroker, reconstruirPosiciones } from '../exportar.js';
 import { store } from '../store.js';
 
@@ -264,6 +265,8 @@ export function vistaInversiones(root, ctx = {}) {
       s.total ? el('p', { class: 'muted small', style: 'margin-top:10px' },
         `Mejor: ${s.mejor?.ticker} (${s.mejor?.r} R) · Peor: ${s.peor?.ticker} (${s.peor?.r} R)${s.duracionMedia ? ` · duración media ${s.duracionMedia} días` : ''}`) : null,
 
+      panelDecisiones(),
+
       el('section', { class: 'card' },
         el('h2', { class: 'card-title' }, 'Diario de operaciones'),
         el('div', { class: 'tabla-scroll' },
@@ -332,6 +335,64 @@ export function vistaInversiones(root, ctx = {}) {
     });
     return el('span', {}, button('📥 Importar CSV del bróker', () => entrada.click(),
       { title: 'Empareja compras y ventas por FIFO y reconstruye la cartera' }), entrada);
+  }
+
+
+  /**
+   * Lo que descartaste y por qué. Revisarlo un año después enseña más que la
+   * lista de aciertos: el diario de operaciones solo guarda lo que hiciste, y
+   * media cartera se decide en lo que no se hace.
+   */
+  function panelDecisiones() {
+    const decisiones = store.estado.decisiones || [];
+    const r = resumenDecisiones(decisiones, hoyISO);
+    const tocan = new Set(decisionesARevisar(decisiones, hoyISO).map((d) => d.id));
+
+    return el('section', { class: 'card' },
+      el('div', { class: 'fila entre' },
+        el('h2', { class: 'card-title', style: 'margin:0' }, 'Decisiones que no tomaste'),
+        button('+ Apuntar una', () => {
+          store.agregarEn('decisiones', decisionNueva({ que: 'Lo que estuve a punto de hacer' }));
+          pintar();
+        }, { variant: 'ghost chico' })),
+      el('p', { class: 'muted small' }, r.frase),
+
+      !decisiones.length ? vacio('Nada apuntado todavía.', '🤔') : null,
+
+      ...decisiones.map((d) => el('div', { class: `idea ${tocan.has(d.id) ? 'toca' : ''}`.trim() },
+        el('div', { class: 'fila' },
+          input(d.que, (v) => store.actualizarEn('decisiones', d.id, { que: v })),
+          el('select', {
+            class: 'input', style: 'width:auto',
+            onChange: (e) => { store.actualizarEn('decisiones', d.id, { tipo: e.target.value }); pintar(); },
+          },
+          el('option', { value: 'descartada', selected: d.tipo === 'descartada' }, 'Descartada'),
+          el('option', { value: 'aplazada', selected: d.tipo === 'aplazada' }, 'Aplazada')),
+          button('✕', () => { store.borrarEn('decisiones', d.id); pintar(); },
+            { variant: 'ghost chico danger', title: 'Borrar la decisión' })),
+        el('label', { class: 'field' }, el('span', { class: 'field-label' }, 'Por qué'),
+          input(d.porque || '', (v) => store.actualizarEn('decisiones', d.id, { porque: v }))),
+        el('div', { class: 'fila' },
+          el('label', { class: 'field', style: 'width:150px' }, el('span', { class: 'field-label' }, 'Precio entonces'),
+            el('input', {
+              class: 'input', type: 'number', step: '0.01', value: d.precio ?? '',
+              onChange: (e) => store.actualizarEn('decisiones', d.id, { precio: Number(e.target.value) || null }),
+            })),
+          el('label', { class: 'field', style: 'width:170px' }, el('span', { class: 'field-label' }, 'Revisar el'),
+            el('input', {
+              class: 'input', type: 'date', value: d.revisarEn || '',
+              onChange: (e) => { store.actualizarEn('decisiones', d.id, { revisarEn: e.target.value }); pintar(); },
+            })),
+          el('span', { class: 'muted small' }, `Apuntada el ${d.fecha}`)),
+        tocan.has(d.id) ? el('div', {},
+          el('p', { class: 'negativo small' }, 'Toca mirarla: ¿acertaste al no hacerlo?'),
+          el('label', { class: 'field' }, el('span', { class: 'field-label' }, 'Qué pasó'),
+            input(d.resultado || '', (v) => store.actualizarEn('decisiones', d.id, { resultado: v }))),
+          button('Marcar revisada', () => {
+            store.actualizarEn('decisiones', d.id, { revisada: hoyISO });
+            pintar();
+          }, { variant: 'ghost chico' })) : null,
+        d.revisada ? el('p', { class: 'muted small' }, `Revisada el ${d.revisada}. ${d.resultado || ''}`) : null)));
   }
 
   /* -------------------- estrés y plan de aportes -------------------- */

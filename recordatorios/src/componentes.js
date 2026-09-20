@@ -11,6 +11,8 @@ import { parseRegla, proximasFechas, textoRegla } from './recurrencia.js';
 import { calibracion, pistaEstimacion } from './calibracion.js';
 import { aplicar, fuentesDe, sugerencias } from './autocompletar.js';
 import { alternarTres, tresDelDia } from './dia.js';
+import { dictadoDisponible, dictar, posiblesDuplicados } from './captura.js';
+import { NIVELES as NIVELES_ENERGIA, energiaDe } from './energia.js';
 import { crearEspera, estadoEspera, tareaDePerseguir } from './esperas.js';
 import * as adjuntos from './adjuntos.js';
 import { store } from './store.js';
@@ -31,7 +33,9 @@ export function entradaRapida(porDefecto = {}, alAgregar = () => {}) {
     placeholder: 'Ej.: Revisar tesis de NVDA mañana 9am p1 #Cartera cada tercer viernes',
   });
   const previa = el('p', { class: 'vista-previa' });
+  const aviso = el('div', { class: 'aviso-duplicado', hidden: true });
   const listaSugerencias = el('div', { class: 'sugerencias' });
+  let dictando = null;
   let sugerenciaActual = null;
   let elegida = 0;
 
@@ -70,9 +74,31 @@ export function entradaRapida(porDefecto = {}, alAgregar = () => {}) {
     actualizarPrevia();
   }
 
+  /**
+   * Avisar de que quizá ya tienes esa tarea. Avisa, no impide: a veces sí
+   * quieres dos tareas parecidas, y la app no es quién para decidirlo.
+   */
+  function actualizarDuplicados(titulo) {
+    const parecidas = titulo ? posiblesDuplicados(titulo, store.tareas) : [];
+    if (!parecidas.length) { aviso.hidden = true; render(aviso); return; }
+    aviso.hidden = false;
+    render(aviso,
+      el('span', {}, '⚠️ Puede que ya la tengas: '),
+      ...parecidas.map(({ tarea, parecido }) => el('button', {
+        class: 'chip', type: 'button', title: `Se parece un ${Math.round(parecido * 100)} %`,
+        onMousedown: (e) => {
+          e.preventDefault();
+          campo.value = '';
+          previa.textContent = '';
+          actualizarDuplicados('');
+          panelTarea(tarea, () => alAgregar(tarea));
+        },
+      }, tarea.titulo.slice(0, 40))));
+  }
+
   function actualizarPrevia() {
     const txt = campo.value.trim();
-    if (!txt) { previa.textContent = ''; return; }
+    if (!txt) { previa.textContent = ''; actualizarDuplicados(''); return; }
     const p = parseEntrada(txt);
     const trozos = [];
     if (p.fecha) trozos.push(`<b>${textoRelativo(p.fecha)}</b>${p.hora ? ` a las <b>${p.hora}</b>` : ''}`);
@@ -82,7 +108,25 @@ export function entradaRapida(porDefecto = {}, alAgregar = () => {}) {
     if (p.etiquetas.length) trozos.push(p.etiquetas.map((e) => `<b>@${e}</b>`).join(' '));
     if (p.duracion) trozos.push(`<b>${p.duracion} min</b>`);
     previa.innerHTML = trozos.length ? `“${p.titulo}” · ${trozos.join(' · ')}` : `“${p.titulo}” · sin fecha`;
+    actualizarDuplicados(p.titulo);
   }
+
+  /** Dictar la tarea: el texto entra en la misma caja y lo analiza igual. */
+  const botonMicro = button('🎤', () => {
+    if (dictando) { dictando.parar(); return; }
+    botonMicro.classList.add('grabando');
+    botonMicro.textContent = '⏹';
+    dictando = dictar({
+      alTexto: (texto) => { campo.value = texto; actualizarPrevia(); },
+      alTerminar: () => {
+        dictando = null;
+        botonMicro.classList.remove('grabando');
+        botonMicro.textContent = '🎤';
+        campo.focus();
+      },
+      alFallar: (err) => { toast(err.message); },
+    });
+  }, { title: 'Dictar la tarea' });
 
   function agregar() {
     const txt = campo.value.trim();
@@ -131,8 +175,11 @@ export function entradaRapida(porDefecto = {}, alAgregar = () => {}) {
   campo.dataset.rapida = '1';
 
   return el('div', { class: 'caja-rapida' },
-    el('div', { class: 'rapida' }, campo, button('Añadir', agregar, { variant: 'primary' })),
+    el('div', { class: 'rapida' }, campo,
+      dictadoDisponible() ? botonMicro : null,
+      button('Añadir', agregar, { variant: 'primary' })),
     listaSugerencias,
+    aviso,
     previa);
 }
 
@@ -312,11 +359,25 @@ export function panelTarea(tarea, alGuardar = () => {}) {
   selModulo.append(el('option', { value: '' }, '— sin módulo —'));
   for (const m of MODULOS) selModulo.append(el('option', { value: m.id, selected: m.id === borrador.modulo }, `${m.icono} ${m.nombre}`));
 
-  const selProyecto = el('select', { class: 'input', onChange: (e) => { borrador.proyecto = e.target.value || null; } });
+  const selEnergia = el('select', { class: 'input', onChange: (e) => { borrador.energia = e.target.value || null; } });
+  selEnergia.append(el('option', { value: '' }, `— deducida: ${NIVELES_ENERGIA.find((n) => n.id === energiaDe(borrador))?.nombre} —`));
+  for (const n of NIVELES_ENERGIA) {
+    selEnergia.append(el('option', { value: n.id, selected: n.id === borrador.energia }, `${n.icono} ${n.nombre}`));
+  }
+
+  const selSeccion = el('select', { class: 'input', onChange: (e) => { borrador.seccion = e.target.value || null; } });
+  const pintarSecciones = () => {
+    render(selSeccion, el('option', { value: '' }, '— sin sección —'),
+      ...store.secciones(borrador.proyecto).map((s) => el('option', { value: s, selected: s === borrador.seccion }, s)));
+    selSeccion.disabled = !store.secciones(borrador.proyecto).length;
+  };
+
+  const selProyecto = el('select', { class: 'input', onChange: (e) => { borrador.proyecto = e.target.value || null; borrador.seccion = null; pintarSecciones(); } });
   selProyecto.append(el('option', { value: '' }, '— sin proyecto —'));
   for (const p of store.estado.proyectos) {
     selProyecto.append(el('option', { value: p.nombre, selected: p.nombre === borrador.proyecto }, p.nombre));
   }
+  pintarSecciones();
 
   render(cuerpo,
     campo('Título', input(borrador.titulo, (v) => { borrador.titulo = v; })),
@@ -339,6 +400,9 @@ export function panelTarea(tarea, alGuardar = () => {}) {
     el('div', { class: 'fila' },
       el('div', { class: 'grow' }, campo('Módulo', selModulo)),
       el('div', { class: 'grow' }, campo('Proyecto', selProyecto))),
+    el('div', { class: 'fila' },
+      el('div', { class: 'grow' }, campo('Energía que pide', selEnergia, 'Para elegir según el momento del día, no según el orden de la lista.')),
+      el('div', { class: 'grow' }, campo('Sección', selSeccion, 'Las secciones se crean dentro del proyecto.'))),
     campo('Se repite', constructorRepeticion(borrador.regla, (r) => { borrador.regla = r; })),
     campo('Etiquetas', input((borrador.etiquetas || []).join(', '), (v) => {
       borrador.etiquetas = v.split(',').map((s) => s.trim().replace(/^@/, '')).filter(Boolean);
@@ -656,5 +720,24 @@ export function tituloVista(titulo, subtitulo, ...extra) {
   return el('div', { class: 'cabecera-vista' },
     el('h1', {}, titulo),
     subtitulo ? el('span', { class: 'muted small' }, subtitulo) : null,
+    estrellaFavorito(),
     ...extra);
+}
+
+/**
+ * La estrella que fija esta vista en la barra lateral. Cuatro o cinco caben en
+ * la cabeza; lo demás se busca, así que no hay lista de favoritos infinita:
+ * simplemente se van quitando.
+ */
+export function estrellaFavorito(ruta = null) {
+  const destino = ruta || ((location.hash || '#/hoy').slice(1).split('?')[0] || '/hoy');
+  const boton = el('button', { class: 'btn ghost chico', title: 'Fijar en la barra lateral' });
+  const pintar = () => {
+    const fijada = (store.estado.ajustes.favoritos || []).includes(destino);
+    boton.textContent = fijada ? '★' : '☆';
+    boton.title = fijada ? 'Quitar de favoritos' : 'Fijar en la barra lateral';
+  };
+  boton.addEventListener('click', () => { store.alternarFavorito(destino); pintar(); });
+  pintar();
+  return boton;
 }

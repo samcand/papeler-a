@@ -50,9 +50,44 @@ export function enSilencio(ajustes = {}, ahora = new Date()) {
   return (silencio.dias || []).includes(dia);
 }
 
+/**
+ * ¿Estás en clase ahora mismo? Sale del horario del semestre, que ya tienes
+ * puesto. Un aviso que suena en mitad de una clase es un aviso que molesta a
+ * treinta personas más.
+ */
+export function enClase(estado = {}, ahora = new Date()) {
+  const DIAS = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+  const semestre = estado.docencia?.semestre;
+  if (!semestre?.cursos?.length) return null;
+  const hoyISO = `${ahora.getFullYear()}-${String(ahora.getMonth() + 1).padStart(2, '0')}-${String(ahora.getDate()).padStart(2, '0')}`;
+  if (semestre.inicio && hoyISO < semestre.inicio) return null;
+  if (semestre.fin && hoyISO > semestre.fin) return null;
+
+  const dia = DIAS[ahora.getDay()];
+  const minutos = ahora.getHours() * 60 + ahora.getMinutes();
+  const aMin = (t) => {
+    const [h, m] = String(t || '').split(':').map(Number);
+    return Number.isFinite(h) ? h * 60 + (m || 0) : null;
+  };
+
+  for (const curso of semestre.cursos) {
+    for (const sesion of curso.horario || []) {
+      const nombreDia = typeof sesion.dia === 'number' ? DIAS[sesion.dia] : String(sesion.dia || '').toLowerCase();
+      if (nombreDia !== dia) continue;
+      const inicio = aMin(sesion.inicio);
+      if (inicio == null) continue;
+      const fin = aMin(sesion.fin) ?? inicio + (sesion.duracion || 120);
+      if (minutos >= inicio && minutos < fin) return { curso: curso.nombre, hasta: sesion.fin || null };
+    }
+  }
+  return null;
+}
+
 export function avisar(titulo, cuerpo, opciones = {}) {
   if (!soportadas() || Notification.permission !== 'granted') return null;
   if (!opciones.saltarSilencio && enSilencio(opciones.ajustes || {})) return null;
+  // En clase solo pasa lo urgente; el resto espera a que salgas.
+  if (!opciones.urgente && opciones.estado && enClase(opciones.estado)) return null;
   try {
     return new Notification(titulo, {
       body: cuerpo,

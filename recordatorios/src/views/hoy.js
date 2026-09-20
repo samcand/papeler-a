@@ -11,6 +11,7 @@ import { SALIDAS_ZOMBI, alternarTres, proponerTres, tresDelDia, zombis } from '.
 import { trabajoEnCurso } from '../tablero.js';
 import { estadoBandeja } from '../modelo.js';
 import { formatoMinutos, resumenTiempo } from '../tiempo.js';
+import { NIVELES as NIVELES_ENERGIA, quePuedoHacer, repartoEnergia } from '../energia.js';
 import { store } from '../store.js';
 
 export function vistaHoy(root, ctx = {}) {
@@ -18,6 +19,7 @@ export function vistaHoy(root, ctx = {}) {
   const hoyISO = aISO(fechaHoy());
 
   let mostrarResumen = tocaResumen(store.estado.ajustes, hoyISO);
+  let hueco = { minutos: 30, energia: 'media', abierto: false };
 
   /**
    * Tarjeta de "buenos días": el resumen que la notificación no siempre puede
@@ -58,6 +60,37 @@ export function vistaHoy(root, ctx = {}) {
         r.mañana ? ` Mañana hay ${r.mañana} tareas.` : ''));
   }
 
+
+  /**
+   * "Tengo veinte minutos y la cabeza a medias": cruzar el hueco que tienes con
+   * la energía que te queda acierta más que bajar por la lista ordenada.
+   */
+  function panelEnergia() {
+    if (!hueco.abierto) {
+      const reparto = repartoEnergia(store.tareas, hoyISO);
+      return el('div', { class: 'fila', style: 'margin:10px 0' },
+        button('¿Qué puedo hacer ahora?', () => { hueco = { ...hueco, abierto: true }; pintar(); }, { variant: 'ghost chico' }),
+        reparto.aviso ? el('span', { class: 'muted small' }, `⚠️ ${reparto.aviso}`) : null);
+    }
+    const r = quePuedoHacer(store.tareas, { minutos: hueco.minutos, energia: hueco.energia, hoyISO });
+    return el('section', { class: 'card' },
+      el('div', { class: 'fila entre' },
+        el('h2', { class: 'card-title', style: 'margin:0' }, '¿Qué puedo hacer ahora?'),
+        button('✕', () => { hueco = { ...hueco, abierto: false }; pintar(); }, { variant: 'ghost chico', title: 'Cerrar' })),
+      el('div', { class: 'chip-list' },
+        ...[10, 20, 30, 60, 120].map((m) => el('button', {
+          class: `chip ${hueco.minutos === m ? 'activa' : ''}`.trim(), type: 'button',
+          onClick: () => { hueco = { ...hueco, minutos: m }; pintar(); },
+        }, `${m} min`))),
+      el('div', { class: 'chip-list' },
+        ...NIVELES_ENERGIA.map((n) => el('button', {
+          class: `chip ${hueco.energia === n.id ? 'activa' : ''}`.trim(), type: 'button', title: n.descripcion,
+          onClick: () => { hueco = { ...hueco, energia: n.id }; pintar(); },
+        }, `${n.icono} ${n.nombre}`))),
+      el('p', { class: 'muted small' }, r.frase),
+      r.tareas.length ? listaTareas(r.tareas.map((t) => store.tarea(t.id) || t), { alCambiar: pintar, hoy: hoyISO }) : null);
+  }
+
   const pintar = () => {
     const todas = store.tareas.filter((t) => !t.padre);
     const pendientes = todas.filter((t) => !t.completada);
@@ -81,6 +114,8 @@ export function vistaHoy(root, ctx = {}) {
         dato(formatoMinutos(tiempo.hoy), 'enfoque hoy', { pie: `${tiempo.pomodorosHoy} pomodoros` }),
         dato(carga.excedido ? `${carga.horas} h` : `${carga.horas} h`, 'comprometidas',
           { clase: carga.excedido ? 'negativo' : '', pie: carga.excedido ? 'el día no da para tanto' : `de ${Math.round(carga.disponibles / 60)} h` })),
+
+      panelEnergia(),
 
       carga.minutos ? el('div', { style: 'margin:12px 0 18px' },
         barra(carga.pct, carga.excedido ? 'var(--danger)' : 'var(--accent-2)'),

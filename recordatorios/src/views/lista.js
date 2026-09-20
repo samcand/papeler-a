@@ -67,8 +67,12 @@ export function vistaLista(root, ctx = {}) {
       entradaRapida({ proyecto: tipo === 'proyecto' ? clave : null, modulo: proyecto?.modulo || null }, pintar),
       raices.length
         ? (tipo === 'buscar' ? agrupadoPorProyecto(raices, pintar, hoyISO, orden)
-          : listaTareas(raices, { alCambiar: pintar, hoy: hoyISO, orden, conSubtareas: true }))
+          : tipo === 'proyecto' && (proyecto?.secciones || []).length
+            ? porSecciones(raices, proyecto, pintar, hoyISO, orden)
+            : listaTareas(raices, { alCambiar: pintar, hoy: hoyISO, orden, conSubtareas: true }))
         : vacio(tipo === 'buscar' ? 'Sin coincidencias. Prueba con menos palabras, o con operadores: #Proyecto, @etiqueta, p1, hoy.' : 'Esta lista está vacía. Escribe arriba para empezar.', '🗒️'),
+
+      tipo === 'proyecto' && proyecto ? barraSecciones(proyecto, pintar) : null,
 
       tipo === 'proyecto' && proyecto ? el('div', { class: 'fila', style: 'margin-top:20px' },
         button('Borrar proyecto', () => {
@@ -116,6 +120,48 @@ async function compartir(nombre, tareas) {
         el('p', { class: 'field-hint', style: 'word-break:break-all;margin-top:12px' }, enlace))));
   panel.addEventListener('click', (e) => { if (e.target === panel) panel.remove(); });
   document.body.append(panel);
+}
+
+
+/**
+ * Secciones: fases dentro de un proyecto sin crear subproyectos que luego hay
+ * que mantener. Una tarea sin sección no desaparece: cae en "Sin sección".
+ */
+function porSecciones(tareas, proyecto, alCambiar, hoyISO, orden) {
+  const nombres = proyecto.secciones || [];
+  const grupos = [...nombres, null];
+  return el('div', {}, ...grupos.map((nombre) => {
+    const lista = tareas.filter((t) => (nombre ? t.seccion === nombre : !t.seccion || !nombres.includes(t.seccion)));
+    if (!lista.length && !nombre) return null;
+    const hechas = lista.filter((t) => t.completada).length;
+    return el('section', { class: 'grupo-dia' },
+      el('h3', {},
+        nombre || 'Sin sección', ' ',
+        el('span', { class: 'muted' }, `${lista.length - hechas}`),
+        el('span', { class: 'grow' }),
+        nombre ? button('✕', () => {
+          if (!window.confirm(`¿Quitar la sección “${nombre}”? Sus tareas vuelven al cuerpo del proyecto.`)) return;
+          store.borrarSeccion(proyecto.nombre, nombre);
+          alCambiar();
+        }, { variant: 'ghost chico', title: 'Quitar la sección' }) : null),
+      lista.length
+        ? listaTareas(lista, { alCambiar, hoy: hoyISO, orden, conSubtareas: true })
+        : el('p', { class: 'muted small' }, 'Vacía. Asigna tareas a esta sección desde el panel de la tarea.'));
+  }).filter(Boolean));
+}
+
+/** Crear secciones desde la propia lista, sin ir a ajustes. */
+function barraSecciones(proyecto, alCambiar) {
+  let nombre = '';
+  const campo = input('', (v) => { nombre = v; }, { placeholder: 'Sección nueva: Campo, Análisis, Redacción…' });
+  const crear = () => {
+    if (!nombre.trim()) return;
+    store.agregarSeccion(proyecto.nombre, nombre.trim());
+    alCambiar();
+  };
+  campo.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); crear(); } });
+  return el('div', { class: 'fila', style: 'margin-top:14px' },
+    campo, button('Añadir sección', crear, { variant: 'ghost chico' }));
 }
 
 /** Los resultados de una búsqueda se leen mejor agrupados por proyecto. */

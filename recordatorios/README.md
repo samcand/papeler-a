@@ -31,6 +31,8 @@ Se instala como app (Chrome/Edge/Android: “Instalar”; iPhone: Compartir →
 | **Proyectos (Gantt)** | Planificación tipo MS Project: EDT, dependencias, ruta crítica, recursos, nivelación y seguimiento. |
 | **Plantillas** | Listas que se repiten enteras: eliges el día señalado y las fechas se calculan solas. |
 | **Listas y filtros** | Listas propias y filtros guardados con un lenguaje corto de consultas. |
+| **Informes** | Eliges qué medir, cómo agruparlo y en qué periodo; la gráfica sale sola y se descarga en CSV. |
+| **Copiloto** | Preguntas sobre el plan respondidas con cálculo: qué se va a retrasar, quién está sobrecargado, qué cambió. |
 | **Lo que queda** | La hoja de ruta: lo hecho, lo pendiente por olas y lo descartado con su motivo. |
 
 ### Escribir una tarea como se habla
@@ -54,6 +56,20 @@ Revisar tesis de NVDA mañana 9am p1 #Cartera @analisis cada tercer viernes
 
 Una tarea repetida no se “pierde” si te atrasas: al completarla se reprograma
 en la siguiente ocurrencia futura, no en una fecha ya pasada.
+
+### Capturar sin fricción, y sin duplicar
+
+La tecla `n` abre la caja de captura **sobre cualquier pantalla**, y al instalar
+la app el icono trae un acceso directo “Capturar”. Un atajo del sistema
+operativo, sobre cualquier ventana, no está al alcance de una app web: lo más
+cerca es ese acceso directo y compartir desde otra app.
+
+Con el botón 🎤 la tarea se **dicta** en vez de escribirse, y lo dictado pasa por
+el mismo analizador, así que “mañana a las nueve p1” funciona igual hablando.
+(Solo en navegadores que reconocen voz; donde no, el botón no aparece.)
+
+Mientras escribes, la app **avisa si ya tienes esa tarea** y deja abrir la que ya
+existe. Avisa, no impide: a veces sí quieres dos parecidas.
 
 ### Capturar primero, decidir después
 
@@ -141,6 +157,13 @@ buscar: parcial & antes de: 15 de octubre
 Operadores `&` (y), `|` (o), `!` (no) y paréntesis. Vienen ocho filtros puestos
 y puedes crear los tuyos.
 
+### Secciones y favoritos
+
+Un proyecto se parte en **secciones** (Campo, Análisis, Redacción) sin crear
+subproyectos que luego hay que mantener; lo que no tiene sección no desaparece,
+cae en “Sin sección”. Y la estrella de cada cabecera **fija esa vista** arriba de
+la barra lateral: cuatro o cinco caben en la cabeza, el resto se busca.
+
 ## Gestión del tiempo
 
 - **Pomodoro** con duraciones configurables, descanso largo cada N ciclos y
@@ -157,7 +180,18 @@ y puedes crear los tuyos.
 - **Informe de 28 días**: a dónde se fue el tiempo por módulo, por proyecto y por
   semana, y cuánto se desvía de lo que habías planificado.
 - **Modo concentración**: pantalla completa con una tarea, su reloj y sus
-  subtareas; se sale con Esc.
+  subtareas; se sale con Esc. Dentro hay **sonido ambiente** (blanco, rosa,
+  marrón o lluvia) generado en el navegador —sin archivos ni descargas— y cinco
+  botones para **apuntar cada interrupción**. En Revisión sale el patrón de
+  catorce días: qué te corta más y a qué hora.
+- **Calendario del tiempo medido**: una casilla pinta sobre el calendario las
+  horas reales en vez de las planificadas, y el día compara las dos columnas. Lo
+  que no mediste no aparece, y eso también es información.
+- **¿Qué puedo hacer ahora?** (en Hoy): cruza los minutos que tienes con la
+  energía que te queda. Cada tarea puede decir si pide cabeza fresca o se hace
+  cansado; si no lo dices, se deduce del verbo del título. Y avisa cuando más
+  del 70 % del día pide cabeza fresca, que es un día imposible disfrazado de
+  lista razonable.
 - **Tu capacidad real** (en Planificar): mapa de calor de cuatro semanas con las
   horas disponibles frente a las comprometidas, el reparto entre los cinco
   módulos y la frase que importa — *«has prometido 46 h y tienes 40: no es
@@ -225,6 +259,16 @@ dependencias y fechas que se arrastran unas a otras:
 - **Arrastrar para reprogramar**: mover una barra fija la tarea a esa fecha (queda
   marcada con 📌, y la chincheta la suelta) y estirar su borde derecho cambia la
   duración. Al soltar se recalculan dependencias, holguras y ruta crítica.
+- **Riesgos ligeros**: cinco líneas por proyecto — qué puede romperlo,
+  probabilidad × impacto, el disparador y cuándo revisarlo. Un riesgo que se
+  cumple deja de ser riesgo: se convierte en tarea. Sin registro formal ni
+  reservas de contingencia, que eso es para una PMO.
+- **Detector de alcance que crece**: cuánto ha engordado el plan desde la línea
+  base, en días y en tareas añadidas, con la lista de lo nuevo y de lo que se
+  alargó. *«El paper ha engordado 12 días desde marzo.»*
+- **Hoja para la reunión**: imprime la tabla del plan sola, sin la app alrededor
+  (EDT, responsable, fechas, holgura y avance, con la ruta crítica en negrita).
+  Desde el diálogo de impresión se guarda como PDF, que es lo que se manda.
 - El plan se **lleva a la agenda** con un botón: cada tarea con su fecha de
   comienzo, prioridad 1 si es crítica y la holgura anotada.
 
@@ -264,6 +308,13 @@ funciona sin internet, no depende de ninguna API y nada sale del dispositivo.
   un botón.
 - **Listas de chequeo** de compra, venta y post-mortem, para cuando hay prisa.
 
+### Decisiones que no tomaste
+
+Lo que descartaste o aplazaste, por qué y a qué precio, con fecha de revisión.
+Cuando llega, vuelve a la mesa preguntando si acertaste al no hacerlo. El diario
+de operaciones solo guarda lo que hiciste, y media cartera se decide en lo que no
+se hace.
+
 ## Docencia
 
 Semestre con cursos, grupos, horario y evaluaciones. Al acabar, **clonar a un
@@ -288,6 +339,13 @@ o rechazado). Cada estado sabe cuál es el siguiente paso y **cuántos días son
 demasiados**: un manuscrito que lleva 90 días “en revisión” genera la tarea de
 escribir al editor. Además, convocatorias con su fecha de cierre y las tesis
 dirigidas con su frecuencia de asesoría.
+
+- **Horas de asesoría por estudiante**, sacadas del tiempo ya medido: una sesión
+  cuenta si la tarea menciona al estudiante o lleva su etiqueta. Sirve para la
+  memoria anual y, sobre todo, para ver a quién no le has dado ni una hora.
+- **Cola de lectura** con prioridad, tipo y minutos estimados, y un “con media
+  hora libre, lee esto”. Lo que lleva más de sesenta días sube solo, y a los tres
+  meses la app lo dice sin rodeos: o se lee o se borra.
 
 ## Alabanza
 
@@ -319,16 +377,44 @@ así que “cada tercer viernes” sigue repitiéndose en tu calendario.
   modificada más tarde; lo que solo existe en uno se conserva. Sin cuentas y sin
   nube.
 - **Franjas de silencio**: no molestar de noche o los días que elijas.
+- **Avisos por contexto**: con el horario del semestre puesto, durante las horas
+  de clase solo pasan los avisos urgentes; el resto espera a que salgas.
+- **Reglas de automatización**: “si el título contiene X, ponle proyecto,
+  prioridad, etiqueta o energía”. Se aplican al crear la tarea y **nunca pisan**
+  una fecha o una duración que escribiste tú. La app dice qué regla actuó y
+  cuántas veces lleva: una automatización silenciosa es una automatización en la
+  que se deja de confiar.
 
 Los datos viven en el almacenamiento de este navegador (y los archivos adjuntos
 en IndexedDB). Si borras los datos del sitio, se van: exporta de vez en cuando.
 
+## Informes y copiloto
+
+**Informes a medida**: tres menús —qué medir, cómo agruparlo y en qué periodo— y
+la gráfica sale sola. Tareas cerradas, creadas, minutos medidos, tiempo estimado
+o fechas incumplidas; por módulo, proyecto, etiqueta, prioridad, semana o mes.
+Cinco informes ya pensados para empezar, los tuyos se guardan y todo se descarga
+en CSV. Los minutos salen del tiempo medido: lo que no mediste no aparece.
+
+**Copiloto local**: seis preguntas respondidas **con cálculo, no con lenguaje**
+— qué se va a retrasar, qué puedo mover sin tocar la entrega, quién está
+sobrecargado, qué cambió esta semana, qué me va a explotar y cómo viene la
+semana. Todo sale de la ruta crítica, la holgura, la capacidad y el historial que
+ya están aquí: no hay modelo, no hay red y nada sale del dispositivo. Empareja la
+pregunta por palabras clave, no la comprende, y cuando no la reconoce **lo dice**
+y enseña las que sí sabe responder. Las seis respuestas juntas se copian para
+pegarlas en un acta.
+
+**Resumen semanal para el equipo** (en Revisión): qué se cerró, qué entró, qué
+está en manos de otros y qué viene la semana próxima, listo para copiar o
+descargar. Si la semana fue floja se nota, que es justo para lo que sirve.
+
 ## Lo que queda
 
-La pestaña **Lo que queda** es la hoja de ruta real de la app: **78 hechas, 20
-pendientes y 12 descartadas**. Las olas 1 y 2 están terminadas; lo que queda es
-la ola 3, el "algún día". Lo pendiente va en tres olas —lo próximo, después
-y algún día— y cualquier entrada se convierte en tarea con un botón.
+La pestaña **Lo que queda** es la hoja de ruta real de la app: **98 hechas y 12
+descartadas**. Las tres olas están terminadas, así que hoy no queda nada
+pendiente. Lo siguiente saldrá de usarla: cuando algo moleste tres veces en una
+semana, eso es la idea 111.
 
 Lo descartado se queda escrito **con su motivo** (notificaciones push, correo a
 tarea, asignar responsable, sincronización con Google Calendar…): casi todo cae
@@ -350,6 +436,7 @@ que se genera con `npm run docs`.
 
 `a` añadir · `/` buscar · `h` Hoy · `p` Próximos · `c` Calendario · `e` Enfoque ·
 `b` Bandeja · `t` Tablero · `i` Inversiones · `g` Proyectos · `r` Revisión ·
+`n` capturar sobre cualquier pantalla · `f` Informes · `k` Copiloto ·
 `Ctrl+Z` deshacer · `Alt+↑/↓` reordenar en orden manual · `Esc` salir o cerrar.
 
 La app es navegable entera con el teclado: hay enlace para saltar los menús, el
@@ -360,7 +447,7 @@ Alt y las flechas.
 ## Pruebas
 
 ```bash
-npm test                  # 248 pruebas de lógica, sin navegador
+npm test                  # 288 pruebas de lógica, sin navegador
 npm run test:navegador    # recorre la app en Chromium (necesita Playwright)
 ```
 
@@ -369,4 +456,7 @@ motor de repeticiones, lenguaje natural, filtros, calendario, pomodoro,
 planificación, cálculo de riesgo y estadísticas de cartera, plantillas de los
 módulos, cronograma de proyectos (CPM, calendario laboral, recursos, valor
 ganado, nivelación de recursos), bandeja de entrada, resumen del día,
-calibración de estimaciones, plantillas de listas e importación/exportación.
+calibración de estimaciones, plantillas de listas e importación/exportación,
+detección de duplicados, reglas de automatización, energía, interrupciones,
+franjas de silencio y horario de clase, cola de lectura, riesgos, alcance que
+crece, informes a medida y las respuestas del copiloto.

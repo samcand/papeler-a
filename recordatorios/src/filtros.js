@@ -13,7 +13,7 @@ import { aISO, deISO, hoy, sumarDias } from './fechas.js';
 import { parseEntrada } from './naturales.js';
 
 function limpia(txt) {
-  return String(txt).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim();
+  return String(txt).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
 }
 
 /** Trocea la expresión en paréntesis, operadores y términos. */

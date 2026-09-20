@@ -8,10 +8,11 @@
 import { button, el, render, toast } from '../../../src/ui.js';
 import { aISO, hoy as fechaHoy } from '../fechas.js';
 import {
-  CONFIG_POMODORO, FASES, crearPomodoro, formatoReloj, iniciar, pausar, progresoFase,
-  reiniciarFase, restante, siguienteFase, termino,
+  CONFIG_POMODORO, FASES, MOTIVOS_INTERRUPCION, crearPomodoro, formatoReloj, iniciar, pausar,
+  progresoFase, registroInterrupcion, reiniciarFase, restante, siguienteFase, termino,
 } from '../tiempo.js';
 import { avisarPomodoro, mantenerPantalla } from '../notificaciones.js';
+import * as ambiente from '../ambiente.js';
 import { store } from '../store.js';
 
 export function vistaConcentracion(root, ctx = {}) {
@@ -77,6 +78,9 @@ export function vistaConcentracion(root, ctx = {}) {
 
       tarea?.notas ? el('p', { class: 'concentracion-notas' }, tarea.notas) : null,
 
+      panelInterrupciones(tarea),
+      panelAmbiente(),
+
       subtareas.length ? el('div', { class: 'lista-chequeo', style: 'max-width:440px;margin:0 auto' },
         ...subtareas.map((s) => el('label', {},
           el('input', {
@@ -90,6 +94,56 @@ export function vistaConcentracion(root, ctx = {}) {
     location.hash = tarea ? '#/hoy' : '#/enfoque';
   }
 
+  /**
+   * Un botón por motivo: apuntar que te cortaron tiene que costar un toque, o
+   * no se apunta. Al final de la semana el patrón sale solo en Revisión.
+   */
+  function panelInterrupciones(tareaActual) {
+    const hoyCuenta = (store.estado.interrupciones || []).filter((i) => i.fecha === hoyISO).length;
+    return el('div', { style: 'max-width:440px;margin:18px auto 0' },
+      el('p', { class: 'muted small' }, `¿Te cortaron? ${hoyCuenta ? `Van ${hoyCuenta} hoy.` : 'Apúntalo.'}`),
+      el('div', { class: 'chip-list', style: 'justify-content:center' },
+        ...MOTIVOS_INTERRUPCION.map((m) => el('button', {
+          class: 'chip', type: 'button', title: m.nombre,
+          onClick: () => {
+            store.anotarInterrupcion(registroInterrupcion(m.id, tareaActual?.id || null));
+            toast(`Apuntado: ${m.nombre.toLowerCase()}`);
+            pintar();
+          },
+        }, `${m.icono} ${m.nombre}`))));
+  }
+
+  /** Ruido generado aquí mismo: ni archivos, ni descarga, ni internet. */
+  function panelAmbiente() {
+    const elegido = ambiente.sonando();
+    return el('div', { style: 'max-width:440px;margin:14px auto 0' },
+      el('div', { class: 'chip-list', style: 'justify-content:center' },
+        ...ambiente.SONIDOS.map((sonido) => el('button', {
+          class: `chip ${elegido === sonido.id ? 'activa' : ''}`.trim(),
+          type: 'button', title: sonido.descripcion,
+          onClick: () => {
+            if (ambiente.sonando() === sonido.id) {
+              ambiente.parar();
+              store.ajustar({ ambiente: { ...(store.estado.ajustes.ambiente || {}), sonido: null } });
+            } else {
+              const volumen = store.estado.ajustes.ambiente?.volumen ?? 0.3;
+              ambiente.reproducir(sonido.id, volumen);
+              store.ajustar({ ambiente: { ...(store.estado.ajustes.ambiente || {}), sonido: sonido.id } });
+            }
+            pintar();
+          },
+        }, sonido.nombre)),
+        elegido ? el('input', {
+          type: 'range', min: 0, max: 100, value: String(Math.round((store.estado.ajustes.ambiente?.volumen ?? 0.3) * 100)),
+          'aria-label': 'Volumen del sonido ambiente',
+          onInput: (e) => {
+            const volumen = Number(e.target.value) / 100;
+            ambiente.ajustarVolumen(volumen);
+            store.ajustar({ ambiente: { ...(store.estado.ajustes.ambiente || {}), volumen } });
+          },
+        }) : null));
+  }
+
   const alPulsar = (e) => { if (e.key === 'Escape') salir(); };
   document.addEventListener('keydown', alPulsar);
 
@@ -99,6 +153,7 @@ export function vistaConcentracion(root, ctx = {}) {
     clearInterval(tick);
     document.removeEventListener('keydown', alPulsar);
     document.body.classList.remove('concentrado');
+    ambiente.parar();
     bloqueo?.release?.().catch(() => {});
   };
 }

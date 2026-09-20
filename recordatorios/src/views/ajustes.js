@@ -6,7 +6,8 @@ import { button, download, el, input, render, toast } from '../../../src/ui.js';
 import { aISO, hoy as fechaHoy } from '../fechas.js';
 import { MODULOS } from '../modelo.js';
 import { aCSV, aICS, aTexto, importarCSV, resumenMarkdown } from '../exportar.js';
-import { pedirPermiso, permiso, programarDelDia } from '../notificaciones.js';
+import { enClase, pedirPermiso, permiso, programarDelDia } from '../notificaciones.js';
+import { ACCIONES, CONDICIONES, REGLAS_EJEMPLO, reglaVacia, textoRegla } from '../automatizacion.js';
 import { tituloVista } from '../componentes.js';
 import { archivadas, candidatasAArchivar, diasRestantes } from '../papelera.js';
 import { cifrar, descifrar, esArchivoCifrado, fusionarEstados } from '../compartir.js';
@@ -114,7 +115,19 @@ export function vistaAjustes(root) {
               store.ajustar({ silencio: { ...(a.silencio || {}), dias: [...dias] } });
               pintar();
             },
-          }, d)))),
+          }, d))),
+        (() => {
+          const clase = enClase(store.estado);
+          const cursos = store.estado.docencia?.semestre?.cursos || [];
+          return el('p', { class: 'muted small', style: 'margin-top:10px' },
+            !cursos.length
+              ? 'Cuando pongas el horario del semestre en Docencia, los avisos no urgentes esperarán a que salgas de clase.'
+              : clase
+                ? `Ahora mismo estás en ${clase.curso}${clase.hasta ? ` hasta las ${clase.hasta}` : ''}: solo pasarían los avisos urgentes.`
+                : 'Fuera de clase. Durante las horas del horario del semestre solo pasan los avisos urgentes.');
+        })()),
+
+      panelReglas(pintar),
 
       el('section', { class: 'card' },
         el('h2', { class: 'card-title' }, 'Proyectos'),
@@ -288,4 +301,83 @@ function archivo(etiqueta, acepta, alLeer) {
     },
   });
   return el('span', {}, button(etiqueta, () => entrada.click()), entrada);
+}
+
+/* ------------------------------------------------------------------ *
+ * Reglas de automatización
+ * ------------------------------------------------------------------ */
+
+/**
+ * "Si entra esto, hazle aquello": las mismas tres decisiones repetidas mil
+ * veces. Las reglas solo actúan **al crear** la tarea, y la app dice cuál
+ * actuó: una automatización silenciosa es una automatización en la que se deja
+ * de confiar.
+ */
+function panelReglas(refrescar) {
+  const caja = el('section', { class: 'card' });
+
+  const menu = (valor, lista, alCambiar) => {
+    const sel = el('select', { class: 'input', onChange: (e) => alCambiar(e.target.value) });
+    for (const x of lista) sel.append(el('option', { value: x.id, selected: x.id === valor }, x.nombre));
+    return sel;
+  };
+
+  const pintar = () => {
+    const reglas = store.estado.reglas || [];
+    render(caja,
+      el('h2', { class: 'card-title' }, 'Reglas de automatización'),
+      el('p', { class: 'muted small' }, 'Se aplican al crear la tarea, en orden. Lo que ya venía escrito no se pisa: una regla nunca cambia una fecha o una duración que tú pusiste.'),
+
+      ...reglas.map((r) => el('div', { class: 'idea' },
+        el('div', { class: 'fila' },
+          input(r.nombre, (v) => store.actualizarEn('reglas', r.id, { nombre: v })),
+          el('label', { class: 'chip', style: 'cursor:pointer' },
+            el('input', {
+              type: 'checkbox', checked: r.activa !== false,
+              onChange: (e) => { store.actualizarEn('reglas', r.id, { activa: e.target.checked }); pintar(); },
+            }), r.activa !== false ? 'Activa' : 'Parada'),
+          button('✕', () => { store.borrarEn('reglas', r.id); pintar(); }, { variant: 'ghost chico danger', title: 'Borrar la regla' })),
+        el('div', { class: 'fila' },
+          el('span', { class: 'muted small' }, 'Si'),
+          menu(r.condicion?.tipo, CONDICIONES, (v) => { store.actualizarEn('reglas', r.id, { condicion: { ...r.condicion, tipo: v } }); pintar(); }),
+          r.condicion?.tipo === 'sinFecha' ? null
+            : input(r.condicion?.valor || '', (v) => store.actualizarEn('reglas', r.id, { condicion: { ...r.condicion, valor: v } }))),
+        ...(r.acciones || []).map((a, i) => el('div', { class: 'fila' },
+          el('span', { class: 'muted small' }, i === 0 ? 'entonces' : 'y'),
+          menu(a.tipo, ACCIONES, (v) => {
+            const acciones = r.acciones.map((x, j) => (j === i ? { ...x, tipo: v } : x));
+            store.actualizarEn('reglas', r.id, { acciones });
+            pintar();
+          }),
+          input(a.valor ?? '', (v) => {
+            const acciones = r.acciones.map((x, j) => (j === i ? { ...x, valor: v } : x));
+            store.actualizarEn('reglas', r.id, { acciones });
+          }),
+          button('✕', () => {
+            store.actualizarEn('reglas', r.id, { acciones: r.acciones.filter((_, j) => j !== i) });
+            pintar();
+          }, { variant: 'ghost chico', title: 'Quitar esta acción' }))),
+        el('div', { class: 'fila' },
+          button('＋ acción', () => {
+            store.actualizarEn('reglas', r.id, { acciones: [...(r.acciones || []), { tipo: 'etiqueta', valor: '' }] });
+            pintar();
+          }, { variant: 'ghost chico' }),
+          el('span', { class: 'muted small grow' }, textoRegla(r)),
+          el('span', { class: 'muted small' }, `${r.veces || 0} veces`)))),
+
+      !reglas.length ? el('p', { class: 'muted small' }, 'Ninguna regla todavía.') : null,
+
+      el('div', { class: 'fila', style: 'margin-top:10px' },
+        button('Regla nueva', () => { store.agregarEn('reglas', reglaVacia()); pintar(); }, { variant: 'primary' }),
+        button('Traer las de ejemplo', () => {
+          const existentes = new Set((store.estado.reglas || []).map((r) => r.id));
+          let n = 0;
+          for (const r of REGLAS_EJEMPLO) if (!existentes.has(r.id)) { store.agregarEn('reglas', { ...r }); n++; }
+          toast(n ? `${n} reglas añadidas, paradas hasta que las actives` : 'Ya las tenías todas');
+          pintar();
+        })));
+  };
+
+  pintar();
+  return caja;
 }

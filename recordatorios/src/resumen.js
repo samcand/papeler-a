@@ -136,3 +136,72 @@ export function tocaResumen(ajustes = {}, hoyISO = aISO(hoy()), ahora = new Date
   const [h, m] = String(ajustes.horaResumen || '07:00').split(':').map(Number);
   return ahora.getHours() * 60 + ahora.getMinutes() >= h * 60 + m;
 }
+
+/* ------------------------------------------------------------------ *
+ * Resumen semanal para el equipo
+ * ------------------------------------------------------------------ */
+
+/**
+ * Qué se cerró, qué se movió y qué está bloqueado: el correo del viernes,
+ * escrito solo. Sale de lo que ya está guardado, así que no adorna nada — si la
+ * semana fue floja, se nota, y eso es justamente para lo que sirve.
+ */
+export function resumenSemanal(estado = {}, hastaISO = aISO(hoy()), opciones = {}) {
+  const dias = opciones.dias || 7;
+  const desde = aISO(sumarDias(hastaISO, -dias + 1));
+  const tareas = (estado.tareas || []).filter((t) => !t.padre);
+
+  const cerradas = (estado.historial || []).filter((h) => h.fecha >= desde && h.fecha <= hastaISO);
+  const creadas = tareas.filter((t) => String(t.creadaEn).slice(0, 10) >= desde && String(t.creadaEn).slice(0, 10) <= hastaISO);
+  const pendientes = tareas.filter((t) => !t.completada);
+  const bloqueadas = pendientes.filter((t) => t.espera?.quien);
+  const movidas = pendientes.filter((t) => (t.aplazamientos || 0) > 0 && t.fecha && t.fecha >= desde);
+  const atrasadas = pendientes.filter((t) => estaVencida(t, hastaISO));
+
+  const proximas = pendientes
+    .filter((t) => t.fecha && t.fecha > hastaISO && t.fecha <= aISO(sumarDias(hastaISO, 7)))
+    .sort((a, b) => a.fecha.localeCompare(b.fecha))
+    .slice(0, 8);
+
+  const porProyecto = new Map();
+  for (const h of cerradas) {
+    const clave = h.proyecto || tareas.find((t) => t.id === h.tareaId)?.proyecto || 'Sin proyecto';
+    porProyecto.set(clave, (porProyecto.get(clave) || 0) + 1);
+  }
+
+  return {
+    desde, hasta: hastaISO, dias,
+    cerradas, creadas, bloqueadas, movidas, atrasadas, proximas,
+    porProyecto: [...porProyecto.entries()].map(([proyecto, n]) => ({ proyecto, n })).sort((a, b) => b.n - a.n),
+    saldo: cerradas.length - creadas.length,
+  };
+}
+
+/** El resumen semanal en texto plano, listo para pegar en un correo. */
+export function textoResumenSemanal(r) {
+  const lineas = [`Semana del ${textoLargo(r.desde)} al ${textoLargo(r.hasta)}`, ''];
+
+  lineas.push(`Cerradas: ${r.cerradas.length} · Nuevas: ${r.creadas.length}`
+    + ` · Saldo: ${r.saldo >= 0 ? '+' : ''}${r.saldo}`);
+
+  if (r.porProyecto.length) {
+    lineas.push('', 'Por proyecto:');
+    for (const p of r.porProyecto) lineas.push(`  · ${p.proyecto}: ${p.n}`);
+  }
+  if (r.bloqueadas.length) {
+    lineas.push('', 'Bloqueado, esperando a alguien:');
+    for (const t of r.bloqueadas) lineas.push(`  · ${t.titulo} — ${t.espera.quien}`);
+  }
+  if (r.atrasadas.length) {
+    lineas.push('', `Atrasado (${r.atrasadas.length}):`);
+    for (const t of r.atrasadas.slice(0, 8)) lineas.push(`  · ${t.titulo} (${t.fecha})`);
+  }
+  if (r.proximas.length) {
+    lineas.push('', 'La semana que viene:');
+    for (const t of r.proximas) lineas.push(`  · ${t.fecha} ${t.titulo}`);
+  }
+  if (!r.cerradas.length && !r.proximas.length) {
+    lineas.push('', 'Sin movimiento esta semana. Si no es verdad, es que no se apuntó.');
+  }
+  return lineas.join('\n');
+}

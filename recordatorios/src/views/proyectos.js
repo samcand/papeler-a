@@ -15,6 +15,7 @@ import {
   quitarRestriccion, resumenProyecto, tareaProyecto, tomarLineaBase, valorGanado,
 } from '../proyectos.js';
 import { dato, tituloVista, vacio } from '../componentes.js';
+import { NIVELES as NIVELES_RIESGO, alcanceQueCrece, nivelRiesgo, riesgoNuevo, riesgosVivos, tareaDeRiesgo } from '../riesgos.js';
 import { probabilidadDeLlegar, queSiPasa, resumenQueSiPasa, simularAusencia, simularProyecto } from '../simulacion.js';
 import { calibracion } from '../calibracion.js';
 import { store } from '../store.js';
@@ -675,6 +676,7 @@ export function vistaProyectos(root, ctx = {}) {
             el('div', {}, `${t.edt} ${t.nombre}`),
             el('div', { class: 'accion' }, `Fin previsto ${formatoCorto(t.fin)} (${textoRelativo(t.fin)}), avance ${t.avance || 0} %.`))))) : null,
 
+      panelAlcance(p, plan),
       panelEsfuerzo(p, plan),
       panelCurvaS(p, plan),
       panelAusencia(p),
@@ -779,6 +781,133 @@ export function vistaProyectos(root, ctx = {}) {
           }, { variant: 'primary' })) : null) : null);
   }
 
+
+  /**
+   * Cuánto ha engordado el plan desde la línea base. El alcance no crece de
+   * golpe: crece a base de "y ya que estamos".
+   */
+  function panelAlcance(p, plan) {
+    const c = alcanceQueCrece(plan, p.lineaBase, p.calendario);
+    if (!c.hayBase) return null;
+    return el('section', { class: 'card' },
+      el('h2', { class: 'card-title' }, 'Alcance que crece'),
+      el('p', { class: c.diasTotales ? 'negativo' : 'muted small' }, c.frase),
+      c.diasTotales ? el('div', { class: 'tarjetas' },
+        dato(`+${c.diasTotales} d`, 'añadidos', { pie: `${c.pct} % sobre la base` }),
+        dato(c.nuevas.length, 'tareas nuevas'),
+        dato(c.crecidas.length, 'alargadas'),
+        dato(c.desaparecidas, 'desaparecidas')) : null,
+      c.nuevas.length ? el('div', { style: 'margin-top:10px' },
+        el('p', { class: 'field-label' }, 'Nuevas desde la línea base'),
+        ...c.nuevas.map((t) => el('div', { class: 'salud-fila' },
+          el('span', { class: 'grow' }, t.nombre),
+          el('span', { class: 'muted small' }, `${t.dias} d`)))) : null,
+      c.crecidas.length ? el('div', { style: 'margin-top:10px' },
+        el('p', { class: 'field-label' }, 'Se alargaron'),
+        ...c.crecidas.map((t) => el('div', { class: 'salud-fila' },
+          el('span', { class: 'grow' }, t.nombre),
+          el('span', { class: 'muted small' }, `${t.antes} → ${t.ahora} d`)))) : null);
+  }
+
+  /**
+   * Cinco líneas por proyecto: qué puede romperlo, cuánto de probable, cuánto
+   * dolería, qué lo dispara y cuándo revisarlo. Sin reservas de contingencia ni
+   * riesgo residual: eso es para una PMO, no para una persona.
+   */
+  function panelRiesgosLigeros(p) {
+    const todos = store.estado.riesgos || [];
+    const vivos = riesgosVivos(todos, hoyISO, p.nombre);
+    const cerrados = todos.filter((r) => r.proyecto === p.nombre && r.cerrado);
+
+    const menuNivel = (valor, alCambiar) => {
+      const sel = el('select', { class: 'input', style: 'width:auto', onChange: (e) => alCambiar(Number(e.target.value)) });
+      for (const n of NIVELES_RIESGO) sel.append(el('option', { value: String(n.valor), selected: n.valor === valor }, n.nombre));
+      return sel;
+    };
+
+    return el('div', {},
+      el('div', { class: 'fila' },
+        button('+ Riesgo', () => {
+          store.agregarEn('riesgos', riesgoNuevo({ proyecto: p.nombre, que: 'Algo que puede romper este plan' }));
+          pintar();
+        }, { variant: 'primary' }),
+        el('span', { class: 'muted small' }, `${vivos.length} vivos${cerrados.length ? ` · ${cerrados.length} cerrados` : ''}`)),
+
+      !vivos.length ? vacio('Ningún riesgo apuntado. O no los hay, o no los has mirado.', '🎲') : null,
+
+      ...vivos.map((r) => el('section', { class: `card riesgo-${r.nivel}` },
+        el('div', { class: 'fila' },
+          input(r.que, (v) => store.actualizarEn('riesgos', r.id, { que: v })),
+          el('span', { class: `chip ${r.nivel}` }, `${nivelRiesgo(r)} · ${r.exposicion}`),
+          button('✕', () => { store.borrarEn('riesgos', r.id); pintar(); }, { variant: 'ghost chico danger', title: 'Borrar el riesgo' })),
+        el('div', { class: 'fila' },
+          el('label', { class: 'field' }, el('span', { class: 'field-label' }, 'Probabilidad'),
+            menuNivel(r.probabilidad, (v) => { store.actualizarEn('riesgos', r.id, { probabilidad: v }); pintar(); })),
+          el('label', { class: 'field' }, el('span', { class: 'field-label' }, 'Impacto'),
+            menuNivel(r.impacto, (v) => { store.actualizarEn('riesgos', r.id, { impacto: v }); pintar(); })),
+          el('label', { class: 'field' }, el('span', { class: 'field-label' }, 'Revisar el'),
+            el('input', {
+              class: 'input', type: 'date', value: r.revisarEn || '',
+              onChange: (e) => { store.actualizarEn('riesgos', r.id, { revisarEn: e.target.value }); pintar(); },
+            }))),
+        el('label', { class: 'field' }, el('span', { class: 'field-label' }, 'Qué lo dispara'),
+          input(r.disparador || '', (v) => store.actualizarEn('riesgos', r.id, { disparador: v }))),
+        el('label', { class: 'field' }, el('span', { class: 'field-label' }, 'Qué haríamos'),
+          input(r.plan || '', (v) => store.actualizarEn('riesgos', r.id, { plan: v }))),
+        r.tocaRevisar ? el('p', { class: 'negativo small' }, `Tocaba revisarlo el ${r.revisarEn}.`) : null,
+        el('div', { class: 'fila' },
+          button('Se cumplió', () => {
+            store.agregar(tareaDeRiesgo(r, hoyISO));
+            store.actualizarEn('riesgos', r.id, { materializado: hoyISO, cerrado: hoyISO });
+            toast('Convertido en tarea: ya no es un riesgo, es un problema');
+            pintar();
+          }, { variant: 'ghost chico' }),
+          button('Cerrar (ya no aplica)', () => {
+            store.actualizarEn('riesgos', r.id, { cerrado: hoyISO });
+            pintar();
+          }, { variant: 'ghost chico' })))),
+
+      el('p', { class: 'muted small' },
+        'Exposición = probabilidad × impacto. Seis o más es alto, y por ahí conviene empezar.'));
+  }
+
+  /**
+   * Hoja imprimible para la reunión: la tabla del plan sin la app alrededor.
+   * Desde el diálogo de impresión se guarda como PDF, que es lo que se manda.
+   */
+  function imprimirPlan(p) {
+    const plan = programar(p);
+    const r = resumenProyecto(plan);
+    const hojas = plan.tareas.filter((t) => !t.resumen);
+    const hoja = el('div', { class: 'hoja-impresion' },
+      el('h1', {}, p.nombre),
+      el('p', { class: 'muted small' },
+        `${r.inicio} → ${r.fin} · ${r.duracion} días hábiles · ${r.tareas} tareas · ${r.criticas} en ruta crítica`
+        + `${p.fechaObjetivo ? ` · comprometido al ${p.fechaObjetivo}` : ''} · avance ${r.avance} %`),
+      el('table', { class: 'tabla' },
+        el('thead', {}, el('tr', {},
+          el('th', {}, 'EDT'), el('th', {}, 'Tarea'), el('th', {}, 'Responsable'),
+          el('th', {}, 'Inicio'), el('th', {}, 'Fin'), el('th', { class: 'num' }, 'Días'),
+          el('th', { class: 'num' }, 'Holgura'), el('th', { class: 'num' }, 'Avance'))),
+        el('tbody', {}, ...hojas.map((t) => el('tr', { class: t.critica ? 'critica' : '' },
+          el('td', {}, t.edt || ''),
+          el('td', {}, t.esHito ? `🏁 ${t.nombre}` : t.nombre),
+          el('td', {}, t.recurso || '—'),
+          el('td', {}, t.inicio),
+          el('td', {}, t.fin),
+          el('td', { class: 'num' }, String(t.duracion)),
+          el('td', { class: 'num' }, t.critica ? 'crítica' : `${t.holgura} d`),
+          el('td', { class: 'num' }, `${t.avance || 0} %`))))),
+      el('p', { class: 'muted small' }, `Generado el ${hoyISO} · las tareas en negrita son la ruta crítica.`));
+
+    document.body.append(hoja);
+    const quitar = () => { hoja.remove(); window.removeEventListener('afterprint', quitar); };
+    window.addEventListener('afterprint', quitar);
+    window.print();
+    // Safari no siempre dispara afterprint: red de seguridad.
+    setTimeout(quitar, 60000);
+  }
+
   /* -------------------------- selector y raíz -------------------------- */
 
   function selectorProyecto() {
@@ -803,6 +932,8 @@ export function vistaProyectos(root, ctx = {}) {
         },
       }, el('option', { value: '' }, '+ Desde plantilla…'),
       ...PLANTILLAS_PROYECTO.map((p) => el('option', { value: p.id, title: p.descripcion }, p.nombre))),
+      proyecto() ? button('🖨 Hoja para la reunión', () => imprimirPlan(proyecto()),
+        { title: 'Abre el diálogo de impresión: desde ahí se guarda como PDF' }) : null,
       proyecto() ? button('🗑 Borrar', () => {
         if (!window.confirm(`¿Borrar el proyecto “${proyecto().nombre}”?`)) return;
         store.borrarPlan(seleccionado);
@@ -819,11 +950,12 @@ export function vistaProyectos(root, ctx = {}) {
       !p ? vacio('Todavía no hay ningún proyecto. Empieza por una plantilla: trae las tareas y las dependencias puestas.', '📐')
         : el('div', {},
           el('div', { class: 'pestanas' },
-            ...[['plan', 'Plan y Gantt'], ['recursos', 'Recursos'], ['riesgo', 'Fecha y escenarios'], ['seguimiento', 'Seguimiento']].map(([id, txt]) =>
+            ...[['plan', 'Plan y Gantt'], ['recursos', 'Recursos'], ['riesgo', 'Fecha y escenarios'], ['seguimiento', 'Seguimiento'], ['riesgos', 'Riesgos']].map(([id, txt]) =>
               el('button', { class: `pestana ${pestana === id ? 'activa' : ''}`.trim(), onClick: () => { pestana = id; pintar(); } }, txt))),
           pestana === 'plan' ? panelPlan(p)
             : pestana === 'recursos' ? panelRecursos(p)
-              : pestana === 'riesgo' ? panelRiesgo(p) : panelSeguimiento(p)));
+              : pestana === 'riesgo' ? panelRiesgo(p)
+                : pestana === 'riesgos' ? panelRiesgosLigeros(p) : panelSeguimiento(p)));
   };
 
   pintar();

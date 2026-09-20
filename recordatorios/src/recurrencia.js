@@ -25,7 +25,7 @@ export function reglaVacia() {
 
 /** Quita acentos y baja a minúsculas, para comparar texto escrito de cualquier forma. */
 function limpia(txt) {
-  return String(txt).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim();
+  return String(txt).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
 }
 
 /**

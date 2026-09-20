@@ -10,6 +10,7 @@ import { aISO, deISO, hoy as fechaHoy, sumarDias, textoLargo, textoRelativo, DIA
 import { agendaDia, agendaSemana, matrizMes, mesAnterior, mesSiguiente, resumenMes } from '../calendario.js';
 import { colorModulo, entradaRapida, listaTareas, tituloVista } from '../componentes.js';
 import { aICS } from '../exportar.js';
+import { formatoMinutos, tiempoRealDelDia } from '../tiempo.js';
 import { store } from '../store.js';
 
 export function vistaCalendario(root, ctx = {}) {
@@ -18,6 +19,7 @@ export function vistaCalendario(root, ctx = {}) {
   let modo = ctx.query?.modo || 'mes';
   let cursor = deISO(ctx.query?.dia || hoyISO);
   let diaElegido = hoyISO;
+  let verReal = false;
 
   const pintar = () => {
     const tareas = store.tareas.filter((t) => !t.padre);
@@ -32,6 +34,11 @@ export function vistaCalendario(root, ctx = {}) {
         button('Hoy', () => { cursor = deISO(hoyISO); diaElegido = hoyISO; pintar(); }),
         button('›', () => { mover(1); }, { title: 'Siguiente' }),
         el('span', { class: 'grow' }),
+        el('label', { class: 'chip', style: 'cursor:pointer' },
+          el('input', {
+            type: 'checkbox', checked: verReal,
+            onChange: (e) => { verReal = e.target.checked; pintar(); },
+          }), 'Tiempo medido'),
         button('📤 Exportar .ics', exportar, { title: 'Llevar estas fechas al calendario del teléfono' })),
 
       modo === 'mes' ? vistaMes(tareas) : modo === 'semana' ? vistaSemana(tareas) : vistaDia(tareas),
@@ -73,6 +80,7 @@ export function vistaCalendario(root, ctx = {}) {
             onClick: () => { diaElegido = d.iso; pintar(); },
           },
           el('div', { class: 'cal-num' }, String(d.dia)),
+          ...(verReal ? [bloqueReal(d.iso)] : []),
           ...lista.slice(0, 3).map((t) => el('div', {
             class: 'cal-evento',
             style: `border-left-color:${colorModulo(t.modulo)}`,
@@ -114,12 +122,35 @@ export function vistaCalendario(root, ctx = {}) {
           f.tareas.length ? listaTareas(f.tareas, { alCambiar: pintar, hoy: hoyISO }) : el('span', { class: 'muted small' }, '')))));
   }
 
+  /**
+   * Lo medido, no lo planificado: la diferencia entre las dos columnas es el
+   * plan contra la vida. Sale del pomodoro y del cronómetro; lo que no mediste
+   * no aparece, y eso también es información.
+   */
+  function bloqueReal(iso) {
+    const r = tiempoRealDelDia(store.estado.tiempo, iso, store.tareas);
+    if (!r.real) return null;
+    return el('div', {
+      class: 'cal-real',
+      title: `${formatoMinutos(r.real)} medidos frente a ${formatoMinutos(r.planificado)} planificados`,
+    }, `⏱ ${formatoMinutos(r.real)}`);
+  }
+
   function panelDelDia(tareas) {
     const delDia = tareas.filter((t) => t.fecha === diaElegido);
+    const real = tiempoRealDelDia(store.estado.tiempo, diaElegido, store.tareas);
     return el('section', { style: 'margin-top:18px' },
       el('h3', {}, textoLargo(diaElegido), ' ', el('span', { class: 'muted small' }, textoRelativo(diaElegido, deISO(hoyISO)))),
       entradaRapida({ fecha: diaElegido }, pintar),
-      listaTareas(delDia, { alCambiar: pintar, hoy: hoyISO, vacio: 'Nada este día.' }));
+      listaTareas(delDia, { alCambiar: pintar, hoy: hoyISO, vacio: 'Nada este día.' }),
+      real.real ? el('div', { class: 'card' },
+        el('h3', { class: 'card-title' }, 'Tiempo medido ese día'),
+        el('p', { class: 'muted small' },
+          `${formatoMinutos(real.real)} medidos frente a ${formatoMinutos(real.planificado)} planificados`,
+          real.planificado ? ` · ${real.desvio >= 0 ? '+' : ''}${formatoMinutos(Math.abs(real.desvio))}` : ''),
+        ...real.bloques.map((b) => el('div', { class: 'salud-fila' },
+          el('span', { class: 'grow' }, b.titulo),
+          el('span', { class: 'muted small' }, `${formatoMinutos(b.minutos)} · ${b.sesiones} sesión(es)`)))) : null);
   }
 
   function exportar() {

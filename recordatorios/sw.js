@@ -14,11 +14,14 @@ const ARCHIVOS = [
   './src/capacidad.js', './src/salud.js', './src/simulacion.js', './src/esperas.js', './src/autocompletar.js',
   './src/tablero.js', './src/compartir.js', './src/adjuntos.js', '../src/qr.js', '../src/qr-tables.js', './src/plantillas.js', './src/exportar.js',
   './src/notificaciones.js', './src/componentes.js', './src/resumen.js', './src/seed.js', './src/ideas.js',
+  './src/captura.js', './src/automatizacion.js', './src/energia.js', './src/ambiente.js',
+  './src/trabajo.js', './src/riesgos.js', './src/informes.js', './src/copiloto.js',
   './src/views/hoy.js', './src/views/bandeja.js', './src/views/proximos.js',
   './src/views/tablero.js', './src/views/concentracion.js', './src/views/importar-lista.js', './src/views/calendario.js',
   './src/views/enfoque.js', './src/views/planificar.js', './src/views/lista.js',
   './src/views/inversiones.js', './src/views/proyectos.js', './src/views/docencia.js', './src/views/investigacion.js',
   './src/views/alabanza.js', './src/views/revision.js', './src/views/plantillas.js', './src/views/ideas.js', './src/views/ajustes.js',
+  './src/views/copiloto.js', './src/views/informes.js',
   '../src/ui.js',
 ];
 

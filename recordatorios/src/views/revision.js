@@ -3,13 +3,14 @@
  * Es la media hora del domingo que sostiene el resto de la semana.
  */
 
-import { button, el, input, render, toast } from '../../../src/ui.js';
+import { button, copyText, download, el, input, render, toast } from '../../../src/ui.js';
 import { aISO, hoy as fechaHoy, semanaISO, sumarDias, textoLargo } from '../fechas.js';
 import { estadisticas, estancadas, MODULOS } from '../modelo.js';
 import { alertasCartera } from '../inversiones.js';
 import { avanceSemestre, rachaHabito, REVISION_MENSUAL, REVISION_SEMANAL } from '../plantillas.js';
 import { barra, dato, grafico, listaTareas, tituloVista } from '../componentes.js';
-import { formatoMinutos, resumenTiempo } from '../tiempo.js';
+import { formatoMinutos, resumenInterrupciones, resumenTiempo } from '../tiempo.js';
+import { resumenSemanal, textoResumenSemanal } from '../resumen.js';
 import { store } from '../store.js';
 import { avisoTemprano, instantaneaSalud, saludPorProyecto } from '../salud.js';
 import { resumenEsperas, tareaDePerseguir } from '../esperas.js';
@@ -50,6 +51,8 @@ export function vistaRevision(root) {
 
       panelSalud(hoyISO, pintar),
       panelEsperas(hoyISO, pintar),
+      panelInterrupciones(hoyISO),
+      panelSemanal(hoyISO),
 
       chequeo('Revisión semanal', REVISION_SEMANAL, marcados, (i) => {
         const nuevos = marcados.includes(i) ? marcados.filter((x) => x !== i) : [...marcados, i];
@@ -193,4 +196,49 @@ function panelHabitos(hoyISO, alCambiar) {
         store.agregarHabito(nuevo.trim());
         alCambiar();
       })));
+}
+
+/**
+ * Quién te corta y a qué hora. El patrón casi siempre es más aburrido (y más
+ * arreglable) de lo que uno cree: no es "el trabajo", son tres personas y una
+ * franja concreta.
+ */
+function panelInterrupciones(hoyISO) {
+  const r = resumenInterrupciones(store.estado.interrupciones || [], hoyISO, 14);
+  return el('section', { class: 'card' },
+    el('h2', { class: 'card-title' }, 'Interrupciones'),
+    el('p', { class: 'muted small' }, r.frase),
+    r.total ? el('div', {},
+      el('div', { class: 'tarjetas' },
+        dato(r.total, 'en 14 días'),
+        dato(r.mediaDiaria, 'al día'),
+        dato(r.porFranja[0]?.clave || '—', 'la peor hora'),
+        dato(r.peorDia?.n || 0, 'el peor día', { pie: r.peorDia?.clave || '' })),
+      el('div', { style: 'margin-top:10px' },
+        ...r.porMotivo.map((m) => el('div', { class: 'salud-fila' },
+          el('span', { style: 'min-width:150px' }, m.nombre),
+          barra(Math.round((m.n / r.total) * 100)),
+          el('span', { class: 'muted small' }, String(m.n)))))) : null,
+    el('p', { class: 'muted small' }, 'Se apuntan con un toque desde la pantalla de concentración.'));
+}
+
+/**
+ * El correo del viernes, escrito solo: lo que se cerró, lo que se movió y lo
+ * que está en manos de otros. Se copia y se manda; la app no envía nada.
+ */
+function panelSemanal(hoyISO) {
+  const r = resumenSemanal(store.estado, hoyISO);
+  const texto = textoResumenSemanal(r);
+  return el('section', { class: 'card' },
+    el('div', { class: 'fila entre' },
+      el('h2', { class: 'card-title', style: 'margin:0' }, 'Resumen para el equipo'),
+      el('div', { class: 'fila' },
+        button('Copiar', () => { copyText(texto); toast('Copiado'); }, { variant: 'ghost chico' }),
+        button('Descargar .txt', () => download(`resumen-${r.hasta}.txt`, texto, 'text/plain'), { variant: 'ghost chico' }))),
+    el('div', { class: 'tarjetas' },
+      dato(r.cerradas.length, 'cerradas'),
+      dato(r.creadas.length, 'nuevas'),
+      dato(`${r.saldo >= 0 ? '+' : ''}${r.saldo}`, 'saldo', { clase: r.saldo >= 0 ? 'positivo' : 'negativo' }),
+      dato(r.bloqueadas.length, 'bloqueadas', { clase: r.bloqueadas.length ? 'negativo' : '' })),
+    el('pre', { class: 'small', style: 'white-space:pre-wrap;margin-top:10px' }, texto));
 }

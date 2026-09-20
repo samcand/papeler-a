@@ -12,6 +12,7 @@ import { esAplazamiento } from './dia.js';
 import { CONFIG_POMODORO } from './tiempo.js';
 import { completar, crearTarea, uid } from './modelo.js';
 import { FILTROS_PREDEFINIDOS } from './filtros.js';
+import { aplicarReglas } from './automatizacion.js';
 import { PLANTILLAS_INICIALES } from './plantillasLista.js';
 import { TAREAS_EJEMPLO, PROYECTOS_EJEMPLO } from './seed.js';
 
@@ -40,6 +41,13 @@ const ESTADO_INICIAL = {
   // EDT, dependencias y ruta crítica. Son cosas distintas y no deben mezclarse.
   planes: [],
   plantillas: [],       // listas reutilizables con desfases relativos a una fecha
+  reglas: [],           // automatización: { condicion, acciones } al crear tareas
+  riesgos: [],          // riesgos ligeros por proyecto
+  lecturas: [],         // cola de lectura con prioridad y notas
+  decisiones: [],       // diario de decisiones, incluidas las que no se tomaron
+  interrupciones: [],   // { motivo, tareaId, fecha, hora }
+  asesorias: [],        // horas de asesoría: { estudiante, fecha, minutos, tema }
+  informes: [],         // informes a medida guardados
   papelera: [],         // lo borrado espera 30 días antes de irse de verdad
   pomodoro: { config: { ...CONFIG_POMODORO }, estado: null },
   ajustes: {
@@ -57,6 +65,9 @@ const ESTADO_INICIAL = {
     saludPrevia: null,
     primerDiaSemana: 1,
     ordenPorDefecto: 'fecha',
+    favoritos: [],
+    silencio: { activo: false, desde: '22:00', hasta: '07:00', dias: [] },
+    ambiente: { sonido: null, volumen: 0.3 },
     enlaceAlabanza: '../index.html',
   },
 };
@@ -115,9 +126,23 @@ class Store {
       alabanza: { ...base.alabanza, ...(guardado.alabanza || {}) },
       planes: guardado.planes || base.planes,
       plantillas: guardado.plantillas || base.plantillas,
+      reglas: guardado.reglas || base.reglas,
+      riesgos: guardado.riesgos || base.riesgos,
+      lecturas: guardado.lecturas || base.lecturas,
+      decisiones: guardado.decisiones || base.decisiones,
+      interrupciones: guardado.interrupciones || base.interrupciones,
+      asesorias: guardado.asesorias || base.asesorias,
+      informes: guardado.informes || base.informes,
       papelera: purgar(guardado.papelera || [], aISO(hoy())),
       pomodoro: { ...base.pomodoro, ...(guardado.pomodoro || {}), config: { ...base.pomodoro.config, ...(guardado.pomodoro?.config || {}) } },
-      ajustes: { ...base.ajustes, ...(guardado.ajustes || {}), jornada: { ...base.ajustes.jornada, ...(guardado.ajustes?.jornada || {}) } },
+      ajustes: {
+        ...base.ajustes,
+        ...(guardado.ajustes || {}),
+        jornada: { ...base.ajustes.jornada, ...(guardado.ajustes?.jornada || {}) },
+        silencio: { ...base.ajustes.silencio, ...(guardado.ajustes?.silencio || {}) },
+        ambiente: { ...base.ajustes.ambiente, ...(guardado.ajustes?.ambiente || {}) },
+        favoritos: guardado.ajustes?.favoritos || base.ajustes.favoritos,
+      },
     };
   }
 
@@ -160,8 +185,20 @@ class Store {
     return this.actualizar(id, { archivada: archivada || undefined });
   }
 
+  /**
+   * Crea una tarea. Antes de guardarla pasan las reglas de automatización, y
+   * lo que hicieron se devuelve para poder decirlo: una regla que actúa en
+   * silencio es una regla en la que se deja de confiar.
+   */
   agregar(campos) {
-    const tarea = crearTarea({ ...campos, orden: Date.now() });
+    const conReglas = aplicarReglas({ ...campos }, this.estado.reglas || []);
+    if (conReglas.aplicadas.length) {
+      for (const r of this.estado.reglas) {
+        if (conReglas.aplicadas.includes(r.nombre || r.id)) r.veces = (r.veces || 0) + 1;
+      }
+    }
+    const tarea = crearTarea({ ...conReglas.tarea, orden: Date.now() });
+    tarea.reglasAplicadas = conReglas.aplicadas.length ? conReglas.aplicadas : undefined;
     // Una tarea que se repite pero no dice cuándo empieza arranca en su
     // primera ocurrencia; si no, no aparecería en ninguna vista con fecha.
     if (tarea.regla && !tarea.fecha) {
@@ -374,6 +411,67 @@ class Store {
     this.instantanea('Borrar plantilla');
     if (plantilla) this.estado.papelera.push(aPapelera('plantilla', plantilla));
     this.estado.plantillas = this.estado.plantillas.filter((p) => p.id !== id);
+    this.guardar();
+  }
+
+  /* ---------------- ola 3: reglas, riesgos, lecturas, decisiones ---------------- */
+
+  /** Alta y baja genéricas para las listas simples del estado. */
+  agregarEn(lista, elemento) {
+    if (!Array.isArray(this.estado[lista])) this.estado[lista] = [];
+    this.estado[lista].push(elemento);
+    this.guardar();
+    return elemento;
+  }
+
+  actualizarEn(lista, id, cambios) {
+    const item = (this.estado[lista] || []).find((x) => x.id === id);
+    if (!item) return null;
+    Object.assign(item, cambios);
+    this.guardar();
+    return item;
+  }
+
+  borrarEn(lista, id) {
+    this.instantanea('Borrar elemento');
+    this.estado[lista] = (this.estado[lista] || []).filter((x) => x.id !== id);
+    this.guardar();
+  }
+
+  /** Apunta una interrupción: un botón, cero fricción, o no se usa. */
+  anotarInterrupcion(registro) {
+    return this.agregarEn('interrupciones', registro);
+  }
+
+  /** Vistas fijadas en la barra lateral. */
+  alternarFavorito(ruta) {
+    const actuales = this.estado.ajustes.favoritos || [];
+    const favoritos = actuales.includes(ruta) ? actuales.filter((r) => r !== ruta) : [...actuales, ruta];
+    this.ajustar({ favoritos });
+    return favoritos;
+  }
+
+  /** Secciones de un proyecto: fases sin crear subproyectos. */
+  secciones(nombreProyecto) {
+    const p = this.estado.proyectos.find((x) => x.nombre === nombreProyecto);
+    return p?.secciones || [];
+  }
+
+  agregarSeccion(nombreProyecto, nombre) {
+    const p = this.estado.proyectos.find((x) => x.nombre === nombreProyecto);
+    if (!p) return null;
+    p.secciones = [...(p.secciones || []), nombre];
+    this.guardar();
+    return p.secciones;
+  }
+
+  borrarSeccion(nombreProyecto, nombre) {
+    const p = this.estado.proyectos.find((x) => x.nombre === nombreProyecto);
+    if (!p) return;
+    this.instantanea('Borrar sección');
+    p.secciones = (p.secciones || []).filter((s) => s !== nombre);
+    // Las tareas de la sección no se borran: vuelven al cuerpo del proyecto.
+    for (const t of this.estado.tareas) if (t.proyecto === nombreProyecto && t.seccion === nombre) t.seccion = null;
     this.guardar();
   }
 

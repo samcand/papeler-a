@@ -20,7 +20,8 @@ import { createRequire } from 'node:module';
 const PUERTO = 8123;
 const BASE = `http://localhost:${PUERTO}/recordatorios/index.html`;
 const PANTALLAS = ['hoy', 'bandeja', 'proximos', 'calendario', 'enfoque', 'planificar', 'revision',
-  'inversiones', 'proyectos', 'docencia', 'investigacion', 'alabanza', 'plantillas', 'tablero', 'ideas', 'ajustes'];
+  'inversiones', 'proyectos', 'docencia', 'investigacion', 'alabanza', 'plantillas', 'tablero',
+  'informes', 'copiloto', 'ideas', 'ajustes'];
 
 /** Busca Playwright en el proyecto y, si no, en la instalación global. */
 async function cargarPlaywright() {
@@ -465,6 +466,141 @@ const adj = await pagina.evaluate(async () => {
 });
 if (adj.guardado !== 1 || adj.borrado !== 0) errores.push('los adjuntos no se guardan o no se borran: ' + JSON.stringify(adj));
 else console.log('  ok  adjuntos en IndexedDB');
+
+
+// Captura: la tecla `n` abre la caja sobre cualquier pantalla
+await pagina.goto(BASE + '#/proyectos');
+await pagina.waitForTimeout(400);
+await pagina.keyboard.press('n');
+await pagina.waitForTimeout(300);
+if (!(await pagina.locator('.drawer.captura').count())) errores.push('la tecla n no abrió la captura');
+else {
+  await pagina.fill('.drawer.captura [data-rapida]', 'Cosa capturada desde proyectos');
+  await pagina.press('.drawer.captura [data-rapida]', 'Enter');
+  await pagina.waitForTimeout(300);
+  await pagina.keyboard.press('Escape');
+  await pagina.goto(BASE + '#/bandeja');
+  await pagina.waitForTimeout(400);
+  if (!(await pagina.textContent('#app')).includes('Cosa capturada desde proyectos')) {
+    errores.push('lo capturado con la tecla n no llegó a la bandeja');
+  } else console.log('  ok  captura con la tecla n desde cualquier pantalla');
+}
+
+// Duplicados: avisar de que ya tienes esa tarea
+await pagina.fill('[data-rapida]', 'cosa capturada proyectos');
+await pagina.waitForTimeout(400);
+const aviso = await pagina.locator('.aviso-duplicado').first().textContent().catch(() => '');
+if (!/ya la tengas/.test(aviso || '')) errores.push('no avisó del duplicado: ' + aviso);
+else console.log('  ok  aviso de tarea duplicada');
+await pagina.fill('[data-rapida]', '');
+
+// Reglas de automatización: se aplican al crear y dejan constancia
+await pagina.evaluate(async () => {
+  const { store } = await import('./src/store.js');
+  store.agregarEn('reglas', {
+    id: 'r-humo', nombre: 'Llamadas', activa: true,
+    condicion: { tipo: 'titulo', valor: 'llamar' },
+    acciones: [{ tipo: 'etiqueta', valor: 'llamar' }, { tipo: 'prioridad', valor: 2 }],
+    veces: 0,
+  });
+});
+const reglaAplicada = await pagina.evaluate(async () => {
+  const { store } = await import('./src/store.js');
+  const t = store.agregar({ titulo: 'Llamar al seguro del coche' });
+  const regla = store.estado.reglas.find((r) => r.id === 'r-humo');
+  return { etiquetas: t.etiquetas, prioridad: t.prioridad, aplicadas: t.reglasAplicadas, veces: regla.veces };
+});
+if (!reglaAplicada.etiquetas?.includes('llamar') || reglaAplicada.prioridad !== 2 || reglaAplicada.veces !== 1) {
+  errores.push('la regla de automatización no actuó: ' + JSON.stringify(reglaAplicada));
+} else console.log('  ok  reglas de automatización (y dicen cuál actuó)');
+
+// Informes a medida
+await pagina.goto(BASE + '#/informes');
+await pagina.waitForTimeout(500);
+const selectoresInforme = pagina.locator('.card').first().locator('select');
+await selectoresInforme.nth(0).selectOption('minutos');
+await pagina.waitForTimeout(300);
+await selectoresInforme.nth(1).selectOption('proyecto');
+await pagina.waitForTimeout(400);
+const textoInformes = (await pagina.textContent('#app')).replace(/\s+/g, ' ');
+const filasInforme = await pagina.locator('.salud-fila').count();
+if (!/Tiempo medido/.test(textoInformes) || !filasInforme) {
+  errores.push('el informe a medida no se recalculó: ' + textoInformes.slice(0, 200));
+} else {
+  const [csv] = await Promise.all([
+    pagina.waitForEvent('download'),
+    pagina.getByRole('button', { name: 'Descargar CSV' }).click(),
+  ]);
+  const contenido = readFileSync(await csv.path(), 'utf8');
+  if (!/"Grupo"/.test(contenido)) errores.push("el CSV del informe no tiene cabecera: " + contenido.slice(0, 80));
+  else console.log(`  ok  informes a medida (${filasInforme} grupo(s)) y su CSV`);
+}
+
+// Copiloto: responde con cálculo y admite lo que no sabe
+await pagina.goto(BASE + '#/copiloto');
+await pagina.waitForTimeout(400);
+await pagina.locator('.chip', { hasText: '¿Quién está sobrecargado?' }).click();
+await pagina.waitForTimeout(500);
+const respuesta = (await pagina.textContent('#app')).replace(/\s+/g, ' ');
+if (!/sobrecargado/i.test(respuesta)) errores.push('el copiloto no respondió: ' + respuesta.slice(0, 200));
+else {
+  await pagina.fill('#app input[type="search"], #app .rapida input', '¿subirá el bitcoin?');
+  await pagina.getByRole('button', { name: 'Preguntar' }).click();
+  await pagina.waitForTimeout(400);
+  const noSabe = (await pagina.textContent('#app')).replace(/\s+/g, ' ');
+  if (!/no la sé calcular/.test(noSabe)) errores.push('el copiloto no admitió lo que no sabe: ' + noSabe.slice(0, 200));
+  else console.log('  ok  copiloto: responde con cálculo y dice lo que no sabe');
+}
+
+// Riesgos ligeros por proyecto
+await pagina.goto(BASE + '#/proyectos');
+await pagina.waitForTimeout(500);
+await pagina.locator('.pestana', { hasText: 'Riesgos' }).click();
+await pagina.waitForTimeout(300);
+await pagina.getByRole('button', { name: '+ Riesgo' }).click();
+await pagina.waitForTimeout(400);
+// La tarjeta cambia de clase al cambiar el nivel, así que se vuelve a buscar.
+const tarjetaRiesgo = () => pagina.locator('[class*="riesgo-"]').first();
+await tarjetaRiesgo().locator('select').nth(0).selectOption('3');
+await pagina.waitForTimeout(300);
+await tarjetaRiesgo().locator('select').nth(1).selectOption('3');
+await pagina.waitForTimeout(400);
+if (!(await pagina.locator('.card.riesgo-alto').count())) errores.push('el riesgo no subió a alto al subir probabilidad e impacto');
+else console.log('  ok  riesgos ligeros por proyecto');
+
+// Secciones dentro de un proyecto
+await pagina.goto(BASE + '#/proyecto/Cartera');
+await pagina.waitForTimeout(400);
+await pagina.getByPlaceholder('Sección nueva').fill('Revisión trimestral');
+await pagina.getByRole('button', { name: 'Añadir sección' }).click();
+await pagina.waitForTimeout(400);
+const conSeccion = (await pagina.textContent('#app')).replace(/\s+/g, ' ');
+if (!/Revisión trimestral/.test(conSeccion) || !/Sin sección/.test(conSeccion)) {
+  errores.push('las secciones no se dibujaron: ' + conSeccion.slice(0, 200));
+} else console.log('  ok  secciones dentro de un proyecto');
+
+// Favoritos: la estrella fija la vista en la barra lateral
+await pagina.goto(BASE + '#/calendario');
+await pagina.waitForTimeout(400);
+await pagina.locator('.cabecera-vista').getByTitle('Fijar en la barra lateral').click();
+await pagina.waitForTimeout(400);
+if (!(await pagina.locator('.nav-titulo', { hasText: 'Favoritos' }).count())) {
+  errores.push('la estrella no fijó la vista en la barra lateral');
+} else console.log('  ok  favoritos en la barra lateral');
+
+// Interrupciones desde la pantalla de concentración
+await pagina.goto(BASE + '#/concentracion');
+await pagina.waitForTimeout(400);
+await pagina.locator('.chip', { hasText: 'Alguien vino' }).click();
+await pagina.waitForTimeout(400);
+const apuntadas = await pagina.evaluate(async () => {
+  const { store } = await import('./src/store.js');
+  return store.estado.interrupciones.length;
+});
+if (apuntadas !== 1) errores.push('la interrupción no se apuntó: ' + apuntadas);
+else console.log('  ok  registro de interrupciones');
+await pagina.keyboard.press('Escape');
+await pagina.waitForTimeout(300);
 
 // Accesibilidad básica
 const a11y = await pagina.evaluate(() => {

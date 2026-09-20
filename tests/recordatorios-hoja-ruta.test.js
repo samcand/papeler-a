@@ -29,9 +29,17 @@ t('las tres olas suman todo lo pendiente', () => {
   const suma = OLAS.reduce((s, o) => s + porOla(o.n).length, 0);
   assert.equal(suma, PENDIENTES.length);
   // Las olas se vacían según se terminan: lo que debe cumplirse es que mientras
-  // queden pendientes haya al menos una ola con trabajo.
+  // queden pendientes haya al menos una ola con trabajo. Hoy están las tres
+  // vacías, y esa también es una situación válida.
   if (PENDIENTES.length) {
     assert.ok(OLAS.some((o) => porOla(o.n).length), 'quedan pendientes pero ninguna ola los recoge');
+  }
+});
+
+t('cada idea hecha explica qué hace la app, no qué haría', () => {
+  for (const n of HECHAS) {
+    const idea = IDEAS.find((i) => i.n === n);
+    assert.ok(idea.d.length > 40, `la hecha ${n} no cuenta qué acabó haciendo la app`);
   }
 });
 

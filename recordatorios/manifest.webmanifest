@@ -30,6 +30,12 @@
   ],
   "shortcuts": [
     {
+      "name": "Capturar una tarea",
+      "short_name": "Capturar",
+      "description": "Abre la caja de captura sobre cualquier pantalla",
+      "url": "./index.html?capturar=1#/hoy"
+    },
+    {
       "name": "Hoy",
       "url": "./index.html#/hoy"
     },

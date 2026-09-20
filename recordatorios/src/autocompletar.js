@@ -9,7 +9,7 @@
 const LIMITE = 6;
 
 function limpia(txt) {
-  return String(txt).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+  return String(txt).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 }
 
 /**

@@ -17,7 +17,7 @@ const DIA_NOMBRE = {
 const ORDINALES = { primer: 1, primero: 1, segundo: 2, tercer: 3, tercero: 3, cuarto: 4, ultimo: -1 };
 
 function limpia(txt) {
-  return String(txt).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+  return String(txt).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 }
 
 /** Frases que podrían describir una repetición, de la más específica a la más general. */

@@ -8,6 +8,7 @@ import { resumenEsperas } from './esperas.js';
 import { programarDelDia, programarResumen } from './notificaciones.js';
 import { resumenDelDia, textoNotificacion } from './resumen.js';
 import { store } from './store.js';
+import { entradaRapida } from './componentes.js';
 
 import { vistaHoy } from './views/hoy.js';
 import { vistaBandeja } from './views/bandeja.js';
@@ -27,6 +28,8 @@ import { vistaAlabanza } from './views/alabanza.js';
 import { vistaRevision } from './views/revision.js';
 import { vistaPlantillas } from './views/plantillas.js';
 import { vistaIdeas } from './views/ideas.js';
+import { vistaCopiloto } from './views/copiloto.js';
+import { vistaInformes } from './views/informes.js';
 import { vistaAjustes } from './views/ajustes.js';
 
 const RUTAS = [
@@ -47,6 +50,8 @@ const RUTAS = [
   { ruta: /^\/alabanza$/, vista: vistaAlabanza, nav: 'alabanza' },
   { ruta: /^\/plantillas$/, vista: vistaPlantillas, nav: 'plantillas' },
   { ruta: /^\/importar-lista$/, vista: vistaImportarLista },
+  { ruta: /^\/copiloto$/, vista: vistaCopiloto, nav: 'copiloto' },
+  { ruta: /^\/informes$/, vista: vistaInformes, nav: 'informes' },
   { ruta: /^\/ideas$/, vista: vistaIdeas, nav: 'ideas' },
   { ruta: /^\/ajustes$/, vista: vistaAjustes, nav: 'ajustes' },
   { ruta: /^\/filtro\/nuevo$/, vista: vistaFiltroNuevo },
@@ -80,6 +85,10 @@ function dibujar() {
   const camino = rutaActual();
   limpiar?.();
   limpiar = null;
+  // Cambiar de pantalla cierra lo que estuviera abierto encima: como el hash
+  // no recarga la página, un panel abierto se quedaba flotando sobre la vista
+  // nueva y tapaba lo que hubiera debajo.
+  document.querySelectorAll('.drawer').forEach((d) => d.remove());
   pintar(raiz);
   window.scrollTo(0, 0);
 
@@ -128,6 +137,8 @@ const PRINCIPAL = [
   { id: 'planificar', icono: '🧭', texto: 'Planificar', href: '#/planificar' },
   { id: 'plantillas', icono: '📋', texto: 'Plantillas', href: '#/plantillas' },
   { id: 'revision', icono: '🔄', texto: 'Revisión', href: '#/revision' },
+  { id: 'informes', icono: '📊', texto: 'Informes', href: '#/informes' },
+  { id: 'copiloto', icono: '🧮', texto: 'Copiloto', href: '#/copiloto' },
 ];
 
 const TRABAJO = [
@@ -166,6 +177,7 @@ function montarArmazon() {
     ...PRINCIPAL.map((i) => enlace(i, cuentaDeNav(i.id))),
     el('div', { class: 'nav-titulo' }, 'Trabajo'),
     ...TRABAJO.map((i) => enlace(i, cuentaModulo(i.id))),
+    ...panelFavoritos(),
     el('div', { class: 'nav-titulo' }, 'Filtros'),
     ...store.estado.filtros.map((f) => el('a', {
       class: 'nav-item', href: `#/filtro/${f.id}`, dataset: { nav: f.id },
@@ -210,6 +222,64 @@ function montarArmazon() {
     const n = pendientes.filter((t) => t.modulo === id && t.fecha && t.fecha <= hoyISO).length;
     return n ? { n } : null;
   }
+}
+
+
+/**
+ * Las vistas fijadas arriba. Cuatro o cinco caben en la cabeza; el resto se
+ * busca. Se marcan con la estrella de la cabecera de cada vista.
+ */
+function panelFavoritos() {
+  const rutas = store.estado.ajustes.favoritos || [];
+  if (!rutas.length) return [];
+  const nombre = (ruta) => {
+    const conocido = [...PRINCIPAL, ...TRABAJO].find((i) => i.href === '#' + ruta);
+    if (conocido) return { icono: conocido.icono, texto: conocido.texto };
+    const trozos = ruta.split('/').filter(Boolean);
+    return { icono: '★', texto: decodeURIComponent(trozos[trozos.length - 1] || ruta) };
+  };
+  return [
+    el('div', { class: 'nav-titulo' }, 'Favoritos'),
+    ...rutas.map((ruta) => {
+      const n = nombre(ruta);
+      return el('a', { class: 'nav-item', href: '#' + ruta },
+        el('span', {}, n.icono), el('span', { class: 'grow' }, n.texto),
+        el('button', {
+          class: 'btn ghost chico', title: 'Quitar de favoritos',
+          onClick: (e) => { e.preventDefault(); store.alternarFavorito(ruta); refrescarArmazon(); },
+        }, '✕'));
+    }),
+  ];
+}
+
+/**
+ * Caja de captura sobre cualquier pantalla, con la tecla `n`.
+ *
+ * Un atajo de verdad global (sobre cualquier ventana del sistema) no está al
+ * alcance de una app web: lo más cerca es instalarla y usar el acceso directo
+ * "Capturar" del icono, o compartir desde otra app. Dentro de la app, esto sí
+ * abre desde donde estés.
+ */
+function abrirCaptura() {
+  if (document.querySelector('.drawer.captura')) return;
+  const panel = el('div', { class: 'drawer captura' },
+    el('div', {},
+      el('div', { class: 'drawer-head' },
+        el('h3', {}, 'Capturar'),
+        button('✕', () => panel.remove(), { variant: 'ghost' })),
+      el('div', { class: 'drawer-body' },
+        entradaRapida({}, (t) => {
+          toast(`Guardado: ${t.titulo.slice(0, 40)}`);
+          dibujar();
+        }),
+        el('p', { class: 'muted small' },
+          'Entra en la bandeja si no le pones fecha. Con Escape se cierra.'))));
+  panel.addEventListener('click', (e) => { if (e.target === panel) panel.remove(); });
+  document.addEventListener('keydown', function esc(e) {
+    if (e.key === 'Escape') { panel.remove(); document.removeEventListener('keydown', esc); }
+  });
+  document.body.append(panel);
+  panel.querySelector('[data-rapida]')?.focus();
 }
 
 function buscador() {
@@ -260,7 +330,8 @@ function atajos() {
     if (escribiendo) return;
     if (e.key === '/') { e.preventDefault(); document.getElementById('buscador')?.focus(); return; }
     if (e.key === 'a') { e.preventDefault(); document.querySelector('[data-rapida]')?.focus(); return; }
-    const destinos = { b: '/bandeja', h: '/hoy', p: '/proximos', t: '/tablero', c: '/calendario', e: '/enfoque', i: '/inversiones', g: '/proyectos', r: '/revision' };
+    if (e.key === 'n') { e.preventDefault(); abrirCaptura(); return; }
+    const destinos = { b: '/bandeja', h: '/hoy', p: '/proximos', t: '/tablero', c: '/calendario', e: '/enfoque', i: '/inversiones', g: '/proyectos', r: '/revision', k: '/copiloto', f: '/informes' };
     if (e.key === 'z' && store.puedeDeshacer) { e.preventDefault(); const etq = store.deshacer(); toast(`Deshecho: ${etq}`); dibujar(); return; }
     if (destinos[e.key]) { e.preventDefault(); navegar(destinos[e.key]); }
   });
@@ -304,6 +375,10 @@ window.addEventListener('DOMContentLoaded', () => {
   montarArmazon();
   atajos();
   recogerCompartido();
+  if (new URLSearchParams(location.search).get('capturar') === '1') {
+    history.replaceState(null, '', location.pathname);
+    setTimeout(abrirCaptura, 50);
+  }
   if (!location.hash || location.hash === '#/') location.hash = '#/' + (store.estado.ajustes.vistaInicio || 'hoy');
   dibujar();
 

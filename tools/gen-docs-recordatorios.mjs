@@ -23,12 +23,20 @@ const lineas = [
   '',
 ];
 
-for (const ola of OLAS) {
-  const items = porOla(ola.n);
-  lineas.push(`## ${ola.nombre} (${items.length})`, '', `_${ola.descripcion}_`, '');
-  for (const i of items) {
-    lineas.push(`**${i.n}. ${i.t}** · ${nombreCat(i.c)}  `);
-    lineas.push(i.d, '');
+if (!PENDIENTES.length) {
+  lineas.push('## No queda nada pendiente', '',
+    'Las ' + HECHAS.length + ' ideas de la lista están hechas; las ' + DESCARTADAS.length +
+    ' descartadas siguen abajo con su motivo. Lo siguiente saldrá de usarla: cuando',
+    'algo moleste tres veces en una semana, eso es la idea ' + (Math.max(...IDEAS.map((i) => i.n)) + 1) + '.', '');
+} else {
+  for (const ola of OLAS) {
+    const items = porOla(ola.n);
+    if (!items.length) continue;
+    lineas.push(`## ${ola.nombre} (${items.length})`, '', `_${ola.descripcion}_`, '');
+    for (const i of items) {
+      lineas.push(`**${i.n}. ${i.t}** · ${nombreCat(i.c)}  `);
+      lineas.push(i.d, '');
+    }
   }
 }
 

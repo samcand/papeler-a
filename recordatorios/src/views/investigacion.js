@@ -4,11 +4,13 @@
  * nadie se entere.
  */
 
-import { button, el, render, toast } from '../../../src/ui.js';
+import { button, el, input, render, toast } from '../../../src/ui.js';
 import { aISO, diferenciaDias, hoy as fechaHoy, textoRelativo } from '../fechas.js';
 import { ESTADOS_ARTICULO, estadoArticulo, RUTINA_INVESTIGACION, tareasAlPublicar, tareasDeInvestigacion } from '../plantillas.js';
 import { parseRegla } from '../recurrencia.js';
-import { dato, listaTareas, tituloVista } from '../componentes.js';
+import { dato, listaTareas, tituloVista, vacio } from '../componentes.js';
+import { TIPOS_LECTURA, colaDeLectura, horasPorEstudiante, lecturaNueva, queLeerEn } from '../trabajo.js';
+import { formatoMinutos } from '../tiempo.js';
 import { store } from '../store.js';
 
 export function vistaInvestigacion(root) {
@@ -16,6 +18,78 @@ export function vistaInvestigacion(root) {
   const hoyISO = aISO(fechaHoy());
   const datos = () => store.estado.investigacion;
   const guardar = () => { store.guardar(); pintar(); };
+
+
+  /**
+   * Horas de asesoría por estudiante. Sale del tiempo ya medido: una tarea
+   * cuenta para un estudiante si lo menciona en el título o lleva su etiqueta.
+   * Sirve para la memoria anual y, sobre todo, para ver a quién le has dado
+   * tres horas y a quién ninguna.
+   */
+  function panelAsesorias() {
+    const r = horasPorEstudiante(datos().tesis, store.tareas, store.estado.tiempo, hoyISO);
+    if (!r.filas.length) return null;
+    const maximo = Math.max(1, ...r.filas.map((f) => f.minutos));
+    return el('section', { class: 'card' },
+      el('h2', { class: 'card-title' }, 'Horas de asesoría'),
+      el('p', { class: 'muted small' }, r.frase),
+      ...r.filas.map((f) => el('div', { class: 'salud-fila' },
+        el('span', { style: 'min-width:150px' }, f.estudiante),
+        el('div', { class: 'barra', style: 'flex:1' },
+          el('div', { style: `width:${Math.round((f.minutos / maximo) * 100)}%` })),
+        el('span', { class: 'muted small', style: 'min-width:110px;text-align:right' },
+          `${f.horas} h · ${f.sesiones} sesión(es)`))),
+      el('p', { class: 'muted small' },
+        'Solo cuenta el tiempo medido con el pomodoro o el cronómetro sobre tareas que mencionan al estudiante.'));
+  }
+
+  /**
+   * Los artículos por leer son una cola con prioridad, no una carpeta de
+   * descargas con 300 PDF. Lo que lleva más de tres meses sube solo: o se lee o
+   * se borra, pero deja de fingir que está pendiente.
+   */
+  function panelLecturas() {
+    const lecturas = store.estado.lecturas || [];
+    const r = colaDeLectura(lecturas, hoyISO);
+    const [hueco] = queLeerEn(lecturas, 30, hoyISO);
+    let nueva = '';
+
+    const campo = input('', (v) => { nueva = v; }, { placeholder: 'Título o referencia del artículo…' });
+    const agregar = () => {
+      if (!nueva.trim()) return;
+      store.agregarEn('lecturas', lecturaNueva({ titulo: nueva.trim() }));
+      nueva = '';
+      pintar();
+    };
+    campo.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); agregar(); } });
+
+    return el('section', { class: 'card' },
+      el('h2', { class: 'card-title' }, 'Cola de lectura'),
+      el('p', { class: 'muted small' }, r.frase),
+      el('div', { class: 'fila' }, campo, button('Añadir', agregar, { variant: 'primary' })),
+
+      hueco ? el('p', { class: 'small' },
+        `Con media hora libre: “${hueco.titulo}” (${formatoMinutos(hueco.minutosEfectivos)}).`) : null,
+
+      !r.cola.length ? vacio('Nada por leer. Cosas peores hay.', '📚') : null,
+
+      ...r.cola.map((l) => el('div', { class: `salud-fila ${l.dias >= 90 ? 'vieja' : ''}`.trim() },
+        el('select', {
+          class: 'input', style: 'width:auto',
+          onChange: (e) => { store.actualizarEn('lecturas', l.id, { tipo: e.target.value }); pintar(); },
+        }, ...TIPOS_LECTURA.map((t) => el('option', { value: t.id, selected: t.id === l.tipo }, `${t.icono} ${t.nombre}`))),
+        input(l.titulo, (v) => store.actualizarEn('lecturas', l.id, { titulo: v })),
+        el('select', {
+          class: 'input', style: 'width:auto',
+          onChange: (e) => { store.actualizarEn('lecturas', l.id, { prioridad: Number(e.target.value) }); pintar(); },
+        }, ...[1, 2, 3, 4].map((n) => el('option', { value: String(n), selected: n === l.prioridad }, `P${n}`))),
+        el('span', { class: 'muted small', style: 'min-width:110px' },
+          `${formatoMinutos(l.minutosEfectivos)} · ${l.dias} d`),
+        button('Leído', () => { store.actualizarEn('lecturas', l.id, { leidoEn: hoyISO }); pintar(); }, { variant: 'ghost chico' }),
+        button('✕', () => { store.borrarEn('lecturas', l.id); pintar(); }, { variant: 'ghost chico danger', title: 'Quitar de la cola' }))),
+
+      r.leidas ? el('p', { class: 'muted small' }, `${r.leidas} leídas y archivadas.`) : null);
+  }
 
   const pintar = () => {
     const arts = datos().articulos;
@@ -93,6 +167,9 @@ export function vistaInvestigacion(root) {
             el('td', {}, el('input', { class: 'input', style: 'width:150px;padding:4px 6px', placeholder: 'cada 2 semanas', value: t.frecuencia || '', onChange: (e) => { t.frecuencia = e.target.value; guardar(); } })),
             el('td', {}, button('🗑', () => { datos().tesis.splice(i, 1); guardar(); }, { variant: 'ghost chico danger' })))))),
         button('+ Añadir tesis', () => { datos().tesis.push({ estudiante: '', frecuencia: 'cada 2 semanas' }); guardar(); }, { variant: 'ghost chico' })),
+
+      panelAsesorias(),
+      panelLecturas(),
 
       el('section', { class: 'card' },
         el('h2', { class: 'card-title' }, 'Rutinas de investigación'),

@@ -39,6 +39,12 @@ export function vistaIdeas(root) {
           }, `${c.nombre} · ${n}`);
         })),
 
+      !quedan.length ? el('section', { class: 'card' },
+        el('h2', { class: 'card-title' }, 'No queda nada pendiente'),
+        el('p', {}, `Las ${hechas.length} ideas de la lista están hechas y las ${DESCARTADAS.length} descartadas siguen abajo con su motivo.`),
+        el('p', { class: 'muted small' },
+          'Lo siguiente sale de usarla: cuando algo moleste tres veces en una semana, eso es la idea 111.')) : null,
+
       ...OLAS.map((ola) => {
         const items = filtra(porOla(ola.n).filter((i) => !marcadas.has(i.n)));
         if (!items.length) return null;

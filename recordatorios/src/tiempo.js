@@ -297,6 +297,111 @@ export function informeTiempo(registros = [], tareas = [], hoyISO = aISO(hoy()),
 }
 
 /* ------------------------------------------------------------------ *
+ * Interrupciones
+ * ------------------------------------------------------------------ */
+
+export const MOTIVOS_INTERRUPCION = [
+  { id: 'persona', nombre: 'Alguien vino', icono: '🧍' },
+  { id: 'mensaje', nombre: 'Mensaje o llamada', icono: '📱' },
+  { id: 'correo', nombre: 'Correo', icono: '📧' },
+  { id: 'yo', nombre: 'Me distraje solo', icono: '🌀' },
+  { id: 'urgencia', nombre: 'Algo urgente', icono: '🔥' },
+];
+
+export function registroInterrupcion(motivo, tareaId = null, ahora = new Date()) {
+  return {
+    id: 'int-' + Math.random().toString(36).slice(2, 8),
+    motivo,
+    tareaId,
+    fecha: aISO(ahora),
+    hora: `${String(ahora.getHours()).padStart(2, '0')}:${String(ahora.getMinutes()).padStart(2, '0')}`,
+  };
+}
+
+/**
+ * Quién te corta y cuándo. Al final de la semana el patrón salta a la vista, y
+ * es casi siempre más aburrido (y más arreglable) de lo que uno cree.
+ */
+export function resumenInterrupciones(interrupciones = [], hoyISO = aISO(hoy()), dias = 14) {
+  const desde = aISO(sumarDias(hoyISO, -dias + 1));
+  const enRango = interrupciones.filter((i) => i.fecha >= desde && i.fecha <= hoyISO);
+
+  const porMotivo = new Map();
+  const porFranja = new Map();
+  const porDia = new Map();
+  for (const i of enRango) {
+    porMotivo.set(i.motivo, (porMotivo.get(i.motivo) || 0) + 1);
+    const franja = `${String(i.hora || '00:00').slice(0, 2)}:00`;
+    porFranja.set(franja, (porFranja.get(franja) || 0) + 1);
+    porDia.set(i.fecha, (porDia.get(i.fecha) || 0) + 1);
+  }
+
+  const lista = (mapa) => [...mapa.entries()].map(([clave, n]) => ({ clave, n })).sort((a, b) => b.n - a.n);
+  const motivos = lista(porMotivo);
+  const franjas = lista(porFranja);
+  const nombreMotivo = (id) => MOTIVOS_INTERRUPCION.find((m) => m.id === id)?.nombre || id;
+
+  return {
+    total: enRango.length,
+    dias,
+    mediaDiaria: Math.round((enRango.length / dias) * 10) / 10,
+    porMotivo: motivos.map((m) => ({ ...m, nombre: nombreMotivo(m.clave) })),
+    porFranja: franjas,
+    peorDia: lista(porDia)[0] || null,
+    frase: !enRango.length ? 'Ninguna interrupción apuntada estos días.'
+      : `${enRango.length} interrupciones en ${dias} días. La más repetida: ${nombreMotivo(motivos[0].clave).toLowerCase()}`
+        + `${franjas.length ? `, y sobre todo a las ${franjas[0].clave}` : ''}.`,
+  };
+}
+
+/* ------------------------------------------------------------------ *
+ * El tiempo que de verdad trabajaste
+ * ------------------------------------------------------------------ */
+
+/**
+ * Bloques de tiempo medido de un día, para pintarlos en el calendario al lado
+ * de lo planificado. La diferencia entre las dos columnas es el plan contra la
+ * vida.
+ */
+export function tiempoRealDelDia(registros = [], diaISO, tareas = []) {
+  const porTarea = new Map(tareas.map((t) => [t.id, t]));
+  const delDia = registros.filter((r) => r.fecha === diaISO);
+  const agrupado = new Map();
+
+  for (const r of delDia) {
+    const clave = r.tareaId || 'sin-tarea';
+    if (!agrupado.has(clave)) {
+      agrupado.set(clave, {
+        tareaId: r.tareaId || null,
+        titulo: porTarea.get(r.tareaId)?.titulo || 'Sin tarea concreta',
+        modulo: porTarea.get(r.tareaId)?.modulo || null,
+        minutos: 0,
+        sesiones: 0,
+        ultima: null,
+      });
+    }
+    const bloque = agrupado.get(clave);
+    bloque.minutos += Number(r.minutos) || 0;
+    bloque.sesiones++;
+    if (r.fin && (!bloque.ultima || r.fin > bloque.ultima)) bloque.ultima = r.fin;
+  }
+
+  const bloques = [...agrupado.values()].sort((a, b) => b.minutos - a.minutos);
+  const real = bloques.reduce((s, b) => s + b.minutos, 0);
+  const planificado = tareas
+    .filter((t) => t.fecha === diaISO && t.duracion)
+    .reduce((s, t) => s + Number(t.duracion), 0);
+
+  return {
+    fecha: diaISO,
+    bloques,
+    real,
+    planificado,
+    desvio: real - planificado,
+  };
+}
+
+/* ------------------------------------------------------------------ *
  * Planificar el día por bloques
  * ------------------------------------------------------------------ */
 
