@@ -577,6 +577,24 @@ body.concentrado .contenido { max-width: none; display: grid; place-items: cente
 .meta .barra { margin: 8px 0 4px; }
 .meta .barra.tiempo { height: 3px; opacity: .55; margin-top: 0; }
 
+.meta-ritmo { margin: 2px 0 0; }
+.meta-ritmo.quieta { color: var(--warn, #e0a33e); }
+
+/* Las metas que llevan semanas quietas: un aviso, no una alarma. */
+.aviso-paradas { border-left: 3px solid var(--warn, #e0a33e); }
+.aviso-paradas .fila { padding: 3px 0; }
+
+/* Tira de los últimos 30 días: barritas, que se lee de un vistazo. */
+.chispa {
+  display: flex; align-items: flex-end; gap: 2px;
+  height: 34px; margin: 4px 0 2px;
+}
+.chispa i {
+  flex: 1; border-radius: 2px 2px 0 0;
+  background: var(--line); min-height: 2px;
+}
+.chispa i.lleno { background: var(--ok, #35c48b); }
+
 /* ---- Objetivos y rutinas ---- */
 .card.objetivo.atrasado { border-left: 3px solid var(--danger); }
 .card.rutina.completa { border-left: 3px solid var(--ok, #35c48b); }

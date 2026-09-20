@@ -504,6 +504,14 @@ Lo que se enseña no es el porcentaje: es el progreso **comparado con el tiempo
 gastado** (la segunda barra, más fina) y cuánto haría falta por semana. Llevar el
 25 % en septiembre de una meta anual suena bien y va tarde.
 
+Y una meta no se incumple de golpe: se deja de tocar. Cada **+1** queda apuntado
+con su fecha, así que cada meta dice **cuándo fue la última vez** («hace 12
+días») y **dónde acabas si sigues igual** («a este ritmo te quedas en 9 de 24»).
+Las que llevan tres semanas quietas con el plazo abierto salen avisadas arriba,
+con un botón para sumar ahí mismo; y el panel enseña los **últimos 30 días** en
+una tira de barras: cuántos días de verdad la tocaste. Las metas que cuentan
+tareas sacan esas fechas del historial, no de un apunte a mano.
+
 Las metas salen **agrupadas por horizonte** —de vida, de este año, de este
 trimestre—, no escondidas detrás de un filtro. Dejar una pide el motivo y se
 queda escrito, que es lo que enseña al mirarlo en diciembre.
@@ -603,7 +611,7 @@ descargar. Si la semana fue floja se nota, que es justo para lo que sirve.
 
 ## Lo que queda
 
-La pestaña **Lo que queda** es la hoja de ruta real de la app: **118 hechas y 12
+La pestaña **Lo que queda** es la hoja de ruta real de la app: **119 hechas y 12
 descartadas**, y hoy no queda nada pendiente. Las diez últimas (111-120) salieron
 de revisar una lista de 50 ideas de productividad personal y resumirlas en cuatro
 piezas genéricas —notas, colecciones, objetivos y gastos— en vez de treinta
@@ -643,7 +651,7 @@ Alt y las flechas.
 ## Pruebas
 
 ```bash
-npm test                  # 394 pruebas de lógica, sin navegador
+npm test                  # 419 pruebas de lógica, sin navegador
 npm run test:navegador    # recorre la app en Chromium (necesita Playwright)
 ```
 
@@ -657,5 +665,6 @@ detección de duplicados, reglas de automatización, energía, interrupciones,
 franjas de silencio y horario de clase, cola de lectura, riesgos, alcance que
 crece, informes a medida, las respuestas del copiloto, enlaces entre notas y
 racha del diario, colecciones con sus vencimientos, objetivos contra el tiempo
-gastado, mantenimiento por kilómetros, presupuesto mensual, agenda de personas,
-rutinas con racha, itinerario y presupuesto de viaje, y el panel de vida.
+gastado y contra su propio ritmo, mantenimiento por kilómetros, presupuesto
+mensual, agenda de personas, rutinas con racha, itinerario y presupuesto de
+viaje, y el panel de vida.

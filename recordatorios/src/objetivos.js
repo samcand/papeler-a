@@ -13,7 +13,7 @@
  * de cosas para la vida: son objetivos con otra etiqueta.
  */
 
-import { aISO, diferenciaDias, hoy } from './fechas.js';
+import { aISO, diferenciaDias, hoy, sumarDias } from './fechas.js';
 
 export const TIPOS_OBJETIVO = [
   { id: 'numero', nombre: 'Llegar a un número', ayuda: 'Leer 24 libros, correr 500 km, ahorrar 3.000.' },
@@ -54,6 +54,7 @@ export function objetivoNuevo(campos = {}) {
     unidad: '',
     proyecto: null,       // para el tipo 'tareas'
     hecho: false,         // para el tipo 'siNo'
+    avances: [],          // { fecha, delta }: cada vez que sumaste algo
     revisarEn: null,
     logradoEn: null,
     abandonadoEn: null,
@@ -282,12 +283,120 @@ export function parseMeta(texto, hoyISO = aISO(hoy())) {
   };
 }
 
-/** Sumar (o restar) avance es lo que se hace todos los días; que cueste un botón. */
-export function sumarAvance(objetivo, n = 1) {
-  if (objetivo.tipo === 'siNo') return { ...objetivo, hecho: n > 0 };
-  const actual = Math.max(0, (Number(objetivo.actual) || 0) + n);
+/**
+ * Sumar (o restar) avance es lo que se hace todos los días; que cueste un
+ * botón. Cada suma se apunta con su fecha: sin eso no hay forma de saber si la
+ * meta sigue viva o lleva tres semanas parada, que es lo que de verdad decide
+ * si se cumple.
+ */
+export function sumarAvance(objetivo, n = 1, hoyISO = aISO(hoy())) {
+  if (objetivo.tipo === 'siNo') return { ...objetivo, hecho: n > 0, avances: [...(objetivo.avances || []), { fecha: hoyISO, delta: n }] };
+
+  const previo = Number(objetivo.actual) || 0;
   const tope = Math.max(1, Number(objetivo.meta) || 1);
-  return { ...objetivo, actual: Math.min(actual, tope * 10) };   // por si alguien se pasa de clics
+  const actual = Math.min(Math.max(0, previo + n), tope * 10);
+  const delta = actual - previo;
+  if (!delta) return objetivo;
+
+  // Varias sumas el mismo día son una sola línea: la gráfica se lee mejor.
+  const avances = [...(objetivo.avances || [])];
+  const i = avances.findIndex((a) => a.fecha === hoyISO);
+  if (i >= 0) avances[i] = { ...avances[i], delta: avances[i].delta + delta };
+  else avances.push({ fecha: hoyISO, delta });
+
+  return { ...objetivo, actual, avances: avances.filter((a) => a.delta !== 0) };
+}
+
+/**
+ * De dónde salen los avances con fecha. Las metas de número los llevan
+ * apuntados; las de tareas los saca del historial, que ya los tiene. Así
+ * "última vez hace N días" significa lo mismo en las dos.
+ */
+export function avancesDe(objetivo, datos = {}) {
+  if (objetivo.tipo === 'tareas') {
+    const porId = new Map((datos.tareas || []).map((t) => [t.id, t]));
+    return (datos.historial || [])
+      .filter((h) => {
+        const proyecto = h.proyecto || porId.get(h.tareaId)?.proyecto;
+        if (proyecto !== objetivo.proyecto) return false;
+        if (objetivo.desde && h.fecha < objetivo.desde) return false;
+        if (objetivo.hasta && h.fecha > objetivo.hasta) return false;
+        return true;
+      })
+      .map((h) => ({ fecha: h.fecha, delta: 1 }))
+      .sort((a, b) => a.fecha.localeCompare(b.fecha));
+  }
+  return [...(objetivo.avances || [])].sort((a, b) => a.fecha.localeCompare(b.fecha));
+}
+
+/**
+ * El ritmo de verdad: cuándo tocaste la meta por última vez y a dónde llegarías
+ * si siguieras así. "Hacen falta 1,2 por semana" está bien; "a este ritmo te
+ * quedas en 9 de 24" duele lo justo para hacer algo hoy.
+ */
+export function ritmo(objetivo, datos = {}, hoyISO = aISO(hoy()), diasParada = 21) {
+  const a = avance(objetivo, datos);
+  const avances = avancesDe(objetivo, datos);
+  const ultima = avances.length ? avances[avances.length - 1].fecha : null;
+  const diasSinTocar = ultima ? Math.max(0, diferenciaDias(ultima, hoyISO)) : null;
+
+  // El ritmo se mide desde que empezó, no desde el primer apunte: los días en
+  // que no hiciste nada también cuentan, que para eso van tarde las metas.
+  const desde = objetivo.desde || (avances.length ? avances[0].fecha : null);
+  const pasados = desde && desde <= hoyISO ? Math.max(1, diferenciaDias(desde, hoyISO)) : null;
+  const porDia = pasados ? a.actual / pasados : null;
+  const porSemana = porDia != null ? Math.round(porDia * 7 * 10) / 10 : null;
+
+  let proyeccion = null;
+  let fechaLlegada = null;
+  if (objetivo.hasta && porDia != null) {
+    const totalDias = Math.max(1, diferenciaDias(desde, objetivo.hasta));
+    proyeccion = Math.min(a.meta, Math.round(porDia * totalDias));
+    const faltan = Math.max(0, a.meta - a.actual);
+    if (porDia > 0 && faltan > 0) fechaLlegada = aISO(sumarDias(hoyISO, Math.ceil(faltan / porDia)));
+  }
+
+  const cerrada = !!(objetivo.logradoEn || objetivo.abandonadoEn) || a.pct >= 100;
+  const llega = proyeccion != null && proyeccion >= a.meta;
+
+  return {
+    ultima,
+    diasSinTocar,
+    porSemana,
+    proyeccion,
+    fechaLlegada,
+    // "Parada" es tener plazo abierto y llevar semanas sin tocarla.
+    parada: !cerrada && !!objetivo.hasta && objetivo.hasta >= hoyISO
+      && (diasSinTocar == null || diasSinTocar >= diasParada),
+    frase: cerrada && a.pct >= 100 ? 'Cumplida.'
+      : !avances.length ? 'Sin avances apuntados todavía.'
+        : diasSinTocar === 0 ? 'Le sumaste hoy.'
+          : diasSinTocar === 1 ? 'Última vez ayer.'
+            : `Última vez hace ${diasSinTocar} días.`,
+    fraseProyeccion: cerrada || proyeccion == null ? ''
+      : llega ? `A este ritmo llegas a ${a.meta}${objetivo.unidad ? ` ${objetivo.unidad}` : ''}.`
+        : `A este ritmo te quedas en ${proyeccion} de ${a.meta}.`,
+  };
+}
+
+/** Las metas que llevan semanas sin tocarse: se apagan sin avisar. */
+export function paradas(objetivos = [], datos = {}, hoyISO = aISO(hoy()), dias = 21) {
+  return vivos(objetivos)
+    .filter((o) => o.tipo !== 'siNo' && o.hasta)
+    .map((o) => ({ objetivo: o, ritmo: ritmo(o, datos, hoyISO, dias) }))
+    .filter((x) => x.ritmo.parada);
+}
+
+/** Lo sumado día a día, para la línea de los últimos días. */
+export function serieDeAvance(objetivo, datos = {}, hoyISO = aISO(hoy()), dias = 30) {
+  const porDia = new Map();
+  for (const a of avancesDe(objetivo, datos)) porDia.set(a.fecha, (porDia.get(a.fecha) || 0) + a.delta);
+  const salida = [];
+  for (let i = dias - 1; i >= 0; i--) {
+    const iso = aISO(sumarDias(hoyISO, -i));
+    salida.push({ fecha: iso, valor: Math.max(0, porDia.get(iso) || 0) });
+  }
+  return salida;
 }
 
 /** Las metas agrupadas por horizonte, que es como se miran de verdad. */

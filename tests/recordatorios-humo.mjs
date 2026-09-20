@@ -975,7 +975,40 @@ if (!/meta 24 libros/.test(pistaMeta) || !/de este año/.test(pistaMeta)) {
     const cifra = await fila().locator('.meta-cifra').textContent();
     if (!/2\/24/.test(cifra)) errores.push(`el +1 no sumó: "${cifra}"`);
     else console.log('  ok  metas: se escriben en una línea y se suman con +1');
+
+    // Sumar deja constancia del día: eso es lo que luego dice si sigue viva.
+    const ritmoTexto = ((await fila().locator('.meta-ritmo').textContent()) || '').trim();
+    if (!/sumaste hoy/i.test(ritmoTexto)) errores.push(`la meta no dice cuándo se tocó: "${ritmoTexto}"`);
+    else console.log('  ok  metas: la fila dice cuándo se sumó por última vez');
   }
+}
+
+// Una meta con plazo abierto y un mes sin tocarse tiene que avisar
+await pagina.evaluate(async () => {
+  const { store } = await import('./src/store.js');
+  const { objetivoNuevo } = await import('./src/objetivos.js');
+  const hoy = new Date();
+  const hace = (d) => new Date(hoy.getTime() - d * 86400000).toISOString().slice(0, 10);
+  const dentro = (d) => new Date(hoy.getTime() + d * 86400000).toISOString().slice(0, 10);
+  store.agregarEn('objetivos', objetivoNuevo({
+    que: 'Nadar 100 km', tipo: 'numero', meta: 100, actual: 8, unidad: 'km',
+    desde: hace(120), hasta: dentro(120), avances: [{ fecha: hace(40), delta: 8 }],
+  }));
+});
+await pagina.goto(BASE + '#/hoy');
+await pagina.goto(BASE + '#/objetivos');
+await pagina.waitForTimeout(600);
+const avisoQuietas = await pagina.locator('.aviso-paradas').count()
+  ? (await pagina.textContent('.aviso-paradas')).replace(/\s+/g, ' ')
+  : '';
+if (!/Nadar 100 km/.test(avisoQuietas) || !/hace 40 días/.test(avisoQuietas)) {
+  errores.push('la meta parada no aparece en el aviso: ' + (avisoQuietas || '(sin aviso)'));
+} else {
+  const proyeccion = ((await pagina.locator('.meta', { hasText: 'Nadar 100 km' }).first()
+    .locator('.meta-ritmo').textContent()) || '').replace(/\s+/g, ' ');
+  if (!/te quedas en \d+ de 100/.test(proyeccion)) {
+    errores.push('no proyecta dónde acaba la meta al ritmo actual: ' + proyeccion);
+  } else console.log('  ok  metas: avisa de las paradas y proyecta el final al ritmo actual');
 }
 
 // Una meta de vida con sus años dentro, y el avance que sale de ellas

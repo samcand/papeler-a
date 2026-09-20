@@ -19,8 +19,8 @@ import { button, el, input, render, toast } from '../../../src/ui.js';
 import { aISO, hoy as fechaHoy, textoRelativo } from '../fechas.js';
 import {
   AMBITOS, HORIZONTES, TIPOS_OBJETIVO, aRevisar, aplanar, arbol, haríaCiclo,
-  objetivoNuevo, parseMeta, porHorizonte, progresoConHijos, resumenObjetivos,
-  sumarAvance, tareaDeObjetivo,
+  objetivoNuevo, paradas, parseMeta, porHorizonte, progresoConHijos, resumenObjetivos,
+  ritmo, serieDeAvance, sumarAvance, tareaDeObjetivo,
 } from '../objetivos.js';
 import { barra, dato, tituloVista, vacio } from '../componentes.js';
 import { store } from '../store.js';
@@ -92,6 +92,8 @@ export function vistaObjetivos(root) {
         el('p', { class: 'muted small' },
           'Escríbela como se dice. El número es la meta y “este año”, “este trimestre” o “algún día” ponen el plazo.')),
 
+      avisoParadas(),
+
       !vivas().length
         ? vacio('Ninguna meta escrita. Lo que no se escribe se queda en intención.', '🎯')
         : el('div', {}, ...grupos.map(grupo)),
@@ -111,6 +113,27 @@ export function vistaObjetivos(root) {
       panelAbierto = null;
     }
   };
+
+  /* ----------------- las que llevan semanas quietas ----------------- */
+
+  /**
+   * Una meta no se incumple de golpe: se deja de tocar. Tres semanas sin sumar
+   * nada, teniendo plazo abierto, es la señal que llega a tiempo de servir.
+   */
+  function avisoParadas() {
+    const quietas = paradas(metas(), datos(), hoyISO);
+    if (!quietas.length) return null;
+    return el('section', { class: 'card aviso-paradas' },
+      el('b', {}, `🕸️ ${quietas.length} ${quietas.length === 1 ? 'meta lleva' : 'metas llevan'} semanas sin moverse`),
+      el('div', { class: 'small' }, ...quietas.slice(0, 4).map(({ objetivo: o, ritmo: rm }) => el('div', { class: 'fila entre' },
+        el('span', { class: 'grow' }, o.que || 'Sin nombre'),
+        el('span', { class: 'muted' }, rm.diasSinTocar == null ? 'nunca' : `hace ${rm.diasSinTocar} días`),
+        button('Sumar', () => {
+          store.actualizarEn('objetivos', o.id, sumarAvance(o, 1, hoyISO));
+          pintar();
+        }, { variant: 'ok chico' })))),
+      quietas.length > 4 ? el('p', { class: 'muted small' }, `y ${quietas.length - 4} más.`) : null);
+  }
 
   /* --------------------------- un grupo --------------------------- */
 
@@ -167,11 +190,27 @@ export function vistaObjetivos(root) {
             : null,
           button('✎', () => { editando = o.id; pintar(); }, { variant: 'ghost chico', title: 'Editar la meta' }))),
 
+      lineaRitmo(o),
+
       tocaRevisar ? el('p', { class: 'negativo small' },
         `Tocaba revisarla el ${o.revisarEn}: ¿sigue teniendo sentido?`) : null);
   }
 
   const madreDe = (o) => (o.padre ? (metas().find((x) => x.id === o.padre)?.que || null) : null);
+
+  /**
+   * El porcentaje dice dónde vas; esto dice **si la estás tocando** y dónde vas
+   * a acabar si sigues igual. Solo aparece cuando tiene algo que decir: una
+   * meta recién escrita no necesita que le adivinen el futuro.
+   */
+  function lineaRitmo(o) {
+    if (o.tipo === 'siNo' || o.logradoEn || o.abandonadoEn) return null;
+    const rm = ritmo(o, datos(), hoyISO);
+    if (!rm.ultima && !rm.parada) return null;
+    const partes = [rm.frase, rm.fraseProyeccion].filter(Boolean).join(' ');
+    return el('p', { class: `small meta-ritmo ${rm.parada ? 'quieta' : 'muted'}`.trim() },
+      rm.parada ? '🕸️ ' : '', partes);
+  }
 
   function filaCerrada(o) {
     return el('div', { class: 'salud-fila' },
@@ -218,6 +257,8 @@ export function vistaObjetivos(root) {
 
     render(cuerpo,
       campoDe('Qué quieres conseguir', input(o.que, (v) => set({ que: v }), { placeholder: 'Leer 24 libros' })),
+
+      bloqueAvance(o),
 
       el('div', { class: 'fila' },
         el('div', { class: 'grow' }, campoDe('Ámbito',
@@ -276,6 +317,29 @@ export function vistaObjetivos(root) {
           store.borrarEn('objetivos', o.id);
           cerrar();
         }, { variant: 'ghost danger chico' })));
+
+    /**
+     * Los últimos 30 días en una tira de barras. No es una gráfica bonita: es
+     * la respuesta a «¿esto lo estoy haciendo o lo estoy pensando?».
+     */
+    function bloqueAvance(meta) {
+      if (meta.tipo === 'siNo') return null;
+      const serie = serieDeAvance(meta, datos(), hoyISO, 30);
+      const tope = Math.max(1, ...serie.map((d) => d.valor));
+      const dias = serie.filter((d) => d.valor > 0).length;
+      const rm = ritmo(meta, datos(), hoyISO);
+      return el('div', { class: 'field' },
+        el('span', { class: 'field-label' }, 'Últimos 30 días'),
+        el('div', { class: 'chispa' }, ...serie.map((d) => el('i', {
+          class: d.valor > 0 ? 'lleno' : '',
+          style: `height:${d.valor > 0 ? Math.max(18, Math.round((d.valor / tope) * 100)) : 6}%`,
+          title: `${d.fecha}: ${d.valor}`,
+        }))),
+        el('span', { class: 'field-hint' },
+          `${dias} de 30 días con avance. ${rm.frase}`
+          + (rm.porSemana ? ` Vas a ${rm.porSemana}${meta.unidad ? ` ${meta.unidad}` : ''} por semana.` : '')
+          + (rm.fraseProyeccion ? ` ${rm.fraseProyeccion}` : '')));
+    }
 
     // Cambiar de tipo cambia los campos: se vuelve a dibujar el panel entero.
     function cerrarYAbrir() { panel.remove(); panelAbierto = null; panelMeta(id); pintar(); }
