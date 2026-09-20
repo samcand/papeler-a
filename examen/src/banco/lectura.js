@@ -1128,4 +1128,337 @@ export const LECTURA = [
     correcta: 0,
     explicacion: 'La cifra sostiene la frase siguiente: nadie las lee y el sistema supone que sí. El texto no afirma que la extensión sea deliberada.',
   },
+
+  // ----- Textos discontinuos: leer gráficas -----
+  {
+    id: 'lec-083', tema: 'discontinuos', dificultad: 2,
+    grafico: {
+      tipo: 'barras', titulo: 'Estudiantes matriculados (en miles)', ejeY: 'miles',
+      datos: [
+        { etiqueta: '2019', valor: 32 }, { etiqueta: '2020', valor: 28 },
+        { etiqueta: '2021', valor: 35 }, { etiqueta: '2022', valor: 41 },
+      ],
+    },
+    enunciado: '¿Cuál fue el aumento de la matrícula entre 2020 y 2022?',
+    opciones: ['13 mil estudiantes', '41 mil estudiantes', '9 mil estudiantes', '28 mil estudiantes'],
+    correcta: 0,
+    explicacion: '41 − 28 = 13 mil. La pregunta pide una diferencia, no el valor de una barra: leer solo el último dato es el error más común.',
+  },
+  {
+    id: 'lec-084', tema: 'discontinuos', dificultad: 1,
+    grafico: {
+      tipo: 'barras', titulo: 'Material reciclado en el mes (toneladas)', ejeY: 'ton',
+      datos: [
+        { etiqueta: 'Papel', valor: 120 }, { etiqueta: 'Vidrio', valor: 85 },
+        { etiqueta: 'Plástico', valor: 60 }, { etiqueta: 'Metal', valor: 35 },
+      ],
+    },
+    enunciado: '¿Cuántas toneladas más de papel que de plástico se reciclaron?',
+    opciones: ['60', '120', '180', '25'],
+    correcta: 0,
+    explicacion: '120 − 60 = 60 toneladas. También se puede decir que se recicló el doble de papel que de plástico.',
+  },
+  {
+    id: 'lec-085', tema: 'discontinuos', dificultad: 3,
+    grafico: {
+      tipo: 'lineas', titulo: 'Hogares con acceso a internet (%)', ejeY: '%',
+      etiquetas: ['2018', '2019', '2020', '2021', '2022'],
+      series: [
+        { nombre: 'Urbano', valores: [62, 64, 67, 70, 72] },
+        { nombre: 'Rural', valores: [38, 37, 35, 34, 32] },
+      ],
+    },
+    enunciado: '¿Qué afirmación describe correctamente lo que muestra el gráfico?',
+    opciones: [
+      'La brecha entre lo urbano y lo rural se amplió durante el periodo',
+      'Las dos zonas mejoraron su acceso a internet',
+      'El acceso rural creció más lento que el urbano, pero creció',
+      'La brecha se mantuvo constante',
+    ],
+    correcta: 0,
+    explicacion: 'En 2018 la diferencia era de 24 puntos y en 2022 de 40. Además el acceso rural no creció más lento: bajó, que es distinto.',
+    pista: 'Calcula la distancia entre las dos líneas al principio y al final.',
+  },
+  {
+    id: 'lec-086', tema: 'discontinuos', dificultad: 2,
+    grafico: {
+      tipo: 'circular', titulo: 'Distribución del gasto mensual de un hogar',
+      datos: [
+        { etiqueta: 'Vivienda', valor: 35 }, { etiqueta: 'Alimentación', valor: 28 },
+        { etiqueta: 'Transporte', valor: 15 }, { etiqueta: 'Educación', valor: 12 },
+        { etiqueta: 'Otros', valor: 10 },
+      ],
+    },
+    enunciado: '¿Qué porcentaje del gasto se destina en conjunto a vivienda y alimentación?',
+    opciones: ['63 %', '35 %', '28 %', '73 %'],
+    correcta: 0,
+    explicacion: '35 + 28 = 63 %. Casi dos terceras partes del presupuesto se van en esos dos rubros.',
+  },
+  {
+    id: 'lec-087', tema: 'discontinuos', dificultad: 2,
+    grafico: {
+      tipo: 'pictograma', titulo: 'Libros prestados por mes', unidad: 50, nombreUnidad: 'libros',
+      filas: [
+        { etiqueta: 'Marzo', valor: 200 }, { etiqueta: 'Abril', valor: 300 }, { etiqueta: 'Mayo', valor: 150 },
+      ],
+    },
+    enunciado: '¿Cuántos libros más se prestaron en abril que en mayo?',
+    opciones: ['150', '3', '300', '450'],
+    correcta: 0,
+    explicacion: 'Abril tiene 6 círculos y mayo 3; la diferencia son 3 círculos, y cada uno equivale a 50 libros: 3 × 50 = 150. En un pictograma siempre hay que mirar primero cuánto vale el símbolo.',
+  },
+  {
+    id: 'lec-088', tema: 'discontinuos', dificultad: 3,
+    grafico: {
+      tipo: 'barras', titulo: 'Quejas recibidas por servicio público', ejeY: 'quejas',
+      datos: [
+        { etiqueta: 'Agua', valor: 45 }, { etiqueta: 'Energía', valor: 30 },
+        { etiqueta: 'Internet', valor: 25 }, { etiqueta: 'Gas', valor: 10 },
+      ],
+    },
+    enunciado: '¿Cuál de estas afirmaciones NO se puede sostener con el gráfico?',
+    opciones: [
+      'El servicio de agua es el de peor calidad de la ciudad',
+      'El servicio de agua recibió más quejas que ningún otro',
+      'El gas recibió menos de la cuarta parte de las quejas del agua',
+      'Los cuatro servicios recibieron quejas',
+    ],
+    correcta: 0,
+    explicacion: 'El gráfico cuenta quejas, no calidad, y tampoco dice cuántos usuarios tiene cada servicio: si el agua llega a mucha más gente, más quejas no implica peor servicio. Las otras tres se leen directamente de las barras.',
+  },
+  {
+    id: 'lec-089', tema: 'discontinuos', dificultad: 3,
+    grafico: {
+      tipo: 'lineas', titulo: 'Temperatura media anual de una ciudad (°C)', ejeY: '°C',
+      etiquetas: ['2000', '2005', '2010', '2015', '2020'],
+      series: [{ nombre: 'Media', valores: [21.4, 21.7, 22.1, 22.4, 22.9] }],
+      tope: 25,
+    },
+    enunciado: '¿Qué conclusión es prudente a partir de este gráfico?',
+    opciones: [
+      'En el periodo medido la temperatura media mostró una tendencia al alza',
+      'En 2050 la temperatura será de 25 °C',
+      'El aumento se debe a la deforestación de la región',
+      'La temperatura subirá indefinidamente al mismo ritmo',
+    ],
+    correcta: 0,
+    explicacion: 'El gráfico muestra qué pasó, no por qué ni qué pasará. Extrapolar o atribuir una causa exige información adicional que aquí no aparece.',
+  },
+  {
+    id: 'lec-090', tema: 'discontinuos', dificultad: 2,
+    grafico: {
+      tipo: 'circular', titulo: 'Modo de transporte al trabajo',
+      datos: [
+        { etiqueta: 'Bus', valor: 35 }, { etiqueta: 'A pie', valor: 30 },
+        { etiqueta: 'Carro', valor: 20 }, { etiqueta: 'Bicicleta', valor: 10 },
+        { etiqueta: 'Moto', valor: 5 },
+      ],
+    },
+    enunciado: '¿Qué proporción de las personas se desplaza en medios no motorizados?',
+    opciones: ['40 %', '30 %', '10 %', '65 %'],
+    correcta: 0,
+    explicacion: 'Los no motorizados son caminar (30 %) y bicicleta (10 %): 40 % en total. El bus, el carro y la moto sí llevan motor.',
+  },
+  {
+    id: 'lec-091', tema: 'discontinuos', dificultad: 3,
+    grafico: {
+      tipo: 'barras', titulo: 'Satisfacción con tres proveedores (sobre 100)', ejeY: 'puntos',
+      datos: [{ etiqueta: 'A', valor: 96 }, { etiqueta: 'B', valor: 98 }, { etiqueta: 'C', valor: 97 }],
+      tope: 100,
+    },
+    enunciado: 'Una publicidad afirma que el proveedor B es "muy superior" a los demás. ¿Qué muestra en realidad el gráfico?',
+    opciones: [
+      'Que los tres tienen resultados casi iguales: la diferencia es de uno o dos puntos sobre cien',
+      'Que B duplica la satisfacción de A',
+      'Que C es el peor evaluado por un amplio margen',
+      'Que los datos son insuficientes para comparar',
+    ],
+    correcta: 0,
+    explicacion: 'Con el eje empezando en cero las tres barras se ven casi idénticas. Si el eje arrancara en 95, la de B parecería el triple que la de A: por eso, en un gráfico de barras, dónde empieza el eje vertical cambia por completo la impresión.',
+    pista: 'Mira la escala del eje antes de mirar el tamaño de las barras.',
+  },
+  {
+    id: 'lec-092', tema: 'discontinuos', dificultad: 2,
+    grafico: {
+      tipo: 'barras', titulo: 'Tasa de desempleo por trimestre (%)', ejeY: '%',
+      datos: [
+        { etiqueta: 'I', valor: 14.2 }, { etiqueta: 'II', valor: 13.8 },
+        { etiqueta: 'III', valor: 12.9 }, { etiqueta: 'IV', valor: 12.1 },
+      ],
+      tope: 15,
+    },
+    enunciado: '¿Qué titular resume mejor la información del gráfico?',
+    opciones: [
+      'El desempleo bajó de forma sostenida a lo largo del año',
+      'El desempleo se disparó durante el año',
+      'El desempleo se redujo a la mitad en un año',
+      'El desempleo se mantuvo estable en todos los trimestres',
+    ],
+    correcta: 0,
+    explicacion: 'Bajó en los cuatro trimestres, de 14,2 % a 12,1 %: es una caída sostenida pero moderada, de poco más de dos puntos. Un titular exacto no exagera ni minimiza lo que muestran los datos.',
+  },
+
+  // ----- Análisis de la imagen -----
+  {
+    id: 'lec-093', tema: 'imagen', dificultad: 1,
+    grafico: {
+      tipo: 'plano', titulo: 'Plano de un apartamento',
+      salas: [
+        { x: 0, y: 0, w: 50, h: 50, etiqueta: 'Sala-comedor' },
+        { x: 50, y: 0, w: 50, h: 25, etiqueta: 'Cocina' },
+        { x: 50, y: 25, w: 50, h: 25, etiqueta: 'Baño' },
+        { x: 0, y: 50, w: 100, h: 50, etiqueta: 'Habitación' },
+      ],
+    },
+    enunciado: 'Según el plano, ¿qué espacio ocupa la mayor superficie?',
+    opciones: ['La habitación', 'La sala-comedor', 'La cocina', 'El baño'],
+    correcta: 0,
+    explicacion: 'La habitación abarca todo el ancho y la mitad del fondo; la sala-comedor ocupa la mitad de eso. Leer un plano es comparar áreas, no solo contar espacios.',
+  },
+  {
+    id: 'lec-094', tema: 'imagen', dificultad: 2,
+    grafico: {
+      tipo: 'mapa', titulo: 'Densidad de población por zona',
+      zonas: [
+        { x: 0, y: 0, w: 48, h: 48, etiqueta: 'Norte', nivel: 1 },
+        { x: 52, y: 0, w: 48, h: 48, etiqueta: 'Oriente', nivel: 0 },
+        { x: 0, y: 52, w: 48, h: 48, etiqueta: 'Centro', nivel: 3 },
+        { x: 52, y: 52, w: 48, h: 48, etiqueta: 'Sur', nivel: 2 },
+      ],
+      leyenda: [
+        { nivel: 3, texto: 'Alta' }, { nivel: 2, texto: 'Media' },
+        { nivel: 1, texto: 'Baja' }, { nivel: 0, texto: 'Sin dato' },
+      ],
+    },
+    enunciado: 'Según el mapa y su convención, ¿qué zona tiene la mayor densidad de población?',
+    opciones: ['Centro', 'Sur', 'Norte', 'Oriente'],
+    correcta: 0,
+    explicacion: 'El sombreado más intenso corresponde a densidad alta, y la leyenda es la que permite traducirlo. Sin leer la convención, un mapa temático no se puede interpretar.',
+  },
+  {
+    id: 'lec-095', tema: 'imagen', dificultad: 3,
+    grafico: {
+      tipo: 'mapa', titulo: 'Densidad de población por zona',
+      zonas: [
+        { x: 0, y: 0, w: 48, h: 48, etiqueta: 'Norte', nivel: 1 },
+        { x: 52, y: 0, w: 48, h: 48, etiqueta: 'Oriente', nivel: 0 },
+        { x: 0, y: 52, w: 48, h: 48, etiqueta: 'Centro', nivel: 3 },
+        { x: 52, y: 52, w: 48, h: 48, etiqueta: 'Sur', nivel: 2 },
+      ],
+      leyenda: [
+        { nivel: 3, texto: 'Alta' }, { nivel: 2, texto: 'Media' },
+        { nivel: 1, texto: 'Baja' }, { nivel: 0, texto: 'Sin dato' },
+      ],
+    },
+    enunciado: '¿Qué afirmación NO se puede sostener con este mapa?',
+    opciones: [
+      'La zona oriente está deshabitada',
+      'El centro está más densamente poblado que el norte',
+      'El sur tiene una densidad intermedia',
+      'Hay una zona de la que no se tiene información',
+    ],
+    correcta: 0,
+    explicacion: '"Sin dato" no significa cero: significa que no se midió. Confundir la ausencia de información con la ausencia del fenómeno es uno de los errores más frecuentes al leer mapas y tablas.',
+  },
+  {
+    id: 'lec-096', tema: 'imagen', dificultad: 2,
+    grafico: {
+      tipo: 'plano', titulo: 'Plano de evacuación de un piso',
+      salas: [
+        { x: 0, y: 0, w: 40, h: 60, etiqueta: 'Aula 1' },
+        { x: 40, y: 0, w: 20, h: 100, etiqueta: 'Pasillo' },
+        { x: 60, y: 0, w: 40, h: 60, etiqueta: 'Aula 2' },
+        { x: 0, y: 60, w: 40, h: 40, etiqueta: 'Laboratorio' },
+        { x: 60, y: 60, w: 40, h: 40, etiqueta: 'Salida' },
+      ],
+    },
+    enunciado: 'Una persona está en el laboratorio. Según el plano, para llegar a la salida debe:',
+    opciones: [
+      'Salir al pasillo y recorrerlo hasta el extremo opuesto',
+      'Atravesar el aula 1 y luego el aula 2',
+      'Salir directamente sin pasar por el pasillo',
+      'Subir al piso superior',
+    ],
+    correcta: 0,
+    explicacion: 'El pasillo es el único espacio que conecta los cuatro recintos con la salida. En un plano de evacuación lo primero que hay que identificar es la circulación, no las habitaciones.',
+  },
+  {
+    id: 'lec-097', tema: 'imagen', dificultad: 2,
+    enunciado: 'Al analizar una imagen se distingue entre denotación y connotación. La denotación es:',
+    opciones: [
+      'Lo que la imagen muestra literalmente, sin interpretación',
+      'El mensaje oculto que el autor quiso transmitir',
+      'La emoción que la imagen produce en quien la ve',
+      'El contexto histórico en que fue creada',
+    ],
+    correcta: 0,
+    explicacion: 'Primero se describe lo que hay (un hombre con un maletín frente a una puerta) y solo después se interpreta qué sugiere. Saltarse el primer paso lleva a ver en la imagen lo que uno ya pensaba.',
+  },
+  {
+    id: 'lec-098', tema: 'imagen', dificultad: 3,
+    enunciado: 'Una fotografía toma a una persona desde abajo, con la cámara a la altura de sus pies mirando hacia arriba. Ese ángulo, llamado contrapicado, suele producir el efecto de:',
+    opciones: [
+      'Engrandecer al sujeto y darle apariencia de autoridad o poder',
+      'Hacerlo parecer más pequeño y vulnerable',
+      'Eliminar cualquier intención del fotógrafo',
+      'Mostrarlo de forma neutral y objetiva',
+    ],
+    correcta: 0,
+    explicacion: 'El picado, desde arriba, produce el efecto contrario. Ninguna fotografía es neutral: el ángulo, el encuadre y lo que queda fuera son decisiones que construyen el mensaje.',
+  },
+  {
+    id: 'lec-099', tema: 'imagen', dificultad: 3,
+    enunciado: 'Para interpretar una caricatura política es indispensable:',
+    opciones: [
+      'Reconocer el contexto al que alude y los símbolos y exageraciones que emplea',
+      'Tomar literalmente lo que muestra el dibujo',
+      'Identificar al dibujante antes que el tema',
+      'Evaluar la calidad técnica del trazo',
+    ],
+    correcta: 0,
+    explicacion: 'La caricatura funciona por exageración y por referencia a hechos conocidos: sin el contexto, el chiste o la crítica no se entienden. Leerla literalmente es no leerla.',
+  },
+  {
+    id: 'lec-100', tema: 'imagen', dificultad: 2,
+    enunciado: 'Un aviso publicitario muestra a una familia sonriente en una cocina impecable junto al empaque de un producto. Lo que el aviso promete implícitamente es:',
+    opciones: [
+      'Una asociación entre el producto y el bienestar familiar, no una cualidad del producto',
+      'Que el producto se fabrica en cocinas como esa',
+      'Que el producto fue probado por esa familia',
+      'Que el producto es el más barato del mercado',
+    ],
+    correcta: 0,
+    explicacion: 'La publicidad emocional vende una asociación, no una propiedad verificable. Distinguir la afirmación comprobable de la sugerida es lo que la pregunta evalúa.',
+  },
+  {
+    id: 'lec-101', tema: 'imagen', dificultad: 3,
+    grafico: {
+      tipo: 'barras', titulo: 'Resultados de la encuesta',
+      datos: [
+        { etiqueta: 'Opción A', valor: 62 }, { etiqueta: 'Opción B', valor: 38 },
+      ],
+      tope: 100,
+    },
+    enunciado: 'Una infografía presenta este gráfico sin más información. ¿Qué haría falta para poder valorar el resultado?',
+    opciones: [
+      'Saber a quiénes y a cuántas personas se preguntó, cuándo y quién hizo la encuesta',
+      'Conocer el color corporativo de quien la publica',
+      'Ver el gráfico en tamaño más grande',
+      'Nada más: los porcentajes hablan por sí solos',
+    ],
+    correcta: 0,
+    explicacion: 'Muestra, fecha, pregunta exacta y autoría son los datos que permiten juzgar si una cifra significa algo. Una infografía sin ficha técnica es una imagen, no una evidencia.',
+  },
+  {
+    id: 'lec-102', tema: 'imagen', dificultad: 2,
+    enunciado: 'Los tres elementos que permiten leer correctamente cualquier mapa son:',
+    opciones: [
+      'La leyenda o convenciones, la escala y la orientación',
+      'El color, el tamaño y el autor',
+      'El título, la fecha y el número de páginas',
+      'La proyección, el idioma y el precio',
+    ],
+    correcta: 0,
+    explicacion: 'La leyenda dice qué significa cada símbolo, la escala cuánto representa cada centímetro y la orientación hacia dónde está el norte. Sin alguno de los tres, el mapa se puede malinterpretar por completo.',
+  },
 ];

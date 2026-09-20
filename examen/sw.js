@@ -11,7 +11,7 @@ const ARCHIVOS = [
   './', './index.html', './manifest.webmanifest',
   './assets/estilos.css', './assets/icono.svg',
   './src/app.js', './src/ui.js', './src/store.js', './src/motor.js',
-  './src/temario.js', './src/figuras.js', './src/componentes.js',
+  './src/temario.js', './src/figuras.js', './src/graficos.js', './src/componentes.js',
   './src/banco/index.js', './src/banco/matematicas.js', './src/banco/trigonometria.js',
   './src/banco/abstracto.js', './src/banco/geografia.js', './src/banco/ciudadania.js',
   './src/banco/salud.js', './src/banco/fisica.js', './src/banco/quimica.js',
@@ -19,7 +19,8 @@ const ARCHIVOS = [
   './src/banco/cotidiana.js', './src/banco/lectura.js',
   './src/banco/ingles.js',
   './src/vistas/inicio.js', './src/vistas/temario.js', './src/vistas/practica.js',
-  './src/vistas/simulacro.js', './src/vistas/progreso.js',
+  './src/vistas/simulacro.js', './src/vistas/progreso.js', './src/vistas/escritura.js',
+  './src/escritura.js',
 ];
 
 self.addEventListener('install', (e) => {

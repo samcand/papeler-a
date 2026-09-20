@@ -138,7 +138,7 @@ que al álgebra.
 
 | Lo que evalúan | Cómo está cubierto | Estado |
 | --- | --- | --- |
-| Lectura crítica / análisis textual | Comprensión de lectura (82 preguntas, 14 textos) | Cubierto; faltan textos discontinuos y filosóficos |
+| Lectura crítica / análisis textual | Lectura crítica (102 preguntas, 14 textos más gráficas) | Cubierto, incluidos textos discontinuos |
 | Matemáticas (numérico, geométrico, aleatorio) | Matemáticas (180) | Cubierto |
 | Razonamiento cuantitativo (Saber Pro) | Matemáticas + Vida cotidiana (100) | Cubierto |
 | Sociales: Constitución, Estado, participación, derechos | Política y ciudadanía (100) | Cubierto |
@@ -150,8 +150,8 @@ que al álgebra.
 | Ciencias naturales: componente químico | Química (100) | Cubierto |
 | Ciencias naturales: competencia de indagación | Biología y salud, tema de indagación (10) | Cubierto; CTS se trabaja desde geografía y vida cotidiana |
 | Historia de Colombia | Historia de Colombia (100) | Cubierto, del periodo prehispánico al presente |
-| **Análisis de la imagen (UNAL)** | Razonamiento abstracto (90) cubre series y matrices | **Sin cubrir** el análisis de imágenes reales |
-| **Comunicación escrita (Saber Pro)** | — | **Sin cubrir**: es pregunta abierta, no opción múltiple |
+| Análisis de la imagen (UNAL) | Lectura crítica, tema de imagen (10) | Cubierto con planos, mapas y gráficos; sin fotografías ni obras |
+| Comunicación escrita (Saber Pro) | Pantalla propia con consignas y rúbrica | Cubierto como ejercicio; la rúbrica es de autoevaluación |
 
 ### Lo que ya quedó cubierto
 
@@ -171,15 +171,28 @@ También se cubrió **historia de Colombia** (100 preguntas, 10 temas), que el
 Saber 11 evalúa dentro de sociales: del periodo prehispánico al acuerdo de paz,
 preguntando por causas y consecuencias y no por listas de fechas.
 
-### Lo que sigue faltando
+### Lo que se cubrió después
 
-1. **Análisis de la imagen** al estilo UNAL: leer gráficos, mapas, planos,
-   pictogramas y caricaturas, no series de figuras abstractas.
-2. **Textos discontinuos** en lectura crítica: gráficas e infografías, que hoy
-   solo se trabajan con tablas de texto.
-3. **Comunicación escrita** (Saber Pro): no son preguntas de opción múltiple,
-   hace falta otra pantalla — escribir un texto argumentativo contra reloj y
-   evaluarlo con una rúbrica.
+- **Textos discontinuos** y **análisis de la imagen**: `graficos.js` dibuja
+  barras, líneas, sectores, pictogramas, planos y mapas con leyenda, y con
+  ellos se escribieron 20 preguntas nuevas de lectura crítica: calcular
+  diferencias y proporciones, decir qué NO se puede concluir de un gráfico,
+  leer un plano de evacuación y un mapa temático.
+- **Comunicación escrita**: tiene pantalla propia. Consigna, cronómetro de 20,
+  30 o 40 minutos, contador de palabras y párrafos, autoguardado, y al
+  terminar una rúbrica de cuatro criterios con tres niveles y una lista de
+  relectura con los errores más frecuentes.
+
+### Límites que conviene tener presentes
+
+1. El **análisis de la imagen** se practica con planos, mapas, gráficos y
+   preguntas conceptuales sobre fotografía, caricatura y publicidad. No hay
+   fotografías ni obras de arte reales, que es parte de lo que usa la UNAL.
+2. La **rúbrica de comunicación escrita** es de autoevaluación: sirve para
+   releerse con criterio, no reemplaza a un evaluador.
+3. Los **módulos específicos del Saber Pro**, que dependen de cada carrera, no
+   están cubiertos y probablemente no deban estarlo en una herramienta
+   general.
 
 ## Fuentes
 

@@ -1,7 +1,7 @@
 # Ingreso — plataforma de preguntas para la prueba de admisión
 
 Banco de preguntas y simulacros para preparar el examen de ingreso a la
-universidad, con **el temario de lo que preguntan** y **1 333 preguntas** con
+universidad, con **el temario de lo que preguntan** y **1 353 preguntas** con
 explicación en doce asignaturas, a razón de **10 por tema en todos los temas**:
 
 | Asignatura | Temas | Preguntas | Qué cubre |
@@ -17,7 +17,7 @@ explicación en doce asignaturas, a razón de **10 por tema en todos los temas**
 | **Política y ciudadanía** | 10 | 100 | Ramas del poder, Constitución, derechos humanos, democracia, sistemas políticos, elecciones, impuestos, convivencia, organismos internacionales y ética pública. |
 | **Vida cotidiana y cultura general** | 10 | 100 | Dinero, precios, documentos, medidas y dosis, seguridad digital, evaluar noticias, seguridad vial, consumo responsable, primer empleo y cultura general. |
 | **Razonamiento abstracto** | 9 | 90 | Series de figuras, matrices, el que no pertenece, rotación, plegado y cubos, series numéricas y alfanuméricas, lógica y analogías. |
-| **Comprensión de lectura** | 8 | 82 | Catorce textos originales: idea principal, detalles, inferencias, vocabulario en contexto, propósito y tono, estructura, argumentación y datos. |
+| **Lectura crítica** | 10 | 102 | Catorce textos originales más gráficas, planos y mapas: idea principal, inferencias, vocabulario, propósito y tono, estructura, argumentación, datos, textos discontinuos y análisis de la imagen. |
 
 No necesita servidor, ni cuenta, ni internet. Todo se guarda en tu dispositivo.
 
@@ -42,6 +42,7 @@ conexión. También se publica tal cual en GitHub Pages: son archivos estáticos
 | **Temario** | El mapa del examen: cada tema dice qué hay que saber hacer, cuántas preguntas hay y cómo vas. Desde ahí se practica un tema suelto. |
 | **Practicar** | Preguntas de a una con la explicación al instante. Se filtra por asignatura, tema y dificultad; las teclas 1–4 responden y Enter avanza. |
 | **Simulacro** | El examen completo con cronómetro (102 preguntas en 130 minutos, o versiones corta y exprés), mapa de preguntas, marcas para volver y nada de ayudas. Al entregar: nota, desglose por asignatura y revisión pregunta por pregunta. |
+| **Escribir** | El módulo de comunicación escrita del Saber Pro, que no es de opción múltiple: una consigna, un cronómetro, contador de palabras y párrafos, autoguardado, y al terminar una rúbrica de cuatro criterios y una lista de relectura. Los textos quedan guardados y se pueden descargar. |
 | **Progreso** | Actividad de los últimos 14 días, aciertos por asignatura, temas más flojos, historial de simulacros, ajustes y respaldo de tus datos. |
 
 ### Repaso espaciado
@@ -69,6 +70,20 @@ y `figuras.js` la convierte en SVG:
 
 Así el banco sigue siendo texto —se versiona, se revisa y se exporta— y la app
 no depende de ninguna imagen.
+
+### Las gráficas también se dibujan
+
+Lo mismo vale para los textos discontinuos de lectura crítica y el análisis de
+la imagen: `graficos.js` convierte un objeto en barras, líneas, sectores,
+pictogramas, planos o mapas con leyenda.
+
+```js
+{ tipo: 'barras', titulo: 'Tasa de desempleo por trimestre (%)',
+  datos: [{ etiqueta: 'I', valor: 14.2 }, { etiqueta: 'II', valor: 13.8 }] }
+```
+
+Cada gráfico lleva además un texto alternativo con sus datos, de modo que se
+puede responder la pregunta con un lector de pantalla.
 
 ## Para qué prueba
 
@@ -118,8 +133,8 @@ La pregunta correcta no es "cuántas preguntas quedan bonitas", sino **cuántas
 hacen falta para que estudiar con el banco enseñe la materia en vez de enseñar
 el banco**. Hay tres restricciones que fijan el número, y la mayor manda.
 
-**1. Cubrir el temario, no solo tocarlo.** Son 133 temas y tres niveles de
-dificultad. Con solo dos preguntas por nivel ya hacen falta unas **798**. Por
+**1. Cubrir el temario, no solo tocarlo.** Son 135 temas y tres niveles de
+dificultad. Con solo dos preguntas por nivel ya hacen falta unas **810**. Por
 debajo de eso hay temas que solo se pueden practicar de una manera.
 
 **2. No memorizar la respuesta.** La investigación sobre práctica de
@@ -168,12 +183,12 @@ Cobertura por asignatura (meta: 10 preguntas por tema)
   Física                   100 preguntas · 10 temas · 10.0 por tema  → meta alcanzada
   Química                  100 preguntas · 10 temas · 10.0 por tema  → meta alcanzada
   Historia de Colombia     100 preguntas · 10 temas · 10.0 por tema  → meta alcanzada
-  Comprensión de lectura    82 preguntas ·  8 temas · 10.3 por tema  → meta alcanzada
+  Lectura crítica          102 preguntas · 10 temas · 10.2 por tema  → meta alcanzada
   Inglés                   120 preguntas · 12 temas · 10.0 por tema  → meta alcanzada
-  TOTAL                   1333 preguntas · faltan 0 para la meta de 10 por tema
+  TOTAL                   1353 preguntas · faltan 0 para la meta de 10 por tema
 ```
 
-Con 133 temas, la meta de 10 por tema son 1 333 preguntas: el banco está
+Con 135 temas, la meta de 10 por tema son 1 350 preguntas: el banco está
 completo en ese nivel y dentro del rango de "gran alcance" de la tabla
 anterior. Alcanza para tres meses de estudio y varios simulacros sin repetir
 preguntas.
@@ -224,6 +239,8 @@ examen/
     temario.js          las asignaturas y sus temas (el mapa del examen)
     motor.js            barajado, filtros, selección, repaso y estadísticas
     figuras.js          las figuras del razonamiento abstracto, en SVG
+    graficos.js         barras, líneas, sectores, pictogramas, planos y mapas
+    escritura.js        consignas y rúbrica de comunicación escrita
     store.js            progreso en localStorage, importar y exportar
     componentes.js      cómo se pinta una pregunta (la comparten las vistas)
     ui.js               cuatro ayudas de DOM, sin framework
@@ -231,7 +248,7 @@ examen/
                         (matematicas, trigonometria, abstracto, geografia,
                          ciudadania, salud, fisica, quimica, historia,
                          cotidiana, lectura, ingles)
-    vistas/             inicio, temario, practicar, simulacro y progreso
+    vistas/             inicio, temario, practicar, simulacro, escribir y progreso
   tests/                pruebas del banco y del motor (node, sin navegador)
   docs/                 qué evalúa cada prueba colombiana y qué falta cubrir
 ```
@@ -242,6 +259,7 @@ examen/
 npm test                      # incluye las de esta app
 node examen/tests/banco.test.js
 node examen/tests/motor.test.js
+node examen/tests/escritura.test.js
 ```
 
 `banco.test.js` no comprueba que las respuestas sean ciertas —eso se revisa al

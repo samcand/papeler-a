@@ -8,6 +8,7 @@
 
 import { el } from './ui.js';
 import { nodoFigura } from './figuras.js';
+import { nodoGrafico } from './graficos.js';
 import { texto } from './banco/index.js';
 import { nombreAsignatura, nombreTema, NIVELES } from './temario.js';
 
@@ -36,6 +37,7 @@ export function nodoEnunciado(pregunta) {
   const partes = [];
   const lectura = nodoLectura(pregunta);
   if (lectura) partes.push(lectura);
+  if (pregunta.grafico) partes.push(nodoGrafico(pregunta.grafico));
   partes.push(el('p', { class: 'pregunta' }, pregunta.enunciado));
   if (pregunta.codigo) partes.push(el('pre', { class: 'bloque' }, pregunta.codigo));
   if (pregunta.figuras?.enunciado?.length) {

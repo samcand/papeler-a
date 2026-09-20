@@ -194,6 +194,41 @@ pre.bloque {
 .figura .rayado { stroke: var(--texto); stroke-width: 2.5; }
 .figura .interrogante { fill: var(--suave); font-size: 44px; font-weight: 700; text-anchor: middle; }
 
+/* ---------- Gráficos: textos discontinuos y análisis de imagen ---------- */
+
+.grafico {
+  background: var(--fondo-2); border: 1px solid var(--borde); border-radius: 12px;
+  padding: 10px; margin: 0 0 14px; max-width: 520px;
+}
+.grafico svg { width: 100%; height: auto; display: block; }
+
+.grafico .g-titulo { fill: var(--texto); font-size: 14px; font-weight: 650; }
+.grafico .g-texto { fill: var(--suave); font-size: 11px; }
+.grafico .g-valor { fill: var(--texto); font-size: 11px; font-weight: 600; }
+.grafico .g-eje { stroke: var(--suave); stroke-width: 1.2; }
+.grafico .g-guia { stroke: var(--borde); stroke-width: 1; stroke-dasharray: 3 3; }
+.grafico .g-linea { fill: none; stroke-width: 2.5; stroke-linejoin: round; }
+.grafico .g-zona { stroke: var(--borde); stroke-width: 1.5; }
+.grafico .g-sector { stroke: var(--tarjeta); stroke-width: 1.5; }
+
+/* Paleta de cinco colores que funciona en tema claro y oscuro. */
+.grafico .g-c1 { fill: var(--acento); }
+.grafico .g-c2 { fill: var(--acento-2); }
+.grafico .g-c3 { fill: var(--ok); }
+.grafico .g-c4 { fill: var(--aviso); }
+.grafico .g-c5 { fill: var(--mal); }
+.grafico .g-t1 { stroke: var(--acento); }
+.grafico .g-t2 { stroke: var(--acento-2); }
+.grafico .g-t3 { stroke: var(--ok); }
+.grafico .g-t4 { stroke: var(--aviso); }
+.grafico .g-t5 { stroke: var(--mal); }
+
+/* Mapas: el nivel controla la intensidad del sombreado. */
+.grafico .g-nivel0 { fill: var(--fondo-2); }
+.grafico .g-nivel1 { fill: var(--acento); fill-opacity: .25; }
+.grafico .g-nivel2 { fill: var(--acento); fill-opacity: .55; }
+.grafico .g-nivel3 { fill: var(--acento); fill-opacity: .9; }
+
 /* ---------- Barra de estado del examen ---------- */
 
 .estado {
@@ -213,6 +248,16 @@ pre.bloque {
 .punto.actual { outline: 2px solid var(--acento); outline-offset: 1px; }
 .punto.acertada { border-color: var(--ok); color: var(--ok); }
 .punto.fallada { border-color: var(--mal); color: var(--mal); }
+
+/* ---------- Comunicación escrita ---------- */
+
+textarea.editor {
+  min-height: 48vh; font-family: inherit; font-size: 16px; line-height: 1.7;
+  resize: vertical; padding: 14px 16px;
+}
+.criterio { border-top: 1px solid var(--borde); padding-top: 14px; margin-top: 14px; }
+.criterio:first-of-type { border-top: 0; padding-top: 0; margin-top: 0; }
+.criterio .opcion { font-size: 14px; padding: 10px 12px; }
 
 /* ---------- Tablas ---------- */
 

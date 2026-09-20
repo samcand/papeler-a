@@ -9,12 +9,14 @@ import { temarioVista } from './vistas/temario.js';
 import { practicaVista } from './vistas/practica.js';
 import { simulacroVista } from './vistas/simulacro.js';
 import { progresoVista } from './vistas/progreso.js';
+import { escrituraVista } from './vistas/escritura.js';
 
 const RUTAS = [
   { ruta: /^\/?$/, vista: inicioVista, nav: 'inicio' },
   { ruta: /^\/temario(?:\/([^/]+))?$/, vista: temarioVista, claves: ['asignatura'], nav: 'temario' },
   { ruta: /^\/practicar(?:\/([^/]+))?$/, vista: practicaVista, claves: ['asignatura'], nav: 'practicar' },
   { ruta: /^\/simulacro$/, vista: simulacroVista, nav: 'simulacro' },
+  { ruta: /^\/escribir$/, vista: escrituraVista, nav: 'escribir' },
   { ruta: /^\/progreso$/, vista: progresoVista, nav: 'progreso' },
 ];
 
@@ -23,6 +25,7 @@ const NAV = [
   { href: '#/temario', id: 'temario', texto: 'Temario' },
   { href: '#/practicar', id: 'practicar', texto: 'Practicar' },
   { href: '#/simulacro', id: 'simulacro', texto: 'Simulacro' },
+  { href: '#/escribir', id: 'escribir', texto: 'Escribir' },
   { href: '#/progreso', id: 'progreso', texto: 'Progreso' },
 ];
 

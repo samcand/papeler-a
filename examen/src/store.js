@@ -17,6 +17,8 @@ const INICIAL = {
   repaso: {},       // { [qid]: { caja, proxima, aciertos, fallos, ultima } }
   simulacros: [],   // { id, at, modelo, minutos, duracionMs, porcentaje, respuestas }
   propias: [],      // preguntas añadidas o importadas por el usuario
+  escritos: [],     // { id, at, consignaId, tema, consigna, texto, palabras, porcentaje, rubrica }
+  borradorEscritura: null,   // texto a medio escribir, para no perderlo al recargar
   ajustes: {
     nombre: '',
     meta: 20,          // preguntas al día
@@ -91,6 +93,24 @@ class Store {
   guardarSimulacro(resultado) {
     this.state.simulacros.unshift({ id: id(), at: Date.now(), ...resultado });
     this.state.simulacros = this.state.simulacros.slice(0, 50);
+    this.guardar();
+  }
+
+  // ------------------------------------------------------------ escritura
+
+  guardarEscrito(escrito) {
+    this.state.escritos.unshift({ id: id(), at: Date.now(), ...escrito });
+    this.state.escritos = this.state.escritos.slice(0, 50);
+    this.guardar();
+  }
+
+  guardarBorradorEscritura(borrador) {
+    this.state.borradorEscritura = { ...borrador, at: Date.now() };
+    this.guardar();
+  }
+
+  borrarBorradorEscritura() {
+    this.state.borradorEscritura = null;
     this.guardar();
   }
 

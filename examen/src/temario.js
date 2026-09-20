@@ -737,9 +737,9 @@ export const ASIGNATURAS = [
   },
   {
     id: 'lectura',
-    nombre: 'Comprensión de lectura',
+    nombre: 'Lectura crítica',
     icono: '📖',
-    resumen: 'Leer un texto y responder: idea principal, inferencias, vocabulario, intención y argumentos.',
+    resumen: 'Leer textos, gráficas e imágenes y responder: idea principal, inferencias, intención, argumentos y datos.',
     temas: [
       { id: 'idea-principal', nombre: 'Idea principal y tema', claves: [
         'Distinguir el tema (de qué habla) de la idea principal (qué dice)',
@@ -780,6 +780,18 @@ export const ASIGNATURAS = [
         'Interpretar cifras, porcentajes y comparaciones',
         'Qué se puede afirmar con los datos dados',
         'Diferencia entre correlación y causa',
+      ] },
+      { id: 'discontinuos', nombre: 'Textos discontinuos: gráficas y tablas', claves: [
+        'Leer barras, líneas, circulares y pictogramas',
+        'Calcular diferencias, sumas de sectores y proporciones',
+        'Qué NO se puede concluir de un gráfico',
+        'El eje truncado y otros efectos que engañan a la vista',
+      ] },
+      { id: 'imagen', nombre: 'Análisis de la imagen', claves: [
+        'Denotación y connotación: describir antes de interpretar',
+        'Leer planos, mapas con leyenda, escala y orientación',
+        'Ángulo, encuadre e intención en fotografía y publicidad',
+        'Caricatura: contexto, símbolos y exageración',
       ] },
     ],
   },
