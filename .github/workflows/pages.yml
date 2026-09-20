@@ -4,8 +4,8 @@
 # repositorio tal cual. La app de alabanza queda en la raíz y la de
 # recordatorios en /recordatorios/.
 #
-# Para que funcione hay que encenderlo una vez en el repositorio:
-# Settings -> Pages -> Build and deployment -> Source: GitHub Actions.
+# El propio flujo enciende Pages la primera vez (enablement), así que no hay
+# que tocar nada en Settings.
 name: Publicar en GitHub Pages
 
 on:
@@ -44,6 +44,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
+        with:
+          # Enciende Pages en el repositorio si todavía no lo estaba.
+          enablement: true
       - uses: actions/upload-pages-artifact@v3
         with:
           path: '.'
