@@ -3,7 +3,7 @@
  * Un recordatorio que solo aparece con cobertura no sirve de mucho.
  */
 
-const VERSION = 'recordatorios-v6';
+const VERSION = 'recordatorios-v7';
 const ARCHIVOS = [
   './', './index.html', './manifest.webmanifest',
   './assets/estilos.css', './assets/icono.svg',

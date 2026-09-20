@@ -462,6 +462,14 @@ function buscador() {
  * eso se notaba como "el campo salta" al escribir un nombre. Se apunta dónde
  * estaba el cursor y se devuelve al terminar.
  */
+let refrescoPendiente = false;
+
+/** ¿El cursor está dentro de algo donde se escribe? */
+function estaEscribiendo(nodo) {
+  if (!nodo) return false;
+  return /^(INPUT|TEXTAREA|SELECT)$/.test(nodo.tagName) || nodo.isContentEditable;
+}
+
 function refrescarArmazon() {
   const viejo = document.querySelector('.marco');
   const contenido = document.getElementById('app');
@@ -469,6 +477,22 @@ function refrescarArmazon() {
   const lateral = viejo.querySelector('.lateral');
   const activo = document.activeElement;
   if (activo && activo.id === 'buscador') return; // no interrumpir la escritura
+
+  // Mientras se escribe no se toca nada. Rehacer el armazón saca el contenido
+  // del documento y el foco se pierde; entonces las teclas sueltas se leen
+  // como atajos y la app "se vuelve loca" cambiando de pantalla a cada letra.
+  // Se deja apuntado y se hace al salir del campo.
+  if (estaEscribiendo(activo) && contenido?.contains(activo)) {
+    if (!refrescoPendiente) {
+      refrescoPendiente = true;
+      activo.addEventListener('blur', () => {
+        refrescoPendiente = false;
+        setTimeout(refrescarArmazon, 0);
+      }, { once: true });
+    }
+    return;
+  }
+
   const escribiendo = !!activo && !!contenido && contenido.contains(activo);
   // Los campos de fecha y número no tienen cursor que restaurar, y preguntarlo
   // lanza excepción: por eso se prueba antes.
@@ -581,7 +605,23 @@ document.documentElement.dataset.theme = store.estado.ajustes.tema || 'dark';
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js').catch((err) => {
+    navigator.serviceWorker.register('sw.js').then((registro) => {
+      // Sin esto uno sigue usando la versión vieja sin enterarse: la app guarda
+      // los archivos para funcionar sin internet, y los guardados no caducan.
+      registro.addEventListener('updatefound', () => {
+        const nuevo = registro.installing;
+        if (!nuevo) return;
+        nuevo.addEventListener('statechange', () => {
+          if (nuevo.state === 'installed' && navigator.serviceWorker.controller) {
+            const aviso = el('div', { class: 'aviso-version' },
+              el('span', { class: 'grow' }, 'Hay una versión nueva de la app.'),
+              button('Actualizar', () => location.reload(), { variant: 'primary chico' }),
+              button('✕', () => aviso.remove(), { variant: 'ghost chico', title: 'Ahora no' }));
+            document.body.append(aviso);
+          }
+        });
+      });
+    }).catch((err) => {
       console.info('La app funciona igual, pero sin modo offline:', err.message);
     });
   });

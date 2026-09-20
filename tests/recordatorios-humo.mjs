@@ -1112,6 +1112,30 @@ if (await campoFichas.count()) {
   else console.log('  ok  buscar en las fichas sin perder el foco');
 }
 
+
+// Escribir en un objetivo: ni se cambia de pantalla ni se pierden letras.
+// Las teclas sueltas son atajos (p = Próximos, g = Proyectos…), así que
+// perder el foco a media palabra hace que la app salte sola.
+await pagina.goto(BASE + '#/objetivos');
+await pagina.waitForTimeout(500);
+await pagina.getByRole('button', { name: '+ Objetivo' }).click();
+await pagina.waitForTimeout(400);
+const campoMeta = pagina.locator('.card.objetivo input[type="text"]').first();
+await campoMeta.click();
+await pagina.keyboard.press('Control+a');
+let saltó = null;
+for (const c of 'programar') {
+  await pagina.keyboard.type(c);
+  await pagina.waitForTimeout(70);
+  const hash = pagina.url().split('#')[1];
+  if (hash !== '/objetivos' && !saltó) saltó = `${hash} al escribir "${c}"`;
+}
+await pagina.waitForTimeout(400);
+const meta = await campoMeta.inputValue().catch(() => '');
+if (saltó) errores.push(`escribir en un objetivo cambió de pantalla: ${saltó}`);
+else if (meta !== 'programar') errores.push(`se perdieron letras al escribir un objetivo: "${meta}"`);
+else console.log('  ok  escribir en un objetivo sin que la app salte de pantalla');
+
 // Accesibilidad básica
 const a11y = await pagina.evaluate(() => {
   const saltar = document.querySelector('.saltar');

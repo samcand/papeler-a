@@ -115,9 +115,11 @@ console.log(`\n${passed} pruebas de lo que sea OK`);
    descripción de **lo que la app acabó haciendo** (no de lo que se pensaba
    hacer), y `npm run docs`.
 3. Actualizar `recordatorios/README.md` si cambia algo que se usa.
-4. Subir la caché del service worker (`VERSION` en `recordatorios/sw.js`) y
-   añadir ahí los archivos nuevos, o quien tenga la app instalada se queda con
-   los viejos.
+4. **Subir la caché del service worker** (`VERSION` en `recordatorios/sw.js`) y
+   añadir ahí los archivos nuevos — también cuando el cambio es un arreglo y no
+   una función. Si no, quien tenga la app abierta sigue con el código viejo y
+   el fallo «ya arreglado» le sigue pasando. La app avisa sola de que hay
+   versión nueva, pero eso solo funciona si la versión cambia.
 
 ## Mensajes de commit
 
