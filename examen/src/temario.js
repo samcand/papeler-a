@@ -1,7 +1,7 @@
 /**
  * temario.js — Qué se pregunta en cada asignatura.
  *
- * Es el mapa del examen: quince asignaturas, y dentro de cada una los temas que
+ * Es el mapa del examen: dieciséis asignaturas, y dentro de cada una los temas que
  * aparecen una y otra vez en las pruebas de ingreso, con lo que hay que saber
  * hacer en cada uno. Todas las preguntas del banco apuntan a un `tema` de aquí
  * (hay una prueba que lo verifica), así que el temario y el banco no se separan.
@@ -1045,6 +1045,64 @@ export const ASIGNATURAS = [
         'Validez y verdad no son lo mismo',
         'Falacias formales e informales',
         'Cómo se reconstruye y se evalúa un argumento',
+      ] },
+    ],
+  },
+  {
+    id: 'universal',
+    nombre: 'Historia universal',
+    icono: '🌍',
+    resumen: 'De las primeras civilizaciones al mundo actual, por causas y no por fechas.',
+    temas: [
+      { id: 'antiguas', nombre: 'Civilizaciones antiguas', claves: [
+        'Revolución neolítica y primeras ciudades',
+        'Mesopotamia, Egipto, India y China',
+        'Escritura, leyes y organización del Estado',
+      ] },
+      { id: 'clasica', nombre: 'Grecia y Roma', claves: [
+        'Polis, democracia ateniense y ciudadanía',
+        'República e Imperio romano',
+        'Herencia clásica: derecho, lengua y pensamiento',
+      ] },
+      { id: 'medieval', nombre: 'Edad Media', claves: [
+        'Feudalismo y sociedad estamental',
+        'Islam, Bizancio y las cruzadas',
+        'Peste negra y crisis del siglo XIV',
+      ] },
+      { id: 'moderna', nombre: 'Renacimiento y expansión europea', claves: [
+        'Humanismo, imprenta y revolución científica',
+        'Reforma protestante y guerras de religión',
+        'Colonialismo y economía atlántica',
+      ] },
+      { id: 'revoluciones', nombre: 'Revoluciones burguesas', claves: [
+        'Ilustración y sus ideas políticas',
+        'Independencia de Estados Unidos y Revolución francesa',
+        'Napoleón y el mapa europeo',
+      ] },
+      { id: 'industrial', nombre: 'Revolución industrial', claves: [
+        'Máquina de vapor, fábrica y ciudad',
+        'Clase obrera, sindicatos y socialismo',
+        'Segunda revolución industrial',
+      ] },
+      { id: 'imperialismo', nombre: 'Imperialismo y siglo XIX', claves: [
+        'Reparto de África y Asia',
+        'Nacionalismos y unificaciones',
+        'Causas profundas de la Gran Guerra',
+      ] },
+      { id: 'guerras', nombre: 'Las guerras mundiales', claves: [
+        'Primera Guerra Mundial y tratado de Versalles',
+        'Crisis de 1929, fascismo y nazismo',
+        'Segunda Guerra Mundial y el Holocausto',
+      ] },
+      { id: 'guerra-fria', nombre: 'Guerra Fría y descolonización', claves: [
+        'Bloques, carrera armamentista y espacial',
+        'Independencias de África y Asia',
+        'Caída del muro y fin de la URSS',
+      ] },
+      { id: 'actual', nombre: 'Mundo contemporáneo', claves: [
+        'Globalización y organismos multilaterales',
+        'Migraciones, terrorismo y crisis financieras',
+        'Cambio climático como problema histórico',
       ] },
     ],
   },

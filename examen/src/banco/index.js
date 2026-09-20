@@ -20,6 +20,7 @@ import { INGLES, LECTURAS_EN } from './ingles.js';
 import { LENGUA } from './lengua.js';
 import { LITERATURA } from './literatura.js';
 import { FILOSOFIA } from './filosofia.js';
+import { UNIVERSAL } from './universal.js';
 
 const POR_ASIGNATURA = {
   matematicas: MATEMATICAS,
@@ -37,6 +38,7 @@ const POR_ASIGNATURA = {
   lengua: LENGUA,
   literatura: LITERATURA,
   filosofia: FILOSOFIA,
+  universal: UNIVERSAL,
 };
 
 export const BANCO = Object.entries(POR_ASIGNATURA)
