@@ -8,6 +8,24 @@ video de YouTube** para saber qué tocar en cada instante, **academia de música
 No necesita servidor, ni cuenta, ni internet (salvo para el video de YouTube).
 Todo se guarda en tu dispositivo.
 
+## Dos apps en este repositorio
+
+| App | Dónde | Para qué |
+| --- | --- | --- |
+| **Alabanza** | `/` (este documento) | Canciones, acordes, instrumentos, atril y equipo. |
+| **Recordatorios** | [`recordatorios/`](recordatorios/README.md) | Tareas y gestión del tiempo: lenguaje natural, calendario, pomodoro y cronómetro, gestión de proyectos con Gantt y ruta crítica, y módulos de inversiones, docencia, investigación, alabanza y personal. Hoja de ruta en [`docs/hoja-de-ruta-recordatorios.md`](docs/hoja-de-ruta-recordatorios.md). |
+
+Las dos son estáticas, funcionan sin internet y guardan los datos en tu
+dispositivo. Con `npm start` se sirven las dos: la de alabanza en
+`http://localhost:8080/` y la de recordatorios en
+`http://localhost:8080/recordatorios/`.
+
+También están publicadas, sin instalar nada:
+[alabanza](https://samcand.github.io/papeler-a/) ·
+[recordatorios](https://samcand.github.io/papeler-a/recordatorios/).
+Los datos siguen guardándose solo en tu navegador: lo que está en internet es
+el código, no lo que escribes.
+
 ## Cómo abrirla
 
 ```bash

@@ -1,0 +1,72 @@
+{
+  "name": "Recordatorios — tareas, tiempo y trabajo",
+  "short_name": "Recordatorios",
+  "description": "Tareas con lenguaje natural, calendario, pomodoro y módulos de inversiones, docencia, investigación y alabanza. Todo local, sin cuentas y sin internet.",
+  "start_url": "./index.html#/hoy",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0f1115",
+  "theme_color": "#0f1115",
+  "lang": "es",
+  "categories": [
+    "productivity",
+    "finance",
+    "education"
+  ],
+  "icons": [
+    {
+      "src": "assets/icono.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icono.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Capturar una tarea",
+      "short_name": "Capturar",
+      "description": "Abre la caja de captura sobre cualquier pantalla",
+      "url": "./index.html?capturar=1#/hoy"
+    },
+    {
+      "name": "Hoy",
+      "url": "./index.html#/hoy"
+    },
+    {
+      "name": "Enfoque (pomodoro)",
+      "url": "./index.html#/enfoque"
+    },
+    {
+      "name": "Calendario",
+      "url": "./index.html#/calendario"
+    },
+    {
+      "name": "Inversiones",
+      "url": "./index.html#/inversiones"
+    },
+    {
+      "name": "Bandeja",
+      "url": "./index.html#/bandeja"
+    },
+    {
+      "name": "Tablero",
+      "url": "./index.html#/tablero"
+    }
+  ],
+  "share_target": {
+    "action": "./index.html",
+    "method": "GET",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  }
+}

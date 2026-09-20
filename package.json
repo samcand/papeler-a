@@ -1,13 +1,15 @@
 {
   "name": "alabanza-app",
   "version": "1.0.0",
-  "description": "App para manejar canciones de alabanza: letras, acordes, guias de guitarra/piano/bateria, sincronizacion con YouTube y modo de aprendizaje.",
+  "description": "App para manejar canciones de alabanza: letras, acordes, guias de guitarra/piano/bateria, sincronizacion con YouTube y modo de aprendizaje. Incluye una segunda app de recordatorios y gestion del tiempo en recordatorios/.",
   "type": "module",
   "private": true,
   "scripts": {
     "start": "node tools/servidor.mjs",
-    "test": "node tests/music.test.js && node tests/dsp.test.js && node tests/fretboard.test.js && node tests/hoja.test.js && node tests/vocal.test.js && node tests/audio-extra.test.js && node tests/calentamiento.test.js && node tests/anotaciones.test.js && node tests/formatos.test.js",
-    "docs": "node tools/gen-docs.mjs",
-    "serve:python": "python3 -m http.server 8080"
+    "test": "node tests/music.test.js && node tests/dsp.test.js && node tests/fretboard.test.js && node tests/hoja.test.js && node tests/vocal.test.js && node tests/audio-extra.test.js && node tests/calentamiento.test.js && node tests/anotaciones.test.js && node tests/formatos.test.js && npm run test:recordatorios",
+    "docs": "node tools/gen-docs.mjs && node tools/gen-docs-recordatorios.mjs",
+    "serve:python": "python3 -m http.server 8080",
+    "test:recordatorios": "node tests/recordatorios-recurrencia.test.js && node tests/recordatorios-naturales.test.js && node tests/recordatorios-modelo.test.js && node tests/recordatorios-tiempo.test.js && node tests/recordatorios-inversiones.test.js && node tests/recordatorios-plantillas.test.js && node tests/recordatorios-exportar.test.js && node tests/recordatorios-proyectos.test.js && node tests/recordatorios-bandeja.test.js && node tests/recordatorios-calibracion.test.js && node tests/recordatorios-plantillas-lista.test.js && node tests/recordatorios-hoja-ruta.test.js && node tests/recordatorios-ola1a.test.js && node tests/recordatorios-ola1b.test.js && node tests/recordatorios-simulacion.test.js && node tests/recordatorios-tablero.test.js && node tests/recordatorios-ola2.test.js && node tests/recordatorios-ola3a.test.js && node tests/recordatorios-ola3b.test.js && node tests/recordatorios-ola4a.test.js && node tests/recordatorios-ola4b.test.js && node tests/recordatorios-buscador.test.js && node tests/recordatorios-ola5.test.js && node tests/recordatorios-logros.test.js && node tests/recordatorios-largoplazo.test.js && node tests/recordatorios-cronometro.test.js && node tests/recordatorios-ritmo.test.js",
+    "test:navegador": "node tests/recordatorios-humo.mjs"
   }
 }
