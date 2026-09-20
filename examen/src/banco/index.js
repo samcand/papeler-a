@@ -1,5 +1,5 @@
 /**
- * index.js — Junta los cinco bancos en una sola lista.
+ * index.js — Junta los bancos de todas las asignaturas en una sola lista.
  *
  * La asignatura no se repite en cada pregunta: se añade aquí, al agrupar. Así
  * una pregunta nunca puede quedar con la asignatura equivocada.
@@ -17,6 +17,7 @@ import { HISTORIA } from './historia.js';
 import { COTIDIANA } from './cotidiana.js';
 import { LECTURA, LECTURAS } from './lectura.js';
 import { INGLES, LECTURAS_EN } from './ingles.js';
+import { LENGUA } from './lengua.js';
 
 const POR_ASIGNATURA = {
   matematicas: MATEMATICAS,
@@ -31,6 +32,7 @@ const POR_ASIGNATURA = {
   cotidiana: COTIDIANA,
   lectura: LECTURA,
   ingles: INGLES,
+  lengua: LENGUA,
 };
 
 export const BANCO = Object.entries(POR_ASIGNATURA)

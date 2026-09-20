@@ -1,23 +1,25 @@
 # Ingreso — plataforma de preguntas para la prueba de admisión
 
 Banco de preguntas y simulacros para preparar el examen de ingreso a la
-universidad, con **el temario de lo que preguntan** y **2 053 preguntas** con
-explicación en doce asignaturas, a razón de **10 por tema en todos los temas**:
+universidad, con **el temario de lo que preguntan** y **2 233 preguntas** con
+explicación en trece asignaturas, clasificadas en cuatro niveles de dificultad
+y con **al menos tres preguntas de cada nivel en cada uno de los 147 temas**:
 
 | Asignatura | Temas | Preguntas | Qué cubre |
 | --- | --- | --- | --- |
-| **Matemáticas** | 18 | 180 | Aritmética, fracciones, razones, porcentajes, potencias, logaritmos, álgebra, ecuaciones, cuadráticas, desigualdades, funciones, sucesiones, geometría plana, del espacio y analítica, estadística, probabilidad y problemas. |
-| **Biología y salud** | 14 | 140 | Célula y genética, sistemas del cuerpo, nutrición, enfermedades, vacunas, salud sexual, primeros auxilios, salud mental, actividad física, ecología, evolución, biodiversidad e indagación científica. |
-| **Geografía** | 12 | 121 | Cartografía, la Tierra en el sistema solar, tectónica, relieve, hidrografía, clima, biomas, población, economía, geopolítica, ambiente y América Latina. |
-| **Inglés** | 12 | 120 | Tiempos verbales, condicionales, modales, pasiva, reported speech, relativas, preposiciones, cuantificadores, conectores, phrasal verbs, vocabulario y lectura. |
-| **Trigonometría** | 10 | 100 | Grados y radianes, triángulo rectángulo, ángulos notables, circunferencia unitaria, identidades, ángulo doble, ecuaciones, gráficas, leyes de senos y cosenos y aplicaciones. |
-| **Física** | 10 | 100 | Magnitudes y vectores, cinemática, leyes de Newton, trabajo y energía, fluidos, ondas, calor, electricidad, magnetismo y gravitación. |
-| **Química** | 10 | 100 | Materia y cambios, átomo, tabla periódica, enlace, nomenclatura, reacciones, estequiometría, soluciones, ácidos y bases y química orgánica. |
-| **Historia de Colombia** | 10 | 100 | De los pueblos originarios al acuerdo de paz: conquista, Colonia, independencia, siglo XIX, Bogotazo y La Violencia, Frente Nacional, conflicto y Constitución de 1991. |
-| **Política y ciudadanía** | 10 | 100 | Ramas del poder, Constitución, derechos humanos, democracia, sistemas políticos, elecciones, impuestos, convivencia, organismos internacionales y ética pública. |
-| **Vida cotidiana y cultura general** | 10 | 100 | Dinero, precios, documentos, medidas y dosis, seguridad digital, evaluar noticias, seguridad vial, consumo responsable, primer empleo y cultura general. |
-| **Razonamiento abstracto** | 9 | 90 | Series de figuras, matrices, el que no pertenece, rotación, plegado y cubos, series numéricas y alfanuméricas, lógica y analogías. |
-| **Lectura crítica** | 10 | 102 | Catorce textos originales más gráficas, planos y mapas: idea principal, inferencias, vocabulario, propósito y tono, estructura, argumentación, datos, textos discontinuos y análisis de la imagen. |
+| **Matemáticas** | 18 | 265 | Aritmética, fracciones, razones, porcentajes, potencias, logaritmos, álgebra, ecuaciones, cuadráticas, desigualdades, funciones, sucesiones, geometría plana, del espacio y analítica, estadística, probabilidad y problemas. |
+| **Biología y salud** | 14 | 209 | Célula y genética, sistemas del cuerpo, nutrición, enfermedades, vacunas, salud sexual, primeros auxilios, salud mental, actividad física, ecología, evolución, biodiversidad e indagación científica. |
+| **Inglés** | 12 | 183 | Tiempos verbales, condicionales, modales, pasiva, reported speech, relativas, preposiciones, cuantificadores, conectores, phrasal verbs, vocabulario y lectura. |
+| **Lengua y escritura** | 12 | 180 | Acentuación, ortografía, puntuación, categorías gramaticales, verbo, sintaxis, concordancia, errores frecuentes del español, conectores, léxico, redacción del párrafo y citación. |
+| **Geografía** | 12 | 175 | Cartografía, la Tierra en el sistema solar, tectónica, relieve, hidrografía, clima, biomas, población, economía, geopolítica, ambiente y América Latina. |
+| **Lectura crítica** | 10 | 168 | Catorce textos originales más gráficas, planos y mapas: idea principal, inferencias, vocabulario, propósito y tono, estructura, argumentación, datos, textos discontinuos y análisis de la imagen. |
+| **Historia de Colombia** | 10 | 161 | De los pueblos originarios al acuerdo de paz: conquista, Colonia, independencia, siglo XIX, Bogotazo y La Violencia, Frente Nacional, conflicto y Constitución de 1991. |
+| **Vida cotidiana y cultura general** | 10 | 155 | Dinero, precios, documentos, medidas y dosis, seguridad digital, evaluar noticias, seguridad vial, consumo responsable, primer empleo y cultura general. |
+| **Química** | 10 | 153 | Materia y cambios, átomo, tabla periódica, enlace, nomenclatura, reacciones, estequiometría, soluciones, ácidos y bases y química orgánica. |
+| **Política y ciudadanía** | 10 | 152 | Ramas del poder, Constitución, derechos humanos, democracia, sistemas políticos, elecciones, impuestos, convivencia, organismos internacionales y ética pública. |
+| **Física** | 10 | 150 | Magnitudes y vectores, cinemática, leyes de Newton, trabajo y energía, fluidos, ondas, calor, electricidad, magnetismo y gravitación. |
+| **Trigonometría** | 10 | 147 | Grados y radianes, triángulo rectángulo, ángulos notables, circunferencia unitaria, identidades, ángulo doble, ecuaciones, gráficas, leyes de senos y cosenos y aplicaciones. |
+| **Razonamiento abstracto** | 9 | 135 | Series de figuras, matrices, el que no pertenece, rotación, plegado y cubos, series numéricas y alfanuméricas, lógica y analogías. |
 
 No necesita servidor, ni cuenta, ni internet. Todo se guarda en tu dispositivo.
 
@@ -41,7 +43,7 @@ conexión. También se publica tal cual en GitHub Pages: son archivos estáticos
 | **Inicio** | Cuántas preguntas llevas hoy, racha, promedio, cuenta regresiva al examen y qué toca repasar. |
 | **Temario** | El mapa del examen: cada tema dice qué hay que saber hacer, cuántas preguntas hay y cómo vas. Desde ahí se practica un tema suelto. |
 | **Practicar** | Preguntas de a una con la explicación al instante. Se filtra por asignatura, tema y dificultad; las teclas 1–4 responden y Enter avanza. |
-| **Simulacro** | El examen completo con cronómetro (102 preguntas en 130 minutos, o versiones corta y exprés), mapa de preguntas, marcas para volver y nada de ayudas. Al entregar: nota, desglose por asignatura y revisión pregunta por pregunta. |
+| **Simulacro** | El examen completo con cronómetro (108 preguntas en 138 minutos, o versiones corta y exprés), mapa de preguntas, marcas para volver y nada de ayudas. Al entregar: nota, desglose por asignatura y revisión pregunta por pregunta. |
 | **Escribir** | El módulo de comunicación escrita del Saber Pro, que no es de opción múltiple: una consigna, un cronómetro, contador de palabras y párrafos, autoguardado, y al terminar una rúbrica de cuatro criterios y una lista de relectura. Los textos quedan guardados y se pueden descargar. |
 | **Progreso** | Actividad de los últimos 14 días, aciertos por asignatura, temas más flojos, historial de simulacros, ajustes y respaldo de tus datos. |
 
@@ -133,9 +135,9 @@ La pregunta correcta no es "cuántas preguntas quedan bonitas", sino **cuántas
 hacen falta para que estudiar con el banco enseñe la materia en vez de enseñar
 el banco**. Hay tres restricciones que fijan el número, y la mayor manda.
 
-**1. Cubrir el temario, no solo tocarlo.** Son 135 temas y cuatro niveles de
+**1. Cubrir el temario, no solo tocarlo.** Son 147 temas y cuatro niveles de
 dificultad (básico, intermedio, avanzado y experto). Con solo tres preguntas
-por nivel ya hacen falta **1 620**. Por debajo de eso hay temas que solo se
+por nivel ya hacen falta **1 764**. Por debajo de eso hay temas que solo se
 pueden practicar de una manera, y el filtro por nivel devuelve listas vacías.
 
 **2. No memorizar la respuesta.** La investigación sobre práctica de
@@ -188,11 +190,12 @@ Cobertura por asignatura (meta: 10 preguntas por tema)
   Historia de Colombia     161 preguntas · 10 temas · 16.1 por tema  → meta alcanzada
   Lectura crítica          168 preguntas · 10 temas · 16.8 por tema  → meta alcanzada
   Inglés                   183 preguntas · 12 temas · 15.3 por tema  → meta alcanzada
-  TOTAL                   2053 preguntas · faltan 0 para la meta de 10 por tema
+  Lengua y escritura       180 preguntas · 12 temas · 15.0 por tema  → meta alcanzada
+  TOTAL                   2233 preguntas · faltan 0 para la meta de 10 por tema
 ```
 
-Con 135 temas, exigir tres preguntas de cada uno de los cuatro niveles son
-1 620 como piso; el banco tiene 2 053 y una media de 15,2 por tema. Está en el
+Con 147 temas, exigir tres preguntas de cada uno de los cuatro niveles son
+1 764 como piso; el banco tiene 2 233 y una media de 15,2 por tema. Está en el
 rango de "gran alcance" de la tabla anterior: alcanza para seis meses de
 estudio con repaso espaciado y nueve simulacros sin repetir preguntas.
 

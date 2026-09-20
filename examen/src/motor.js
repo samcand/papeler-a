@@ -125,24 +125,24 @@ function tasa(dato) {
 /** Cuántas preguntas de cada asignatura y cuánto tiempo, como en el examen real. */
 export const MODELOS_SIMULACRO = {
   completo: {
-    nombre: 'Completo', minutos: 130,
+    nombre: 'Completo', minutos: 138,
     reparto: {
       matematicas: 16, trigonometria: 6, abstracto: 10, fisica: 8, quimica: 8, salud: 8,
-      geografia: 6, historia: 6, ciudadania: 6, cotidiana: 6, lectura: 10, ingles: 12,
+      geografia: 6, historia: 6, ciudadania: 6, cotidiana: 6, lectura: 10, lengua: 6, ingles: 12,
     },
   },
   corto: {
-    nombre: 'Corto', minutos: 55,
+    nombre: 'Corto', minutos: 58,
     reparto: {
       matematicas: 8, trigonometria: 3, abstracto: 5, fisica: 4, quimica: 4, salud: 4,
-      geografia: 3, historia: 3, ciudadania: 3, cotidiana: 3, lectura: 5, ingles: 6,
+      geografia: 3, historia: 3, ciudadania: 3, cotidiana: 3, lectura: 5, lengua: 3, ingles: 6,
     },
   },
   express: {
-    nombre: 'Exprés', minutos: 26,
+    nombre: 'Exprés', minutos: 28,
     reparto: {
       matematicas: 4, trigonometria: 2, abstracto: 2, fisica: 2, quimica: 2, salud: 2,
-      geografia: 2, historia: 2, ciudadania: 2, cotidiana: 2, lectura: 2, ingles: 2,
+      geografia: 2, historia: 2, ciudadania: 2, cotidiana: 2, lectura: 2, lengua: 2, ingles: 2,
     },
   },
 };
@@ -163,7 +163,7 @@ export function armarSimulacro(banco, modelo = MODELOS_SIMULACRO.completo, rnd =
 /** Agrupa por asignatura (como en el examen real) pero mezcla dentro de cada bloque. */
 function barajarPorAsignatura(preguntas, rnd) {
   const orden = ['matematicas', 'trigonometria', 'abstracto', 'fisica', 'quimica', 'salud',
-    'geografia', 'historia', 'ciudadania', 'cotidiana', 'lectura', 'ingles'];
+    'geografia', 'historia', 'ciudadania', 'cotidiana', 'lectura', 'lengua', 'ingles'];
   return orden.flatMap((a) => barajar(preguntas.filter((p) => p.asignatura === a), rnd));
 }
 

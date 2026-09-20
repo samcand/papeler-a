@@ -139,6 +139,7 @@ que al álgebra.
 | Lo que evalúan | Cómo está cubierto | Estado |
 | --- | --- | --- |
 | Lectura crítica / análisis textual | Lectura crítica (168 preguntas, 14 textos más gráficas) | Cubierto, incluidos textos discontinuos |
+| Uso del idioma (UNAL y privadas) | Lengua y escritura (180) | Cubierto: tilde, ortografía, puntuación, gramática, sintaxis, léxico y redacción |
 | Matemáticas (numérico, geométrico, aleatorio) | Matemáticas (265) | Cubierto |
 | Razonamiento cuantitativo (Saber Pro) | Matemáticas + Vida cotidiana (155) | Cubierto |
 | Sociales: Constitución, Estado, participación, derechos | Política y ciudadanía (152) | Cubierto |

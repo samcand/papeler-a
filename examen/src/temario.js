@@ -1,7 +1,7 @@
 /**
  * temario.js — Qué se pregunta en cada asignatura.
  *
- * Es el mapa del examen: cinco asignaturas, y dentro de cada una los temas que
+ * Es el mapa del examen: trece asignaturas, y dentro de cada una los temas que
  * aparecen una y otra vez en las pruebas de ingreso, con lo que hay que saber
  * hacer en cada uno. Todas las preguntas del banco apuntan a un `tema` de aquí
  * (hay una prueba que lo verifica), así que el temario y el banco no se separan.
@@ -861,6 +861,74 @@ export const ASIGNATURAS = [
         'Idea general y detalle específico',
         'Inferir el significado de una palabra por contexto',
         'Verdadero, falso o no se dice',
+      ] },
+    ],
+  },
+  {
+    id: 'lengua',
+    nombre: 'Lengua y escritura',
+    icono: 'Ñ',
+    resumen: 'Ortografía, gramática, sintaxis y redacción: el idioma como objeto de estudio.',
+    temas: [
+      { id: 'acentuacion', nombre: 'Acentuación y tilde', claves: [
+        'Agudas, graves, esdrújulas y sobresdrújulas',
+        'Diptongo, hiato y tilde en la vocal débil',
+        'Tilde diacrítica: tú/tu, él/el, sí/si, más/mas, qué/que',
+      ] },
+      { id: 'ortografia', nombre: 'Ortografía de letras', claves: [
+        'Uso de b y v, g y j, h, ll y y',
+        'Palabras homófonas: haber/a ver, hay/ahí/ay, echo/hecho',
+        'Mayúsculas y escritura de números',
+      ] },
+      { id: 'puntuacion', nombre: 'Puntuación', claves: [
+        'La coma que cambia el sentido y la coma que sobra',
+        'Punto y coma, dos puntos y paréntesis',
+        'Comillas, raya de diálogo y puntos suspensivos',
+      ] },
+      { id: 'gramatica', nombre: 'Categorías gramaticales', claves: [
+        'Sustantivo, adjetivo, verbo, adverbio y determinante',
+        'Pronombres y su función',
+        'Preposiciones y conjunciones',
+      ] },
+      { id: 'verbos', nombre: 'El verbo: tiempo y modo', claves: [
+        'Indicativo, subjuntivo e imperativo',
+        'Tiempos compuestos y participios irregulares',
+        'Perífrasis verbales y gerundio mal usado',
+      ] },
+      { id: 'sintaxis', nombre: 'Sintaxis de la oración', claves: [
+        'Sujeto, predicado y núcleos',
+        'Complemento directo, indirecto y circunstancial',
+        'Oración simple, compuesta y subordinada',
+      ] },
+      { id: 'concordancia', nombre: 'Concordancia y régimen', claves: [
+        'Concordancia de género y número',
+        'Sujetos colectivos y verbos en singular o plural',
+        'Régimen preposicional: de qué se acompaña cada verbo',
+      ] },
+      { id: 'errores', nombre: 'Errores frecuentes del español', claves: [
+        'Dequeísmo y queísmo',
+        'Laísmo, leísmo y loísmo',
+        'Anacoluto, pleonasmo y muletillas',
+      ] },
+      { id: 'cohesion', nombre: 'Conectores y cohesión', claves: [
+        'Conectores de causa, consecuencia, contraste y adición',
+        'Referencia: pronombres y sinónimos que evitan repetir',
+        'El conector que contradice lo que dice la frase',
+      ] },
+      { id: 'lexico', nombre: 'Léxico y precisión', claves: [
+        'Sinónimos, antónimos y matices',
+        'Palabras que se confunden: infligir/infringir, adolecer, álgido',
+        'Prefijos, sufijos y familias de palabras',
+      ] },
+      { id: 'redaccion', nombre: 'Redacción del párrafo', claves: [
+        'Idea principal y oraciones de apoyo',
+        'Orden de las ideas y transiciones',
+        'Frases largas: cuándo partirlas',
+      ] },
+      { id: 'citacion', nombre: 'Citación y uso de fuentes', claves: [
+        'Cita textual, paráfrasis y referencia',
+        'Qué es plagio y cómo se evita',
+        'Elementos de una referencia bibliográfica',
       ] },
     ],
   },
