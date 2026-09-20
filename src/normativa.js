@@ -302,6 +302,29 @@ export const CONTRATOS = [
   },
 ];
 
+/**
+ * Periodo de prueba (CST art. 76 a 80).
+ *  - Debe pactarse por escrito, si no, no existe.
+ *  - Indefinido: hasta 2 meses.
+ *  - Término fijo menor a un año: hasta la quinta parte del plazo, sin pasar
+ *    de 2 meses.
+ */
+export const PERIODO_PRUEBA = {
+  maximoDias: 60,
+  fraccionDelPlazo: 1 / 5,
+  norma: 'CST art. 76 a 80',
+};
+
+/** Datos que el contrato escrito debe contener (CST art. 39). */
+export const REQUISITOS_CONTRATO = [
+  'Identificación y domicilio de las partes.',
+  'Lugar y fecha de nacimiento del trabajador.',
+  'Clase de trabajo y lugar donde va a prestarse.',
+  'Cuantía de la remuneración, forma y periodos de pago.',
+  'Estimación del valor del salario en especie, si lo hay.',
+  'Duración del contrato, su desahucio y terminación.',
+];
+
 /** Cambios que ya están en el calendario: el módulo de Vigilancia los anuncia. */
 export const CAMBIOS_PROGRAMADOS = [
   {

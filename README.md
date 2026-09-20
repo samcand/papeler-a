@@ -29,6 +29,7 @@ pantalla de inicio") y funciona sin conexión.
 | --- | --- |
 | **Panel** | Los valores vigentes del año, el personal activo con su antigüedad y vacaciones pendientes, las próximas fechas de ley y las alertas de cambios normativos. |
 | **Empleados** | Empleados y contratos: indefinido, fijo, obra o labor y aprendizaje; pago mensual, por día o por hora; ARL, auxilio de transporte, salario integral, día de descanso pactado. Avisa si el salario queda bajo el mínimo, si el fijo pasa de 4 años o si se acerca el preaviso. |
+| **Contrato** | Genera el contrato de trabajo escrito y listo para firmar: por días, por meses, por un año, continuo (indefinido), por obra o labor o de aprendizaje. Incluye las cláusulas de ley, calcula el periodo de prueba máximo, avisa de los datos que exige el artículo 39 del CST y se imprime o se descarga. |
 | **Días** | El calendario del mes: se marca qué pasó cada día (trabajo con horario, descanso, vacaciones, incapacidad, licencia, ausencia). Al poner la entrada y la salida, muestra en el momento cuántas horas son ordinarias, nocturnas y extra, y cuánto vale el recargo. |
 | **Nómina** | Liquida el periodo (mes, quincena o fechas libres) y arma el comprobante de pago: devengados, deducciones, neto, aportes a seguridad social, retención en la fuente y el costo real del empleado. Se imprime o se exporta a CSV, y queda registrado el pago. |
 | **Liquidación** | La cuenta final del contrato: cesantías, intereses, prima, vacaciones e indemnización del artículo 64, cada renglón con su fórmula y su norma. Muestra también cuánto costaría pagar tarde. |
@@ -55,6 +56,8 @@ esencial, al 20 de septiembre de 2026:
 - Prestaciones con el año comercial de 360 días; cesantías al fondo antes del
   15 de febrero e intereses antes del 31 de enero.
 - Indemnización del artículo 64 del CST y sanción moratoria del artículo 65.
+- Contrato escrito con los datos del artículo 39, periodo de prueba de los
+  artículos 76 a 80 y tope de 4 años del término fijo (Ley 2466 de 2025).
 
 ## Cómo se mantiene al día
 
@@ -102,13 +105,13 @@ deja los enlaces listos para abrirlos y anotar el hallazgo.
 ## Pruebas
 
 ```bash
-npm test    # 66 pruebas del motor de cálculo
+npm test    # 82 pruebas del motor de cálculo
 ```
 
 Cubren festivos (incluida la Pascua y los traslados al lunes), clasificación de
 turnos que cruzan la medianoche, los factores de cada recargo por fecha, IBC,
 exoneraciones, retención, prestaciones, indemnizaciones y el módulo de
-vigilancia.
+vigilancia, y la generación del contrato con sus cláusulas y avisos.
 
 ---
 

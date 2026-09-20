@@ -191,6 +191,29 @@ Con menos de un año de servicio se pagan los 30 días (o los 20) completos.
 - **Mora en el pago de la liquidación**: un día de salario por cada día de
   retardo, hasta 24 meses; después corren intereses moratorios (CST art. 65).
 
+## 8.1 El contrato escrito
+
+El artículo 39 del CST exige que el contrato escrito diga: identificación y
+domicilio de las partes; lugar y fecha de nacimiento del trabajador; clase de
+trabajo y lugar donde se presta; cuantía de la remuneración, forma y periodos
+de pago; valor del salario en especie si lo hay; y duración, desahucio y
+terminación.
+
+Deben constar **por escrito** el contrato a término fijo, el de aprendizaje,
+el periodo de prueba, el salario integral y los pagos que se pacten como no
+salariales. El indefinido puede ser verbal, pero por escrito evita
+discusiones.
+
+**Periodo de prueba** (CST art. 76 a 80):
+
+| Contrato | Máximo |
+| --- | --- |
+| Indefinido | 2 meses |
+| Término fijo de un año o más | 2 meses |
+| Término fijo menor a un año | La quinta parte del plazo, sin pasar de 2 meses |
+
+Si no se pacta por escrito, no existe: el trabajador no está en prueba.
+
 ## 9. Retención en la fuente sobre salarios
 
 La app estima el **procedimiento 1** (E.T. arts. 383, 385, 387 y 388):

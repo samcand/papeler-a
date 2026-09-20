@@ -7,6 +7,7 @@ import { h, mensaje } from './ui.js';
 import { vista as panel } from './views/panel.js';
 import { vista as empleados } from './views/empleados.js';
 import { vista as registro } from './views/registro.js';
+import { vista as contrato } from './views/contrato.js';
 import { vista as nomina } from './views/nomina.js';
 import { vista as liquidacion } from './views/liquidacion.js';
 import { vista as calendario } from './views/calendario.js';
@@ -17,6 +18,7 @@ import { vista as ajustes } from './views/ajustes.js';
 const RUTAS = [
   { id: 'panel', titulo: 'Panel', icono: '🏠', render: panel },
   { id: 'empleados', titulo: 'Empleados', icono: '👥', render: empleados },
+  { id: 'contrato', titulo: 'Contrato', icono: '✍️', render: contrato },
   { id: 'registro', titulo: 'Días', icono: '🗓️', render: registro },
   { id: 'nomina', titulo: 'Nómina', icono: '💵', render: nomina },
   { id: 'liquidacion', titulo: 'Liquidación', icono: '📄', render: liquidacion },

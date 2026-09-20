@@ -59,6 +59,7 @@ export function vista(store, params = {}) {
             remuneracion(c),
             c.estado === 'terminado' ? chip('Terminado', 'gris') : chip('Vigente', 'ok'),
             h('div', { class: 'acciones' },
+              boton('Contrato', () => { window.location.hash = `#/contrato/${c.id}`; }),
               boton('Días', () => { window.location.hash = `#/registro/${c.id}`; }),
               boton('Nómina', () => { window.location.hash = `#/nomina/${c.id}`; }),
               boton('Editar', () => abrirFormularioContrato(store, emp, c)),
@@ -146,7 +147,7 @@ function abrirFormularioContrato(store, empleado, contrato) {
 
   const cuerpo = h('div', { class: 'formulario' });
   const refrescar = () => {
-    cuerpo.replaceChildren(
+    const piezas = [
       h('div', { class: 'rejilla rejilla-2' },
         campo('Tipo de contrato', seleccion(ley.CONTRATOS.map((c) => ({ value: c.id, label: c.nombre })), datos.tipo, { onChange: set('tipo') }),
           (ley.CONTRATOS.find((c) => c.id === datos.tipo) || {}).nota),
@@ -200,7 +201,9 @@ function abrirFormularioContrato(store, empleado, contrato) {
       contrato ? campo('Estado', seleccion([
         { value: 'activo', label: 'Vigente' }, { value: 'terminado', label: 'Terminado' },
       ], datos.estado || 'activo', { onChange: set('estado') })) : null,
-    );
+    ];
+    // replaceChildren escribe "null" si le pasan un null: hay que filtrarlos.
+    cuerpo.replaceChildren(...piezas.filter(Boolean));
   };
   refrescar();
 
