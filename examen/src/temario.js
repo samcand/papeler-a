@@ -1,7 +1,7 @@
 /**
  * temario.js — Qué se pregunta en cada asignatura.
  *
- * Es el mapa del examen: trece asignaturas, y dentro de cada una los temas que
+ * Es el mapa del examen: catorce asignaturas, y dentro de cada una los temas que
  * aparecen una y otra vez en las pruebas de ingreso, con lo que hay que saber
  * hacer en cada uno. Todas las preguntas del banco apuntan a un `tema` de aquí
  * (hay una prueba que lo verifica), así que el temario y el banco no se separan.
@@ -929,6 +929,64 @@ export const ASIGNATURAS = [
         'Cita textual, paráfrasis y referencia',
         'Qué es plagio y cómo se evita',
         'Elementos de una referencia bibliográfica',
+      ] },
+    ],
+  },
+  {
+    id: 'literatura',
+    nombre: 'Literatura',
+    icono: '📖',
+    resumen: 'Géneros, recursos, movimientos y las obras que las pruebas dan por sabidas.',
+    temas: [
+      { id: 'generos', nombre: 'Géneros literarios', claves: [
+        'Narrativo, lírico y dramático',
+        'Subgéneros: novela, cuento, fábula, soneto, tragedia',
+        'Rasgos que distinguen a cada uno',
+      ] },
+      { id: 'figuras', nombre: 'Figuras literarias', claves: [
+        'Metáfora, símil, personificación e hipérbole',
+        'Anáfora, aliteración y paralelismo',
+        'Ironía, paradoja, oxímoron y metonimia',
+      ] },
+      { id: 'verso', nombre: 'Verso, métrica y rima', claves: [
+        'Contar sílabas métricas: sinalefa y ley del acento final',
+        'Rima consonante y asonante',
+        'Estrofas: soneto, romance, copla',
+      ] },
+      { id: 'narrador', nombre: 'Narrador y punto de vista', claves: [
+        'Primera persona, tercera omnisciente y observador',
+        'Narrador poco fiable',
+        'Tiempo del relato: analepsis y prolepsis',
+      ] },
+      { id: 'universal', nombre: 'Literatura universal', claves: [
+        'Épica antigua y teatro griego',
+        'Del Renacimiento al Romanticismo',
+        'Realismo, vanguardias y siglo XX',
+      ] },
+      { id: 'espanola', nombre: 'Literatura española', claves: [
+        'Siglo de Oro: Cervantes, Quevedo, Góngora, Lope',
+        'Generación del 98 y del 27',
+        'El Quijote y su lugar en la novela moderna',
+      ] },
+      { id: 'latinoamericana', nombre: 'Literatura latinoamericana', claves: [
+        'Modernismo y Rubén Darío',
+        'El boom: Cortázar, Rulfo, Vargas Llosa, Borges',
+        'Poesía: Neruda, Vallejo, Mistral',
+      ] },
+      { id: 'colombiana', nombre: 'Literatura colombiana', claves: [
+        'Del costumbrismo a "María" de Jorge Isaacs',
+        'García Márquez y el realismo mágico',
+        'Voces contemporáneas y literatura del conflicto',
+      ] },
+      { id: 'analisis', nombre: 'Análisis del texto literario', claves: [
+        'Tema, motivo y símbolo',
+        'Personajes: caracterización y conflicto',
+        'Relación entre forma y sentido',
+      ] },
+      { id: 'contexto', nombre: 'Literatura y contexto', claves: [
+        'Obra, época y condiciones de producción',
+        'Intertextualidad: obras que dialogan con otras',
+        'Canon, censura y recepción',
       ] },
     ],
   },

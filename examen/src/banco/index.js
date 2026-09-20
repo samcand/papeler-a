@@ -18,6 +18,7 @@ import { COTIDIANA } from './cotidiana.js';
 import { LECTURA, LECTURAS } from './lectura.js';
 import { INGLES, LECTURAS_EN } from './ingles.js';
 import { LENGUA } from './lengua.js';
+import { LITERATURA } from './literatura.js';
 
 const POR_ASIGNATURA = {
   matematicas: MATEMATICAS,
@@ -33,6 +34,7 @@ const POR_ASIGNATURA = {
   lectura: LECTURA,
   ingles: INGLES,
   lengua: LENGUA,
+  literatura: LITERATURA,
 };
 
 export const BANCO = Object.entries(POR_ASIGNATURA)
