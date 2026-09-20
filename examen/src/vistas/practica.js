@@ -20,7 +20,7 @@ export function practicaVista(raiz, params = {}) {
   const config = {
     asignatura: buscarAsignatura(params.asignatura) ? params.asignatura : 'todas',
     temas: params.tema ? [params.tema] : [],
-    dificultades: [1, 2, 3],
+    dificultades: [1, 2, 3, 4],
     cantidad: 10,
     soloRepaso: params.repaso === '1',
   };
@@ -89,11 +89,11 @@ export function practicaVista(raiz, params = {}) {
     const dificultad = el('div', {},
       el('h3', {}, 'Dificultad'),
       el('div', { class: 'chips' },
-        [1, 2, 3].map((d) => chip(NIVELES[d], config.dificultades.includes(d), () => {
+        [1, 2, 3, 4].map((d) => chip(NIVELES[d], config.dificultades.includes(d), () => {
           const nuevas = config.dificultades.includes(d)
             ? config.dificultades.filter((x) => x !== d)
             : [...config.dificultades, d];
-          config.dificultades = nuevas.length ? nuevas : [1, 2, 3];
+          config.dificultades = nuevas.length ? nuevas : [1, 2, 3, 4];
           render();
         }))));
 

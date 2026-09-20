@@ -65,9 +65,9 @@ t('la respuesta correcta está dentro del rango y hay explicación', () => {
   }
 });
 
-t('la dificultad es 1, 2 o 3', () => {
+t('la dificultad es 1, 2, 3 o 4', () => {
   for (const p of BANCO) {
-    assert.ok([1, 2, 3].includes(p.dificultad), `${p.id}: dificultad "${p.dificultad}"`);
+    assert.ok([1, 2, 3, 4].includes(p.dificultad), `${p.id}: dificultad "${p.dificultad}"`);
   }
 });
 
@@ -110,10 +110,10 @@ t('las figuras usan formas y rellenos que el dibujante conoce', () => {
   }
 });
 
-t('cada asignatura mezcla las tres dificultades', () => {
+t('cada asignatura mezcla los cuatro niveles', () => {
   for (const a of ASIGNATURAS) {
     const suyas = BANCO.filter((p) => p.asignatura === a.id);
-    for (const nivel of [1, 2, 3]) {
+    for (const nivel of [1, 2, 3, 4]) {
       assert.ok(suyas.some((p) => p.dificultad === nivel), `${a.nombre} no tiene preguntas de nivel ${nivel}`);
     }
   }

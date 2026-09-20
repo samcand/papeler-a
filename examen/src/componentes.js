@@ -14,12 +14,14 @@ import { nombreAsignatura, nombreTema, NIVELES } from './temario.js';
 
 const LETRAS = ['A', 'B', 'C', 'D', 'E', 'F'];
 
+/** Básico verde, intermedio neutro, avanzado ámbar, experto rojo. */
+const CLASE_NIVEL = { 1: 'ok', 2: '', 3: 'media', 4: 'mal' };
+
 export function etiquetasPregunta(pregunta) {
   return el('div', { class: 'fila pequeno suave' },
     el('span', { class: 'etiqueta' }, nombreAsignatura(pregunta.asignatura)),
     el('span', { class: 'etiqueta' }, nombreTema(pregunta.asignatura, pregunta.tema)),
-    el('span', { class: 'etiqueta ' + (pregunta.dificultad === 3 ? 'mal' : pregunta.dificultad === 2 ? 'media' : 'ok') },
-      NIVELES[pregunta.dificultad] || 'Intermedio'),
+    el('span', { class: 'etiqueta ' + CLASE_NIVEL[pregunta.dificultad] }, NIVELES[pregunta.dificultad] || 'Intermedio'),
     pregunta.propia && el('span', { class: 'etiqueta' }, 'tuya'));
 }
 

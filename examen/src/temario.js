@@ -893,4 +893,17 @@ export const NIVELES = {
   1: 'Básico',
   2: 'Intermedio',
   3: 'Avanzado',
+  4: 'Experto',
+};
+
+/**
+ * Qué significa cada nivel. Está escrito para que la clasificación sea
+ * comparable entre asignaturas: lo que sube no es la rareza del dato, es la
+ * cantidad de razonamiento que hay que poner.
+ */
+export const DESCRIPCION_NIVELES = {
+  1: 'Aplicar una definición o una fórmula de forma directa, en un solo paso.',
+  2: 'Dos pasos, o elegir el procedimiento correcto entre varios posibles.',
+  3: 'Combinar dos conceptos, interpretar un caso concreto o evitar una trampa frecuente.',
+  4: 'Varios pasos encadenados, un caso límite, o distinguir entre dos ideas que casi todo el mundo confunde.',
 };

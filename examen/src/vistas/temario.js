@@ -8,7 +8,7 @@
 import { el, pintar, tarjeta, barra } from '../ui.js';
 import { store } from '../store.js';
 import { BANCO } from '../banco/index.js';
-import { ASIGNATURAS, asignatura as buscarAsignatura } from '../temario.js';
+import { ASIGNATURAS, asignatura as buscarAsignatura, NIVELES } from '../temario.js';
 import { agruparPor } from '../motor.js';
 
 export function temarioVista(raiz, params = {}) {
@@ -31,8 +31,14 @@ export function temarioVista(raiz, params = {}) {
       return el('details', { class: 'tema' },
         el('summary', {},
           el('span', { class: 'crece' }, t.nombre),
-          el('span', { class: 'pequeno suave' },
-            `${preguntas.length} preguntas${stats ? ` · ${stats.porcentaje}%` : ''}`)),
+          el('span', { class: 'niveles' }, [1, 2, 3, 4].map((d) => {
+            const n = preguntas.filter((p) => p.dificultad === d).length;
+            return el('span', {
+              class: 'nivel n' + d + (n ? '' : ' vacio'),
+              title: `${NIVELES[d]}: ${n} pregunta${n === 1 ? '' : 's'}`,
+            }, String(n));
+          })),
+          el('span', { class: 'pequeno suave' }, stats ? `${stats.porcentaje}%` : '')),
         el('ul', { class: 'claves' }, t.claves.map((c) => el('li', {}, c))),
         stats && el('div', { style: 'margin:10px 0' },
           barra(stats.porcentaje, stats.porcentaje >= 70 ? 'ok' : stats.porcentaje < 50 ? 'mal' : '')),

@@ -194,6 +194,18 @@ pre.bloque {
 .figura .rayado { stroke: var(--texto); stroke-width: 2.5; }
 .figura .interrogante { fill: var(--suave); font-size: 44px; font-weight: 700; text-anchor: middle; }
 
+/* Reparto por nivel en el temario: básico, intermedio, avanzado, experto. */
+.niveles { display: flex; gap: 4px; }
+.niveles .nivel {
+  min-width: 22px; text-align: center; border-radius: 6px; padding: 1px 5px;
+  font-size: 11px; font-variant-numeric: tabular-nums; border: 1px solid var(--borde);
+}
+.niveles .n1 { color: var(--ok); border-color: var(--ok); }
+.niveles .n2 { color: var(--suave); }
+.niveles .n3 { color: var(--aviso); border-color: var(--aviso); }
+.niveles .n4 { color: var(--mal); border-color: var(--mal); }
+.niveles .vacio { opacity: .35; }
+
 /* ---------- Gráficos: textos discontinuos y análisis de imagen ---------- */
 
 .grafico {
