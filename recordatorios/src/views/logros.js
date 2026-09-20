@@ -9,7 +9,10 @@
 
 import { button, el, render, toast } from '../../../src/ui.js';
 import { aISO, hoy as fechaHoy, textoLargo } from '../fechas.js';
-import { NIVELES, estrellasDelDia, marcarVistas, nivel, nuevasDesde, resumenLogros, tiraDeEstrellas } from '../logros.js';
+import {
+  NIVELES, cantidad, estrellasDelDia, marcarVistas, nivel, nuevasDesde,
+  resumenLogros, textoFalta, tiraDeEstrellas,
+} from '../logros.js';
 import { barra, dato, tituloVista } from '../componentes.js';
 import { store } from '../store.js';
 
@@ -29,7 +32,7 @@ export function vistaLogros(root) {
         el('h2', { class: 'card-title' }, nuevas.length === 1 ? 'Medalla nueva' : `${nuevas.length} medallas nuevas`),
         ...nuevas.map((n) => el('p', {},
           `${nivel(n.nivel).icono} ${n.medalla.icono} ${n.medalla.nombre} — ${nivel(n.nivel).nombre.toLowerCase()}`,
-          el('span', { class: 'muted small' }, ` · ${n.valor} ${n.medalla.unidad}`))),
+          el('span', { class: 'muted small' }, ` · ${cantidad(n.valor, n.medalla)}`))),
         button('Visto', () => {
           store.ajustar({ medallasVistas: marcarVistas(store.estado, hoyISO) });
           pintar();
@@ -58,7 +61,7 @@ export function vistaLogros(root) {
           el('span', { style: 'min-width:180px' }, `${x.medalla.icono} ${x.medalla.nombre}`),
           el('div', { class: 'grow' }, barra(x.pct, 'var(--accent-2)')),
           el('span', { class: 'muted small', style: 'min-width:190px;text-align:right' },
-            `faltan ${x.falta} ${x.medalla.unidad} para ${nivel(x.siguiente).icono}`)))) : null,
+            `${textoFalta(x)} para ${nivel(x.siguiente).icono}`)))) : null,
 
       el('section', { class: 'card' },
         el('h2', { class: 'card-title' }, 'Todas las medallas'),

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {
-  MEDALLAS, NIVELES, estrellasDelDia, evaluarMedalla, evaluarTodas,
-  marcarVistas, nuevasDesde, resumenLogros, tiraDeEstrellas,
+  MEDALLAS, NIVELES, cantidad, estrellasDelDia, evaluarMedalla, evaluarTodas,
+  marcarVistas, nuevasDesde, resumenLogros, textoFalta, tiraDeEstrellas,
 } from '../recordatorios/src/logros.js';
 import { crearTarea } from '../recordatorios/src/modelo.js';
 import { notaNueva } from '../recordatorios/src/notas.js';
@@ -185,6 +185,17 @@ t('una medalla se felicita una vez, no cada vez que se abre la pantalla', () => 
   estado.historial = Array.from({ length: 600 }, () => ({ fecha: HOY }));
   const subida = nuevasDesde(estado, vistas, HOY);
   assert.ok(subida.some((x) => x.id === 'volumen' && x.nivel === 'plata'));
+});
+
+t('el singular se nota: "1 día seguido", no "1 días seguidos"', () => {
+  const rutina = rutinaNueva({ id: 'r1', dias: [0, 1, 2, 3, 4, 5, 6], pasos: [pasoNuevo('Agua', 5)] });
+  const estado = { rutinas: [rutina], rutinasHechas: [{ rutina: 'r1', fecha: HOY, pasos: [rutina.pasos[0].id] }] };
+  const x = evaluarMedalla(medalla('rutina'), estado, HOY);
+  assert.equal(cantidad(1, x.medalla), '1 día seguido');
+  assert.equal(cantidad(6, x.medalla), '6 días seguidos');
+  assert.match(x.frase, /^1 día seguido/);
+  assert.equal(textoFalta({ falta: 1, medalla: medalla('metas') }), 'falta 1 objetivo');
+  assert.equal(textoFalta({ falta: 4, medalla: medalla('metas') }), 'faltan 4 objetivos');
 });
 
 console.log(`\n${passed} pruebas de medallas y estrellas OK`);

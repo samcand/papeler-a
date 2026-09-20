@@ -31,6 +31,18 @@ export const NIVELES = [
 
 export const nivel = (id) => NIVELES.find((n) => n.id === id) || null;
 
+/** "1 día seguido" y no "1 días seguidos": el singular se nota. */
+export function cantidad(n, medalla) {
+  const unidad = Math.abs(n) === 1 ? (medalla.singular || medalla.unidad) : medalla.unidad;
+  return `${n} ${unidad}`;
+}
+
+/** "falta 1 hora" / "faltan 3 horas". */
+export function textoFalta(evaluacion) {
+  const n = evaluacion.falta;
+  return `${n === 1 ? 'falta' : 'faltan'} ${cantidad(n, evaluacion.medalla)}`;
+}
+
 /* ------------------------------------------------------------------ *
  * Las medidas: cada una sale de datos que ya existen
  * ------------------------------------------------------------------ */
@@ -79,19 +91,19 @@ function mesesEnPresupuesto(estado, hoyISO) {
 
 export const MEDALLAS = [
   {
-    id: 'constancia', nombre: 'Constancia', icono: '🔥', unidad: 'días seguidos',
+    id: 'constancia', nombre: 'Constancia', icono: '🔥', unidad: 'días seguidos', singular: 'día seguido',
     descripcion: 'Días seguidos cerrando al menos una tarea.',
     umbrales: { bronce: 7, plata: 30, oro: 100 },
     medir: (estado, hoyISO) => rachaTareas(estado, hoyISO),
   },
   {
-    id: 'volumen', nombre: 'Trabajo hecho', icono: '✅', unidad: 'tareas',
+    id: 'volumen', nombre: 'Trabajo hecho', icono: '✅', unidad: 'tareas', singular: 'tarea',
     descripcion: 'Tareas completadas en total, desde el principio.',
     umbrales: { bronce: 100, plata: 500, oro: 2000 },
     medir: (estado) => (estado.historial || []).length,
   },
   {
-    id: 'palabra', nombre: 'Palabra cumplida', icono: '🤝', unidad: '% a tiempo',
+    id: 'palabra', nombre: 'Palabra cumplida', icono: '🤝', unidad: '% a tiempo', singular: '% a tiempo',
     descripcion: 'Porcentaje de entregas con plazo cerradas antes de vencer. Hace falta un mínimo de cinco para que cuente.',
     umbrales: { bronce: 70, plata: 85, oro: 95 },
     medir: (estado) => {
@@ -104,50 +116,50 @@ export const MEDALLAS = [
     },
   },
   {
-    id: 'enfoque', nombre: 'Enfoque', icono: '🍅', unidad: 'horas medidas',
+    id: 'enfoque', nombre: 'Enfoque', icono: '🍅', unidad: 'horas medidas', singular: 'hora medida',
     descripcion: 'Horas de trabajo medidas con el pomodoro o el cronómetro. Lo que no mediste no cuenta.',
     umbrales: { bronce: 10, plata: 50, oro: 200 },
     medir: (estado) => Math.floor((estado.tiempo || []).reduce((s, r) => s + (Number(r.minutos) || 0), 0) / 60),
   },
   {
-    id: 'revision', nombre: 'Domingo de revisión', icono: '🔄', unidad: 'semanas seguidas',
+    id: 'revision', nombre: 'Domingo de revisión', icono: '🔄', unidad: 'semanas seguidas', singular: 'semana seguida',
     descripcion: 'Semanas seguidas haciendo la revisión semanal.',
     umbrales: { bronce: 4, plata: 12, oro: 52 },
     medir: (estado, hoyISO) => semanasDeRevision(estado, hoyISO),
   },
   {
-    id: 'metas', nombre: 'Metas logradas', icono: '🎯', unidad: 'objetivos',
+    id: 'metas', nombre: 'Metas logradas', icono: '🎯', unidad: 'objetivos', singular: 'objetivo',
     descripcion: 'Objetivos marcados como logrados.',
     umbrales: { bronce: 1, plata: 5, oro: 15 },
     medir: (estado) => (estado.objetivos || []).filter((o) => o.logradoEn).length,
   },
   {
-    id: 'rutina', nombre: 'Rutina de hierro', icono: '🌅', unidad: 'días seguidos',
+    id: 'rutina', nombre: 'Rutina de hierro', icono: '🌅', unidad: 'días seguidos', singular: 'día seguido',
     descripcion: 'La mejor racha viva de una rutina completa.',
     umbrales: { bronce: 7, plata: 30, oro: 100 },
     medir: (estado, hoyISO) => Math.max(0, ...(estado.rutinas || [])
       .map((r) => rachaRutina(r, estado.rutinasHechas || [], hoyISO))),
   },
   {
-    id: 'diario', nombre: 'Diario', icono: '📔', unidad: 'días seguidos',
+    id: 'diario', nombre: 'Diario', icono: '📔', unidad: 'días seguidos', singular: 'día seguido',
     descripcion: 'Días seguidos escribiendo el diario.',
     umbrales: { bronce: 7, plata: 30, oro: 100 },
     medir: (estado, hoyISO) => rachaDiario(estado.notas || [], hoyISO),
   },
   {
-    id: 'lector', nombre: 'Lector', icono: '📚', unidad: 'lecturas',
+    id: 'lector', nombre: 'Lector', icono: '📚', unidad: 'lecturas', singular: 'lectura',
     descripcion: 'Artículos y libros marcados como leídos en la cola.',
     umbrales: { bronce: 5, plata: 20, oro: 50 },
     medir: (estado) => (estado.lecturas || []).filter((l) => l.leidoEn).length,
   },
   {
-    id: 'cuentas', nombre: 'Cuentas claras', icono: '💳', unidad: 'meses',
+    id: 'cuentas', nombre: 'Cuentas claras', icono: '💳', unidad: 'meses', singular: 'mes',
     descripcion: 'Meses cerrados sin pasarte del presupuesto.',
     umbrales: { bronce: 1, plata: 3, oro: 12 },
     medir: (estado, hoyISO) => mesesEnPresupuesto(estado, hoyISO),
   },
   {
-    id: 'entregas', nombre: 'Hitos cumplidos', icono: '🏁', unidad: 'hitos',
+    id: 'entregas', nombre: 'Hitos cumplidos', icono: '🏁', unidad: 'hitos', singular: 'hito',
     descripcion: 'Hitos de proyecto terminados al 100 %.',
     umbrales: { bronce: 3, plata: 10, oro: 30 },
     medir: (estado) => (estado.planes || [])
@@ -168,19 +180,23 @@ export function evaluarMedalla(medalla, estado, hoyISO = aISO(hoy())) {
     ? Math.max(0, Math.min(100, Math.round(((valor - base) / (meta - base)) * 100)))
     : 100;
 
+  const falta = siguiente ? Math.max(0, meta - valor) : 0;
+
   return {
     medalla,
     valor,
     nivel: conseguido,
     siguiente,
     meta,
-    falta: siguiente ? Math.max(0, meta - valor) : 0,
+    falta,
     pct,
     nota: medalla.nota ? medalla.nota(estado, hoyISO) : '',
     frase: conseguido && !siguiente
-      ? `Oro: ${valor} ${medalla.unidad}. No hay más allá de esto.`
-      : `${valor} ${medalla.unidad}${conseguido ? ` · ${nivel(conseguido).nombre}` : ''}`
-        + (siguiente ? ` · faltan ${Math.max(0, meta - valor)} para ${nivel(siguiente).nombre.toLowerCase()}` : ''),
+      ? `Oro: ${cantidad(valor, medalla)}. No hay más allá de esto.`
+      : `${cantidad(valor, medalla)}${conseguido ? ` · ${nivel(conseguido).nombre}` : ''}`
+        + (siguiente
+          ? ` · ${falta === 1 ? 'falta' : 'faltan'} ${cantidad(falta, medalla)} para ${nivel(siguiente).nombre.toLowerCase()}`
+          : ''),
   };
 }
 
@@ -279,7 +295,7 @@ export function resumenLogros(estado = {}, hoyISO = aISO(hoy())) {
     frase: !todas.filter((x) => x.nivel).length
       ? 'Ninguna medalla todavía. Salen solas de usar la app; no hay nada que marcar a mano.'
       : `${cuenta('oro')} de oro, ${cuenta('plata')} de plata y ${cuenta('bronce')} de bronce`
-        + (cerca.length ? `. Lo más cerca: ${cerca[0].medalla.nombre.toLowerCase()}, faltan ${cerca[0].falta} ${cerca[0].medalla.unidad}.` : '.'),
+        + (cerca.length ? `. Lo más cerca: ${cerca[0].medalla.nombre.toLowerCase()}, ${textoFalta(cerca[0])}.` : '.'),
   };
 }
 
