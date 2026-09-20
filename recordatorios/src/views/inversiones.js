@@ -15,6 +15,7 @@ import {
   tamanoPosicion, tareasDeCartera, valoraCartera,
 } from '../inversiones.js';
 import { dato, tituloVista } from '../componentes.js';
+import { importarMovimientosBroker, reconstruirPosiciones } from '../exportar.js';
 import { store } from '../store.js';
 
 const CAMPOS_POSICION = [
@@ -286,7 +287,8 @@ export function vistaInversiones(root, ctx = {}) {
           button('+ Nueva operación', () => {
             inv().operaciones.push({ ticker: '', lado: 'largo', cantidad: 0, entrada: 0, stop: 0, salida: null, fechaEntrada: hoyISO });
             guardar();
-          }))),
+          }),
+          importadorBroker())),
 
       el('section', { class: 'card' },
         el('h2', { class: 'card-title' }, 'Lecciones'),
@@ -297,6 +299,39 @@ export function vistaInversiones(root, ctx = {}) {
             class: 'input', value: op.leccion || '', placeholder: 'Qué aprendí…',
             onChange: (e) => { op.leccion = e.target.value; guardar(); },
           })))));
+  }
+
+  /**
+   * Importar el CSV del bróker: copiar operaciones a mano es donde entran los
+   * errores. Se empareja por FIFO y se enseña qué va a pasar antes de tocar nada.
+   */
+  function importadorBroker() {
+    const entrada = el('input', {
+      type: 'file', accept: '.csv,.txt', style: 'display:none',
+      onChange: async (e) => {
+        const f = e.target.files?.[0];
+        if (!f) return;
+        const { movimientos, avisos } = importarMovimientosBroker(await f.text());
+        entrada.value = '';
+        if (!movimientos.length) { toast(avisos[0] || 'No se reconoció ninguna operación', 'warn'); return; }
+        const r = reconstruirPosiciones(movimientos);
+        const detalle = [
+          `${movimientos.length} movimientos leídos.`,
+          r.resumen,
+          ...r.avisos,
+          '',
+          'Esto reemplaza las posiciones y añade las operaciones cerradas al diario. ¿Seguir?',
+        ].join('\n');
+        if (!window.confirm(detalle)) return;
+        store.instantanea('Importar del bróker');
+        inv().posiciones = r.posiciones;
+        inv().operaciones = [...inv().operaciones, ...r.operaciones];
+        guardar();
+        toast(`${r.posiciones.length} posiciones y ${r.operaciones.length} operaciones importadas`);
+      },
+    });
+    return el('span', {}, button('📥 Importar CSV del bróker', () => entrada.click(),
+      { title: 'Empareja compras y ventas por FIFO y reconstruye la cartera' }), entrada);
   }
 
   /* ----------------------------- chequeos ----------------------------- */

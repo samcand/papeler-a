@@ -11,6 +11,8 @@ import { avanceSemestre, rachaHabito, REVISION_MENSUAL, REVISION_SEMANAL } from 
 import { barra, dato, grafico, listaTareas, tituloVista } from '../componentes.js';
 import { formatoMinutos, resumenTiempo } from '../tiempo.js';
 import { store } from '../store.js';
+import { avisoTemprano, instantaneaSalud, saludPorProyecto } from '../salud.js';
+import { resumenEsperas, tareaDePerseguir } from '../esperas.js';
 
 export function vistaRevision(root) {
   const host = el('div', {});
@@ -46,6 +48,9 @@ export function vistaRevision(root) {
             return el('span', { class: 'chip' }, `${info?.icono || '•'} ${info?.nombre || m.modulo}: ${m.total}`);
           }))),
 
+      panelSalud(hoyISO, pintar),
+      panelEsperas(hoyISO, pintar),
+
       chequeo('Revisión semanal', REVISION_SEMANAL, marcados, (i) => {
         const nuevos = marcados.includes(i) ? marcados.filter((x) => x !== i) : [...marcados, i];
         store.ajustar({ [claveSemana]: nuevos });
@@ -80,6 +85,65 @@ export function vistaRevision(root) {
 
   pintar();
   render(root, host);
+}
+
+/**
+ * Salud de cada proyecto con el porqué delante. El número sin explicación no
+ * sirve para decidir nada.
+ */
+function panelSalud(hoyISO, alCambiar) {
+  const previas = store.estado.ajustes.saludPrevia?.scores || null;
+  const filas = saludPorProyecto(store.tareas, store.estado.proyectos, hoyISO, previas);
+  if (!filas.length) return null;
+  const avisos = avisoTemprano(filas);
+
+  return el('section', { class: 'card' },
+    el('div', { class: 'fila entre' },
+      el('h2', { class: 'card-title', style: 'margin:0' }, 'Salud de cada proyecto'),
+      button('Guardar foto de hoy', () => {
+        store.ajustar({ saludPrevia: instantaneaSalud(filas, hoyISO) });
+        toast('Guardada: la semana que viene se compara con esta');
+        alCambiar();
+      }, { variant: 'ghost chico', title: 'Para poder comparar la semana que viene' })),
+
+    ...avisos.map((a) => el('div', { class: 'alerta medio' },
+      el('div', {}, el('div', {}, '⚠ Se está deteriorando'), el('div', { class: 'accion' }, a.texto)))),
+
+    ...filas.map((f) => el('div', { class: `salud-fila ${f.nivel}` },
+      el('div', { class: 'fila entre' },
+        el('div', {},
+          el('b', {}, f.proyecto),
+          f.tendencia != null && f.tendencia !== 0
+            ? el('span', { class: `small ${f.tendencia > 0 ? 'positivo' : 'negativo'}` }, ` ${f.tendencia > 0 ? '+' : ''}${f.tendencia}`)
+            : null),
+        el('span', { class: `valor-salud ${f.nivel}` }, String(f.puntuacion))),
+      el('div', { class: 'barra' },
+        el('div', { style: `width:${f.puntuacion}%;background:${f.nivel === 'bien' ? 'var(--ok)' : f.nivel === 'atención' ? 'var(--warn)' : 'var(--danger)'}` })),
+      f.factores.length
+        ? el('ul', { class: 'small muted', style: 'margin:6px 0 0' }, ...f.factores.map((x) => el('li', {}, `${x.texto} (−${x.puntos})`)))
+        : el('p', { class: 'small muted', style: 'margin:6px 0 0' }, 'Todo al día y moviéndose.'))));
+}
+
+/** Lo que está en manos de otros, que no se hace solo por esperar más. */
+function panelEsperas(hoyISO, alCambiar) {
+  const r = resumenEsperas(store.tareas, hoyISO);
+  if (!r.total) return null;
+  return el('section', { class: 'card' },
+    el('h2', { class: 'card-title' }, `Esperando a otros (${r.total})`),
+    el('p', { class: r.vencidas ? 'negativo small' : 'muted small' }, r.frase),
+    el('table', { class: 'tabla' },
+      el('thead', {}, el('tr', {}, el('th', {}, 'Qué'), el('th', {}, 'Quién'), el('th', { class: 'num' }, 'Esperando'), el('th', {}, ''))),
+      el('tbody', {}, ...r.lista.map((e) => el('tr', {},
+        el('td', {}, e.tarea.titulo),
+        el('td', { class: 'muted' }, e.quien),
+        el('td', { class: `num ${e.vencida ? 'negativo' : ''}` },
+          `${e.esperando} d${e.vencida ? ` (+${Math.abs(e.margen)})` : ''}`),
+        el('td', {}, button('Perseguir', () => {
+          store.agregar(tareaDePerseguir(e.tarea, hoyISO));
+          store.actualizar(e.tarea.id, { espera: { ...e.tarea.espera, perseguida: hoyISO } });
+          toast('Tarea de seguimiento creada');
+          alCambiar();
+        }, { variant: 'ghost chico' })))))));
 }
 
 function chequeo(titulo, items, marcados, alMarcar) {

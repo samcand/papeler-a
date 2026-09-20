@@ -7,6 +7,7 @@ import { copyText } from '../../../src/ui.js';
 import { rachaHabito } from '../plantillas.js';
 import { barra, dato, entradaRapida, listaTareas, tituloVista, vacio } from '../componentes.js';
 import { resumenDelDia, textoResumen, tocaResumen } from '../resumen.js';
+import { SALIDAS_ZOMBI, alternarTres, proponerTres, tresDelDia, zombis } from '../dia.js';
 import { estadoBandeja } from '../modelo.js';
 import { formatoMinutos, resumenTiempo } from '../tiempo.js';
 import { store } from '../store.js';
@@ -102,6 +103,8 @@ export function vistaHoy(root, ctx = {}) {
           ? listaTareas(deHoy, { alCambiar: pintar, hoy: hoyISO, conSubtareas: true })
           : vacio(vencidas.length ? 'Nada más para hoy: primero lo atrasado.' : 'Día limpio. Disfrútalo o adelanta lo de mañana.', '✅')),
 
+      panelTres(hoyISO, pintar),
+      panelZombis(hoyISO, pintar),
       avisoBandeja(hoyISO),
 
       habitosDelDia(hoyISO, pintar),
@@ -120,6 +123,74 @@ export function vistaHoy(root, ctx = {}) {
 
   pintar();
   render(root, host);
+}
+
+/**
+ * Las tres cosas del día. Elegir tres es el trabajo; la lista completa es solo
+ * el inventario.
+ */
+function panelTres(hoyISO, alCambiar) {
+  const estado = tresDelDia(store.estado.ajustes, store.tareas, hoyISO);
+  const sugeridas = proponerTres(store.tareas, hoyISO);
+  if (!estado.elegidas.length && !sugeridas.length) return null;
+
+  return el('section', { class: `card tres-dia${estado.completo ? ' completo' : ''}` },
+    el('div', { class: 'fila entre' },
+      el('h2', { class: 'card-title', style: 'margin:0' },
+        estado.completo ? '✅ Las tres de hoy, hechas' : `Las tres de hoy · ${estado.hechas}/${estado.elegidas.length || 3}`),
+      !estado.elegidas.length && sugeridas.length
+        ? button('Elegir por mí', () => {
+          store.ajustar({ tresDelDia: { fecha: hoyISO, ids: sugeridas.slice(0, 3).map((t) => t.id) } });
+          alCambiar();
+        }, { variant: 'ghost chico' })
+        : button('Vaciar', () => { store.ajustar({ tresDelDia: { fecha: hoyISO, ids: [] } }); alCambiar(); }, { variant: 'ghost chico' })),
+
+    estado.elegidas.length
+      ? el('ol', { class: 'foco' }, ...estado.elegidas.map((t) => el('li', { class: t.completada ? 'muted' : '' },
+        el('button', {
+          class: 'casilla chica' + (t.completada ? ' marcada' : ''),
+          title: t.completada ? 'Reabrir' : 'Completar',
+          onClick: () => { store.alternarCompletada(t.id, hoyISO); alCambiar(); },
+        }),
+        el('span', {}, t.hora ? el('b', {}, `${t.hora} `) : null, t.titulo),
+        el('button', {
+          class: 'btn ghost chico', title: 'Quitar de las tres',
+          onClick: () => { store.ajustar({ tresDelDia: alternarTres(store.estado.ajustes, t.id, hoyISO) }); alCambiar(); },
+        }, '✕'))))
+      : el('p', { class: 'muted small' },
+        'Marca con ☆ tres tareas de la lista, o deja que las elija por ti: lo urgente primero y lo que tiene hora después.'));
+}
+
+/** Lo que llevas posponiendo tanto que ya es una decisión tomada. */
+function panelZombis(hoyISO, alCambiar) {
+  const lista = zombis(store.tareas, hoyISO);
+  if (!lista.length) return null;
+  const t = lista[0];
+
+  return el('section', { class: 'card', style: 'border-left:3px solid var(--warn)' },
+    el('h2', { class: 'card-title' }, 'Llevas posponiendo esto'),
+    el('p', {}, el('b', {}, t.titulo), ' ',
+      el('span', { class: 'muted small' },
+        `· ${t.aplazamientos} aplazamientos${t.diasRodando ? ` · ${t.diasRodando} días dando vueltas` : ''}`)),
+    el('p', { class: 'muted small' }, 'Cinco aplazamientos son una decisión tomada sin admitirla. Cuatro salidas honestas:'),
+    el('div', { class: 'fila' },
+      ...SALIDAS_ZOMBI.map((s) => button(s.texto, () => resolverZombi(s.id, t, hoyISO, alCambiar), { title: s.descripcion, variant: s.id === 'borrar' ? 'ghost danger' : '' }))),
+    lista.length > 1 ? el('p', { class: 'muted small', style: 'margin-top:8px' }, `Y ${lista.length - 1} más en la misma situación.`) : null);
+}
+
+function resolverZombi(salida, tarea, hoyISO, alCambiar) {
+  if (salida === 'hoy') store.actualizar(tarea.id, { fecha: hoyISO, prioridad: 2, aplazamientos: 0 });
+  if (salida === 'algunDia') store.actualizar(tarea.id, { fecha: null, aplazamientos: 0 });
+  if (salida === 'trocear') {
+    store.agregar({ titulo: `Primer paso de: ${tarea.titulo}`, padre: tarea.id, fecha: hoyISO, duracion: 15, proyecto: tarea.proyecto, modulo: tarea.modulo });
+    store.actualizar(tarea.id, { aplazamientos: 0 });
+    toast('Troceada: empieza por el primer paso');
+  }
+  if (salida === 'borrar') {
+    store.borrar(tarea.id);
+    toast('Borrada. Se queda 30 días en la papelera.');
+  }
+  alCambiar();
 }
 
 /** Recordar la bandeja solo cuando de verdad pide atención. */

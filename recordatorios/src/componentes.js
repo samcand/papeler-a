@@ -9,6 +9,9 @@ import { MODULOS, PRIORIDADES, descripcionCorta, ordenarTareas } from './modelo.
 import { parseEntrada } from './naturales.js';
 import { parseRegla, proximasFechas, textoRegla } from './recurrencia.js';
 import { calibracion, pistaEstimacion } from './calibracion.js';
+import { aplicar, fuentesDe, sugerencias } from './autocompletar.js';
+import { alternarTres, tresDelDia } from './dia.js';
+import { crearEspera, estadoEspera, tareaDePerseguir } from './esperas.js';
 import { store } from './store.js';
 
 export const colorModulo = (id) => MODULOS.find((m) => m.id === id)?.color || 'var(--muted)';
@@ -23,10 +26,48 @@ export const iconoModulo = (id) => MODULOS.find((m) => m.id === id)?.icono || '�
  * guardar: si la app interpretó mal la fecha, se ve al momento.
  */
 export function entradaRapida(porDefecto = {}, alAgregar = () => {}) {
-  const campo = input('', () => actualizarPrevia(), {
+  const campo = input('', () => { actualizarPrevia(); actualizarSugerencias(); }, {
     placeholder: 'Ej.: Revisar tesis de NVDA mañana 9am p1 #Cartera cada tercer viernes',
   });
   const previa = el('p', { class: 'vista-previa' });
+  const listaSugerencias = el('div', { class: 'sugerencias' });
+  let sugerenciaActual = null;
+  let elegida = 0;
+
+  /** Sugerir proyectos y etiquetas que ya existen, para no duplicarlos. */
+  function actualizarSugerencias() {
+    sugerenciaActual = sugerencias(campo.value, campo.selectionStart ?? campo.value.length, fuentesDe(store.estado));
+    elegida = 0;
+    pintarSugerencias();
+  }
+
+  function pintarSugerencias() {
+    if (!sugerenciaActual || (!sugerenciaActual.opciones.length && !sugerenciaActual.nuevo)) {
+      render(listaSugerencias);
+      listaSugerencias.classList.remove('abierta');
+      return;
+    }
+    listaSugerencias.classList.add('abierta');
+    render(listaSugerencias,
+      ...sugerenciaActual.opciones.map((opcion, i) => el('button', {
+        class: `sugerencia ${i === elegida ? 'activa' : ''}`.trim(),
+        type: 'button',
+        onMousedown: (e) => { e.preventDefault(); usarSugerencia(opcion); },
+      }, `${sugerenciaActual.simbolo}${opcion}`)),
+      sugerenciaActual.nuevo
+        ? el('span', { class: 'sugerencia nueva' }, `se creará ${sugerenciaActual.simbolo}${sugerenciaActual.prefijo}`)
+        : null);
+  }
+
+  function usarSugerencia(valor) {
+    const r = aplicar(campo.value, sugerenciaActual, valor);
+    campo.value = r.texto;
+    campo.setSelectionRange(r.cursor, r.cursor);
+    campo.focus();
+    sugerenciaActual = null;
+    pintarSugerencias();
+    actualizarPrevia();
+  }
 
   function actualizarPrevia() {
     const txt = campo.value.trim();
@@ -65,13 +106,32 @@ export function entradaRapida(porDefecto = {}, alAgregar = () => {}) {
   }
 
   campo.addEventListener('keydown', (e) => {
+    const abierta = sugerenciaActual && sugerenciaActual.opciones.length;
+    if (abierta && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) {
+      e.preventDefault();
+      const n = sugerenciaActual.opciones.length;
+      elegida = (elegida + (e.key === 'ArrowDown' ? 1 : n - 1)) % n;
+      pintarSugerencias();
+      return;
+    }
+    if (abierta && (e.key === 'Tab' || e.key === 'Enter')) {
+      e.preventDefault();
+      usarSugerencia(sugerenciaActual.opciones[elegida]);
+      return;
+    }
     if (e.key === 'Enter') { e.preventDefault(); agregar(); }
-    if (e.key === 'Escape') { campo.value = ''; previa.textContent = ''; campo.blur(); }
+    if (e.key === 'Escape') {
+      if (sugerenciaActual) { sugerenciaActual = null; pintarSugerencias(); return; }
+      campo.value = ''; previa.textContent = ''; campo.blur();
+    }
   });
+  campo.addEventListener('blur', () => { sugerenciaActual = null; pintarSugerencias(); });
+  campo.addEventListener('click', actualizarSugerencias);
   campo.dataset.rapida = '1';
 
-  return el('div', {},
+  return el('div', { class: 'caja-rapida' },
     el('div', { class: 'rapida' }, campo, button('Añadir', agregar, { variant: 'primary' })),
+    listaSugerencias,
     previa);
 }
 
@@ -111,9 +171,26 @@ export function itemTarea(tarea, opciones = {}) {
   if (tarea.proyecto) meta.push(el('span', {}, `# ${tarea.proyecto}`));
   for (const et of tarea.etiquetas || []) meta.push(el('span', { class: 'etiqueta' }, '@' + et));
   if (tarea.notas) meta.push(el('span', { title: tarea.notas }, '📝'));
+  if (tarea.espera?.quien) {
+    const e = estadoEspera(tarea.espera, hoyISO);
+    meta.push(el('span', { class: e.vencida ? 'vencida' : '', title: `Esperando desde ${tarea.espera.desde}` },
+      `⏳ ${tarea.espera.quien}${e.vencida ? ` · ${Math.abs(e.margen)} días de más` : ''}`));
+  }
+  if ((tarea.aplazamientos || 0) >= 3) {
+    meta.push(el('span', { title: 'Veces que la has pospuesto' }, `↩ ${tarea.aplazamientos}`));
+  }
   if (tarea.modulo) meta.unshift(el('span', { class: 'punto-modulo', style: `background:${colorModulo(tarea.modulo)}`, title: tarea.modulo }));
 
+  const enLasTres = (tresDelDia(store.estado.ajustes, store.tareas, hoyISO).ids || []).includes(tarea.id);
   const acciones = el('div', { class: 'tarea-acciones' },
+    !tarea.completada ? button(enLasTres ? '★' : '☆', () => {
+      const r = alternarTres(store.estado.ajustes, tarea.id, hoyISO);
+      if (r.lleno) { toast('Ya hay tres. Quita una antes de poner otra.', 'warn'); return; }
+      store.ajustar({ tresDelDia: r });
+      refrescar();
+    }, { variant: `ghost chico${enLasTres ? ' estrella' : ''}`, title: 'Una de las tres de hoy' }) : null,
+    tarea.completada ? button('📦', () => { store.archivar(tarea.id); toast('Archivada'); refrescar(); },
+      { variant: 'ghost chico', title: 'Archivar' }) : null,
     !tarea.completada ? button('📅', () => { store.aplazar(tarea.id, hoyISO); refrescar(); }, { variant: 'ghost chico', title: 'Mover a hoy' }) : null,
     !tarea.completada ? button('→', () => { store.aplazar(tarea.id, aISO(sumarDias(tarea.fecha || hoyISO, 1))); refrescar(); }, { variant: 'ghost chico', title: 'Posponer un día' }) : null,
     button('✎', () => panelTarea(tarea, refrescar), { variant: 'ghost chico', title: 'Editar' }),
@@ -206,6 +283,7 @@ export function panelTarea(tarea, alGuardar = () => {}) {
     campo('Etiquetas', input((borrador.etiquetas || []).join(', '), (v) => {
       borrador.etiquetas = v.split(',').map((s) => s.trim().replace(/^@/, '')).filter(Boolean);
     }, { placeholder: 'mercado, espera, tesis' })),
+    campoEspera(borrador, alGuardar, cerrar),
     campo('Avisar antes (min)', input((borrador.recordatorios || []).join(', '), (v) => {
       borrador.recordatorios = v.split(',').map((s) => Number(s.trim())).filter((n) => Number.isFinite(n));
     }, { placeholder: '0, 30, 60' }), 'Solo funciona con la app abierta o instalada. Para lo importante, exporta al calendario.'),
@@ -394,6 +472,37 @@ function reglaDeTipo(tipo, anterior) {
 
 function diaSemanaDeHoy() {
   return hoy().getDay();
+}
+
+/** Campos de "esto no depende de mí": quién, desde cuándo y hasta cuándo. */
+function campoEspera(borrador, alGuardar, cerrar) {
+  const caja = el('div', { class: 'field' });
+  const pintar = () => {
+    const e = borrador.espera;
+    render(caja,
+      el('span', { class: 'field-label' }, 'Esperando a alguien'),
+      el('div', { class: 'fila' },
+        input(e?.quien || '', (v) => {
+          borrador.espera = { ...(borrador.espera || crearEspera()), quien: v };
+        }, { placeholder: 'Coautor, revista, estudiante, banco…' }),
+        e?.quien ? button('✕', () => { borrador.espera = null; pintar(); }, { variant: 'ghost chico' }) : null),
+      e?.quien ? el('div', { class: 'fila' },
+        el('label', { class: 'field', style: 'width:160px' },
+          el('span', { class: 'field-label' }, 'Desde'),
+          input(e.desde, (v) => { borrador.espera = { ...borrador.espera, desde: v }; }, { type: 'date' })),
+        el('label', { class: 'field', style: 'width:160px' },
+          el('span', { class: 'field-label' }, 'Plazo razonable'),
+          input(e.limite, (v) => { borrador.espera = { ...borrador.espera, limite: v }; }, { type: 'date' })),
+        button('Perseguir ahora', () => {
+          store.agregar(tareaDePerseguir({ ...borrador }, aISO(hoy())));
+          store.actualizar(borrador.id, { espera: { ...borrador.espera, perseguida: aISO(hoy()) } });
+          toast('Tarea de seguimiento creada');
+          cerrar();
+          alGuardar();
+        }, { variant: 'ghost chico' })) : null);
+  };
+  pintar();
+  return caja;
 }
 
 /* ------------------------------------------------------------------ *

@@ -1,9 +1,10 @@
 /** app.js — Router y armazón de la app de recordatorios. */
 
-import { el, render as pintar, toast } from '../../src/ui.js';
+import { button, el, render as pintar, toast } from '../../src/ui.js';
 import { aISO, hoy as fechaHoy } from './fechas.js';
 import { aplicarFiltro } from './filtros.js';
 import { MODULOS, enBandeja, estaVencida } from './modelo.js';
+import { resumenEsperas } from './esperas.js';
 import { programarDelDia, programarResumen } from './notificaciones.js';
 import { resumenDelDia, textoNotificacion } from './resumen.js';
 import { store } from './store.js';
@@ -182,6 +183,10 @@ function montarArmazon() {
       const n = enBandeja(store.tareas).length;
       return n ? { n } : null;
     }
+    if (id === 'revision') {
+      const n = resumenEsperas(store.tareas, hoyISO).vencidas;
+      return n ? { n, urgente: true } : null;
+    }
     return null;
   }
 
@@ -226,11 +231,21 @@ function refrescarArmazon() {
 
 function atajos() {
   document.addEventListener('keydown', (e) => {
+    // Deshacer funciona siempre, incluso escribiendo en un campo.
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+      if (!store.puedeDeshacer) return;
+      e.preventDefault();
+      const etiqueta = store.deshacer();
+      toast(`Deshecho: ${etiqueta}`);
+      dibujar();
+      return;
+    }
     const escribiendo = /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName);
     if (escribiendo) return;
     if (e.key === '/') { e.preventDefault(); document.getElementById('buscador')?.focus(); return; }
     if (e.key === 'a') { e.preventDefault(); document.querySelector('[data-rapida]')?.focus(); return; }
     const destinos = { b: '/bandeja', h: '/hoy', p: '/proximos', c: '/calendario', e: '/enfoque', i: '/inversiones', g: '/proyectos', r: '/revision' };
+    if (e.key === 'z' && store.puedeDeshacer) { e.preventDefault(); const etq = store.deshacer(); toast(`Deshecho: ${etq}`); dibujar(); return; }
     if (destinos[e.key]) { e.preventDefault(); navegar(destinos[e.key]); }
   });
 }

@@ -7,6 +7,8 @@
 
 import { aISO, hoy, sumarDias } from './fechas.js';
 import { siguienteFecha } from './recurrencia.js';
+import { PilaDeshacer, aPapelera, purgar, restaurar } from './papelera.js';
+import { esAplazamiento } from './dia.js';
 import { CONFIG_POMODORO } from './tiempo.js';
 import { completar, crearTarea, uid } from './modelo.js';
 import { FILTROS_PREDEFINIDOS } from './filtros.js';
@@ -38,6 +40,7 @@ const ESTADO_INICIAL = {
   // EDT, dependencias y ruta crítica. Son cosas distintas y no deben mezclarse.
   planes: [],
   plantillas: [],       // listas reutilizables con desfases relativos a una fecha
+  papelera: [],         // lo borrado espera 30 días antes de irse de verdad
   pomodoro: { config: { ...CONFIG_POMODORO }, estado: null },
   ajustes: {
     tema: 'dark',
@@ -48,6 +51,9 @@ const ESTADO_INICIAL = {
     resumenMatutino: true,
     horaResumen: '07:00',
     resumenVistoEn: null,
+    minutosFinde: 240,
+    tresDelDia: null,
+    saludPrevia: null,
     primerDiaSemana: 1,
     ordenPorDefecto: 'fecha',
     enlaceAlabanza: '../index.html',
@@ -62,7 +68,27 @@ class Store {
   constructor() {
     this.estado = this.cargar();
     this.oyentes = new Set();
+    this.pila = new PilaDeshacer(15);
   }
+
+  /**
+   * Guarda una instantánea antes de una operación que se pueda lamentar.
+   * Se llama justo antes de cambiar nada; `deshacer()` la devuelve entera.
+   */
+  instantanea(etiqueta) {
+    this.pila.guardar(this.estado, etiqueta);
+    return etiqueta;
+  }
+
+  deshacer() {
+    const paso = this.pila.deshacer();
+    if (!paso) return null;
+    this.estado = paso.estado;
+    this.guardar();
+    return paso.etiqueta;
+  }
+
+  get puedeDeshacer() { return this.pila.hayAlgo; }
 
   cargar() {
     try {
@@ -88,6 +114,7 @@ class Store {
       alabanza: { ...base.alabanza, ...(guardado.alabanza || {}) },
       planes: guardado.planes || base.planes,
       plantillas: guardado.plantillas || base.plantillas,
+      papelera: purgar(guardado.papelera || [], aISO(hoy())),
       pomodoro: { ...base.pomodoro, ...(guardado.pomodoro || {}), config: { ...base.pomodoro.config, ...(guardado.pomodoro?.config || {}) } },
       ajustes: { ...base.ajustes, ...(guardado.ajustes || {}), jornada: { ...base.ajustes.jornada, ...(guardado.ajustes?.jornada || {}) } },
     };
@@ -119,9 +146,18 @@ class Store {
 
   /* ---------------- tareas ---------------- */
 
-  get tareas() { return this.estado.tareas; }
+  /** Las tareas vivas: lo archivado sigue guardado pero no estorba. */
+  get tareas() { return this.estado.tareas.filter((t) => !t.archivada); }
+
+  /** Todas, incluidas las archivadas: para estadísticas y respaldos. */
+  get todasLasTareas() { return this.estado.tareas; }
 
   tarea(id) { return this.estado.tareas.find((t) => t.id === id) || null; }
+
+  archivar(id, archivada = true) {
+    this.instantanea(archivada ? 'Archivar tarea' : 'Desarchivar tarea');
+    return this.actualizar(id, { archivada: archivada || undefined });
+  }
 
   agregar(campos) {
     const tarea = crearTarea({ ...campos, orden: Date.now() });
@@ -144,6 +180,7 @@ class Store {
   }
 
   borrar(id) {
+    this.instantanea('Borrar tarea');
     // Al borrar un padre se van sus subtareas: no dejamos huérfanas sueltas.
     const fuera = new Set([id]);
     let creció = true;
@@ -153,9 +190,32 @@ class Store {
         if (t.padre && fuera.has(t.padre) && !fuera.has(t.id)) { fuera.add(t.id); creció = true; }
       }
     }
+    const borradas = this.estado.tareas.filter((t) => fuera.has(t.id));
+    for (const t of borradas) this.estado.papelera.push(aPapelera('tarea', t));
     this.estado.tareas = this.estado.tareas.filter((t) => !fuera.has(t.id));
     this.guardar();
     return fuera.size;
+  }
+
+  /* ---------------- papelera ---------------- */
+
+  restaurarDePapelera(id) {
+    const { elemento, papelera } = restaurar(this.estado.papelera, id);
+    if (!elemento) return null;
+    this.instantanea('Restaurar de la papelera');
+    this.estado.papelera = papelera;
+    if (elemento.tipo === 'tarea') this.estado.tareas.push(elemento.datos);
+    else if (elemento.tipo === 'proyecto') this.estado.proyectos.push(elemento.datos);
+    else if (elemento.tipo === 'plan') this.estado.planes.push(elemento.datos);
+    else if (elemento.tipo === 'plantilla') this.estado.plantillas.push(elemento.datos);
+    this.guardar();
+    return elemento;
+  }
+
+  vaciarPapelera() {
+    this.instantanea('Vaciar la papelera');
+    this.estado.papelera = [];
+    this.guardar();
   }
 
   /** Completa (o reabre) una tarea; si se repetía, la reprograma. */
@@ -188,8 +248,13 @@ class Store {
     this.guardar();
   }
 
+  /** Mover una tarea de día; si se empuja hacia adelante, cuenta como aplazada. */
   aplazar(id, nuevaFecha) {
-    return this.actualizar(id, { fecha: nuevaFecha });
+    const t = this.tarea(id);
+    if (!t) return null;
+    const cambios = { fecha: nuevaFecha };
+    if (esAplazamiento(t.fecha, nuevaFecha)) cambios.aplazamientos = (t.aplazamientos || 0) + 1;
+    return this.actualizar(id, cambios);
   }
 
   /* ---------------- proyectos, filtros, hábitos ---------------- */
@@ -203,6 +268,8 @@ class Store {
 
   borrarProyecto(id) {
     const p = this.estado.proyectos.find((x) => x.id === id);
+    this.instantanea('Borrar proyecto');
+    if (p) this.estado.papelera.push(aPapelera('proyecto', p));
     this.estado.proyectos = this.estado.proyectos.filter((x) => x.id !== id);
     if (p) for (const t of this.estado.tareas) if (t.proyecto === p.nombre) t.proyecto = null;
     this.guardar();
@@ -286,6 +353,9 @@ class Store {
   }
 
   borrarPlan(id) {
+    const plan = this.estado.planes.find((p) => p.id === id);
+    this.instantanea('Borrar plan de proyecto');
+    if (plan) this.estado.papelera.push(aPapelera('plan', plan));
     this.estado.planes = this.estado.planes.filter((p) => p.id !== id);
     this.guardar();
   }
@@ -299,6 +369,9 @@ class Store {
   }
 
   borrarPlantilla(id) {
+    const plantilla = this.estado.plantillas.find((p) => p.id === id);
+    this.instantanea('Borrar plantilla');
+    if (plantilla) this.estado.papelera.push(aPapelera('plantilla', plantilla));
     this.estado.plantillas = this.estado.plantillas.filter((p) => p.id !== id);
     this.guardar();
   }
@@ -331,6 +404,7 @@ class Store {
   }
 
   vaciar() {
+    this.instantanea('Vaciar la app entera');
     this.estado = clonar(ESTADO_INICIAL);
     this.estado.filtros = clonar(FILTROS_PREDEFINIDOS);
     this.estado.plantillas = clonar(PLANTILLAS_INICIALES);

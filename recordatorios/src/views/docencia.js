@@ -5,7 +5,7 @@
 
 import { button, el, render, toast } from '../../../src/ui.js';
 import { aISO, hoy as fechaHoy, textoRelativo, DIAS } from '../fechas.js';
-import { avanceSemestre, RUTINA_DOCENCIA, tareasDeCurso, tareasDeSemestre } from '../plantillas.js';
+import { avanceSemestre, clonarSemestre, RUTINA_DOCENCIA, tareasDeCurso, tareasDeSemestre } from '../plantillas.js';
 import { parseRegla } from '../recurrencia.js';
 import { barra, dato, listaTareas, tituloVista } from '../componentes.js';
 import { store } from '../store.js';
@@ -42,6 +42,16 @@ export function vistaDocencia(root) {
             sem().cursos.push({ codigo: '', nombre: 'Curso nuevo', grupos: 1, horario: [], evaluaciones: [] });
             guardar();
           }),
+          sem().cursos.length ? button('📋 Clonar a un semestre nuevo', () => {
+            const inicio = window.prompt('¿Cuándo empieza el semestre nuevo? (aaaa-mm-dd)', hoyISO);
+            if (!inicio || !/^\d{4}-\d{2}-\d{2}$/.test(inicio)) return;
+            const nombre = window.prompt('¿Cómo se llama?', `${sem().nombre || 'Semestre'} (copia)`) || undefined;
+            store.instantanea('Clonar semestre');
+            const clon = clonarSemestre(sem(), { inicio, nombre });
+            store.actualizarModulo('docencia', { semestre: clon });
+            toast(`Semestre clonado: todo corrido ${clon.semanasDesplazadas} semanas`);
+            pintar();
+          }, { title: 'Corre todas las fechas en semanas enteras: los martes siguen siendo martes' }) : null,
           sem().cursos.length ? button('🔔 Generar todas las tareas del semestre', () => {
             const n = store.sembrarTareas(tareasDeSemestre(sem()), 'semestre');
             toast(n ? `${n} tareas creadas` : 'Ya estaban todas creadas');

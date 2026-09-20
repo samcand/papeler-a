@@ -8,6 +8,7 @@ import { MODULOS } from '../modelo.js';
 import { aCSV, aICS, aTexto, importarCSV, resumenMarkdown } from '../exportar.js';
 import { pedirPermiso, permiso, programarDelDia } from '../notificaciones.js';
 import { tituloVista } from '../componentes.js';
+import { archivadas, candidatasAArchivar, diasRestantes } from '../papelera.js';
 import { store } from '../store.js';
 
 export function vistaAjustes(root) {
@@ -128,6 +129,9 @@ export function vistaAjustes(root) {
             pintar();
           }))),
 
+      panelPapelera(),
+      panelArchivo(),
+
       el('section', { class: 'card' },
         el('h2', { class: 'card-title' }, 'Zona peligrosa'),
         el('div', { class: 'fila' },
@@ -145,6 +149,54 @@ export function vistaAjustes(root) {
             pintar();
           }, { variant: 'danger' }))));
   };
+
+  /** La papelera: treinta días para arrepentirse. */
+  function panelPapelera() {
+    const papelera = store.estado.papelera || [];
+    return el('section', { class: 'card' },
+      el('h2', { class: 'card-title' }, `Papelera (${papelera.length})`),
+      el('p', { class: 'muted small' }, 'Lo borrado espera 30 días aquí antes de irse de verdad.'),
+      papelera.length ? el('table', { class: 'tabla' },
+        el('tbody', {}, ...[...papelera].reverse().map((x) => el('tr', {},
+          el('td', {}, x.nombre),
+          el('td', { class: 'muted small' }, x.tipo),
+          el('td', { class: 'muted small' }, `le quedan ${diasRestantes(x, hoyISO)} días`),
+          el('td', {}, button('Restaurar', () => {
+            store.restaurarDePapelera(x.id);
+            toast('Restaurado');
+            pintar();
+          }, { variant: 'ghost chico' })))))) : el('p', { class: 'muted' }, 'Vacía.'),
+      papelera.length ? el('div', { class: 'fila', style: 'margin-top:10px' },
+        button('Vaciar la papelera', () => {
+          if (!window.confirm('Se borra definitivamente lo que hay en la papelera. ¿Seguro?')) return;
+          store.vaciarPapelera();
+          pintar();
+        }, { variant: 'ghost danger chico' })) : null);
+  }
+
+  /** El archivo: lo terminado deja de estorbar pero no se pierde. */
+  function panelArchivo() {
+    const guardadas = archivadas(store.todasLasTareas);
+    const candidatas = candidatasAArchivar(store.todasLasTareas, hoyISO);
+    return el('section', { class: 'card' },
+      el('h2', { class: 'card-title' }, `Archivo (${guardadas.length})`),
+      el('p', { class: 'muted small' },
+        'Lo archivado no sale en ninguna lista, pero sigue contando en las estadísticas y en el historial.'),
+      candidatas.length ? el('div', { class: 'fila' },
+        button(`Archivar ${candidatas.length} tareas completadas hace más de 30 días`, () => {
+          store.instantanea('Archivar completadas');
+          for (const t of candidatas) store.actualizar(t.id, { archivada: true });
+          toast(`${candidatas.length} archivadas`);
+          pintar();
+        }, { variant: 'primary' })) : el('p', { class: 'muted small' }, 'Nada pendiente de archivar.'),
+      guardadas.length ? el('details', { style: 'margin-top:10px' },
+        el('summary', { class: 'muted small' }, 'Ver lo archivado'),
+        el('div', { class: 'chip-list', style: 'margin-top:8px' },
+          ...guardadas.slice(0, 40).map((t) => el('button', {
+            class: 'chip', title: 'Desarchivar',
+            onClick: () => { store.archivar(t.id, false); pintar(); },
+          }, `${t.titulo} ✕`)))) : null);
+  }
 
   pintar();
   render(root, host);

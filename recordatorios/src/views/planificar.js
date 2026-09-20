@@ -8,6 +8,7 @@ import { aISO, hoy as fechaHoy, sumarDias, textoLargo } from '../fechas.js';
 import { paraHoy } from '../modelo.js';
 import { formatoMinutos, matrizEisenhower, planificarDia } from '../tiempo.js';
 import { colorModulo, dato, listaTareas, tituloVista } from '../componentes.js';
+import { capacidadSemanas, resumenCapacidad } from '../capacidad.js';
 import { store } from '../store.js';
 
 export function vistaPlanificar(root) {
@@ -62,6 +63,8 @@ export function vistaPlanificar(root) {
           b.tarea.modulo ? el('span', { class: 'punto-modulo', style: `background:${colorModulo(b.tarea.modulo)}` }) : null)))
           : el('p', { class: 'muted' }, 'No hay tareas con fecha para este día.')),
 
+      panelCapacidad(),
+
       el('section', { style: 'margin-top:14px' },
         el('h2', {}, 'Urgente frente a importante'),
         el('p', { class: 'muted small' }, 'Si casi todo cae en “hacer ya”, el problema no es el día: es la semana pasada.'),
@@ -71,6 +74,48 @@ export function vistaPlanificar(root) {
             el('p', { class: 'muted small' }, c.descripcion),
             listaTareas(c.tareas.slice(0, 6), { alCambiar: pintar, hoy: diaISO, vacio: 'Nada aquí.', icono: '·' }))))));
   };
+
+  /**
+   * Tu capacidad real: el recurso escaso que provoca todos los choques entre
+   * cartera, docencia, investigación, alabanza y casa eres tú.
+   */
+  function panelCapacidad() {
+    const ajustes = store.estado.ajustes;
+    const r = resumenCapacidad(store.tareas, ajustes, aISO(fechaHoy()));
+    const semanas = capacidadSemanas(store.tareas, aISO(fechaHoy()), 4, ajustes, aISO(fechaHoy()));
+
+    return el('section', { class: 'card', style: 'margin-top:14px' },
+      el('h2', { class: 'card-title' }, 'Tu capacidad, semana a semana'),
+      el('p', { class: r.semana.pct > 100 ? 'negativo' : 'muted' }, r.frase),
+
+      el('div', { class: 'mapa-calor' },
+        el('div', { class: 'mapa-cabecera' },
+          el('span', {}, ''), ...['L', 'M', 'X', 'J', 'V', 'S', 'D'].map((d) => el('span', {}, d)), el('span', {}, 'total')),
+        ...semanas.map((s) => el('div', { class: 'mapa-fila' },
+          el('span', { class: 'muted small' }, `sem ${s.numero}`),
+          ...s.dias.map((d) => el('span', {
+            class: `celda-carga ${d.nivel}${d.esHoy ? ' hoy' : ''}`,
+            title: `${d.fecha}: ${formatoMinutos(d.comprometidos)} de ${formatoMinutos(d.disponibles)} (${d.pct} %)`,
+          }, d.comprometidos ? String(Math.round(d.comprometidos / 60)) : '')),
+          el('span', { class: `small ${s.nivel === 'imposible' ? 'negativo' : 'muted'}` }, `${s.pct} %`)))),
+
+      r.reparto.length ? el('div', { style: 'margin-top:12px' },
+        el('p', { class: 'field-label' }, 'A quién le has prometido tus horas esta semana'),
+        ...r.reparto.map((m) => el('div', { style: 'margin-bottom:6px' },
+          el('div', { class: 'fila entre small' },
+            el('span', {}, `${m.icono} ${m.nombre}`),
+            el('span', { class: 'muted' }, `${formatoMinutos(m.minutos)} · ${m.pct} %`)),
+          el('div', { class: 'barra' }, el('div', { style: `width:${m.pct}%;background:${colorModulo(m.modulo)}` }))))) : null,
+
+      el('div', { class: 'fila', style: 'margin-top:12px' },
+        el('label', { class: 'field', style: 'width:220px;margin:0' },
+          el('span', { class: 'field-label' }, 'Horas disponibles el fin de semana'),
+          el('input', {
+            class: 'input', type: 'number', min: 0, max: 16, step: 0.5,
+            value: Math.round(((ajustes.minutosFinde ?? 240) / 60) * 10) / 10,
+            onChange: (e) => { store.ajustar({ minutosFinde: Math.round(Number(e.target.value) * 60) }); pintar(); },
+          }))));
+  }
 
   pintar();
   render(root, host);

@@ -64,13 +64,19 @@ export function vistaIdeas(root) {
             el('div', { class: 'muted' }, `${idea.n}. ${idea.t}`),
             el('div', { class: 'accion' }, idea.motivo))))),
 
-      el('div', { class: 'fila', style: 'margin-top:16px' },
-        button('Convertir la ola 1 en tareas', () => {
-          const n = store.sembrarTareas(porOla(1).map((i) => ({
-            titulo: i.t, notas: i.d, modulo: 'proyectos', proyecto: 'Mejoras de la app', prioridad: 2, etiquetas: ['ola-1', i.c],
-          })), 'hoja-de-ruta-1');
-          toast(n ? `${n} tareas creadas` : 'Ya estaban creadas');
-        }, { variant: 'primary' })));
+      (() => {
+        // La ola 1 se vacía cuando se termina: el botón apunta a la siguiente con trabajo.
+        const siguiente = OLAS.find((o) => porOla(o.n).some((i) => !marcadas.has(i.n)));
+        if (!siguiente) return el('p', { class: 'positivo' }, 'No queda nada pendiente. Eso sí que es raro.');
+        return el('div', { class: 'fila', style: 'margin-top:16px' },
+          button(`Convertir "${siguiente.nombre}" en tareas`, () => {
+            const n = store.sembrarTareas(porOla(siguiente.n).filter((i) => !marcadas.has(i.n)).map((i) => ({
+              titulo: i.t, notas: i.d, modulo: 'proyectos', proyecto: 'Mejoras de la app', prioridad: siguiente.n === 1 ? 2 : 3,
+              etiquetas: [`ola-${siguiente.n}`, i.c],
+            })), `hoja-de-ruta-${siguiente.n}`);
+            toast(n ? `${n} tareas creadas` : 'Ya estaban creadas');
+          }, { variant: 'primary' }));
+      })());
   };
 
   function filaIdea(idea, marcadas, alCambiar) {

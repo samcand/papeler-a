@@ -278,6 +278,49 @@ a { color: var(--accent); }
 .item-bandeja .tarea { border-bottom: none; }
 .chip.chico { padding: 2px 7px; font-size: .78rem; }
 
+/* ---------- Autocompletado de la entrada rápida ---------- */
+.caja-rapida { position: relative; }
+.sugerencias { display: none; position: absolute; z-index: 30; top: 46px; left: 0; gap: 4px; padding: 6px;
+  background: var(--card); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow); }
+.sugerencias.abierta { display: flex; flex-wrap: wrap; }
+.sugerencia { background: var(--bg-soft); border: 1px solid var(--line); color: var(--text);
+  border-radius: 999px; padding: 4px 10px; font-size: .85rem; cursor: pointer; }
+.sugerencia.activa { background: var(--accent); color: #0d1219; border-color: transparent; }
+.sugerencia.nueva { color: var(--muted); border-style: dashed; cursor: default; }
+
+/* ---------- Las tres del día ---------- */
+.tres-dia { border-left: 3px solid var(--accent); }
+.tres-dia.completo { border-left-color: var(--ok); }
+.tres-dia .foco { list-style: decimal; margin: 6px 0 0; padding-left: 22px; }
+.tres-dia .foco li { padding: 4px 0; display: flex; align-items: center; gap: 8px; }
+.casilla.chica { width: 16px; height: 16px; border-width: 2px; }
+
+/* ---------- Mapa de calor de capacidad ---------- */
+.mapa-calor { display: flex; flex-direction: column; gap: 4px; margin-top: 10px; }
+.mapa-cabecera, .mapa-fila { display: grid; grid-template-columns: 56px repeat(7, 1fr) 48px; gap: 4px; align-items: center; }
+.mapa-cabecera span { text-align: center; font-size: .72rem; color: var(--muted); }
+.celda-carga { display: grid; place-items: center; height: 30px; border-radius: 6px; font-size: .74rem;
+  background: var(--bg-soft); border: 1px solid var(--line); color: var(--muted); }
+.celda-carga.normal { background: color-mix(in oklab, var(--accent-2) 22%, var(--card)); color: var(--text); }
+.celda-carga.ajustado { background: color-mix(in oklab, var(--warn) 32%, var(--card)); color: var(--text); }
+.celda-carga.imposible { background: color-mix(in oklab, var(--danger) 45%, var(--card)); color: var(--text); font-weight: 600; }
+.celda-carga.hoy { outline: 2px solid var(--accent); outline-offset: -2px; }
+.celda-carga.pasado { opacity: .3; }
+
+/* ---------- Salud ---------- */
+.salud-fila { padding: 10px 0; border-top: 1px solid var(--line); }
+.valor-salud { font-variant-numeric: tabular-nums; font-weight: 700; }
+.valor-salud.bien { color: var(--ok); }
+.valor-salud.atención { color: var(--warn); }
+.valor-salud.riesgo { color: var(--danger); }
+
+/* ---------- Histograma de la simulación ---------- */
+.histograma { display: flex; align-items: flex-end; gap: 4px; height: 120px; }
+.columna-hist { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; height: 100%; gap: 4px; }
+.columna-hist > div { background: color-mix(in oklab, var(--accent) 65%, var(--card)); border-radius: 3px 3px 0 0; min-height: 2px; }
+.columna-hist > span { font-size: .62rem; text-align: center; white-space: nowrap; }
+.btn.estrella { color: var(--accent); }
+
 /* ---------- Gantt y plan de proyecto ---------- */
 .gantt-caja { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--bg-soft); }
 .gantt { display: block; min-width: 100%; }

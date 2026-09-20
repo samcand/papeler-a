@@ -191,7 +191,9 @@ else {
 // Arrastrar una tarea en el Gantt
 await pagina.goto(BASE + '#/proyectos');
 await pagina.waitForTimeout(500);
-const antesFin = await pagina.locator('.tabla-plan tbody tr').nth(1).locator('td').nth(4).textContent();
+// columnas: EDT, tarea, días, optimista, pesimista, comienzo, fin…
+const COL_FIN = 6;
+const antesFin = await pagina.locator('.tabla-plan tbody tr').nth(1).locator('td').nth(COL_FIN).textContent();
 const barra = pagina.locator('.gantt-barra').nth(1);
 const caja = await barra.boundingBox();
 await pagina.mouse.move(caja.x + 12, caja.y + caja.height / 2);
@@ -199,7 +201,7 @@ await pagina.mouse.down();
 await pagina.mouse.move(caja.x + 12 + 9 * 5, caja.y + caja.height / 2, { steps: 8 });  // ~5 días a escala de semanas
 await pagina.mouse.up();
 await pagina.waitForTimeout(500);
-const despuesFin = await pagina.locator('.tabla-plan tbody tr').nth(1).locator('td').nth(4).textContent();
+const despuesFin = await pagina.locator('.tabla-plan tbody tr').nth(1).locator('td').nth(COL_FIN).textContent();
 const chincheta = await pagina.locator('.tabla-plan tbody tr').nth(1).getByRole('button', { name: '📌' }).count();
 if (antesFin === despuesFin) errores.push(`arrastrar en el Gantt no movió la tarea (seguía en ${antesFin})`);
 else if (!chincheta) errores.push('la tarea movida no quedó marcada como fijada');
@@ -269,6 +271,92 @@ const despues = (await pagina.textContent('#app')).replace(/\s+/g, ' ');
 if (!antesNivelar) errores.push('el proyecto de prueba no marcó la sobreasignación');
 else if (!/Ya no hay nadie sobreasignado/.test(despues)) errores.push('la nivelación no resolvió el choque: ' + despues.slice(0, 300));
 else console.log('  ok  nivelación automática de recursos');
+
+// Las tres del día
+await pagina.goto(BASE + '#/hoy');
+await pagina.waitForTimeout(300);
+await pagina.getByRole('button', { name: 'Elegir por mí' }).click();
+await pagina.waitForTimeout(300);
+const tres = await pagina.locator('.tres-dia .foco li').count();
+if (!tres) errores.push('las tres del día no se eligieron solas');
+else console.log(`  ok  las tres del día (${tres} elegidas)`);
+
+// Borrar va a la papelera y se restaura
+const antesBorrar = await pagina.locator('.tarea').count();
+pagina.once('dialog', (d) => d.accept());
+await pagina.locator('.tarea').first().getByTitle('Borrar').click();
+await pagina.waitForTimeout(400);
+await pagina.goto(BASE + '#/ajustes');
+await pagina.waitForTimeout(400);
+const textoAjustes = (await pagina.textContent('#app')).replace(/\s+/g, ' ');
+if (!/Papelera \(1\)/.test(textoAjustes)) errores.push('lo borrado no llegó a la papelera');
+else {
+  // "Restaurar" a secas también casa con "Restaurar copia (.json)": hay que acotar a la tarjeta.
+  await pagina.locator('.card', { hasText: 'Papelera' }).getByRole('button', { name: 'Restaurar', exact: true }).first().click();
+  await pagina.waitForTimeout(400);
+  await pagina.goto(BASE + '#/hoy');
+  await pagina.waitForTimeout(400);
+  const despuesRestaurar = await pagina.locator('.tarea').count();
+  if (despuesRestaurar !== antesBorrar) errores.push(`restaurar no devolvió la tarea (${antesBorrar} → ${despuesRestaurar})`);
+  else console.log('  ok  papelera: borrar y restaurar');
+}
+
+// Deshacer global con Ctrl+Z
+const antesDeshacer = await pagina.locator('.tarea').count();
+pagina.once('dialog', (d) => d.accept());
+await pagina.locator('.tarea').first().getByTitle('Borrar').click();
+await pagina.waitForTimeout(400);
+await pagina.keyboard.press('Control+z');
+await pagina.waitForTimeout(500);
+if (await pagina.locator('.tarea').count() !== antesDeshacer) errores.push('Ctrl+Z no deshizo el borrado');
+else console.log('  ok  deshacer global con Ctrl+Z');
+
+// Autocompletado de proyectos
+await pagina.fill('[data-rapida]', 'Revisar algo #car');
+await pagina.waitForTimeout(350);
+const sugerencia = await pagina.locator('.sugerencias.abierta .sugerencia').first().textContent().catch(() => '');
+if (!/Cartera/i.test(sugerencia || '')) errores.push('el autocompletado no sugirió el proyecto: ' + sugerencia);
+else {
+  await pagina.keyboard.press('Tab');
+  await pagina.waitForTimeout(200);
+  const valor = await pagina.locator('[data-rapida]').inputValue();
+  if (!valor.includes('#Cartera')) errores.push('Tab no completó el proyecto: ' + valor);
+  else console.log('  ok  autocompletar # y @');
+  await pagina.fill('[data-rapida]', '');
+}
+
+// Capacidad real entre módulos
+await pagina.goto(BASE + '#/planificar');
+await pagina.waitForTimeout(500);
+const celdas = await pagina.locator('.celda-carga').count();
+if (celdas !== 28) errores.push(`el mapa de capacidad debería tener 28 días, tiene ${celdas}`);
+else console.log('  ok  capacidad: mapa de cuatro semanas');
+
+// Salud explicada
+await pagina.goto(BASE + '#/revision');
+await pagina.waitForTimeout(500);
+const salud = await pagina.locator('.salud-fila').count();
+if (!salud) errores.push('la salud por proyecto no se dibujó');
+else console.log(`  ok  salud explicada (${salud} proyectos)`);
+
+// Fecha probabilística y escenarios
+await pagina.goto(BASE + '#/proyectos');
+await pagina.waitForTimeout(400);
+await pagina.locator('.pestana', { hasText: 'Fecha y escenarios' }).click();
+await pagina.waitForTimeout(900);
+const riesgo = (await pagina.textContent('#app')).replace(/\s+/g, ' ');
+const columnas = await pagina.locator('.columna-hist').count();
+if (!/P80/.test(riesgo) || columnas !== 12) errores.push('la fecha probabilística no salió: ' + riesgo.slice(0, 200));
+else {
+  const caja = pagina.locator('.card', { hasText: '¿Qué pasa si' });
+  const selectorTarea = caja.locator('select').first();
+  const opciones = await selectorTarea.locator('option').count();
+  await selectorTarea.selectOption({ index: 1 });        // la primera tarea del plan
+  await pagina.waitForTimeout(600);
+  const escenario = (await pagina.textContent('#app')).replace(/\s+/g, ' ');
+  if (!/(más tarde|no cambia|antes)/.test(escenario)) errores.push('el escenario no calculó el impacto');
+  else console.log(`  ok  fecha probabilística y "¿qué pasa si?" (${opciones - 1} tareas)`);
+}
 
 await pagina.setViewportSize({ width: 390, height: 844 });
 await pagina.goto(BASE + '#/hoy');

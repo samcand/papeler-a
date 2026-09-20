@@ -1,6 +1,6 @@
 # Hoja de ruta de la app de recordatorios
 
-**43 hechas · 55 pendientes · 12 descartadas.**
+**56 hechas · 42 pendientes · 12 descartadas.**
 
 Esta lista empezó como “100 ideas” y hoy es la lista de trabajo real. Lo
 pendiente va por olas, que son un orden recomendado y no un compromiso. Lo
@@ -14,48 +14,9 @@ sirve a una persona que trabaja sola, sin equipo ni PMO.
 En la app, la pestaña **Lo que queda** muestra lo mismo y convierte cualquier
 pendiente en tarea con un botón.
 
-## Lo próximo (13)
+## Lo próximo (0)
 
 _Quita fricción real o evita un error caro. Vale la pena hacerlo ya._
-
-**9. Autocompletar proyectos y etiquetas al escribir** · Capturar sin fricción  
-Al teclear # o @ se sugiere lo que ya existe, que es como se evita tener "cartera", "Cartera" y "carteras".
-
-**16. Archivar en vez de borrar** · Organizar y encontrar  
-Los proyectos terminados no se borran: se archivan, y siguen contando en las estadísticas del año.
-
-**17. Papelera con recuperación** · Organizar y encontrar  
-Treinta días para arrepentirse de un borrado, porque el botón de confirmar se pulsa en automático.
-
-**25. Las tres cosas del día** · Priorizar y planificar  
-Obligar a elegir tres tareas que harían que el día valga la pena, y enseñarlas por encima del resto.
-
-**46. Escalado de las aplazadas** · Recordatorios y avisos  
-Si una tarea se pospone cinco veces, preguntar en serio si sigue viva o hay que matarla.
-
-**54. Dependencias externas: dueño, fecha y seguimiento** · Equipo y delegación  
-El coautor, la revista, el estudiante o el banco: quién lo tiene, desde cuándo y cuándo perseguirlo, con aviso cuando se pasa de plazo.
-
-**66. Importar movimientos del bróker** · Inversiones  
-Leer el CSV de operaciones y cuadrar la cartera sola, que copiar a mano es donde entran los errores.
-
-**75. Banco de tareas por curso reutilizable** · Docencia e investigación  
-Clonar el semestre anterior con las fechas corridas, en vez de rehacerlo cada enero.
-
-**89. Fecha final probabilística (PERT + Monte Carlo)** · Gestión de proyectos  
-Duración optimista, probable y pesimista por tarea, simulación del plan y una fecha con probabilidad — alimentada por tu factor de calibración medido, no por un optimismo genérico.
-
-**95. Deshacer global e historial de versiones** · Datos, privacidad y automatización  
-Una franja de "deshacer" tras cada borrado y copias automáticas de los últimos días.
-
-**101. Simulación "¿qué pasa si?" y propagación del impacto** · Gestión de proyectos  
-Retrasar una tarea, alargar otra o mover un hito, y ver antes de tocar nada qué fechas se mueven en cascada y si la entrega sigue en pie.
-
-**102. Tu capacidad real entre los cinco módulos** · Priorizar y planificar  
-Horas disponibles por semana descontando clases, ensayo y servicio, frente a lo que ya has comprometido, con un mapa de calor semanal. El recurso escaso que provoca todos los choques eres tú.
-
-**103. Salud explicada y aviso temprano** · Gestión de proyectos  
-Un indicador por compromiso con las razones detrás: holgura consumida, dependencias externas vencidas, tu carga y estancamiento. Lo que importa no es el número sino el porqué, antes de que se ponga en rojo.
 
 ## Después (22)
 
@@ -194,34 +155,34 @@ Preguntas del plan respondidas con cálculo, no con lenguaje: qué se va a retra
 ## Ya está hecho
 
 **Capturar sin fricción**  
-1. Escribir la tarea en una sola línea · 2. Enseñar lo que la app entendió antes de guardar · 3. Bandeja de entrada universal · 8. Plantillas de listas reutilizables
+1. Escribir la tarea en una sola línea · 2. Enseñar lo que la app entendió antes de guardar · 3. Bandeja de entrada universal · 8. Plantillas de listas reutilizables · 9. Autocompletar proyectos y etiquetas al escribir
 
 **Organizar y encontrar**  
-11. Proyectos, subtareas y etiquetas · 12. Filtros guardados con lenguaje de consulta
+11. Proyectos, subtareas y etiquetas · 12. Filtros guardados con lenguaje de consulta · 16. Archivar en vez de borrar · 17. Papelera con recuperación
 
 **Priorizar y planificar**  
-21. Cuatro niveles de prioridad con color · 22. Matriz urgente / importante · 23. Estimar duración y ver la carga del día · 24. Planificador que dice qué no cabe · 26. Aplazar con un toque · 29. Revisión semanal guiada · 30. Avisar de lo que lleva demasiado abierto
+21. Cuatro niveles de prioridad con color · 22. Matriz urgente / importante · 23. Estimar duración y ver la carga del día · 24. Planificador que dice qué no cabe · 25. Las tres cosas del día · 26. Aplazar con un toque · 29. Revisión semanal guiada · 30. Avisar de lo que lleva demasiado abierto · 102. Tu capacidad real entre los cinco módulos
 
 **Tiempo y concentración**  
 31. Pomodoro configurable · 32. Cronómetro con vueltas · 33. Temporizadores rápidos · 34. Medir el tiempo con marcas de reloj, no contando ticks · 35. Estimado frente a real
 
 **Recordatorios y avisos**  
-41. Aviso con antelación configurable · 42. Exportar al calendario con las repeticiones intactas · 43. Repeticiones que se entienden · 44. Resumen matutino
+41. Aviso con antelación configurable · 42. Exportar al calendario con las repeticiones intactas · 43. Repeticiones que se entienden · 44. Resumen matutino · 46. Escalado de las aplazadas
 
 **Equipo y delegación**  
-53. Lista de "esperando respuesta"
+53. Lista de "esperando respuesta" · 54. Dependencias externas: dueño, fecha y seguimiento
 
 **Inversiones**  
-61. Tamaño de posición calculado desde el riesgo · 62. Alertas contra tus propias reglas · 63. Diario con expectativa en R · 64. Calendario propio del mercado · 65. Listas de chequeo antes de comprar y de vender
+61. Tamaño de posición calculado desde el riesgo · 62. Alertas contra tus propias reglas · 63. Diario con expectativa en R · 64. Calendario propio del mercado · 65. Listas de chequeo antes de comprar y de vender · 66. Importar movimientos del bróker
 
 **Docencia e investigación**  
-71. El semestre genera sus propias tareas · 72. Aviso cuando un artículo lleva demasiado parado · 73. Convocatorias con su cuenta atrás · 74. Seguimiento de tesis dirigidas
+71. El semestre genera sus propias tareas · 72. Aviso cuando un artículo lleva demasiado parado · 73. Convocatorias con su cuenta atrás · 74. Seguimiento de tesis dirigidas · 75. Banco de tareas por curso reutilizable
 
 **Gestión de proyectos**  
-81. EDT con tareas resumen · 82. Dependencias de los cuatro tipos con desfase · 83. Ruta crítica y holgura · 84. Gantt con dependencias dibujadas · 85. Línea base y desviación en días hábiles · 86. Valor ganado (SPI y CPI) · 87. Mover tareas arrastrando en el Gantt · 88. Nivelación automática de recursos
+81. EDT con tareas resumen · 82. Dependencias de los cuatro tipos con desfase · 83. Ruta crítica y holgura · 84. Gantt con dependencias dibujadas · 85. Línea base y desviación en días hábiles · 86. Valor ganado (SPI y CPI) · 87. Mover tareas arrastrando en el Gantt · 88. Nivelación automática de recursos · 89. Fecha final probabilística (PERT + Monte Carlo) · 101. Simulación "¿qué pasa si?" y propagación del impacto · 103. Salud explicada y aviso temprano
 
 **Datos, privacidad y automatización**  
-91. Todo local, sin cuenta y sin servidor · 92. Exportar e importar de verdad · 99. Tema claro y oscuro, y que quepa en el móvil
+91. Todo local, sin cuenta y sin servidor · 92. Exportar e importar de verdad · 95. Deshacer global y papelera · 99. Tema claro y oscuro, y que quepa en el móvil
 
 ## Descartado, y por qué
 

@@ -90,6 +90,31 @@ export function avanceSemestre(semestre, hoyISO = aISO(hoy())) {
   };
 }
 
+/**
+ * Clona un semestre corriendo todas las fechas. El desplazamiento se redondea a
+ * **semanas enteras** para que los martes sigan siendo martes: un curso que se
+ * da los martes y jueves no puede acabar cayendo en miércoles.
+ */
+export function clonarSemestre(semestre = {}, opciones = {}) {
+  const nuevoInicio = opciones.inicio || aISO(hoy());
+  const anterior = semestre.inicio || nuevoInicio;
+  const semanas = Math.round(diferenciaDias(anterior, nuevoInicio) / 7);
+  const desplaza = (f) => (f ? aISO(sumarDias(f, semanas * 7)) : f);
+
+  return {
+    nombre: opciones.nombre || `${semestre.nombre || 'Semestre'} (copia)`,
+    inicio: desplaza(semestre.inicio) || nuevoInicio,
+    fin: desplaza(semestre.fin),
+    semanasDesplazadas: semanas,
+    cursos: (semestre.cursos || []).map((c) => ({
+      ...c,
+      horario: (c.horario || []).map((h) => ({ ...h })),
+      entregaNotas: desplaza(c.entregaNotas),
+      evaluaciones: (c.evaluaciones || []).map((e) => ({ ...e, fecha: desplaza(e.fecha) })),
+    })),
+  };
+}
+
 export const RUTINA_DOCENCIA = [
   { titulo: 'Responder correos de estudiantes', regla: 'cada día hábil', hora: '17:00', prioridad: 3, duracion: 20 },
   { titulo: 'Subir material de la semana al aula virtual', regla: 'cada lunes', prioridad: 2 },

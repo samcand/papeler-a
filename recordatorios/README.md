@@ -19,6 +19,7 @@ Se instala como app (Chrome/Edge/Android: “Instalar”; iPhone: Compartir →
 | Pantalla | Para qué sirve |
 | --- | --- |
 | **Bandeja** | Donde se suelta lo capturado sin decidir nada, con un modo de procesarlo de una en una. |
+| **Papelera y archivo** | Lo borrado espera 30 días; lo terminado se archiva sin perderse (en Ajustes). |
 | **Hoy** | El resumen del día, lo de hoy, lo que se quedó atrás, las horas comprometidas y los hábitos. |
 | **Próximos** | Los siguientes 7, 14 o 30 días agrupados por fecha, más lo que no tiene fecha y hay que decidir. |
 | **Calendario** | Mes, semana y día. El mes marca con puntos de color a qué módulo pertenece cada día. |
@@ -78,6 +79,24 @@ semana del servicio y viaje — y cualquier proyecto que ya tengas se puede
 **guardar como plantilla**: la app toma la fecha más tardía como ancla y
 convierte el resto en desfases.
 
+### Las tres del día, y lo que llevas posponiendo
+
+En **Hoy**, tres huecos: los eliges con ☆ o deja que los proponga (lo urgente
+primero, lo que tiene hora después). Y cuando algo se ha pospuesto cinco veces,
+la app lo pone delante con las cuatro salidas honestas: hacerla hoy, quitarle la
+fecha, trocearla o borrarla. Cinco aplazamientos son una decisión tomada sin
+admitirla.
+
+### Nada se pierde
+
+- **Papelera**: lo borrado espera 30 días y se restaura con un botón.
+- **Archivar**: lo terminado deja de salir en las listas pero sigue contando en
+  las estadísticas; hay un botón para archivar de golpe lo completado hace más
+  de un mes.
+- **Deshacer con Ctrl+Z**: las últimas quince operaciones, incluidas las que
+  tocan muchas tareas a la vez (mover todas a hoy, nivelar recursos, importar
+  del bróker, aplicar un escenario).
+
 ### El resumen del día
 
 Al entrar por la mañana, una tarjeta con lo que necesitas saber en diez
@@ -127,6 +146,10 @@ y puedes crear los tuyos.
   fijas, mete descansos cada 90 minutos y **dice qué no cabe**. Un día no rinde
   más por meterle más cosas en la lista.
 - **Registro de tiempo** por tarea y por día, con racha y gráfico de 14 días.
+- **Tu capacidad real** (en Planificar): mapa de calor de cuatro semanas con las
+  horas disponibles frente a las comprometidas, el reparto entre los cinco
+  módulos y la frase que importa — *«has prometido 46 h y tienes 40: no es
+  optimismo, no cabe»*.
 - **Estimado frente a real**: compara lo que dijiste que ibas a tardar con lo
   medido y saca tu factor de corrección — por **mediana**, para que un día
   desastroso no desplace la cuenta, y por módulo cuando hay datos suficientes
@@ -160,6 +183,14 @@ dependencias y fechas que se arrastran unas a otras:
 - **Seguimiento**: línea base, desviación en días hábiles y **valor ganado**
   (BAC, PV, EV, AC, SPI y CPI) para saber si vas tarde o vas caro antes de que
   sea evidente.
+- **Fecha probabilística**: tres duraciones por tarea (la pesimista sale de tu
+  factor medido si no la escribes), 2.000 simulaciones y los percentiles que
+  sirven para prometer — P50 es la fecha que cumples la mitad de las veces, P80
+  la que puedes comprometer. Con histograma y la probabilidad de llegar a la
+  fecha que elijas.
+- **¿Qué pasa si…?**: retrasar o alargar una tarea y ver, sobre una copia del
+  plan, qué se mueve en cascada, qué hitos se van, si cambia la ruta crítica y
+  cuánto se retrasa el final. Se aplica de verdad solo si quieres.
 - **Plantillas** listas: artículo de investigación, montar un curso y estudio de
   una inversión, con sus dependencias ya puestas.
 - **Arrastrar para reprogramar**: mover una barra fija la tarea a esa fecha (queda
@@ -184,6 +215,10 @@ funciona sin internet, no depende de ninguna API y nada sale del dispositivo.
 - **Tamaño de posición**: cuántas acciones comprar para arriesgar solo el % que
   decidiste, con avisos si el stop está tan cerca que te saca el ruido normal
   del mercado o tan lejos que la tesis no lo aguanta.
+- **Importar del bróker**: lee el CSV de operaciones (reconoce los nombres de
+  columna de cada bróker y los dos formatos de número), empareja compras y
+  ventas por **FIFO** y reconstruye posiciones y diario, avisando de lo que no
+  cuadra.
 - **Diario de operaciones** con lo que de verdad mide un sistema: expectativa en
   R, factor de beneficio, racha, mejor y peor operación, duración media — y una
   lección escrita por operación cerrada.
@@ -195,10 +230,19 @@ funciona sin internet, no depende de ninguna API y nada sale del dispositivo.
 
 ## Docencia
 
-Semestre con cursos, grupos, horario y evaluaciones. De ahí salen solas las
+Semestre con cursos, grupos, horario y evaluaciones. Al acabar, **clonar a un
+semestre nuevo** corre todas las fechas en semanas enteras, para que los martes
+sigan siendo martes. De ahí salen solas las
 tareas de preparar clase (repetidas por cada día de horario), preparar y
 **calificar** cada parcial, y entregar notas antes de la fecha de la universidad.
 Con la barra de avance del semestre y las rutinas de la semana.
+
+## Esperando a otros
+
+El coautor, la revista, el estudiante, el banco: lo que no depende de ti tiene
+su propio campo (quién, desde cuándo y hasta cuándo es razonable esperar). La
+**Revisión** los lista con los días que llevan, marca en rojo los que se pasaron
+de plazo y crea la tarea de perseguir, que es la única parte que sí depende de ti.
 
 ## Investigación
 
@@ -237,8 +281,8 @@ sitio, se van: exporta de vez en cuando.
 
 ## Lo que queda
 
-La pestaña **Lo que queda** es la hoja de ruta real de la app: **43 hechas, 55
-pendientes y 12 descartadas**. Lo pendiente va en tres olas —lo próximo, después
+La pestaña **Lo que queda** es la hoja de ruta real de la app: **56 hechas, 42
+pendientes y 12 descartadas** (la ola 1 está terminada). Lo pendiente va en tres olas —lo próximo, después
 y algún día— y cualquier entrada se convierte en tarea con un botón.
 
 Lo descartado se queda escrito **con su motivo** (notificaciones push, correo a
@@ -265,7 +309,7 @@ que se genera con `npm run docs`.
 ## Pruebas
 
 ```bash
-npm test                  # 182 pruebas de lógica, sin navegador
+npm test                  # 179 pruebas de lógica, sin navegador
 npm run test:navegador    # recorre la app en Chromium (necesita Playwright)
 ```
 

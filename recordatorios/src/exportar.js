@@ -172,6 +172,176 @@ export function importarCSV(texto) {
   return tareas;
 }
 
+/* ------------------------- movimientos del bróker ------------------------- */
+
+const COMPRA = /^(compra|buy|bought|c|b|adquisici[oó]n)$/i;
+const VENTA = /^(venta|sell|sold|v|s|enajenaci[oó]n)$/i;
+
+/**
+ * Lee el CSV de operaciones que exporta un bróker. Los nombres de columna
+ * cambian de uno a otro, así que se reconocen por sinónimos en español e
+ * inglés y se avisa de las filas que no se entienden en vez de inventarlas.
+ */
+export function importarMovimientosBroker(texto) {
+  const filas = leerCSV(texto);
+  if (filas.length < 2) return { movimientos: [], avisos: ['El archivo no tiene filas de datos.'] };
+  const cabecera = filas[0].map((c) => c.trim().toLowerCase());
+  const col = (...nombres) => {
+    for (const n of nombres) {
+      const i = cabecera.findIndex((c) => c === n);
+      if (i >= 0) return i;
+    }
+    for (const n of nombres) {
+      const i = cabecera.findIndex((c) => c.includes(n));
+      if (i >= 0) return i;
+    }
+    return -1;
+  };
+
+  const iFecha = col('fecha', 'date', 'trade date');
+  const iTipo = col('tipo', 'operacion', 'operación', 'side', 'type', 'action');
+  const iTicker = col('ticker', 'simbolo', 'símbolo', 'symbol', 'instrumento', 'activo');
+  const iCantidad = col('cantidad', 'titulos', 'títulos', 'quantity', 'shares', 'qty');
+  const iPrecio = col('precio', 'price');
+  const iComision = col('comision', 'comisión', 'fee', 'commission', 'gastos');
+
+  const avisos = [];
+  if (iTicker < 0) avisos.push('No se encontró la columna del ticker: revisa el archivo.');
+  if (iCantidad < 0) avisos.push('No se encontró la columna de cantidad.');
+  if (iTicker < 0 || iCantidad < 0) return { movimientos: [], avisos };
+
+  const numero = (v) => {
+    // Un bróker escribe 1.234,56 y otro 1,234.56. Con los dos separadores
+    // presentes, el último manda. Con uno solo hay que adivinar: separador
+    // seguido de exactamente tres cifras es de millares (1.234 son mil
+    // doscientos treinta y cuatro), salvo que lo de delante sea un cero, que
+    // entonces es decimal de verdad (0.001).
+    const s = String(v || '').replace(/[^0-9,.-]/g, '');
+    if (!s) return 0;
+    const tieneComa = s.includes(',');
+    const tienePunto = s.includes('.');
+    let normalizado = s;
+    if (tieneComa && tienePunto) {
+      normalizado = s.lastIndexOf(',') > s.lastIndexOf('.')
+        ? s.replace(/\./g, '').replace(',', '.')
+        : s.replace(/,/g, '');
+    } else if (tieneComa || tienePunto) {
+      const separador = tieneComa ? ',' : '.';
+      const [entera, decimal = ''] = s.split(separador);
+      const esMillares = decimal.length === 3 && s.split(separador).length === 2
+        && entera.replace('-', '') !== '0' && entera !== '';
+      normalizado = esMillares ? entera + decimal : s.replace(separador, '.');
+    }
+    return Math.abs(Number(normalizado) || 0);
+  };
+
+  const movimientos = [];
+  filas.slice(1).forEach((f, i) => {
+    const ticker = (f[iTicker] || '').trim().toUpperCase();
+    if (!ticker) return;
+    const bruto = (f[iTipo] || '').trim();
+    const cantidadCruda = f[iCantidad];
+    const tipo = COMPRA.test(bruto) ? 'compra'
+      : VENTA.test(bruto) ? 'venta'
+        : String(cantidadCruda).trim().startsWith('-') ? 'venta' : 'compra';
+    const cantidad = numero(cantidadCruda);
+    if (!cantidad) { avisos.push(`Fila ${i + 2} (${ticker}): sin cantidad, se salta.`); return; }
+    movimientos.push({
+      fecha: (f[iFecha] || '').match(/\d{4}-\d{2}-\d{2}/)?.[0] || fechaSuelta(f[iFecha]),
+      tipo,
+      ticker,
+      cantidad,
+      precio: iPrecio >= 0 ? numero(f[iPrecio]) : 0,
+      comision: iComision >= 0 ? numero(f[iComision]) : 0,
+    });
+  });
+
+  if (!movimientos.length) avisos.push('No se reconoció ninguna operación.');
+  return { movimientos: movimientos.sort((a, b) => String(a.fecha).localeCompare(String(b.fecha))), avisos };
+}
+
+/** dd/mm/aaaa o dd-mm-aaaa, que es como lo escriben casi todos. */
+function fechaSuelta(txt) {
+  const m = String(txt || '').match(/(\d{1,2})[/-](\d{1,2})[/-](\d{2,4})/);
+  if (!m) return null;
+  const anio = m[3].length === 2 ? 2000 + Number(m[3]) : Number(m[3]);
+  return `${anio}-${String(m[2]).padStart(2, '0')}-${String(m[1]).padStart(2, '0')}`;
+}
+
+/**
+ * Reconstruye la cartera a partir de los movimientos, emparejando ventas con
+ * compras por **FIFO** (primera que entra, primera que sale), que es el método
+ * que se usa para calcular la plusvalía.
+ *
+ * Devuelve las posiciones abiertas con su coste medio, las operaciones cerradas
+ * con su resultado, y los avisos de lo que no cuadra.
+ */
+export function reconstruirPosiciones(movimientos = []) {
+  const lotes = new Map();       // ticker -> [{ cantidad, precio, fecha }]
+  const operaciones = [];
+  const avisos = [];
+
+  for (const m of movimientos) {
+    if (!lotes.has(m.ticker)) lotes.set(m.ticker, []);
+    const cola = lotes.get(m.ticker);
+
+    if (m.tipo === 'compra') {
+      cola.push({ cantidad: m.cantidad, precio: m.precio, fecha: m.fecha, comision: m.comision });
+      continue;
+    }
+
+    let porVender = m.cantidad;
+    while (porVender > 0 && cola.length) {
+      const lote = cola[0];
+      const usado = Math.min(lote.cantidad, porVender);
+      operaciones.push({
+        ticker: m.ticker,
+        lado: 'largo',
+        cantidad: usado,
+        entrada: lote.precio,
+        salida: m.precio,
+        fechaEntrada: lote.fecha,
+        fechaSalida: m.fecha,
+        comisiones: redondea((m.comision * usado) / m.cantidad + (lote.comision || 0) * (usado / (lote.cantidad || 1))),
+      });
+      lote.cantidad -= usado;
+      porVender -= usado;
+      if (lote.cantidad <= 0.0000001) cola.shift();
+    }
+    if (porVender > 0) {
+      avisos.push(`${m.ticker}: se venden ${redondea(porVender)} títulos que no aparecen comprados antes. ¿Falta histórico?`);
+    }
+  }
+
+  const posiciones = [];
+  for (const [ticker, cola] of lotes) {
+    const cantidad = cola.reduce((s, l) => s + l.cantidad, 0);
+    if (cantidad <= 0.0000001) continue;
+    const coste = cola.reduce((s, l) => s + l.cantidad * l.precio, 0);
+    posiciones.push({
+      ticker,
+      cantidad: redondea(cantidad, 4),
+      entrada: redondea(coste / cantidad, 4),
+      precio: redondea(coste / cantidad, 4),
+      sector: '',
+      tesis: '',
+      revisadaEn: null,
+    });
+  }
+
+  return {
+    posiciones: posiciones.sort((a, b) => a.ticker.localeCompare(b.ticker)),
+    operaciones,
+    avisos,
+    resumen: `${posiciones.length} posiciones abiertas y ${operaciones.length} operaciones cerradas.`,
+  };
+}
+
+function redondea(n, d = 2) {
+  const f = Math.pow(10, d);
+  return Math.round((Number(n) || 0) * f) / f;
+}
+
 /* ---------------------------- texto plano ---------------------------- */
 
 /** El día en texto, listo para pegarlo en un chat o imprimirlo. */

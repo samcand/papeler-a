@@ -15,6 +15,8 @@ import {
   valorGanado,
 } from '../proyectos.js';
 import { dato, tituloVista, vacio } from '../componentes.js';
+import { probabilidadDeLlegar, queSiPasa, resumenQueSiPasa, simularProyecto } from '../simulacion.js';
+import { calibracion } from '../calibracion.js';
 import { store } from '../store.js';
 
 const ALTO_FILA = 30;
@@ -27,6 +29,7 @@ export function vistaProyectos(root, ctx = {}) {
   let escala = 'semana';
   let seleccionado = ctx.query?.p || store.estado.planes[0]?.id || null;
   let nivelacion = null;   // resultado de la última nivelación, para poder deshacerla
+  const escenario = { tareaId: null, modo: 'retraso', valor: 5 };
 
   const proyecto = () => store.estado.planes.find((p) => p.id === seleccionado) || null;
   const guardar = () => { store.guardar(); pintar(); };
@@ -46,7 +49,7 @@ export function vistaProyectos(root, ctx = {}) {
     return el('div', { class: 'tabla-scroll' },
       el('table', { class: 'tabla tabla-plan' },
         el('thead', {}, el('tr', {},
-          ...['EDT', 'Tarea', 'Días', 'Comienzo', 'Fin', '%', 'Recurso', 'Coste', 'Depende de', 'Holgura', ''].map((h) => el('th', {}, h)))),
+          ...['EDT', 'Tarea', 'Días', 'Opt.', 'Pes.', 'Comienzo', 'Fin', '%', 'Recurso', 'Coste', 'Depende de', 'Holgura', ''].map((h) => el('th', {}, h)))),
         el('tbody', {},
           ...plan.tareas.map((t) => {
             const original = p.tareas.find((x) => x.id === t.id);
@@ -69,6 +72,8 @@ export function vistaProyectos(root, ctx = {}) {
                     onChange: (e) => { original.nombre = e.target.value; guardar(); },
                   }))),
               el('td', {}, t.resumen ? el('span', { class: 'muted' }, String(t.duracion)) : editable('duracion', 'number', 60, { min: 0 })),
+              el('td', {}, t.resumen ? '' : editable('optimista', 'number', 55, { min: 0, title: 'Duración si todo sale bien' })),
+              el('td', {}, t.resumen ? '' : editable('pesimista', 'number', 55, { min: 0, title: 'Duración si se tuerce' })),
               el('td', { class: 'small' },
                 formatoCorto(t.inicio),
                 original.noAntesDe ? el('button', {
@@ -494,6 +499,100 @@ export function vistaProyectos(root, ctx = {}) {
         el('div', { class: 'chip-list' }, ...sinRecurso.map((t) => el('span', { class: 'chip' }, t.nombre)))) : null);
   }
 
+  /**
+   * Fecha probabilística y escenarios. Una fecha exacta es una mentira cómoda:
+   * aquí sale la distribución y lo que costaría mover algo.
+   */
+  function panelRiesgo(p) {
+    const cal = calibracion(store.tareas, store.estado.tiempo);
+    const factor = cal.suficiente ? Math.max(1.1, cal.factor) : 1.5;
+    const sim = simularProyecto(p, { n: 2000, semilla: 7, factor });
+    const objetivo = p.fechaObjetivo || null;
+    const prob = objetivo && sim.posible ? probabilidadDeLlegar(sim, objetivo, p) : null;
+
+    if (!sim.posible) return el('div', { class: 'alerta alto' }, el('div', {}, sim.motivo));
+
+    const maxBarra = Math.max(...sim.histograma.map((h) => h.n));
+    return el('div', {},
+      el('section', { class: 'card' },
+        el('h2', { class: 'card-title' }, 'Cuándo terminas de verdad'),
+        el('p', { class: 'muted small' },
+          `2.000 simulaciones con tus tres duraciones por tarea. La pesimista, donde no la has escrito, sale de tu factor medido (×${factor}).`),
+        el('div', { class: 'tarjetas' },
+          dato(formatoCorto(sim.deterministico.fecha), 'el plan dice', { pie: `${sim.deterministico.dias} días` }),
+          dato(formatoCorto(sim.fechas.p50), 'P50 · la mitad de las veces', { pie: `${sim.dias.p50} días` }),
+          dato(formatoCorto(sim.fechas.p80), 'P80 · la que puedes prometer', { clase: 'positivo', pie: `${sim.dias.p80} días` }),
+          dato(`${sim.colchon} d`, 'colchón que falta', { clase: sim.colchon > 0 ? 'negativo' : 'positivo', pie: 'sobre la fecha del plan' })),
+
+        el('div', { class: 'histograma', style: 'margin-top:14px' },
+          ...sim.histograma.map((h) => el('div', {
+            class: 'columna-hist', title: `${h.n} escenarios terminan hacia el ${h.fecha}`,
+          }, el('div', { style: `height:${Math.round((h.n / maxBarra) * 100)}%` }), el('span', { class: 'muted' }, formatoCorto(h.fecha))))),
+
+        el('div', { class: 'fila', style: 'margin-top:14px' },
+          el('label', { class: 'field', style: 'width:200px;margin:0' },
+            el('span', { class: 'field-label' }, '¿A qué fecha te comprometes?'),
+            el('input', {
+              class: 'input', type: 'date', value: objetivo || '',
+              onChange: (e) => { p.fechaObjetivo = e.target.value || null; guardar(); },
+            }))),
+        prob ? el('div', { class: `alerta ${prob.probabilidad >= 80 ? 'bajo' : prob.probabilidad >= 50 ? 'medio' : 'alto'}`, style: 'margin-top:10px' },
+          el('div', {}, el('div', {}, `${prob.probabilidad} % de probabilidad`), el('div', { class: 'accion' }, prob.frase))) : null),
+
+      panelQueSiPasa(p));
+  }
+
+  /** ¿Qué pasa si…? Se calcula sobre una copia: el plan real no se toca. */
+  function panelQueSiPasa(p) {
+    const plan = programar(p);
+    const hojas = plan.tareas.filter((t) => !t.resumen);
+    const resultado = escenario.tareaId ? queSiPasa(p, [escenario.modo === 'duracion'
+      ? { tareaId: escenario.tareaId, duracion: escenario.valor }
+      : { tareaId: escenario.tareaId, dias: escenario.valor }]) : null;
+
+    return el('section', { class: 'card' },
+      el('h2', { class: 'card-title' }, '¿Qué pasa si…?'),
+      el('div', { class: 'fila' },
+        el('select', {
+          class: 'input', style: 'max-width:260px',
+          onChange: (e) => { escenario.tareaId = e.target.value || null; pintar(); },
+        }, el('option', { value: '' }, '— elige una tarea —'),
+        ...hojas.map((t) => el('option', { value: t.id, selected: t.id === escenario.tareaId }, `${t.edt} ${t.nombre}`))),
+        el('select', {
+          class: 'input', style: 'width:auto',
+          onChange: (e) => { escenario.modo = e.target.value; escenario.valor = e.target.value === 'duracion' ? 10 : 5; pintar(); },
+        },
+        el('option', { value: 'retraso', selected: escenario.modo === 'retraso' }, 'se retrasa'),
+        el('option', { value: 'duracion', selected: escenario.modo === 'duracion' }, 'dura en total')),
+        el('input', {
+          class: 'input', type: 'number', style: 'width:90px', value: escenario.valor, min: 0,
+          onChange: (e) => { escenario.valor = Number(e.target.value) || 0; pintar(); },
+        }),
+        el('span', { class: 'muted' }, 'días')),
+
+      resultado?.posible ? el('div', { style: 'margin-top:12px' },
+        el('p', { class: resultado.diasProyecto > 0 ? 'negativo' : 'positivo' }, resumenQueSiPasa(resultado)),
+        resultado.movidas.length ? el('table', { class: 'tabla' },
+          el('thead', {}, el('tr', {}, el('th', {}, 'Tarea'), el('th', {}, 'Antes'), el('th', {}, 'Después'), el('th', { class: 'num' }, 'Días'))),
+          el('tbody', {}, ...resultado.movidas.map((m) => el('tr', {},
+            el('td', {}, m.esHito ? `🏁 ${m.nombre}` : m.nombre, m.directa ? el('span', { class: 'chip', style: 'margin-left:6px' }, 'el cambio') : null),
+            el('td', { class: 'small muted' }, formatoCorto(m.antesInicio)),
+            el('td', { class: 'small' }, formatoCorto(m.ahoraInicio)),
+            el('td', { class: `num ${m.dias > 0 ? 'negativo' : 'positivo'}` }, m.dias ? `${m.dias > 0 ? '+' : ''}${m.dias}` : '—')))))
+          : null,
+        resultado.nuevasCriticas.length ? el('p', { class: 'small muted' },
+          `Pasa a ruta crítica: ${resultado.nuevasCriticas.join(', ')}.`) : null,
+        el('div', { class: 'fila', style: 'margin-top:10px' },
+          button('Aplicarlo de verdad', () => {
+            store.instantanea('Aplicar escenario');
+            const copia = resultado.proyectoSimulado;
+            p.tareas = copia.tareas;
+            guardar();
+            toast('Aplicado. Se puede deshacer con Ctrl+Z.');
+          }, { variant: 'primary' }),
+          button('Descartar', () => { escenario.tareaId = null; pintar(); }, { variant: 'ghost' }))) : null);
+  }
+
   /** Ejecuta la nivelación sobre el proyecto y guarda el resultado. */
   function ejecutarNivelacion(retrasarProyecto) {
     const p = proyecto();
@@ -595,9 +694,11 @@ export function vistaProyectos(root, ctx = {}) {
       !p ? vacio('Todavía no hay ningún proyecto. Empieza por una plantilla: trae las tareas y las dependencias puestas.', '📐')
         : el('div', {},
           el('div', { class: 'pestanas' },
-            ...[['plan', 'Plan y Gantt'], ['recursos', 'Recursos'], ['seguimiento', 'Seguimiento']].map(([id, txt]) =>
+            ...[['plan', 'Plan y Gantt'], ['recursos', 'Recursos'], ['riesgo', 'Fecha y escenarios'], ['seguimiento', 'Seguimiento']].map(([id, txt]) =>
               el('button', { class: `pestana ${pestana === id ? 'activa' : ''}`.trim(), onClick: () => { pestana = id; pintar(); } }, txt))),
-          pestana === 'plan' ? panelPlan(p) : pestana === 'recursos' ? panelRecursos(p) : panelSeguimiento(p)));
+          pestana === 'plan' ? panelPlan(p)
+            : pestana === 'recursos' ? panelRecursos(p)
+              : pestana === 'riesgo' ? panelRiesgo(p) : panelSeguimiento(p)));
   };
 
   pintar();
