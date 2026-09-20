@@ -1,13 +1,14 @@
 {
   "name": "alabanza-app",
   "version": "1.0.0",
-  "description": "App para manejar canciones de alabanza: letras, acordes, guias de guitarra/piano/bateria, sincronizacion con YouTube y modo de aprendizaje.",
+  "description": "App para manejar canciones de alabanza: letras, acordes, guias de guitarra/piano/bateria, sincronizacion con YouTube y modo de aprendizaje. Incluye tambien la plataforma de nomina colombiana en nomina/.",
   "type": "module",
   "private": true,
   "scripts": {
     "start": "node tools/servidor.mjs",
-    "test": "node tests/music.test.js && node tests/dsp.test.js && node tests/fretboard.test.js && node tests/hoja.test.js && node tests/vocal.test.js && node tests/audio-extra.test.js && node tests/calentamiento.test.js && node tests/anotaciones.test.js && node tests/formatos.test.js",
+    "test": "node tests/music.test.js && node tests/dsp.test.js && node tests/fretboard.test.js && node tests/hoja.test.js && node tests/vocal.test.js && node tests/audio-extra.test.js && node tests/calentamiento.test.js && node tests/anotaciones.test.js && node tests/formatos.test.js && node tests/nomina-fechas.test.js && node tests/nomina-calculo.test.js && node tests/nomina-prestaciones.test.js && node tests/nomina-aportes.test.js && node tests/nomina-vigilancia.test.js",
     "docs": "node tools/gen-docs.mjs",
-    "serve:python": "python3 -m http.server 8080"
+    "serve:python": "python3 -m http.server 8080",
+    "test:nomina": "node tests/nomina-fechas.test.js && node tests/nomina-calculo.test.js && node tests/nomina-prestaciones.test.js && node tests/nomina-aportes.test.js && node tests/nomina-vigilancia.test.js"
   }
 }

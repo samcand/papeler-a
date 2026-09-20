@@ -36,6 +36,23 @@ necesita red es el video de YouTube.
 
 También se puede publicar tal cual en GitHub Pages: son archivos estáticos.
 
+## Además: plataforma de nómina colombiana
+
+En la carpeta [`nomina/`](nomina/) vive una segunda app independiente:
+**Nómina Colombia**, para llevar contratos, días de pago y liquidaciones según
+la ley laboral colombiana (pago por mes, por quincena, por día o por hora;
+recargos y horas extra; seguridad social; liquidación final con prima,
+cesantías, intereses, vacaciones e indemnización; y un módulo de vigilancia
+normativa que avisa cuando la ley cambia).
+
+```bash
+npm start                      # http://localhost:8080/nomina/
+npm run test:nomina            # sus pruebas
+```
+
+Detalles en [`nomina/README.md`](nomina/README.md) y el resumen de las normas
+aplicadas en [`docs/nomina-normas-colombia.md`](docs/nomina-normas-colombia.md).
+
 ## Qué incluye
 
 | Pantalla | Para qué sirve |
