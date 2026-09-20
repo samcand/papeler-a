@@ -7,6 +7,7 @@
  */
 
 import { actualizarRepaso } from './motor.js';
+import { logrosNuevos } from './logros.js';
 
 const CLAVE = 'ingreso.v1';
 const MAX_RESPUESTAS = 5000;   // suficiente para meses de estudio sin llenar el almacenamiento
@@ -18,10 +19,13 @@ const INICIAL = {
   simulacros: [],   // { id, at, modelo, minutos, duracionMs, porcentaje, respuestas }
   propias: [],      // preguntas añadidas o importadas por el usuario
   escritos: [],     // { id, at, consignaId, tema, consigna, texto, palabras, porcentaje, rubrica }
+  logros: {},       // { [logroId]: fecha en que se consiguió }
   borradorEscritura: null,   // texto a medio escribir, para no perderlo al recargar
   ajustes: {
     nombre: '',
     meta: 20,          // preguntas al día
+    grado: '',         // grado escolar elegido en Practicar ('' = cualquiera)
+    modoGrado: 'hasta',
     tema: 'oscuro',
     fechaExamen: '',
   },
@@ -120,6 +124,20 @@ class Store {
   }
 
   // ------------------------------------------------------------ consultas
+
+  /**
+   * Apunta las medallas recién conseguidas y las devuelve, para que la vista
+   * las celebre. Se llama después de guardar, no antes: una medalla se gana
+   * con lo que ya quedó registrado.
+   */
+  revisarLogros(ahora = Date.now()) {
+    const nuevos = logrosNuevos(this.state, ahora);
+    if (!nuevos.length) return [];
+    if (!this.state.logros) this.state.logros = {};
+    for (const l of nuevos) this.state.logros[l.id] = ahora;
+    this.guardar();
+    return nuevos;
+  }
 
   respuestasDe(asignatura) {
     return this.state.respuestas.filter((r) => r.asignatura === asignatura);

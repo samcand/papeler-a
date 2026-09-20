@@ -5,10 +5,10 @@
  * en esta función; al salir de la vista se limpia el teclado y se acabó.
  */
 
-import { el, pintar, tarjeta, aviso, reloj, barra } from '../ui.js';
+import { el, pintar, tarjeta, aviso, reloj, barra, celebrar } from '../ui.js';
 import { store } from '../store.js';
 import { BANCO } from '../banco/index.js';
-import { ASIGNATURAS, asignatura as buscarAsignatura, nombreTema, NIVELES } from '../temario.js';
+import { ASIGNATURAS, asignatura as buscarAsignatura, nombreTema, NIVELES, GRADOS, NOMBRE_GRADO } from '../temario.js';
 import { filtrar, seleccionarPreguntas, prepararPregunta, puntaje, agruparPor, pendientesDeRepaso } from '../motor.js';
 import { nodoEnunciado, nodoOpciones, nodoExplicacion, nodoPista, etiquetasPregunta } from '../componentes.js';
 
@@ -21,6 +21,8 @@ export function practicaVista(raiz, params = {}) {
     asignatura: buscarAsignatura(params.asignatura) ? params.asignatura : 'todas',
     temas: params.tema ? [params.tema] : [],
     dificultades: [1, 2, 3, 4],
+    grado: Number(store.state.ajustes.grado) || null,
+    modoGrado: store.state.ajustes.modoGrado || 'hasta',
     cantidad: 10,
     soloRepaso: params.repaso === '1',
   };
@@ -56,6 +58,8 @@ export function practicaVista(raiz, params = {}) {
       asignatura: config.asignatura === 'todas' ? null : config.asignatura,
       temas: config.temas,
       dificultades: config.dificultades,
+      grado: config.grado,
+      modoGrado: config.modoGrado,
     });
     return config.soloRepaso ? pendientesDeRepaso(filtrado, store.state.repaso).length : filtrado.length;
   }
@@ -97,6 +101,28 @@ export function practicaVista(raiz, params = {}) {
           render();
         }))));
 
+    const elegirGrado = (g) => {
+      config.grado = g;
+      store.ajustar('grado', g || '');
+      render();
+    };
+    const grado = el('div', {},
+      el('h3', {}, 'Grado'),
+      el('div', { class: 'chips' },
+        chip('Cualquiera', !config.grado, () => elegirGrado(null)),
+        GRADOS.map((g) => chip(NOMBRE_GRADO[g], config.grado === g, () => elegirGrado(g)))),
+      config.grado ? el('div', { class: 'chips', style: 'margin-top:6px' },
+        chip(`Hasta ${NOMBRE_GRADO[config.grado]}`, config.modoGrado === 'hasta', () => {
+          config.modoGrado = 'hasta'; store.ajustar('modoGrado', 'hasta'); render();
+        }),
+        chip(`Solo ${NOMBRE_GRADO[config.grado]}`, config.modoGrado === 'solo', () => {
+          config.modoGrado = 'solo'; store.ajustar('modoGrado', 'solo'); render();
+        })) : null,
+      config.grado ? el('p', { class: 'pequeno suave' },
+        config.modoGrado === 'hasta'
+          ? 'Todo lo que ya se debería dominar a esa altura del colegio, arrastrando los grados anteriores.'
+          : 'Solo los temas que se ven ese año.') : null);
+
     const cantidad = el('div', {},
       el('h3', {}, 'Cuántas preguntas'),
       el('div', { class: 'chips' },
@@ -113,7 +139,7 @@ export function practicaVista(raiz, params = {}) {
       el('p', { class: 'sub' }, 'Responde y lee la explicación en el momento. Lo que falles vuelve a aparecer en los próximos días.'),
       tarjeta(null,
         el('h3', { style: 'margin-top:0' }, 'Asignatura'), asignaturas,
-        chipsTemas, dificultad, cantidad, repaso,
+        chipsTemas, grado, dificultad, cantidad, repaso,
         el('div', { class: 'fila entre', style: 'margin-top:18px' },
           el('span', { class: 'pequeno suave' },
             disponibles === 0
@@ -130,6 +156,8 @@ export function practicaVista(raiz, params = {}) {
       asignatura: config.asignatura === 'todas' ? null : config.asignatura,
       temas: config.temas,
       dificultades: config.dificultades,
+      grado: config.grado,
+      modoGrado: config.modoGrado,
     });
     const elegidas = seleccionarPreguntas({
       banco: filtrado,
@@ -153,6 +181,7 @@ export function practicaVista(raiz, params = {}) {
     const acerto = i === pregunta.correcta;
     const ms = Date.now() - inicioPregunta;
     store.registrar({ pregunta, correcta: acerto, ms, modo: 'practica' });
+    celebrar(store.revisarLogros());
     resultados.push({
       qid: pregunta.id, asignatura: pregunta.asignatura, tema: pregunta.tema,
       correcta: acerto, ms, elegida: i,

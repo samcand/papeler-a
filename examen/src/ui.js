@@ -53,6 +53,13 @@ export function aviso(mensaje, tipo = 'info') {
   setTimeout(() => { nodo.classList.add('fuera'); setTimeout(() => nodo.remove(), 320); }, 2600);
 }
 
+/** Anuncia las medallas recién conseguidas, una detrás de otra. */
+export function celebrar(logros) {
+  (logros || []).forEach((l, i) => {
+    setTimeout(() => aviso(`${l.icono} ${l.nombre}`, 'ok'), i * 900);
+  });
+}
+
 /** 754000 -> "12:34". Para relojes y tiempos por pregunta. */
 export function reloj(ms) {
   const total = Math.max(0, Math.round(ms / 1000));

@@ -70,6 +70,22 @@ t('filtrar por asignatura, tema y dificultad', () => {
   assert.equal(filtrar(BANCO, {}).length, BANCO.length, 'sin filtros debe devolver todo');
 });
 
+t('filtrar por grado: "hasta" acumula y "solo" aísla el año', () => {
+  const hasta9 = filtrar(BANCO, { grado: 9 });
+  const solo9 = filtrar(BANCO, { grado: 9, modoGrado: 'solo' });
+  assert.ok(hasta9.every((p) => p.grado <= 9), '"hasta" no debe traer grados superiores');
+  assert.ok(solo9.every((p) => p.grado === 9), '"solo" debe traer exactamente ese grado');
+  assert.ok(hasta9.length > solo9.length, '"hasta" arrastra los grados anteriores');
+  assert.equal(filtrar(BANCO, { grado: 11 }).length, BANCO.length, 'hasta 11.º es todo el banco');
+  assert.equal(filtrar(BANCO, {}).length, BANCO.length, 'sin grado no se filtra nada');
+});
+
+t('el grado se combina con los demás filtros', () => {
+  const lista = filtrar(BANCO, { asignatura: 'matematicas', grado: 8, dificultades: [1] });
+  assert.ok(lista.length > 0);
+  assert.ok(lista.every((p) => p.asignatura === 'matematicas' && p.grado <= 8 && p.dificultad === 1));
+});
+
 t('acertar sube de caja y fallar devuelve a la primera', () => {
   const ahora = Date.now();
   let dato = actualizarRepaso(null, true, ahora);

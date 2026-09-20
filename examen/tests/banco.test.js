@@ -7,7 +7,7 @@
 
 import assert from 'node:assert/strict';
 import { BANCO, TEXTOS } from '../src/banco/index.js';
-import { ASIGNATURAS, todosLosTemas } from '../src/temario.js';
+import { ASIGNATURAS, todosLosTemas, GRADOS, tema } from '../src/temario.js';
 import { svgFigura } from '../src/figuras.js';
 import { revisarPregunta } from '../src/store.js';
 
@@ -107,6 +107,28 @@ t('las figuras usan formas y rellenos que el dibujante conoce', () => {
     if (p.figuras.disposicion === 'matriz3') {
       assert.equal(p.figuras.enunciado.length, 9, `${p.id}: una matriz 3x3 necesita 9 casillas`);
     }
+  }
+});
+
+t('todo tema del temario tiene un grado válido', () => {
+  for (const a of ASIGNATURAS) {
+    for (const tm of a.temas) {
+      assert.ok(GRADOS.includes(tm.grado), `${a.id}/${tm.id}: grado "${tm.grado}" fuera de 6.º-11.º`);
+    }
+  }
+});
+
+t('toda pregunta hereda el grado de su tema', () => {
+  for (const p of BANCO) {
+    assert.ok(GRADOS.includes(p.grado), `${p.id}: sin grado`);
+    assert.equal(p.grado, tema(p.asignatura, p.tema).grado, `${p.id}: grado distinto al del tema`);
+  }
+});
+
+t('cada grado tiene preguntas suficientes para practicar', () => {
+  for (const g of GRADOS) {
+    const solo = BANCO.filter((p) => p.grado === g).length;
+    assert.ok(solo >= 100, `${g}.º solo tiene ${solo} preguntas propias`);
   }
 });
 

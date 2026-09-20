@@ -15,7 +15,7 @@ asignaturas —matemáticas, física, química, biología y salud, trigonometrí
 razonamiento abstracto, geografía, historia de Colombia, historia universal,
 política y ciudadanía, economía, ética y filosofía, vida cotidiana, lectura
 crítica, lengua y escritura, literatura e inglés—, más una pantalla de
-comunicación escrita
+comunicación escrita, sesión diaria de 30 minutos, filtro por grado escolar (6.º a 11.º) y un sistema de puntos y medallas para sostener la rutina
 con cronómetro y rúbrica. Se abre en
 `http://localhost:8080/examen/`. Incluye un mapa de
 [qué evalúan las pruebas colombianas](examen/docs/pruebas-colombia.md)

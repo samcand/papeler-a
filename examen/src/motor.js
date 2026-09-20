@@ -53,12 +53,17 @@ export function prepararPregunta(pregunta, rnd = Math.random) {
   };
 }
 
-export function filtrar(banco, { asignatura, asignaturas, temas, dificultades } = {}) {
+export function filtrar(banco, { asignatura, asignaturas, temas, dificultades, grado, modoGrado = 'hasta' } = {}) {
   const lista = asignaturas?.length ? asignaturas : (asignatura ? [asignatura] : null);
   return banco.filter((p) => {
     if (lista && !lista.includes(p.asignatura)) return false;
     if (temas?.length && !temas.includes(p.tema)) return false;
     if (dificultades?.length && !dificultades.includes(p.dificultad)) return false;
+    // 'hasta' trae todo lo que ya se debería dominar a esa altura del colegio;
+    // 'solo' aísla lo que se ve ese año. Una pregunta sin grado nunca se filtra.
+    if (grado && p.grado) {
+      if (modoGrado === 'solo' ? p.grado !== grado : p.grado > grado) return false;
+    }
     return true;
   });
 }

@@ -7,6 +7,7 @@ import { store } from '../store.js';
 import { BANCO } from '../banco/index.js';
 import { ASIGNATURAS, nombreTema, nombreAsignatura } from '../temario.js';
 import { agruparPor, pendientesDeRepaso, racha, temasDebiles, notaGlobal } from '../motor.js';
+import { resumen as resumirLogros, rangoDe } from '../logros.js';
 
 function diasHasta(fecha) {
   if (!fecha) return null;
@@ -30,6 +31,7 @@ export function inicioVista(raiz) {
       ? 'Cinco asignaturas, un temario completo y un banco que se acuerda de lo que fallaste.'
       : 'Elige una asignatura y empieza. No hace falta registrarse: todo se guarda en este dispositivo.'),
     el('div', { class: 'rejilla' },
+      dato(rangoDe(resumirLogros(store.state).puntos).actual.icono + ' ' + resumirLogros(store.state).puntos, 'puntos'),
       dato(hechasHoy + ' / ' + ajustes.meta, 'preguntas hoy'),
       dato(racha(respuestas) + (racha(respuestas) === 1 ? ' día' : ' días'), 'racha de estudio'),
       dato(notaGlobal(respuestas) + '%', 'promedio general'),

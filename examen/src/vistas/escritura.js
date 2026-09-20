@@ -9,7 +9,7 @@
  * la página por accidente no borre media hora de trabajo.
  */
 
-import { el, pintar, tarjeta, barra, reloj, aviso, dato, descargar, fecha } from '../ui.js';
+import { el, pintar, tarjeta, barra, reloj, aviso, dato, descargar, fecha, celebrar } from '../ui.js';
 import { store } from '../store.js';
 import {
   CONSIGNAS, RUBRICA, REVISION, DURACIONES, PALABRAS_SUGERIDAS,
@@ -237,6 +237,7 @@ export function escrituraVista(raiz) {
             });
             store.borrarBorradorEscritura();
             aviso('Texto guardado', 'ok');
+            celebrar(store.revisarLogros());
             fase = 'inicio';
             consigna = siguienteConsigna(store.state.escritos.map((e) => e.consignaId));
             texto = '';

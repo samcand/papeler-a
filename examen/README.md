@@ -45,12 +45,72 @@ conexión. También se publica tal cual en GitHub Pages: son archivos estáticos
 
 | Pantalla | Para qué sirve |
 | --- | --- |
-| **Inicio** | Cuántas preguntas llevas hoy, racha, promedio, cuenta regresiva al examen y qué toca repasar. |
+| **Inicio** | Puntos y rango, cuántas preguntas llevas hoy, racha, promedio, cuenta regresiva al examen y qué toca repasar. |
 | **Temario** | El mapa del examen: cada tema dice qué hay que saber hacer, cuántas preguntas hay y cómo vas. Desde ahí se practica un tema suelto. |
-| **Practicar** | Preguntas de a una con la explicación al instante. Se filtra por asignatura, tema y dificultad; las teclas 1–4 responden y Enter avanza. |
-| **Simulacro** | El examen completo con cronómetro (128 preguntas en 162 minutos, o versiones corta y exprés), mapa de preguntas, marcas para volver y nada de ayudas. Al entregar: nota, desglose por asignatura y revisión pregunta por pregunta. |
+| **Practicar** | Preguntas de a una con la explicación al instante. Se filtra por asignatura, tema, **grado escolar** y dificultad; las teclas 1–4 responden y Enter avanza. |
+| **Simulacro** | La **sesión diaria** de 30 preguntas en 30 minutos y, debajo, los ensayos largos (128 preguntas en 162 minutos, o versiones corta y exprés). Mapa de preguntas, marcas para volver y nada de ayudas. Al entregar: nota, desglose por asignatura y revisión pregunta por pregunta. |
 | **Escribir** | El módulo de comunicación escrita del Saber Pro, que no es de opción múltiple: una consigna, un cronómetro, contador de palabras y párrafos, autoguardado, y al terminar una rúbrica de cuatro criterios y una lista de relectura. Los textos quedan guardados y se pueden descargar. |
-| **Progreso** | Actividad de los últimos 14 días, aciertos por asignatura, temas más flojos, historial de simulacros, ajustes y respaldo de tus datos. |
+| **Progreso** | Rango, puntos y **medallas**, actividad de los últimos 14 días, aciertos por asignatura, temas más flojos, historial de simulacros, ajustes y respaldo de tus datos. |
+
+### La sesión diaria
+
+Un simulacro de 128 preguntas es un ensayo general, no una rutina: nadie lo
+hace dos días seguidos. Por eso la pantalla de simulacro empieza con una
+**sesión de 30 preguntas en 30 minutos**, pensada para hacerse todos los días.
+
+El reparto combina un núcleo fijo con una rotación:
+
+- **Todos los días**: matemáticas (5), lectura crítica (4) e inglés (3). Son
+  las tres que pesan en todos los exámenes de ingreso.
+- **Rotando**: seis asignaturas más, tres preguntas cada una. El ciclo es de
+  siete días y está calculado para que cada una de las catorce asignaturas
+  restantes salga **exactamente tres veces por semana**.
+
+A diferencia de los ensayos largos, la sesión diaria no elige al azar: saca
+primero las preguntas vencidas según las cajas de repaso. Es rutina de
+estudio, no examen de muestra.
+
+### Grado escolar
+
+Cada uno de los 185 temas lleva el grado en que se ve normalmente (6.º a 11.º),
+y cada pregunta lo hereda de su tema. Eso permite dos formas de filtrar en
+Practicar:
+
+- **Hasta 9.º** — todo lo que ya se debería dominar a esa altura del colegio,
+  arrastrando los grados anteriores.
+- **Solo 9.º** — únicamente los temas que se ven ese año.
+
+El grado va en el tema y no en cada pregunta a propósito: un tema se enseña en
+un grado concreto, y dentro de él la exigencia la marca el nivel de dificultad.
+Son 185 decisiones revisables en vez de 2 803 etiquetas sueltas, y toda
+pregunta nueva hereda el grado sin tener que acordarse de ponérselo.
+
+| Grado | Temas | Solo ese año | Acumulado |
+| --- | --- | --- | --- |
+| 6.º | 32 | 484 | 484 |
+| 7.º | 23 | 352 | 836 |
+| 8.º | 24 | 362 | 1 198 |
+| 9.º | 33 | 503 | 1 701 |
+| 10.º | 48 | 728 | 2 429 |
+| 11.º | 25 | 374 | 2 803 |
+
+### Puntos, rangos y medallas
+
+Estudiar dos años seguidos no lo sostiene la fuerza de voluntad: lo sostiene
+ver que algo avanza. Hay siete rangos, de Principiante a Maestro, y 23
+medallas. Tres reglas evitan que se vuelva un juego tonto:
+
+1. **Los puntos se ganan por dificultad, no por cantidad.** Un acierto vale
+   tantos puntos como su nivel: 1 en básico, 4 en experto. Así no compensa
+   quedarse en lo fácil para inflar el marcador.
+2. **Fallar no resta.** Castigar el intento empuja a responder solo lo que ya
+   se sabe, que es justo lo contrario de estudiar.
+3. **Casi todas las medallas premian constancia y cobertura, no volumen.** Se
+   pueden responder mil preguntas en un fin de semana; no se puede tener una
+   racha de treinta días en un fin de semana. Hay una prueba que lo verifica.
+
+Cada medalla muestra en qué va ("4 de 7"), no un candado mudo: lo que sostiene
+la motivación es ver la siguiente al alcance.
 
 ### Repaso espaciado
 

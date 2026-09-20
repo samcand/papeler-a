@@ -166,6 +166,7 @@ export function simulacroVista(raiz) {
       modelo: resultado.modelo, minutos: resultado.minutos, duracionMs,
       porcentaje: p.porcentaje, aciertos: p.aciertos, total: p.total,
     });
+    resultado.logros = store.revisarLogros();
     fase = 'resultado';
     render();
   }
@@ -246,7 +247,12 @@ export function simulacroVista(raiz) {
           dato(reloj(resultado.duracionMs), `de ${resultado.minutos} minutos`),
           dato(String(resultado.sinResponder), 'sin responder'),
           dato(reloj(resultado.duracionMs / resultado.total), 'por pregunta')),
-        barra(resultado.porcentaje, resultado.porcentaje >= 70 ? 'ok' : resultado.porcentaje < 50 ? 'mal' : '')),
+        barra(resultado.porcentaje, resultado.porcentaje >= 70 ? 'ok' : resultado.porcentaje < 50 ? 'mal' : ''),
+        resultado.logros?.length ? el('div', {},
+          el('h3', {}, resultado.logros.length === 1 ? 'Medalla nueva' : 'Medallas nuevas'),
+          el('div', { class: 'medallas' }, resultado.logros.map((l) => el('div', { class: 'medalla', title: l.descripcion },
+            el('span', { class: 'cara' }, l.icono),
+            el('span', { class: 'pequeno' }, l.nombre))))) : null),
       tarjeta('Por asignatura',
         el('table', {},
           el('thead', {}, el('tr', {},

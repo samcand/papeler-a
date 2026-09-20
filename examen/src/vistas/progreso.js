@@ -10,6 +10,7 @@ import { store } from '../store.js';
 import { BANCO } from '../banco/index.js';
 import { ASIGNATURAS, nombreAsignatura, nombreTema } from '../temario.js';
 import { agruparPor, temasDebiles, racha, notaGlobal, pendientesDeRepaso } from '../motor.js';
+import { estadoLogros, resumen as resumirLogros, rangoDe } from '../logros.js';
 
 const DIA = 86400000;
 
@@ -52,6 +53,40 @@ export function progresoVista(raiz) {
         dato(String(pendientes), 'esperando repaso')),
       el('h3', {}, 'Últimos 14 días'),
       actividad(respuestas));
+
+    const r = resumirLogros(store.state);
+    const rango = rangoDe(r.puntos);
+    const medallas = estadoLogros(store.state);
+    const ganadas = medallas.filter((m) => m.logrado);
+    const enCurso = medallas.filter((m) => !m.logrado).sort((a, b) => b.avance - a.avance);
+
+    const recompensas = tarjeta(null,
+      el('div', { class: 'fila entre' },
+        el('h2', { style: 'margin:0' }, `${rango.actual.icono} ${rango.actual.nombre}`),
+        el('span', { class: 'etiqueta' }, `${r.puntos} puntos`)),
+      rango.siguiente
+        ? el('div', {},
+          barra(rango.avance, 'ok'),
+          el('p', { class: 'pequeno suave' },
+            `Faltan ${rango.falta} puntos para ${rango.siguiente.nombre}. `
+            + 'Cada acierto vale tantos puntos como su nivel: de 1 en básico a 4 en experto.'))
+        : el('p', { class: 'pequeno suave' }, 'Rango máximo alcanzado.'),
+
+      el('h3', {}, `Medallas (${ganadas.length} de ${medallas.length})`),
+      ganadas.length
+        ? el('div', { class: 'medallas' }, ganadas.map((m) => el('div', {
+          class: 'medalla', title: m.descripcion,
+        }, el('span', { class: 'cara' }, m.icono), el('span', { class: 'pequeno' }, m.nombre))))
+        : el('p', { class: 'pequeno suave' }, 'Todavía ninguna. La primera llega con la primera pregunta.'),
+
+      enCurso.length ? el('div', {},
+        el('h3', {}, 'Las más cerca'),
+        enCurso.slice(0, 4).map((m) => el('div', { class: 'proxima' },
+          el('div', { class: 'fila entre' },
+            el('span', {}, `${m.icono} ${m.nombre}`),
+            el('span', { class: 'pequeno suave' }, `${m.valor} / ${m.meta}`)),
+          barra(m.avance, m.avance >= 75 ? 'ok' : ''),
+          el('p', { class: 'pequeno suave' }, m.descripcion)))) : null);
 
     const tabla = tarjeta('Por asignatura',
       el('table', {},
@@ -190,7 +225,7 @@ export function progresoVista(raiz) {
 
     return pintar(raiz,
       el('h1', {}, 'Progreso'),
-      resumen, tabla, flojos, historial, ajustesTarjeta, datosTarjeta);
+      resumen, recompensas, tabla, flojos, historial, ajustesTarjeta, datosTarjeta);
   };
 
   render();

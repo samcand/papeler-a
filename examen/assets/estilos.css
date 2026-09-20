@@ -324,3 +324,30 @@ details.tema[open] > summary { margin-bottom: 8px; }
   .nav, .estado, button { display: none !important; }
   body { background: #fff; color: #000; }
 }
+
+/* ---------- Medallas y recompensas ---------- */
+
+.medallas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 10px 0 4px;
+}
+
+.medalla {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 84px;
+  padding: 10px 6px;
+  border: 1px solid var(--borde);
+  border-radius: 12px;
+  background: var(--fondo-2);
+  text-align: center;
+}
+
+.medalla .cara { font-size: 24px; line-height: 1; }
+
+.proxima { margin: 12px 0; }
+.proxima p { margin: 4px 0 0; }
