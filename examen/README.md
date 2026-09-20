@@ -1,17 +1,20 @@
 # Ingreso — plataforma de preguntas para la prueba de admisión
 
 Banco de preguntas y simulacros para preparar el examen de ingreso a la
-universidad, con **el temario de lo que preguntan** y **347 preguntas** con
-explicación en seis asignaturas:
+universidad, con **el temario de lo que preguntan** y **993 preguntas** con
+explicación en nueve asignaturas, a razón de **10 por tema en todos los temas**:
 
 | Asignatura | Temas | Preguntas | Qué cubre |
 | --- | --- | --- | --- |
-| **Matemáticas** | 18 | 70 | Aritmética, fracciones, razones, porcentajes, potencias, logaritmos, álgebra, ecuaciones, cuadráticas, desigualdades, funciones, sucesiones, geometría plana y del espacio, geometría analítica, estadística, probabilidad y problemas de aplicación. |
-| **Trigonometría** | 10 | 38 | Grados y radianes, triángulo rectángulo, ángulos notables, circunferencia unitaria, identidades, ángulo doble, ecuaciones, gráficas, leyes de senos y cosenos, y aplicaciones. |
-| **Razonamiento abstracto** | 9 | 47 | Series de figuras, matrices, el que no pertenece, rotación y simetría, plegado y cubos, series numéricas y alfanuméricas, lógica y analogías. |
-| **Geografía** | 12 | 110 | Cartografía y coordenadas, la Tierra en el sistema solar, tectónica, relieve, hidrografía, clima, biomas, población, economía, política y geopolítica, ambiente y riesgos, y geografía de América Latina. |
-| **Comprensión de lectura** | 8 | 34 | Ocho textos originales: idea principal, detalles, inferencias, vocabulario en contexto, propósito y tono, estructura, argumentación y datos. |
-| **Inglés** | 12 | 48 | Tiempos verbales, condicionales, modales, pasiva, reported speech, relativas, preposiciones, cuantificadores, conectores, phrasal verbs, vocabulario y dos lecturas. |
+| **Matemáticas** | 18 | 180 | Aritmética, fracciones, razones, porcentajes, potencias, logaritmos, álgebra, ecuaciones, cuadráticas, desigualdades, funciones, sucesiones, geometría plana, del espacio y analítica, estadística, probabilidad y problemas de aplicación. |
+| **Trigonometría** | 10 | 100 | Grados y radianes, triángulo rectángulo, ángulos notables, circunferencia unitaria, identidades, ángulo doble, ecuaciones, gráficas, leyes de senos y cosenos, y aplicaciones. |
+| **Razonamiento abstracto** | 9 | 90 | Series de figuras, matrices, el que no pertenece, rotación y simetría, plegado y cubos, series numéricas y alfanuméricas, lógica y analogías. |
+| **Geografía** | 12 | 121 | Cartografía, la Tierra en el sistema solar, tectónica, relieve, hidrografía, clima, biomas, población, economía, política y geopolítica, ambiente y riesgos, y América Latina. |
+| **Política y ciudadanía** | 10 | 100 | Ramas del poder, Constitución, derechos humanos y sus mecanismos, democracia y participación, sistemas políticos, elecciones, impuestos y presupuesto, convivencia, organismos internacionales y ética pública. |
+| **Salud y biología humana** | 10 | 100 | Sistemas del cuerpo, célula y genética, nutrición, enfermedades transmisibles y crónicas, vacunas y salud pública, salud sexual y reproductiva, primeros auxilios, salud mental y actividad física. |
+| **Vida cotidiana y cultura general** | 10 | 100 | Dinero y deudas, precios y consumo, documentos y trámites, medidas y dosis, seguridad digital, evaluar noticias, seguridad vial, consumo responsable, primer empleo y cultura general. |
+| **Comprensión de lectura** | 8 | 82 | Catorce textos originales: idea principal, detalles, inferencias, vocabulario en contexto, propósito y tono, estructura, argumentación y datos. |
+| **Inglés** | 12 | 120 | Tiempos verbales, condicionales, modales, pasiva, reported speech, relativas, preposiciones, cuantificadores, conectores, phrasal verbs, vocabulario y lectura. |
 
 No necesita servidor, ni cuenta, ni internet. Todo se guarda en tu dispositivo.
 
@@ -35,7 +38,7 @@ conexión. También se publica tal cual en GitHub Pages: son archivos estáticos
 | **Inicio** | Cuántas preguntas llevas hoy, racha, promedio, cuenta regresiva al examen y qué toca repasar. |
 | **Temario** | El mapa del examen: cada tema dice qué hay que saber hacer, cuántas preguntas hay y cómo vas. Desde ahí se practica un tema suelto. |
 | **Practicar** | Preguntas de a una con la explicación al instante. Se filtra por asignatura, tema y dificultad; las teclas 1–4 responden y Enter avanza. |
-| **Simulacro** | El examen completo con cronómetro, mapa de preguntas, marcas para volver y nada de ayudas. Al entregar: nota, desglose por asignatura y revisión pregunta por pregunta. |
+| **Simulacro** | El examen completo con cronómetro (92 preguntas en 110 minutos, o versiones corta y exprés), mapa de preguntas, marcas para volver y nada de ayudas. Al entregar: nota, desglose por asignatura y revisión pregunta por pregunta. |
 | **Progreso** | Actividad de los últimos 14 días, aciertos por asignatura, temas más flojos, historial de simulacros, ajustes y respaldo de tus datos. |
 
 ### Repaso espaciado
@@ -98,8 +101,8 @@ La pregunta correcta no es "cuántas preguntas quedan bonitas", sino **cuántas
 hacen falta para que estudiar con el banco enseñe la materia en vez de enseñar
 el banco**. Hay tres restricciones que fijan el número, y la mayor manda.
 
-**1. Cubrir el temario, no solo tocarlo.** Son 69 temas y tres niveles de
-dificultad. Con solo dos preguntas por nivel ya hacen falta unas **414**. Por
+**1. Cubrir el temario, no solo tocarlo.** Son 99 temas y tres niveles de
+dificultad. Con solo dos preguntas por nivel ya hacen falta unas **594**. Por
 debajo de eso hay temas que solo se pueden practicar de una manera.
 
 **2. No memorizar la respuesta.** La investigación sobre práctica de
@@ -127,9 +130,9 @@ Juntando las tres:
 
 | Nivel | Tamaño | Por tema | Para qué alcanza |
 | --- | --- | --- | --- |
-| Suelo usable | ~420 | 6 | Cubrir el temario y un mes de práctica |
-| **Meta recomendada** | **~700** | **10** | 3 meses de estudio serio y 6 simulacros sin repetir |
-| Gran alcance | ~1 200 | 17 | 6 meses, repaso espaciado completo y 9 simulacros |
+| Suelo usable | ~600 | 6 | Cubrir el temario y un mes de práctica |
+| **Meta recomendada** | **~1 000** | **10** | 3 meses de estudio serio y 6 simulacros sin repetir |
+| Gran alcance | ~1 700 | 17 | 6 meses, repaso espaciado completo y 9 simulacros |
 
 Por eso la meta del proyecto son **10 preguntas por tema**, y el orden para
 llegar es: primero que ningún tema baje de 3 (eso ya lo verifica una prueba),
@@ -138,17 +141,22 @@ relleno. `npm run test:examen` imprime el estado exacto:
 
 ```
 Cobertura por asignatura (meta: 10 preguntas por tema)
-  Matemáticas               70 preguntas · 18 temas ·  3.9 por tema  → faltan 110 para la meta
-  Trigonometría             38 preguntas · 10 temas ·  3.8 por tema  → faltan 62 para la meta
-  Razonamiento abstracto    47 preguntas ·  9 temas ·  5.2 por tema  → faltan 43 para la meta
-  Geografía                110 preguntas · 12 temas ·  9.2 por tema  → faltan 11 para la meta
-  Comprensión de lectura    34 preguntas ·  8 temas ·  4.3 por tema  → faltan 46 para la meta
-  Inglés                    48 preguntas · 12 temas ·  4.0 por tema  → faltan 72 para la meta
-  TOTAL                    347 preguntas · faltan 344 para la meta de 10 por tema
+  Matemáticas              180 preguntas · 18 temas · 10.0 por tema  → meta alcanzada
+  Trigonometría            100 preguntas · 10 temas · 10.0 por tema  → meta alcanzada
+  Razonamiento abstracto    90 preguntas ·  9 temas · 10.0 por tema  → meta alcanzada
+  Geografía                121 preguntas · 12 temas · 10.1 por tema  → meta alcanzada
+  Política y ciudadanía    100 preguntas · 10 temas · 10.0 por tema  → meta alcanzada
+  Salud y biología humana  100 preguntas · 10 temas · 10.0 por tema  → meta alcanzada
+  Vida cotidiana y cultura general 100 preguntas · 10 temas · 10.0 por tema  → meta alcanzada
+  Comprensión de lectura    82 preguntas ·  8 temas · 10.3 por tema  → meta alcanzada
+  Inglés                   120 preguntas · 12 temas · 10.0 por tema  → meta alcanzada
+  TOTAL                    993 preguntas · faltan 0 para la meta de 10 por tema
 ```
 
-Geografía se escribió ya a esa densidad para que sirva de referencia de cómo
-debe quedar cada asignatura.
+Con 99 temas, la meta de 10 por tema son 993 preguntas: el banco está
+completo en ese nivel. El siguiente escalón, el de "gran alcance" (unas 17 por
+tema, 1 700 en total), da para seis meses de estudio y nueve simulacros sin
+repetir una sola pregunta.
 
 Una advertencia que sale de la misma evidencia: el volumen solo ayuda si se
 leen las explicaciones. En los estudios sobre bancos de preguntas, lo que mejor
@@ -201,7 +209,7 @@ examen/
     ui.js               cuatro ayudas de DOM, sin framework
     banco/              las preguntas, un archivo por asignatura
                         (matematicas, trigonometria, abstracto, geografia,
-                         lectura, ingles)
+                         ciudadania, salud, cotidiana, lectura, ingles)
     vistas/             inicio, temario, practicar, simulacro y progreso
   tests/                pruebas del banco y del motor (node, sin navegador)
 ```
