@@ -9,7 +9,7 @@
  * Operadores: `&` (y), `|` (o), `!` (no) y paréntesis.
  */
 
-import { aISO, deISO, hoy, sumarDias } from './fechas.js';
+import { aISO, deISO, diferenciaDias, hoy, sumarDias } from './fechas.js';
 import { parseEntrada } from './naturales.js';
 
 function limpia(txt) {
@@ -90,6 +90,14 @@ function evaluaTermino(valor, tarea, ctx) {
   if (v === 'repetidas' || v === 'recurrentes') return !!tarea.regla;
   if (v === 'subtareas') return !!tarea.padre;
   if (v === 'con nota' || v === 'con notas') return !!(tarea.notas || '').trim();
+  if (v === 'con plazo' || v === 'con limite') return !!tarea.limite;
+  if (v === 'sin plazo' || v === 'sin limite') return !tarea.limite;
+  // "en riesgo": el plazo vence o está planificada para después de vencer.
+  if (v === 'en riesgo') return !tarea.completada && !!tarea.limite
+    && (tarea.limite < hoyISO || (!!tarea.fecha && tarea.fecha > tarea.limite)
+      || diferenciaDias(hoyISO, tarea.limite) <= 3);
+  if (v === 'bloqueadas') return !tarea.completada && !!(tarea.dependeDe || []).length;
+  if (v === 'sin bloquear' || v === 'libres') return !(tarea.dependeDe || []).length;
 
   const mProximos = v.match(/^(?:proximos?\s+)?(\d+)\s+dias?$/);
   if (mProximos) {
@@ -158,4 +166,5 @@ export const FILTROS_PREDEFINIDOS = [
   { id: 'f-domingo', nombre: 'Para el domingo', expresion: 'módulo:alabanza & 7 días', icono: '🎵' },
   { id: 'f-espera', nombre: 'Esperando respuesta', expresion: '@espera', icono: '⏳' },
   { id: 'f-sinfecha', nombre: 'Sin fecha (decidir)', expresion: 'sin fecha & pendientes', icono: '🗂️' },
+  { id: 'f-plazos', nombre: 'Plazos que aprietan', expresion: 'en riesgo', icono: '⏳' },
 ];

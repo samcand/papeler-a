@@ -189,6 +189,8 @@ export function parseEntrada(texto, opciones = {}) {
   const ref = opciones.hoy ? deISO(opciones.hoy) : hoy();
   let resto = String(texto || '');
 
+  // El plazo va lo primero: "antes del 30" no debe leerse como la fecha de hacerla.
+  const lim = sacarLimite(resto, ref); resto = lim.resto;
   const proyectos = sacarMarcas(resto, '#'); resto = proyectos.resto;
   const etiquetas = sacarMarcas(resto, '@'); resto = etiquetas.resto;
   const prio = sacarPrioridad(resto); resto = prio.resto;
@@ -211,6 +213,7 @@ export function parseEntrada(texto, opciones = {}) {
   return {
     titulo: titulo || String(texto || '').trim(),
     fecha: fechaFinal,
+    limite: lim.limite,
     hora: h.hora,
     prioridad: prio.prioridad,
     etiquetas: etiquetas.valores,
@@ -220,10 +223,32 @@ export function parseEntrada(texto, opciones = {}) {
   };
 }
 
+/**
+ * El plazo, escrito como se dice: "antes del 30 de octubre", "límite 15/11",
+ * "vence el viernes". Se saca antes que la fecha normal, porque si no "antes
+ * del 30" se leería como "el 30" y las dos cosas acabarían siendo la misma.
+ */
+function sacarLimite(texto, ref) {
+  // Ojo con el espacio final: si una alternativa ya se lleva el suyo, exigir
+  // otro deja fuera "vence el viernes". Cada alternativa termina en palabra.
+  const marca = /\b(?:para\s+antes\s+del?|antes\s+del?|fecha\s+l[íi]mite|l[íi]mite|vence(?:\s+el)?)\b:?\s+/i;
+  const m = marca.exec(texto);
+  if (!m) return { limite: null, resto: texto };
+
+  const despues = texto.slice(m.index + m[0].length);
+  const f = sacarFecha(despues, ref);
+  if (!f.fecha) return { limite: null, resto: texto };
+
+  // Se quita la marca y lo que la fecha se llevó, y se deja el resto del título.
+  const resto = texto.slice(0, m.index) + f.resto;
+  return { limite: aISO(f.fecha), resto };
+}
+
 /** Escribe la tarea de vuelta como una línea, para editarla con el mismo lenguaje. */
 export function aTextoEntrada(tarea) {
   const partes = [tarea.titulo];
   if (tarea.fecha) partes.push(tarea.fecha);
+  if (tarea.limite) partes.push(`antes del ${tarea.limite}`);
   if (tarea.hora) partes.push(tarea.hora);
   if (tarea.prioridad) partes.push('p' + tarea.prioridad);
   if (tarea.proyecto) partes.push('#' + tarea.proyecto);

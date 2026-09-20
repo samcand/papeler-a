@@ -64,6 +64,25 @@ Revisar tesis de NVDA mañana 9am p1 #Cartera @analisis cada tercer viernes
 Una tarea repetida no se “pierde” si te atrasas: al completarla se reprograma
 en la siguiente ocurrencia futura, no en una fecha ya pasada.
 
+### La fecha en que lo haces no es la fecha en que vence
+
+Son dos cosas y la app las guarda aparte: **fecha** es cuándo piensas hacerlo y
+**límite** cuándo vence de verdad. Se escribe hablando —«enviar el paper mañana
+antes del 30 de octubre», «pagar el recibo límite 15/11», «llamar al banco vence
+el viernes»— y el aviso que de verdad sirve aparece semanas antes: *«la tienes
+para el 5 de noviembre y vence el 30: así no llega»*.
+
+En Hoy sale una tarjeta con los plazos que aprietan, ordenados por gravedad
+(vencido, imposible, hoy, cerca, y el que vence pronto y no está puesto en
+ningún día). Filtros nuevos: `con plazo`, `sin plazo`, `en riesgo`.
+
+### Tareas que esperan a otras
+
+Una tarea puede ir **después de otra**: se marca con 🔒 y deja de fingir que se
+puede hacer. La app no admite círculos, dice por dónde empezar a desatascar una
+cadena y, al cerrar la de antes, avisa de lo que acaba de quedar libre. Filtros
+`bloqueadas` y `libres`.
+
 ### Capturar sin fricción, y sin duplicar
 
 La tecla `n` abre la caja de captura **sobre cualquier pantalla**, y al instalar
@@ -293,6 +312,14 @@ dependencias y fechas que se arrastran unas a otras:
 Validaciones incluidas: dependencias circulares, dependencias a tareas
 borradas, tareas que dependen de sí mismas y duraciones negativas.
 
+### Cartera: todos los proyectos a la vez
+
+De uno en uno todos los planes parecen ir bien. La pestaña **Cartera** los pone
+juntos: fecha de fin frente a la comprometida, avance, próximo hito de cada uno
+y —lo que no se puede ver desde dentro de un proyecto— **el mismo recurso en dos
+sitios a la vez**, agrupado por rachas de días, más la carga total por persona
+sumando todos los planes.
+
 ## Inversiones
 
 Es el módulo principal. No hay precios en vivo: los escribes tú. A cambio
@@ -504,7 +531,7 @@ descargar. Si la semana fue floja se nota, que es justo para lo que sirve.
 
 ## Lo que queda
 
-La pestaña **Lo que queda** es la hoja de ruta real de la app: **109 hechas y 12
+La pestaña **Lo que queda** es la hoja de ruta real de la app: **112 hechas y 12
 descartadas**, y hoy no queda nada pendiente. Las diez últimas (111-120) salieron
 de revisar una lista de 50 ideas de productividad personal y resumirlas en cuatro
 piezas genéricas —notas, colecciones, objetivos y gastos— en vez de treinta
@@ -544,7 +571,7 @@ Alt y las flechas.
 ## Pruebas
 
 ```bash
-npm test                  # 340 pruebas de lógica, sin navegador
+npm test                  # 357 pruebas de lógica, sin navegador
 npm run test:navegador    # recorre la app en Chromium (necesita Playwright)
 ```
 

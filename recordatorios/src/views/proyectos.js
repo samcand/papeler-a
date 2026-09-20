@@ -16,6 +16,7 @@ import {
 } from '../proyectos.js';
 import { dato, tituloVista, vacio } from '../componentes.js';
 import { NIVELES as NIVELES_RIESGO, alcanceQueCrece, nivelRiesgo, riesgoNuevo, riesgosVivos, tareaDeRiesgo } from '../riesgos.js';
+import { cargaTotal, conflictosEntrePlanes, filasCartera, resumenCartera } from '../cartera.js';
 import { probabilidadDeLlegar, queSiPasa, resumenQueSiPasa, simularAusencia, simularProyecto } from '../simulacion.js';
 import { calibracion } from '../calibracion.js';
 import { store } from '../store.js';
@@ -27,6 +28,7 @@ export function vistaProyectos(root, ctx = {}) {
   const host = el('div', {});
   const hoyISO = aISO(fechaHoy());
   let pestana = ctx.query?.tab || 'plan';
+  let vista = ctx.query?.vista || 'uno';
   let escala = 'semana';
   let seleccionado = ctx.query?.p || store.estado.planes[0]?.id || null;
   let nivelacion = null;   // resultado de la última nivelación, para poder deshacerla
@@ -908,6 +910,66 @@ export function vistaProyectos(root, ctx = {}) {
     setTimeout(quitar, 60000);
   }
 
+
+  /**
+   * Todos los proyectos a la vez. De uno en uno todos parecen ir bien; los
+   * choques aparecen al ponerlos juntos, porque el recurso de los tres eres tú.
+   */
+  function panelCartera() {
+    const r = resumenCartera(store.estado.planes, hoyISO);
+    if (!store.estado.planes.length) {
+      return vacio('Todavía no hay proyectos con plan. Crea uno en la otra pestaña.', '📐');
+    }
+    const COLOR = { mal: 'negativo', ojo: '', bien: 'positivo' };
+
+    return el('div', {},
+      el('p', { class: r.enRiesgo ? 'negativo' : 'muted small' }, r.frase),
+
+      el('div', { class: 'tabla-scroll' },
+        el('table', { class: 'tabla' },
+          el('thead', {}, el('tr', {},
+            el('th', {}, 'Proyecto'), el('th', {}, 'Termina'), el('th', {}, 'Comprometido'),
+            el('th', { class: 'num' }, 'Avance'), el('th', { class: 'num' }, 'Críticas'),
+            el('th', {}, 'Próximo hito'), el('th', {}, ''))),
+          el('tbody', {}, ...r.filas.map((f) => el('tr', { class: f.nivel === 'mal' ? 'fila-critica' : '' },
+            el('td', {}, f.proyecto.nombre),
+            el('td', { class: COLOR[f.nivel] }, formatoCorto(f.plan.fin)),
+            el('td', {}, f.proyecto.fechaObjetivo
+              ? `${formatoCorto(f.proyecto.fechaObjetivo)}${f.tarde ? ` · +${f.diasTarde} d` : ''}`
+              : '—'),
+            el('td', { class: 'num' }, `${f.resumen.avance} %`),
+            el('td', { class: 'num' }, String(f.resumen.criticas)),
+            el('td', { class: 'small' }, f.proximoHito ? `${f.proximoHito.nombre} · ${formatoCorto(f.proximoHito.fecha)}` : '—'),
+            el('td', {}, button('Abrir', () => {
+              seleccionado = f.proyecto.id;
+              vista = 'uno';
+              pintar();
+            }, { variant: 'ghost chico' }))))))),
+
+      r.conflictos.length ? el('section', { class: 'card' },
+        el('h2', { class: 'card-title' }, `En dos sitios a la vez (${r.conflictos.length})`),
+        el('p', { class: 'muted small' }, 'Esto no se ve desde dentro de un proyecto: cada plan cree que tiene a la persona entera.'),
+        ...r.conflictos.slice(0, 8).map((c) => el('div', { class: 'alerta medio' },
+          el('div', {},
+            el('div', {}, c.texto),
+            el('div', { class: 'accion' }, c.trabajos.slice(0, 3).map((t) => `${t.proyecto}: ${t.tarea}`).join(' · ')))))) : null,
+
+      el('section', { class: 'card' },
+        el('h2', { class: 'card-title' }, 'Carga por persona, sumando todo'),
+        ...cargaTotal(store.estado.planes).map((c) => el('div', { class: 'salud-fila' },
+          el('span', { style: 'min-width:150px' }, c.recurso),
+          el('span', { class: 'grow muted small' }, `${c.proyectos.length} proyecto(s): ${[...new Set(c.proyectos)].join(', ')}`),
+          el('span', { class: 'muted small' }, `${c.dias} días de trabajo · ${c.tareas} tareas`)))),
+
+      r.proximosHitos.length ? el('section', { class: 'card' },
+        el('h2', { class: 'card-title' }, 'Los próximos hitos de todos'),
+        ...r.proximosHitos.map((h) => el('div', { class: 'salud-fila' },
+          el('span', { style: 'min-width:130px' }, formatoCorto(h.fecha)),
+          el('span', { class: 'grow' }, `${h.proyecto} · ${h.nombre}`),
+          el('span', { class: h.critica ? 'negativo small' : 'muted small' },
+            h.critica ? 'sin margen' : `${h.holgura} d de colchón`)))) : null);
+  }
+
   /* -------------------------- selector y raíz -------------------------- */
 
   function selectorProyecto() {
@@ -946,8 +1008,13 @@ export function vistaProyectos(root, ctx = {}) {
     const p = proyecto();
     render(host,
       tituloVista('Proyectos', 'EDT, dependencias, ruta crítica y seguimiento'),
-      selectorProyecto(),
-      !p ? vacio('Todavía no hay ningún proyecto. Empieza por una plantilla: trae las tareas y las dependencias puestas.', '📐')
+      el('div', { class: 'pestanas' },
+        ...[['uno', 'Un proyecto'], ['cartera', `Cartera (${store.estado.planes.length})`]].map(([id, txt]) =>
+          el('button', { class: `pestana ${vista === id ? 'activa' : ''}`.trim(), onClick: () => { vista = id; pintar(); } }, txt))),
+      vista === 'cartera' ? panelCartera() : null,
+      vista === 'cartera' ? null : selectorProyecto(),
+      vista === 'cartera' ? null
+        : !p ? vacio('Todavía no hay ningún proyecto. Empieza por una plantilla: trae las tareas y las dependencias puestas.', '📐')
         : el('div', {},
           el('div', { class: 'pestanas' },
             ...[['plan', 'Plan y Gantt'], ['recursos', 'Recursos'], ['riesgo', 'Fecha y escenarios'], ['seguimiento', 'Seguimiento'], ['riesgos', 'Riesgos']].map(([id, txt]) =>

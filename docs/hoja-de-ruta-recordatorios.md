@@ -1,6 +1,6 @@
 # Hoja de ruta de la app de recordatorios
 
-**109 hechas · 0 pendientes · 12 descartadas.**
+**112 hechas · 0 pendientes · 12 descartadas.**
 
 Esta lista empezó como “100 ideas” y hoy es la lista de trabajo real. Lo
 pendiente va por olas, que son un orden recomendado y no un compromiso. Lo
@@ -19,8 +19,8 @@ pendiente en tarea con un botón.
 
 ## No queda nada pendiente
 
-Las 109 ideas de la lista están hechas; las 12 descartadas siguen abajo con su motivo. Lo siguiente saldrá de usarla: cuando
-algo moleste tres veces en una semana, eso es la idea 122.
+Las 112 ideas de la lista están hechas; las 12 descartadas siguen abajo con su motivo. Lo siguiente saldrá de usarla: cuando
+algo moleste tres veces en una semana, eso es la idea 125.
 
 ## Ya está hecho
 
@@ -34,10 +34,10 @@ algo moleste tres veces en una semana, eso es la idea 122.
 1. Escribir la tarea en una sola línea · 2. Enseñar lo que la app entendió antes de guardar · 3. Bandeja de entrada universal · 4. Atajo global de captura · 5. Compartir desde otra app · 6. Dictar la tarea · 8. Plantillas de listas reutilizables · 9. Autocompletar proyectos y etiquetas al escribir · 10. Adjuntar archivos y fotos a la tarea
 
 **Organizar y encontrar**  
-11. Proyectos, subtareas y etiquetas · 12. Filtros guardados con lenguaje de consulta · 13. Secciones dentro de un proyecto · 14. Vista de tablero Kanban · 15. Reordenar arrastrando · 16. Archivar en vez de borrar · 17. Papelera con recuperación · 18. Búsqueda con operadores y resultados agrupados · 19. Favoritos y accesos rápidos · 20. Detección de duplicados · 121. Buscador universal con paleta
+11. Proyectos, subtareas y etiquetas · 12. Filtros guardados con lenguaje de consulta · 13. Secciones dentro de un proyecto · 14. Vista de tablero Kanban · 15. Reordenar arrastrando · 16. Archivar en vez de borrar · 17. Papelera con recuperación · 18. Búsqueda con operadores y resultados agrupados · 19. Favoritos y accesos rápidos · 20. Detección de duplicados · 121. Buscador universal con paleta · 123. Tareas que esperan a otras
 
 **Priorizar y planificar**  
-21. Cuatro niveles de prioridad con color · 22. Matriz urgente / importante · 23. Estimar duración y ver la carga del día · 24. Planificador que dice qué no cabe · 25. Las tres cosas del día · 26. Aplazar con un toque · 27. Nivel de energía por tarea · 28. Límite de tareas en curso · 29. Revisión semanal guiada · 30. Avisar de lo que lleva demasiado abierto · 102. Tu capacidad real entre los cinco módulos
+21. Cuatro niveles de prioridad con color · 22. Matriz urgente / importante · 23. Estimar duración y ver la carga del día · 24. Planificador que dice qué no cabe · 25. Las tres cosas del día · 26. Aplazar con un toque · 27. Nivel de energía por tarea · 28. Límite de tareas en curso · 29. Revisión semanal guiada · 30. Avisar de lo que lleva demasiado abierto · 102. Tu capacidad real entre los cinco módulos · 122. Fecha límite distinta de la fecha en que lo haces
 
 **Tiempo y concentración**  
 31. Pomodoro configurable · 32. Cronómetro con vueltas · 33. Temporizadores rápidos · 34. Medir el tiempo con marcas de reloj, no contando ticks · 35. Estimado frente a real · 36. Modo concentración a pantalla completa · 37. Sonido ambiente · 38. Registro de interrupciones · 39. Informe de dónde se fue el tiempo · 40. Calendario del tiempo real trabajado
@@ -55,7 +55,7 @@ algo moleste tres veces en una semana, eso es la idea 122.
 71. El semestre genera sus propias tareas · 72. Aviso cuando un artículo lleva demasiado parado · 73. Convocatorias con su cuenta atrás · 74. Seguimiento de tesis dirigidas · 75. Banco de tareas por curso reutilizable · 76. Horas de asesoría por estudiante · 77. Calendario público para los estudiantes · 78. Recordar actualizar el CV al publicar · 80. Lectura pendiente con cola y notas
 
 **Gestión de proyectos**  
-81. EDT con tareas resumen · 82. Dependencias de los cuatro tipos con desfase · 83. Ruta crítica y holgura · 84. Gantt con dependencias dibujadas · 85. Línea base y desviación en días hábiles · 86. Valor ganado (SPI y CPI) · 87. Mover tareas arrastrando en el Gantt · 88. Nivelación automática de recursos · 89. Fecha final probabilística (PERT + Monte Carlo) · 101. Simulación "¿qué pasa si?" y propagación del impacto · 103. Salud explicada y aviso temprano · 104. Valor ganado en horas: ETC, VAC, TCPI y curva S · 105. Ruta casi crítica y margen hasta el hito · 106. Fechas imposibles y tareas huérfanas · 107. Simulación de ausencia · 108. Riesgos ligeros por proyecto · 109. Detector de alcance que crece
+81. EDT con tareas resumen · 82. Dependencias de los cuatro tipos con desfase · 83. Ruta crítica y holgura · 84. Gantt con dependencias dibujadas · 85. Línea base y desviación en días hábiles · 86. Valor ganado (SPI y CPI) · 87. Mover tareas arrastrando en el Gantt · 88. Nivelación automática de recursos · 89. Fecha final probabilística (PERT + Monte Carlo) · 101. Simulación "¿qué pasa si?" y propagación del impacto · 103. Salud explicada y aviso temprano · 104. Valor ganado en horas: ETC, VAC, TCPI y curva S · 105. Ruta casi crítica y margen hasta el hito · 106. Fechas imposibles y tareas huérfanas · 107. Simulación de ausencia · 108. Riesgos ligeros por proyecto · 109. Detector de alcance que crece · 124. Cartera: todos los proyectos a la vez
 
 **Datos, privacidad y automatización**  
 91. Todo local, sin cuenta y sin servidor · 92. Exportar e importar de verdad · 93. Respaldo cifrado con contraseña · 94. Sincronizar entre dispositivos sin servidor · 95. Deshacer global y papelera · 96. Reglas de automatización · 97. Informes a medida · 98. Accesibilidad de verdad · 99. Tema claro y oscuro, y que quepa en el móvil · 110. Copiloto local, sin mandar nada fuera

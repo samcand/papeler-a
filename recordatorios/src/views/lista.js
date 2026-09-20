@@ -202,6 +202,7 @@ export function vistaFiltroNuevo(root) {
         el('ul', { class: 'small muted' },
           el('li', {}, '`hoy`, `vencidas`, `7 días`, `sin fecha`, `pendientes`, `completadas`, `repetidas`'),
           el('li', {}, '`p1`…`p4` · `#Proyecto` · `@etiqueta` · `módulo:inversiones`'),
+          el('li', {}, '`con plazo` · `sin plazo` · `en riesgo` · `bloqueadas` · `libres`'),
           el('li', {}, '`buscar: texto` · `antes de: 15 de octubre` · `después de: mañana`'),
           el('li', {}, 'Se combinan con `&` (y), `|` (o), `!` (no) y paréntesis.'))),
       el('p', { class: 'muted small' }, `${resultado.length} tareas coinciden ahora mismo:`),

@@ -826,6 +826,87 @@ else {
   if (await pagina.locator('.paleta').count()) errores.push('Escape no cerró la paleta');
 }
 
+
+// Plazo: se escribe hablando y avisa cuando la planificas para después
+await pagina.goto(BASE + '#/hoy');
+await pagina.waitForTimeout(400);
+await pagina.fill('[data-rapida]', 'Enviar el paper antes del 30 de octubre');
+await pagina.waitForTimeout(400);
+const previaPlazo = await pagina.textContent('.vista-previa');
+if (!/vence el/.test(previaPlazo)) errores.push('la vista previa no entendió el plazo: ' + previaPlazo);
+else {
+  await pagina.press('[data-rapida]', 'Enter');
+  await pagina.waitForTimeout(400);
+  const puesta = await pagina.evaluate(async () => {
+    const { store } = await import('./src/store.js');
+    const t = store.tareas.find((x) => x.titulo === 'Enviar el paper');
+    if (!t) return null;
+    // Se planifica para después del plazo: ahí es donde tiene que avisar.
+    store.actualizar(t.id, { fecha: '2026-11-05' });
+    return { limite: t.limite, id: t.id };
+  });
+  if (!puesta || puesta.limite !== '2026-10-30') errores.push('el plazo no se guardó: ' + JSON.stringify(puesta));
+  else {
+    await pagina.goto(BASE + '#/proximos');
+    await pagina.goto(BASE + '#/hoy');
+    await pagina.waitForTimeout(600);
+    const conPlazo = (await pagina.textContent('#app')).replace(/\s+/g, ' ');
+    if (!/Plazos/.test(conPlazo) || !/así no llega/.test(conPlazo)) {
+      errores.push('Hoy no avisó del plazo imposible: ' + conPlazo.slice(0, 250));
+    } else console.log('  ok  plazos: "antes del 30" y el aviso de que así no llega');
+  }
+}
+
+// Dependencias: una tarea espera a otra y se libera al cerrarla
+const deps = await pagina.evaluate(async () => {
+  const { store } = await import('./src/store.js');
+  const a = store.agregar({ titulo: 'Pedir los datos al hospital' });
+  const b = store.agregar({ titulo: 'Analizar los datos' });
+  const ok = store.dependerDe(b.id, a.id);
+  const ciclo = store.dependerDe(a.id, b.id);          // cerraría el círculo
+  return { ok: ok.ok, cicloRechazado: !ciclo.ok, a: a.id, b: b.id };
+});
+if (!deps.ok || !deps.cicloRechazado) errores.push('las dependencias no se guardan o el círculo no se rechaza: ' + JSON.stringify(deps));
+else {
+  await pagina.goto(BASE + '#/proximos');
+  await pagina.goto(BASE + '#/hoy');
+  await pagina.waitForTimeout(500);
+  await pagina.evaluate(async (id) => {
+    const { store } = await import('./src/store.js');
+    store.alternarCompletada(id, new Date().toISOString().slice(0, 10));
+  }, deps.a);
+  await pagina.goto(BASE + '#/proximos');
+  await pagina.goto(BASE + '#/hoy');
+  await pagina.waitForTimeout(600);
+  const libre = (await pagina.textContent('#app')).replace(/\s+/g, ' ');
+  if (!/Se desbloqueó/.test(libre) || !/Analizar los datos/.test(libre)) {
+    errores.push('no avisó de la tarea desbloqueada: ' + libre.slice(0, 250));
+  } else console.log('  ok  dependencias: se bloquea, no admite círculos y avisa al liberarse');
+}
+
+// Cartera: dos proyectos a la vez y el choque que solo se ve juntándolos
+await pagina.evaluate(async () => {
+  const { store } = await import('./src/store.js');
+  const { proyectoVacio, tareaProyecto } = await import('./src/proyectos.js');
+  for (const [nombre, objetivo] of [['Paper de redes', '2026-09-30'], ['Curso nuevo', '2026-12-01']]) {
+    const p = proyectoVacio(nombre, '2026-09-21');
+    p.fechaObjetivo = objetivo;
+    p.tareas = [tareaProyecto({ nombre: 'Bloque largo', duracion: 10, recurso: 'Yo' })];
+    store.agregarPlan(p);
+  }
+});
+await pagina.goto(BASE + '#/hoy');
+await pagina.goto(BASE + '#/proyectos');
+await pagina.waitForTimeout(600);
+await pagina.locator('.pestana', { hasText: 'Cartera' }).click();
+await pagina.waitForTimeout(800);
+const cartera = (await pagina.textContent('#app')).replace(/\s+/g, ' ');
+if (!/Paper de redes/.test(cartera) || !/Curso nuevo/.test(cartera)) {
+  errores.push('la cartera no listó los proyectos: ' + cartera.slice(0, 250));
+} else if (!/En dos sitios a la vez/.test(cartera) || !/Yo está en/.test(cartera)) {
+  errores.push('la cartera no detectó el choque entre planes: ' + cartera.slice(0, 300));
+} else console.log('  ok  cartera: todos los proyectos y el choque de recurso entre ellos');
+
 // Accesibilidad básica
 const a11y = await pagina.evaluate(() => {
   const saltar = document.querySelector('.saltar');

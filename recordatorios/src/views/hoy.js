@@ -1,17 +1,19 @@
 /** hoy.js (vista) — Lo de hoy, lo que se quedó atrás y cómo va el día. */
 
-import { button, el, render } from '../../../src/ui.js';
+import { button, el, render, toast } from '../../../src/ui.js';
 import { aISO, hoy as fechaHoy, sumarDias, textoLargo } from '../fechas.js';
 import { cargaDelDia, estadisticas, paraHoy } from '../modelo.js';
 import { copyText } from '../../../src/ui.js';
 import { rachaHabito } from '../plantillas.js';
-import { barra, dato, entradaRapida, listaTareas, tituloVista, vacio } from '../componentes.js';
+import { barra, dato, entradaRapida, listaTareas, panelTarea, tituloVista, vacio } from '../componentes.js';
 import { resumenDelDia, textoResumen, tocaResumen } from '../resumen.js';
 import { SALIDAS_ZOMBI, alternarTres, proponerTres, tresDelDia, zombis } from '../dia.js';
 import { trabajoEnCurso } from '../tablero.js';
 import { estadoBandeja } from '../modelo.js';
 import { formatoMinutos, resumenTiempo } from '../tiempo.js';
 import { NIVELES as NIVELES_ENERGIA, quePuedoHacer, repartoEnergia } from '../energia.js';
+import { resumenLimites } from '../limites.js';
+import { desbloqueadasHoy, resumenDependencias } from '../dependencias.js';
 import { MOMENTOS, duracionRutina, rutinasDeHoy } from '../rutinas.js';
 import { store } from '../store.js';
 
@@ -61,6 +63,47 @@ export function vistaHoy(root, ctx = {}) {
         r.mañana ? ` Mañana hay ${r.mañana} tareas.` : ''));
   }
 
+
+  /**
+   * Los plazos que aprietan. Lo primero de la lista no es lo más cercano: es lo
+   * que ya venció y lo que has planificado para después de vencer, que es un
+   * problema que se ve semanas antes de serlo.
+   */
+  function panelPlazos() {
+    const r = resumenLimites(store.tareas, hoyISO);
+    if (!r.total) return null;
+    return el('section', { class: 'card' },
+      el('div', { class: 'fila entre' },
+        el('h2', { class: 'card-title', style: 'margin:0' }, 'Plazos'),
+        el('a', { class: 'btn ghost chico', href: '#/filtro/f-plazos' }, 'ver todos')),
+      el('p', { class: r.vencidos || r.imposibles ? 'negativo' : 'muted small' }, r.frase),
+      ...r.lista.slice(0, 5).map(({ tarea, estado }) => el('div', { class: `alerta ${['vencido', 'imposible'].includes(estado.nivel) ? 'alto' : 'medio'}` },
+        el('div', { class: 'grow' },
+          el('div', {}, tarea.titulo),
+          el('div', { class: 'accion' }, estado.texto)),
+        el('div', { class: 'fila' },
+          estado.nivel === 'imposible' || estado.nivel === 'sinPlan'
+            ? button('Ponerla antes', () => {
+              store.aplazar(tarea.id, tarea.limite);
+              toast('Movida al día del plazo');
+              pintar();
+            }, { variant: 'ghost chico' })
+            : null,
+          button('Abrir', () => panelTarea(tarea, pintar), { variant: 'ghost chico' })))));
+  }
+
+  /** Lo que acaba de quedar libre al cerrar otra cosa: el momento de aprovecharlo. */
+  function panelDesbloqueadas() {
+    const libres = desbloqueadasHoy(store.tareas, hoyISO);
+    const r = resumenDependencias(store.tareas, hoyISO);
+    if (!libres.length && !r.bloqueadas) return null;
+    return el('section', { class: 'card' },
+      el('h2', { class: 'card-title' }, 'Dependencias'),
+      libres.length ? el('div', {},
+        el('p', { class: 'positivo' }, `Se desbloqueó al cerrar lo de antes (${libres.length}):`),
+        listaTareas(libres, { alCambiar: pintar, hoy: hoyISO })) : null,
+      r.bloqueadas ? el('p', { class: 'muted small' }, r.frase) : null);
+  }
 
   /**
    * Las rutinas de hoy, con sus pasos. Aquí van en pequeño: montarlas y verlas
@@ -142,6 +185,8 @@ export function vistaHoy(root, ctx = {}) {
         dato(carga.excedido ? `${carga.horas} h` : `${carga.horas} h`, 'comprometidas',
           { clase: carga.excedido ? 'negativo' : '', pie: carga.excedido ? 'el día no da para tanto' : `de ${Math.round(carga.disponibles / 60)} h` })),
 
+      panelPlazos(),
+      panelDesbloqueadas(),
       panelRutinas(),
       panelEnergia(),
 

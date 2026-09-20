@@ -12,6 +12,8 @@ import { calibracion, pistaEstimacion } from './calibracion.js';
 import { aplicar, fuentesDe, sugerencias } from './autocompletar.js';
 import { alternarTres, tresDelDia } from './dia.js';
 import { dictadoDisponible, dictar, posiblesDuplicados } from './captura.js';
+import { estadoLimite } from './limites.js';
+import { bloqueantes, estaBloqueada, primerPaso } from './dependencias.js';
 import { NIVELES as NIVELES_ENERGIA, energiaDe } from './energia.js';
 import { crearEspera, estadoEspera, tareaDePerseguir } from './esperas.js';
 import * as adjuntos from './adjuntos.js';
@@ -102,6 +104,7 @@ export function entradaRapida(porDefecto = {}, alAgregar = () => {}) {
     const p = parseEntrada(txt);
     const trozos = [];
     if (p.fecha) trozos.push(`<b>${textoRelativo(p.fecha)}</b>${p.hora ? ` a las <b>${p.hora}</b>` : ''}`);
+    if (p.limite) trozos.push(`⏳ vence el <b>${textoRelativo(p.limite)}</b>`);
     if (p.regla) trozos.push(`🔁 <b>${textoRegla(p.regla)}</b>`);
     if (p.prioridad) trozos.push(`<b>P${p.prioridad}</b>`);
     if (p.proyecto) trozos.push(`proyecto <b>${p.proyecto}</b>`);
@@ -135,6 +138,7 @@ export function entradaRapida(porDefecto = {}, alAgregar = () => {}) {
     const tarea = store.agregar({
       titulo: p.titulo,
       fecha: p.fecha ?? porDefecto.fecha ?? null,
+      limite: p.limite ?? null,
       hora: p.hora,
       prioridad: p.prioridad ?? porDefecto.prioridad ?? 4,
       etiquetas: p.etiquetas,
@@ -214,6 +218,19 @@ export function itemTarea(tarea, opciones = {}) {
   if (tarea.fecha) {
     meta.push(el('span', { class: vencida ? 'vencida' : '' },
       `${vencida ? '⚠ ' : ''}${textoRelativo(tarea.fecha, deISO(hoyISO))}${tarea.hora ? ` ${tarea.hora}` : ''}`));
+  }
+  const plazo = estadoLimite(tarea, hoyISO);
+  if (plazo.hayLimite && !tarea.completada) {
+    const grave = ['vencido', 'imposible', 'hoy'].includes(plazo.nivel);
+    meta.push(el('span', { class: grave ? 'vencida' : '', title: plazo.texto },
+      `⏳ vence ${textoRelativo(tarea.limite, deISO(hoyISO))}`));
+  }
+  const paradaPor = tarea.completada ? [] : bloqueantes(tarea, store.tareas);
+  if (paradaPor.length) {
+    meta.push(el('span', {
+      class: 'bloqueada',
+      title: `Espera a: ${paradaPor.map((b) => b.titulo).join(', ')}`,
+    }, `🔒 espera a ${paradaPor[0].titulo}${paradaPor.length > 1 ? ` +${paradaPor.length - 1}` : ''}`));
   }
   if (tarea.regla) meta.push(el('span', {}, '🔁 ' + textoRegla(tarea.regla)));
   if (tarea.duracion) meta.push(el('span', {}, `⏱ ${tarea.duracion} min`));
@@ -338,7 +355,9 @@ export function vacio(mensaje, icono = '🌤️') {
 
 /** Cajón lateral con todos los campos de la tarea. */
 export function panelTarea(tarea, alGuardar = () => {}) {
-  const borrador = { ...tarea, etiquetas: [...(tarea.etiquetas || [])] };
+  const borrador = { ...tarea, etiquetas: [...(tarea.etiquetas || [])], dependeDe: [...(tarea.dependeDe || [])] };
+  const hoyDelPanel = aISO(hoy());
+  let pistaPlazo = () => {};
   const cuerpo = el('div', { class: 'drawer-body' });
   const panel = el('div', { class: 'drawer' },
     el('div', {},
@@ -383,8 +402,21 @@ export function panelTarea(tarea, alGuardar = () => {}) {
     campo('Título', input(borrador.titulo, (v) => { borrador.titulo = v; })),
     campo('Notas', textarea(borrador.notas, (v) => { borrador.notas = v; }, { rows: 4, placeholder: 'Contexto, enlaces, la tesis en dos líneas…' })),
     el('div', { class: 'fila' },
-      el('div', { class: 'grow' }, campo('Fecha', input(borrador.fecha || '', (v) => { borrador.fecha = v || null; }, { type: 'date' }))),
+      el('div', { class: 'grow' }, campo('Fecha', input(borrador.fecha || '', (v) => { borrador.fecha = v || null; pistaPlazo(); }, { type: 'date' }), 'Cuándo piensas hacerla.')),
       el('div', { class: 'grow' }, campo('Hora', input(borrador.hora || '', (v) => { borrador.hora = v || null; }, { type: 'time' })))),
+    (() => {
+      const aviso = el('span', { class: 'field-hint' });
+      const control = input(borrador.limite || '', (v) => { borrador.limite = v || null; pintarAviso(); }, { type: 'date' });
+      function pintarAviso() {
+        const e = estadoLimite(borrador, hoyDelPanel);
+        aviso.textContent = e.hayLimite ? e.texto : 'Cuándo vence de verdad. No es lo mismo que cuándo la haces.';
+        aviso.classList.toggle('negativo', ['vencido', 'imposible'].includes(e.nivel));
+      }
+      pistaPlazo = pintarAviso;
+      pintarAviso();
+      return el('label', { class: 'field' }, el('span', { class: 'field-label' }, 'Fecha límite'), control, aviso);
+    })(),
+    campoDependencias(borrador, alGuardar, cerrar),
     campo('Prioridad', selectorPrioridad(borrador.prioridad, (v) => { borrador.prioridad = v; })),
     (() => {
       // La pista sale del historial real: si sueles tardar más, que se vea al estimar.
@@ -448,6 +480,56 @@ export function panelTarea(tarea, alGuardar = () => {}) {
 /* ------------------------------------------------------------------ *
  * Prioridad y repetición, con botones en vez de con memoria
  * ------------------------------------------------------------------ */
+
+/**
+ * "Esto va después de aquello": se guarda en la tarea que espera, que es donde
+ * uno lo piensa. La app no deja cerrar un círculo.
+ */
+function campoDependencias(borrador, alGuardar, cerrar) {
+  const caja = el('div', { class: 'field' });
+  const pintar = () => {
+    const todas = store.tareas.filter((t) => t.id !== borrador.id && !t.completada);
+    const espera = (borrador.dependeDe || [])
+      .map((id) => store.tarea(id))
+      .filter(Boolean);
+    const bloquea = store.tareas.filter((t) => (t.dependeDe || []).includes(borrador.id));
+
+    const selector = el('select', {
+      class: 'input',
+      onChange: (e) => {
+        const otra = e.target.value;
+        if (!otra) return;
+        const r = store.dependerDe(borrador.id, otra);
+        if (!r.ok) { toast(r.error, 'warn'); e.target.value = ''; return; }
+        borrador.dependeDe = [...(borrador.dependeDe || []), otra];
+        pintar();
+      },
+    }, el('option', { value: '' }, '— va después de… —'),
+    ...todas.filter((t) => !(borrador.dependeDe || []).includes(t.id))
+      .map((t) => el('option', { value: t.id }, t.titulo.slice(0, 60))));
+
+    render(caja,
+      el('span', { class: 'field-label' }, 'Va después de'),
+      selector,
+      espera.length ? el('div', { class: 'chip-list' }, ...espera.map((t) => el('span', { class: 'chip' },
+        t.titulo.slice(0, 40),
+        button('✕', () => {
+          store.quitarDependencia(borrador.id, t.id);
+          borrador.dependeDe = (borrador.dependeDe || []).filter((x) => x !== t.id);
+          pintar();
+        }, { variant: 'ghost chico', title: 'Quitar la dependencia' })))) : null,
+      (() => {
+        const primera = primerPaso(borrador, store.tareas);
+        return primera && primera.id !== (borrador.dependeDe || [])[0]
+          ? el('span', { class: 'field-hint' }, `Para desatascarla hay que empezar por “${primera.titulo}”.`)
+          : null;
+      })(),
+      bloquea.length ? el('span', { class: 'field-hint' },
+        `${bloquea.length} tarea(s) esperan a esta: ${bloquea.map((t) => t.titulo).join(', ')}`) : null);
+  };
+  pintar();
+  return caja;
+}
 
 /** Cuatro banderas de prioridad, como en Todoist: se ve el color, no el número. */
 export function selectorPrioridad(valor, alCambiar) {

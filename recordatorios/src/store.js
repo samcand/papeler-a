@@ -15,6 +15,7 @@ import { FILTROS_PREDEFINIDOS } from './filtros.js';
 import { aplicarReglas } from './automatizacion.js';
 import { marcarHecho, registrarLectura } from './mantenimiento.js';
 import { alternarPaso } from './rutinas.js';
+import { haríaCiclo } from './dependencias.js';
 import { PLANTILLAS_INICIALES } from './plantillasLista.js';
 import { TAREAS_EJEMPLO, PROYECTOS_EJEMPLO } from './seed.js';
 
@@ -260,6 +261,30 @@ class Store {
     this.estado.tareas = this.estado.tareas.filter((t) => !fuera.has(t.id));
     this.guardar();
     return fuera.size;
+  }
+
+  /**
+   * Guarda que una tarea va después de otra, comprobando antes que no se cierre
+   * un círculo: si A espera a B, B no puede esperar a A.
+   */
+  dependerDe(id, otraId) {
+    const t = this.tarea(id);
+    if (!t || id === otraId) return { ok: false, error: 'Una tarea no puede esperarse a sí misma.' };
+    if (haríaCiclo(id, otraId, this.estado.tareas)) {
+      return { ok: false, error: 'Eso cerraría un círculo: la otra tarea ya depende de esta.' };
+    }
+    if ((t.dependeDe || []).includes(otraId)) return { ok: true, tarea: t };
+    t.dependeDe = [...(t.dependeDe || []), otraId];
+    this.guardar();
+    return { ok: true, tarea: t };
+  }
+
+  quitarDependencia(id, otraId) {
+    const t = this.tarea(id);
+    if (!t) return null;
+    t.dependeDe = (t.dependeDe || []).filter((x) => x !== otraId);
+    this.guardar();
+    return t;
   }
 
   /* ---------------- papelera ---------------- */

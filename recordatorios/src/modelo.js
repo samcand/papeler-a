@@ -37,8 +37,10 @@ export function crearTarea(campos = {}) {
     modulo: null,
     prioridad: 4,
     etiquetas: [],
-    fecha: null,
+    fecha: null,          // cuándo piensas hacerla
+    limite: null,         // cuándo vence de verdad; no es lo mismo
     hora: null,
+    dependeDe: [],        // ids de tareas que tienen que estar hechas antes
     duracion: null,
     regla: null,
     recordatorios: [],   // minutos antes de la hora
