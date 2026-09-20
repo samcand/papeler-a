@@ -8,6 +8,19 @@ video de YouTube** para saber qué tocar en cada instante, **academia de música
 No necesita servidor, ni cuenta, ni internet (salvo para el video de YouTube).
 Todo se guarda en tu dispositivo.
 
+Este repositorio también contiene una segunda app, independiente de esta:
+**[Ingreso](examen/README.md)**, una plataforma de preguntas para pruebas de
+admisión a la universidad: 2 803 preguntas con explicación en diecisiete
+asignaturas —matemáticas, física, química, biología y salud, trigonometría,
+razonamiento abstracto, geografía, historia de Colombia, historia universal,
+política y ciudadanía, economía, ética y filosofía, vida cotidiana, lectura
+crítica, lengua y escritura, literatura e inglés—, más una pantalla de
+comunicación escrita, sesión diaria de 30 minutos, filtro por grado escolar (6.º a 11.º) y un sistema de puntos y medallas para sostener la rutina
+con cronómetro y rúbrica. Se abre en
+`http://localhost:8080/examen/`. Incluye un mapa de
+[qué evalúan las pruebas colombianas](examen/docs/pruebas-colombia.md)
+—Saber 11, admisión UNAL y Saber Pro— y qué de eso cubre el banco.
+
 ## Cómo abrirla
 
 ```bash
@@ -290,14 +303,17 @@ tests/                Pruebas: teoría musical, señal (acordes y afinación),
                       digitaciones y formato de hoja
 tools/gen-docs.mjs    Genera el documento de las 100 ideas
 tools/servidor.mjs    Servidor estático para desarrollo (sin dependencias)
+examen/               App aparte: banco de preguntas para la prueba de ingreso
+                      a la universidad (ver examen/README.md)
 ```
 
 ## Comandos
 
 ```bash
 npm start    # servidor local (Node, sin dependencias)
-npm test     # 64 pruebas: teoría, señal, digitaciones, formato de hoja,
-             # voz, estiramiento de tiempo, clic, QR, compartir e historial
+npm test     # 102 pruebas: teoría, señal, digitaciones, formato de hoja,
+             # voz, estiramiento de tiempo, clic, QR, compartir, historial,
+             # y el banco, el motor, la escritura y los gráficos de examen/
 npm run docs # regenera docs/100-ideas-alabanza.md desde src/ideas.js
 ```
 

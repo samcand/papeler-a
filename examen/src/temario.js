@@ -1,0 +1,1213 @@
+/**
+ * temario.js — Qué se pregunta en cada asignatura.
+ *
+ * Es el mapa del examen: diecisiete asignaturas, y dentro de cada una los temas que
+ * aparecen una y otra vez en las pruebas de ingreso, con lo que hay que saber
+ * hacer en cada uno. Todas las preguntas del banco apuntan a un `tema` de aquí
+ * (hay una prueba que lo verifica), así que el temario y el banco no se separan.
+ */
+
+export const ASIGNATURAS = [
+  {
+    id: 'matematicas',
+    nombre: 'Matemáticas',
+    icono: '∑',
+    resumen: 'Aritmética, álgebra, geometría, estadística y problemas de aplicación.',
+    temas: [
+      { id: 'aritmetica', grado: 6, nombre: 'Números y operaciones', claves: [
+        'Jerarquía de operaciones y signos de agrupación',
+        'Divisibilidad, mcd y mcm',
+        'Números enteros, orden y valor absoluto',
+      ] },
+      { id: 'fracciones', grado: 6, nombre: 'Fracciones, decimales y notación científica', claves: [
+        'Sumar, restar, multiplicar y dividir fracciones',
+        'Fracción de una fracción y partes que quedan',
+        'Mover la coma: potencias de 10 y notación científica',
+      ] },
+      { id: 'razones', grado: 7, nombre: 'Razones, proporciones y regla de tres', claves: [
+        'Repartir una cantidad en una razón dada',
+        'Proporción directa e inversa (obreros, velocidad, escalas)',
+        'Escalas de mapas y planos',
+      ] },
+      { id: 'porcentajes', grado: 7, nombre: 'Porcentajes, descuentos e interés', claves: [
+        'Porcentaje de una cantidad y cantidad a partir del porcentaje',
+        'Aumentos y descuentos sucesivos (no se suman)',
+        'Interés simple y compuesto',
+      ] },
+      { id: 'potencias', grado: 8, nombre: 'Potencias, raíces y radicales', claves: [
+        'Leyes de los exponentes, incluidos negativos y fraccionarios',
+        'Simplificar y racionalizar radicales',
+        'Operar con expresiones con letras',
+      ] },
+      { id: 'logaritmos', grado: 9, nombre: 'Logaritmos y exponenciales', claves: [
+        'Definición: log_b x = y equivale a b^y = x',
+        'Propiedades del producto, cociente y potencia',
+        'Ecuaciones exponenciales con bases iguales',
+      ] },
+      { id: 'algebra', grado: 8, nombre: 'Expresiones algebraicas y factorización', claves: [
+        'Productos notables',
+        'Factorizar trinomios y diferencia de cuadrados',
+        'Simplificar fracciones algebraicas',
+      ] },
+      { id: 'ecuaciones', grado: 8, nombre: 'Ecuaciones lineales y sistemas', claves: [
+        'Despejar con paréntesis y denominadores',
+        'Sistemas 2x2 por sustitución, igualación o reducción',
+        'Plantear la ecuación a partir del enunciado',
+      ] },
+      { id: 'cuadraticas', grado: 9, nombre: 'Ecuación cuadrática', claves: [
+        'Factorización y fórmula general',
+        'Discriminante: cuántas raíces reales hay',
+        'Suma y producto de raíces',
+      ] },
+      { id: 'desigualdades', grado: 9, nombre: 'Desigualdades, valor absoluto e intervalos', claves: [
+        'Al multiplicar por un negativo se voltea el signo',
+        'Desigualdades con valor absoluto',
+        'Escribir la solución como intervalo',
+      ] },
+      { id: 'funciones', grado: 9, nombre: 'Funciones y gráficas', claves: [
+        'Evaluar, dominio y rango',
+        'Composición de funciones y función inversa',
+        'Leer una gráfica: cortes, crecimiento y vértice',
+      ] },
+      { id: 'sucesiones', grado: 10, nombre: 'Sucesiones y progresiones', claves: [
+        'Progresión aritmética: término general y suma',
+        'Progresión geométrica: término general y suma',
+        'Descubrir el patrón de una sucesión',
+      ] },
+      { id: 'geometria-plana', grado: 7, nombre: 'Geometría plana', claves: [
+        'Ángulos entre paralelas y en polígonos',
+        'Perímetro y área de triángulos, cuadriláteros y círculos',
+        'Teorema de Pitágoras y semejanza',
+      ] },
+      { id: 'geometria-espacio', grado: 8, nombre: 'Cuerpos: área y volumen', claves: [
+        'Prisma, cilindro, cono, pirámide y esfera',
+        'Qué pasa con el volumen si cambian las medidas',
+        'Área total y área lateral',
+      ] },
+      { id: 'geometria-analitica', grado: 10, nombre: 'Geometría analítica', claves: [
+        'Distancia, punto medio y pendiente',
+        'Ecuación de la recta; paralelas y perpendiculares',
+        'Circunferencia: centro y radio',
+      ] },
+      { id: 'estadistica', grado: 8, nombre: 'Estadística descriptiva', claves: [
+        'Media, mediana, moda y rango',
+        'Media ponderada y efecto de agregar o quitar datos',
+        'Leer tablas y gráficos de barras o circulares',
+      ] },
+      { id: 'probabilidad', grado: 9, nombre: 'Conteo y probabilidad', claves: [
+        'Principio multiplicativo, permutaciones y combinaciones',
+        'Probabilidad simple, con y sin reemplazo',
+        'Eventos independientes y complementarios',
+      ] },
+      { id: 'problemas', grado: 7, nombre: 'Problemas de aplicación', claves: [
+        'Mezclas y aleaciones',
+        'Móviles: encuentro y alcance',
+        'Trabajo conjunto y problemas de edades',
+      ] },
+    ],
+  },
+
+  {
+    id: 'trigonometria',
+    nombre: 'Trigonometría',
+    icono: '△',
+    resumen: 'Del triángulo rectángulo a las identidades, ecuaciones y leyes de senos y cosenos.',
+    temas: [
+      { id: 'angulos', grado: 10, nombre: 'Ángulos, grados y radianes', claves: [
+        'Convertir grados a radianes y al revés',
+        'Ángulos coterminales y de referencia',
+        'Longitud de arco y área de sector',
+      ] },
+      { id: 'triangulo-rectangulo', grado: 10, nombre: 'Razones en el triángulo rectángulo', claves: [
+        'seno, coseno, tangente y sus recíprocas',
+        'Dada una razón, hallar las demás con Pitágoras',
+        'Resolver el triángulo rectángulo completo',
+      ] },
+      { id: 'notables', grado: 10, nombre: 'Ángulos notables', claves: [
+        'Valores exactos de 30°, 45°, 60°, 90°',
+        'Operar sin calculadora con esos valores',
+        'Los dos triángulos que hay que recordar',
+      ] },
+      { id: 'circunferencia', grado: 10, nombre: 'Circunferencia unitaria y cuadrantes', claves: [
+        'Signo de cada razón por cuadrante',
+        'Reducir un ángulo al primer cuadrante',
+        'Razones de ángulos mayores de 90° o negativos',
+      ] },
+      { id: 'identidades', grado: 10, nombre: 'Identidades fundamentales', claves: [
+        'sen²x + cos²x = 1 y sus derivadas',
+        'Pasar todo a senos y cosenos para simplificar',
+        'Demostrar o verificar una identidad',
+      ] },
+      { id: 'suma-angulos', grado: 11, nombre: 'Suma, resta y ángulo doble', claves: [
+        'sen(A±B), cos(A±B), tan(A±B)',
+        'Ángulo doble y ángulo mitad',
+        'Valores exactos de 15°, 75°, 105°',
+      ] },
+      { id: 'ecuaciones-trig', grado: 11, nombre: 'Ecuaciones trigonométricas', claves: [
+        'Todas las soluciones en un intervalo dado',
+        'Ecuaciones que se vuelven cuadráticas',
+        'Cuidado con las soluciones que se pierden al dividir',
+      ] },
+      { id: 'graficas-trig', grado: 11, nombre: 'Gráficas: amplitud, periodo y desfase', claves: [
+        'y = A sen(Bx + C) + D pieza por pieza',
+        'Periodo de seno, coseno y tangente',
+        'Rango y desplazamiento vertical',
+      ] },
+      { id: 'leyes', grado: 10, nombre: 'Ley de senos y ley de cosenos', claves: [
+        'Cuándo usar cada una según los datos',
+        'Área del triángulo con dos lados y el ángulo entre ellos',
+        'Caso ambiguo del lado-lado-ángulo',
+      ] },
+      { id: 'aplicaciones', grado: 10, nombre: 'Aplicaciones', claves: [
+        'Ángulos de elevación y depresión',
+        'Alturas, distancias y escaleras',
+        'Rumbos y navegación',
+      ] },
+    ],
+  },
+
+  {
+    id: 'abstracto',
+    nombre: 'Razonamiento abstracto',
+    icono: '◪',
+    resumen: 'Encontrar la regla: series de figuras, matrices, series numéricas, analogías y lógica.',
+    temas: [
+      { id: 'series-figuras', grado: 6, nombre: 'Series de figuras', claves: [
+        'Qué cambia y qué se mantiene de una figura a la siguiente',
+        'Cambios combinados: lados, relleno, giro y puntos',
+        'Descartar opciones por un solo atributo a la vez',
+      ] },
+      { id: 'matrices', grado: 6, nombre: 'Matrices y analogías figurales', claves: [
+        'Leer la matriz por filas y por columnas',
+        'Analogía "A es a B como C es a ?"',
+        'Sumar, restar o superponer elementos',
+      ] },
+      { id: 'diferente', grado: 6, nombre: 'El que no pertenece', claves: [
+        'Buscar el criterio que comparten tres de cuatro',
+        'Contar lados, ejes de simetría y elementos',
+        'No quedarse con el primer criterio que aparece',
+      ] },
+      { id: 'rotacion', grado: 6, nombre: 'Rotación y simetría', claves: [
+        'Distinguir giro de reflexión',
+        'Giros de 45°, 90° y 180°',
+        'Figuras que quedan igual al girarlas',
+      ] },
+      { id: 'plegado', grado: 7, nombre: 'Plegado, cubos y vistas', claves: [
+        'Caras opuestas en el desarrollo de un cubo',
+        'Perforaciones sobre papel doblado',
+        'Vistas desde arriba, de frente y de lado',
+      ] },
+      { id: 'series-numericas', grado: 6, nombre: 'Series numéricas', claves: [
+        'Diferencias sucesivas y segundas diferencias',
+        'Factores, cuadrados, cubos y factoriales',
+        'Series alternadas o con dos series entrelazadas',
+      ] },
+      { id: 'series-alfanumericas', grado: 6, nombre: 'Series de letras y alfanuméricas', claves: [
+        'Posición de cada letra en el alfabeto',
+        'Saltos crecientes y recorridos hacia atrás',
+        'Combinaciones de letra con número',
+      ] },
+      { id: 'logica', grado: 8, nombre: 'Lógica, silogismos y ordenamientos', claves: [
+        'Qué se concluye de verdad y qué no',
+        'Negar correctamente "todos", "algunos" y "ninguno"',
+        'Ordenar personas u objetos con pistas',
+        'Conjuntos: diagramas de Venn con tres grupos',
+      ] },
+      { id: 'analogias', grado: 6, nombre: 'Analogías y relaciones', claves: [
+        'Nombrar la relación antes de mirar las opciones',
+        'Parte-todo, causa-efecto, instrumento-función',
+        'Mantener el mismo orden de la relación',
+      ] },
+    ],
+  },
+
+  {
+    id: 'geografia',
+    nombre: 'Geografía',
+    icono: '🌎',
+    resumen: 'La Tierra y su representación, el medio físico, la población, la economía, la política y el ambiente.',
+    temas: [
+      { id: 'cartografia', grado: 6, nombre: 'La Tierra y su representación', claves: [
+        'Coordenadas: latitud, longitud y hemisferios',
+        'Escala: calcular distancias reales y saber qué mapa da más detalle',
+        'Proyecciones y sus deformaciones',
+        'Curvas de nivel, simbología y sistemas de información geográfica',
+      ] },
+      { id: 'tierra-universo', grado: 6, nombre: 'La Tierra en el sistema solar', claves: [
+        'Rotación y traslación: qué produce cada una',
+        'Inclinación del eje, solsticios, equinoccios y zonas térmicas',
+        'Husos horarios y cambio de fecha',
+      ] },
+      { id: 'geodinamica-interna', grado: 7, nombre: 'Tectónica, sismos y volcanes', claves: [
+        'Capas de la Tierra y movimiento de placas',
+        'Bordes convergentes, divergentes y de desplazamiento',
+        'Magnitud e intensidad; epicentro e hipocentro',
+        'Cinturón de Fuego y formación de los Andes',
+      ] },
+      { id: 'relieve', grado: 6, nombre: 'Relieve y modelado externo', claves: [
+        'Meteorización, erosión, transporte y sedimentación',
+        'Formas del relieve y el agente que las crea',
+        'Tipos de rocas y horizontes del suelo',
+        'Relación entre relieve, población y actividades económicas',
+      ] },
+      { id: 'hidrografia', grado: 6, nombre: 'Aguas continentales y oceánicas', claves: [
+        'Ciclo del agua y distribución del agua dulce',
+        'Cuenca hidrográfica, afluentes y desembocaduras',
+        'Corrientes marinas y su efecto en el clima',
+        'El Niño y La Niña; acuíferos y escasez de agua',
+      ] },
+      { id: 'clima', grado: 7, nombre: 'Tiempo, clima y atmósfera', claves: [
+        'Diferencia entre tiempo y clima',
+        'Elementos y factores del clima',
+        'Capas de la atmósfera, ozono y efecto invernadero',
+        'Tipos de clima, huracanes y sombra de lluvia',
+      ] },
+      { id: 'biogeografia', grado: 7, nombre: 'Regiones naturales y biodiversidad', claves: [
+        'Biomas del mundo y su relación con el clima',
+        'Selva, sabana, desierto, bosque templado, taiga y tundra',
+        'Pisos térmicos y páramos andinos',
+        'Países megadiversos',
+      ] },
+      { id: 'poblacion', grado: 8, nombre: 'Geografía de la población', claves: [
+        'Densidad, natalidad, mortalidad y crecimiento natural',
+        'Transición demográfica y lectura de pirámides de población',
+        'Migraciones: causas, saldo migratorio y éxodo rural',
+        'Urbanización y esperanza de vida',
+      ] },
+      { id: 'economica', grado: 8, nombre: 'Geografía económica', claves: [
+        'Sectores económicos y recursos renovables y no renovables',
+        'PIB per cápita, IDH y qué mide cada uno',
+        'Dependencia de materias primas y balanza comercial',
+        'Globalización y deslocalización industrial',
+      ] },
+      { id: 'politica', grado: 9, nombre: 'Geografía política y geopolítica', claves: [
+        'Elementos del Estado, fronteras y soberanía',
+        'Mar territorial y zona económica exclusiva',
+        'Organismos y bloques: ONU, Mercosur, CAN, UE',
+        'Pasos estratégicos y países sin litoral',
+      ] },
+      { id: 'ambiente', grado: 9, nombre: 'Medio ambiente, riesgos y sostenibilidad', claves: [
+        'Cambio climático: causas y consecuencias',
+        'Deforestación, lluvia ácida y huella ecológica',
+        'Riesgo = amenaza × vulnerabilidad',
+        'Desarrollo sostenible y acuerdos internacionales',
+      ] },
+      { id: 'america-latina', grado: 8, nombre: 'Geografía de América Latina', claves: [
+        'Grandes unidades de relieve: Andes, Amazonia, altiplanos, Patagonia',
+        'Principales cuencas: Amazonas, Plata, Orinoco',
+        'Distribución de la población y grandes ciudades',
+        'Rasgos físicos que explican climas extremos de la región',
+      ] },
+    ],
+  },
+  {
+    id: 'ciudadania',
+    nombre: 'Política y ciudadanía',
+    icono: '⚖️',
+    resumen: 'Cómo está organizado el Estado, qué dice la Constitución, qué derechos hay y cómo se ejercen.',
+    temas: [
+      { id: 'estado-poderes', grado: 9, nombre: 'El Estado y las ramas del poder', claves: [
+        'Funciones del ejecutivo, el legislativo y el judicial',
+        'Frenos y contrapesos: quién controla a quién',
+        'Estado y gobierno no son lo mismo',
+        'Centralización y descentralización',
+      ] },
+      { id: 'constitucion', grado: 9, nombre: 'Constitución y jerarquía de las normas', claves: [
+        'Supremacía constitucional y control de constitucionalidad',
+        'Constitución, ley, decreto y reglamento',
+        'Parte dogmática y parte orgánica',
+        'Garantías penales: presunción de inocencia, irretroactividad, cosa juzgada',
+      ] },
+      { id: 'derechos', grado: 9, nombre: 'Derechos humanos y su protección', claves: [
+        'Características: universales, inalienables e indivisibles',
+        'Generaciones de derechos',
+        'Mecanismos: tutela o amparo, habeas corpus, habeas data',
+        'Límites de los derechos y deberes correlativos',
+      ] },
+      { id: 'democracia', grado: 8, nombre: 'Democracia y participación', claves: [
+        'Democracia directa y representativa',
+        'Sufragio universal, libre y secreto',
+        'Referendo, plebiscito, revocatoria e iniciativa popular',
+        'Mayorías, minorías y abstención',
+      ] },
+      { id: 'sistemas-politicos', grado: 10, nombre: 'Formas de gobierno y sistemas políticos', claves: [
+        'República y monarquía; presidencialismo y parlamentarismo',
+        'Estado laico, Estado de bienestar',
+        'Rasgos del autoritarismo frente a la democracia',
+        'Alternancia y tiranía de la mayoría',
+      ] },
+      { id: 'partidos-elecciones', grado: 10, nombre: 'Partidos, elecciones y opinión pública', claves: [
+        'Sistemas mayoritarios y proporcionales; umbral electoral',
+        'Financiamiento de campañas y su regulación',
+        'Leer encuestas: muestra y margen de error',
+        'Voto en blanco, voto nulo y observación electoral',
+      ] },
+      { id: 'economia-politica', grado: 10, nombre: 'Estado, economía y políticas públicas', claves: [
+        'Para qué sirven los impuestos; progresivo y regresivo',
+        'Presupuesto público y déficit fiscal',
+        'Inflación y poder adquisitivo; cifras nominales y reales',
+        'Bienes públicos, subsidios y banco central',
+      ] },
+      { id: 'convivencia', grado: 6, nombre: 'Convivencia y resolución de conflictos', claves: [
+        'Conflicto no es lo mismo que violencia',
+        'Mediación, conciliación y arbitraje',
+        'Discriminación, estereotipo y prejuicio',
+        'Acoso escolar y papel de los espectadores',
+      ] },
+      { id: 'organismos', grado: 10, nombre: 'Organismos internacionales', claves: [
+        'ONU: Asamblea General, Consejo de Seguridad y veto',
+        'OMS, UNESCO, OEA y sistema interamericano',
+        'Corte Penal Internacional y derecho internacional humanitario',
+        'Tratados, ratificación y estatuto de refugiado',
+      ] },
+      { id: 'etica-publica', grado: 10, nombre: 'Ética pública y transparencia', claves: [
+        'Corrupción y conflicto de interés',
+        'Acceso a la información y rendición de cuentas',
+        'Contratación pública y veedurías ciudadanas',
+        'Clientelismo y protección al denunciante',
+      ] },
+    ],
+  },
+
+  {
+    id: 'salud',
+    nombre: 'Biología y salud',
+    icono: '🧬',
+    resumen: 'El componente biológico completo: célula, genética, ecología, evolución e indagación, más el cuidado del cuerpo.',
+    temas: [
+      { id: 'cuerpo-sistemas', grado: 6, nombre: 'Sistemas del cuerpo humano', claves: [
+        'Circulatorio, respiratorio y digestivo: qué hace cada uno',
+        'Riñones, hígado y páncreas',
+        'Sistema nervioso central y periférico',
+        'Componentes de la sangre y sus funciones',
+      ] },
+      { id: 'celula-genetica', grado: 9, nombre: 'Célula, herencia y genética', claves: [
+        'Organelos y sus funciones',
+        'Mitosis y meiosis; número de cromosomas',
+        'Genotipo, fenotipo y cuadro de Punnett',
+        'Mutaciones y variabilidad',
+      ] },
+      { id: 'nutricion', grado: 6, nombre: 'Nutrición y alimentación', claves: [
+        'Macronutrientes, micronutrientes y fibra',
+        'Índice de masa corporal y sus límites',
+        'Leer una etiqueta nutricional y sus trampas',
+        'Azúcares añadidos, anemia y doble carga de malnutrición',
+      ] },
+      { id: 'enfermedades-transmisibles', grado: 7, nombre: 'Enfermedades transmisibles', claves: [
+        'Virus y bacterias; por qué los antibióticos no sirven para todo',
+        'Resistencia antimicrobiana',
+        'Vías de transmisión: aérea, vectorial, fecal-oral, sexual',
+        'Periodo de incubación y portadores asintomáticos',
+      ] },
+      { id: 'enfermedades-cronicas', grado: 10, nombre: 'Enfermedades crónicas y factores de riesgo', claves: [
+        'Diabetes, hipertensión, cáncer y riesgo cardiovascular',
+        'Factores de riesgo modificables y no modificables',
+        'Interpretar una cifra de presión arterial',
+        'Tamizaje y adherencia al tratamiento',
+      ] },
+      { id: 'vacunas-salud-publica', grado: 7, nombre: 'Vacunas, prevención y salud pública', claves: [
+        'Cómo funciona una vacuna e inmunidad de rebaño',
+        'Endemia, epidemia y pandemia',
+        'Letalidad y mortalidad: no son lo mismo',
+        'Agua potable, saneamiento y vigilancia epidemiológica',
+      ] },
+      { id: 'salud-sexual', grado: 8, nombre: 'Salud sexual y reproductiva', claves: [
+        'Aparato reproductor, ciclo menstrual y fecundación',
+        'Infecciones de transmisión sexual; VIH y sida',
+        'Métodos anticonceptivos y doble protección',
+        'Consentimiento y embarazo adolescente',
+      ] },
+      { id: 'primeros-auxilios', grado: 6, nombre: 'Primeros auxilios y emergencias', claves: [
+        'Proteger, avisar, socorrer',
+        'Reanimación cardiopulmonar y atragantamiento',
+        'Hemorragias, quemaduras y fracturas',
+        'Qué NO hacer: mover, provocar el vómito, aplicar remedios caseros',
+      ] },
+      { id: 'salud-mental', grado: 9, nombre: 'Salud mental y adicciones', claves: [
+        'Estrés agudo y crónico; ansiedad y depresión',
+        'Sueño y rendimiento',
+        'Alcohol y otras sustancias: tolerancia y dependencia',
+        'Estigma, señales de alerta y a quién acudir',
+      ] },
+      { id: 'actividad-fisica', grado: 6, nombre: 'Actividad física y hábitos', claves: [
+        'Recomendaciones de actividad y riesgos del sedentarismo',
+        'Frecuencia cardiaca, calentamiento e hidratación',
+        'Efectos cardiovasculares y sobre el ánimo',
+        'Ergonomía frente a la pantalla y mitos frecuentes',
+      ] },
+      { id: 'ecologia', grado: 7, nombre: 'Ecología y ecosistemas', claves: [
+        'Factores bióticos y abióticos; niveles de organización',
+        'Cadenas tróficas y flujo de energía (la regla del 10 %)',
+        'Relaciones entre especies: mutualismo, parasitismo, competencia',
+        'Capacidad de carga y efectos en cascada',
+      ] },
+      { id: 'evolucion', grado: 9, nombre: 'Evolución', claves: [
+        'Selección natural: la variación existe antes que la necesidad',
+        'Darwin frente a Lamarck',
+        'Evidencias: fósiles, homologías y ADN',
+        'Especiación, deriva génica y resistencia a antibióticos',
+      ] },
+      { id: 'biodiversidad', grado: 6, nombre: 'Biodiversidad y clasificación', claves: [
+        'Niveles de biodiversidad y especies endémicas',
+        'Categorías taxonómicas y nombre científico',
+        'Procariotas y eucariotas; el caso de los virus',
+        'Fotosíntesis y servicios ecosistémicos',
+      ] },
+      { id: 'indagacion', grado: 6, nombre: 'Indagación y método científico', claves: [
+        'Preguntas investigables e hipótesis falsables',
+        'Variable independiente, dependiente y grupo control',
+        'Cambiar una sola variable a la vez; repetir el experimento',
+        'Leer una tabla de resultados sin extrapolar de más',
+      ] },
+    ],
+  },
+
+  {
+    id: 'cotidiana',
+    nombre: 'Vida cotidiana y cultura general',
+    icono: '🧭',
+    resumen: 'Usar lo que se sabe en situaciones reales: dinero, precios, trámites, dosis, estafas, noticias y seguridad.',
+    temas: [
+      { id: 'dinero', grado: 8, nombre: 'Dinero, presupuesto y deudas', claves: [
+        'Presupuesto: ingresos, gastos fijos y ahorro',
+        'Cuotas: cuánto suma el total frente al contado',
+        'Interés simple y compuesto; pago mínimo de la tarjeta',
+        'Riesgo y rentabilidad; cómo se reconoce una pirámide',
+      ] },
+      { id: 'compras-precios', grado: 7, nombre: 'Compras, precios y consumo', claves: [
+        'Comparar precio por unidad',
+        'Descuentos sucesivos y promociones tipo 3x2',
+        'Garantía legal, factura y derecho de retracto',
+        'Fecha de vencimiento y consumo preferente',
+      ] },
+      { id: 'documentos', grado: 10, nombre: 'Documentos, trámites y servicios', claves: [
+        'Leer un contrato, un recibo y un comprobante de nómina',
+        'Salario bruto y neto',
+        'Reclamos por escrito y plazos en días hábiles',
+        'Nunca firmar documentos en blanco',
+      ] },
+      { id: 'medidas', grado: 6, nombre: 'Medidas, dosis y conversiones', claves: [
+        'Unidades de masa, volumen y tiempo',
+        'Dosis por peso y duración de un tratamiento',
+        'Regla de tres en recetas, viajes y materiales',
+        'Proyectar un consumo con los datos que ya se tienen',
+      ] },
+      { id: 'tecnologia', grado: 7, nombre: 'Tecnología y seguridad digital', claves: [
+        'Contraseñas y verificación en dos pasos',
+        'Phishing, estafas por premio y códigos de un solo uso',
+        'Redes públicas, permisos de aplicaciones y respaldos',
+        'Huella digital y actualizaciones de seguridad',
+      ] },
+      { id: 'informacion', grado: 9, nombre: 'Evaluar información y noticias', claves: [
+        'Buscar la fuente original; titular frente a contenido',
+        'Correlación y causa; muestras no representativas',
+        'Gráficos con eje truncado y porcentajes sobre bases pequeñas',
+        'Sesgo de confirmación y fuentes primarias',
+      ] },
+      { id: 'seguridad', grado: 6, nombre: 'Seguridad vial y prevención', claves: [
+        'Cinturón, casco y distancia de frenado',
+        'Alcohol, celular y distracción al conducir',
+        'Señales de tránsito y conducta del peatón',
+        'Accidentes en casa, sismos y rutas de evacuación',
+      ] },
+      { id: 'ambiente-hogar', grado: 6, nombre: 'Consumo responsable en casa', claves: [
+        'Separar residuos y jerarquía de las tres erres',
+        'Residuos peligrosos: pilas y electrónicos',
+        'Calcular el consumo eléctrico en kWh',
+        'Agua, aceite usado y eficiencia energética',
+      ] },
+      { id: 'trabajo', grado: 11, nombre: 'Primer empleo y derechos laborales', claves: [
+        'Qué debe decir un contrato; periodo de prueba',
+        'Jornada, horas extra, vacaciones y aportes',
+        'Hoja de vida y entrevista',
+        'Informalidad, acoso laboral y ofertas fraudulentas',
+      ] },
+      { id: 'cultura-general', grado: 9, nombre: 'Cultura general', claves: [
+        'Hitos de la historia moderna y contemporánea',
+        'Ciencia y tecnología que cambiaron la sociedad',
+        'Literatura y arte de referencia',
+        'Independencias de América Latina',
+      ] },
+    ],
+  },
+  {
+    id: 'fisica',
+    nombre: 'Física',
+    icono: '⚛',
+    resumen: 'Del movimiento y las fuerzas a la energía, las ondas, el calor y la electricidad.',
+    temas: [
+      { id: 'magnitudes-medida', grado: 10, nombre: 'Magnitudes, unidades y vectores', claves: [
+        'Unidades del SI y conversiones (km/h a m/s)',
+        'Escalares y vectores; suma de vectores perpendiculares',
+        'Notación científica y densidad',
+        'Exactitud y precisión de una medida',
+      ] },
+      { id: 'cinematica', grado: 10, nombre: 'Cinemática', claves: [
+        'Movimiento uniforme y uniformemente acelerado',
+        'Caída libre',
+        'Leer gráficas de posición-tiempo y velocidad-tiempo',
+        'Distancia y desplazamiento no son lo mismo',
+      ] },
+      { id: 'dinamica', grado: 10, nombre: 'Fuerzas y leyes de Newton', claves: [
+        'Inercia, F = ma y acción-reacción',
+        'Masa y peso',
+        'Fuerza neta, normal y rozamiento',
+        'Explicar situaciones cotidianas con las tres leyes',
+      ] },
+      { id: 'trabajo-energia', grado: 10, nombre: 'Trabajo, energía y potencia', claves: [
+        'Trabajo y cuándo vale cero',
+        'Energía cinética y potencial; conservación',
+        'Potencia y rendimiento',
+        'La energía cinética depende del cuadrado de la velocidad',
+      ] },
+      { id: 'fluidos', grado: 11, nombre: 'Fluidos y presión', claves: [
+        'Presión, principio de Pascal y prensa hidráulica',
+        'Principio de Arquímedes y flotación',
+        'Presión hidrostática y atmosférica',
+        'Por qué el área cambia la presión',
+      ] },
+      { id: 'ondas', grado: 11, nombre: 'Ondas, sonido y luz', claves: [
+        'v = λf, periodo y frecuencia',
+        'Ondas mecánicas y electromagnéticas',
+        'Reflexión, refracción y efecto Doppler',
+        'Amplitud y frecuencia: volumen y tono',
+      ] },
+      { id: 'termodinamica', grado: 11, nombre: 'Calor y temperatura', claves: [
+        'Calor no es lo mismo que temperatura; escala Kelvin',
+        'Conducción, convección y radiación',
+        'Dilatación y cambios de estado',
+        'Calor específico y equilibrio térmico',
+      ] },
+      { id: 'electricidad', grado: 11, nombre: 'Electricidad y circuitos', claves: [
+        'Carga, corriente, voltaje y resistencia',
+        'Ley de Ohm y potencia eléctrica',
+        'Circuitos en serie y en paralelo',
+        'Consumo en kWh y elementos de protección',
+      ] },
+      { id: 'magnetismo', grado: 11, nombre: 'Magnetismo y electromagnetismo', claves: [
+        'Polos magnéticos y campo terrestre',
+        'Oersted: la corriente genera campo magnético',
+        'Inducción, generadores y motores',
+        'Electroimanes y transformadores',
+      ] },
+      { id: 'gravitacion', grado: 10, nombre: 'Gravitación', claves: [
+        'Ley de gravitación universal e inverso del cuadrado',
+        'Masa y peso en otros astros',
+        'Satélites, órbitas e ingravidez aparente',
+        'Caída libre independiente de la masa',
+      ] },
+    ],
+  },
+
+  {
+    id: 'quimica',
+    nombre: 'Química',
+    icono: '⚗',
+    resumen: 'De la estructura del átomo a las reacciones, las soluciones, el pH y la química del carbono.',
+    temas: [
+      { id: 'materia', grado: 10, nombre: 'La materia y sus cambios', claves: [
+        'Sustancias puras y mezclas; homogéneas y heterogéneas',
+        'Métodos de separación: filtración, destilación, decantación',
+        'Cambios físicos y químicos',
+        'Conservación de la masa; propiedades intensivas y extensivas',
+      ] },
+      { id: 'atomo', grado: 10, nombre: 'Estructura atómica', claves: [
+        'Protones, neutrones y electrones',
+        'Número atómico y número másico; isótopos',
+        'Iones: cationes y aniones',
+        'Modelos atómicos y el experimento de Rutherford',
+      ] },
+      { id: 'tabla-periodica', grado: 10, nombre: 'Tabla periódica', claves: [
+        'Grupos y periodos: qué comparte cada uno',
+        'Familias: alcalinos, halógenos y gases nobles',
+        'Tendencias: electronegatividad y radio atómico',
+        'Metales, no metales y metaloides; símbolos frecuentes',
+      ] },
+      { id: 'enlace', grado: 10, nombre: 'Enlace químico', claves: [
+        'Iónico, covalente y metálico',
+        'Regla del octeto y electrones de valencia',
+        'Polaridad: por qué el agua disuelve lo que disuelve',
+        'Puentes de hidrógeno',
+      ] },
+      { id: 'nomenclatura', grado: 10, nombre: 'Fórmulas y nomenclatura', claves: [
+        'Leer una fórmula: subíndices y coeficientes',
+        'Óxidos, ácidos, hidróxidos y sales',
+        'Compuestos de uso frecuente y sus nombres',
+        'Contar átomos en una fórmula',
+      ] },
+      { id: 'reacciones', grado: 10, nombre: 'Reacciones químicas', claves: [
+        'Reactivos y productos; balanceo',
+        'Tipos: síntesis, descomposición, sustitución, combustión',
+        'Exotérmicas y endotérmicas; catalizadores',
+        'Oxidación y reducción; evidencias de reacción',
+      ] },
+      { id: 'estequiometria', grado: 11, nombre: 'El mol y la estequiometría', claves: [
+        'Número de Avogadro y masa molar',
+        'Pasar de gramos a moles y al revés',
+        'Relaciones molares en una ecuación balanceada',
+        'Reactivo límite y rendimiento',
+      ] },
+      { id: 'soluciones', grado: 11, nombre: 'Soluciones y concentración', claves: [
+        'Soluto y solvente; molaridad y porcentaje',
+        'Dilución y solución saturada',
+        'Solubilidad: sólidos y gases responden al revés',
+        'Coloides y efecto Tyndall',
+      ] },
+      { id: 'acidos-bases', grado: 11, nombre: 'Ácidos, bases y pH', claves: [
+        'Escala de pH y su carácter logarítmico',
+        'Ácidos y bases según Arrhenius',
+        'Neutralización e indicadores',
+        'Casos cotidianos: jugo gástrico, bicarbonato, lluvia ácida',
+      ] },
+      { id: 'organica', grado: 11, nombre: 'Química orgánica', claves: [
+        'El carbono y su tetravalencia',
+        'Hidrocarburos: alcanos, alquenos y alquinos',
+        'Grupos funcionales y alcoholes',
+        'Biomoléculas, polímeros e isómeros',
+      ] },
+    ],
+  },
+  {
+    id: 'historia',
+    nombre: 'Historia de Colombia',
+    icono: '🏛',
+    resumen: 'De los pueblos originarios al acuerdo de paz: causas, consecuencias y continuidades, no listas de fechas.',
+    temas: [
+      { id: 'prehispanica', grado: 6, nombre: 'Pueblos originarios', claves: [
+        'Muiscas, taironas, quimbayas y zenúes: dónde y cómo vivían',
+        'Orfebrería, ingeniería hidráulica y estatuaria (San Agustín, Tierradentro)',
+        'Cacicazgos y confederaciones, no un Estado unificado',
+        'La familia lingüística chibcha y el origen de El Dorado',
+      ] },
+      { id: 'conquista', grado: 7, nombre: 'Conquista', claves: [
+        'Fundaciones: Santa Marta, Cartagena, Santafé y quién las fundó',
+        'La caída demográfica indígena y sus causas',
+        'Encomienda, Leyes Nuevas y la denuncia de Las Casas',
+        'Llegada forzada de africanos esclavizados y resistencia indígena',
+      ] },
+      { id: 'colonia', grado: 7, nombre: 'La Colonia', claves: [
+        'Nuevo Reino de Granada y Virreinato de la Nueva Granada',
+        'Sociedad de castas y exclusión política de los criollos',
+        'Economía: oro, haciendas y estancos; palenques',
+        'Expedición Botánica y reformas borbónicas',
+      ] },
+      { id: 'independencia', grado: 8, nombre: 'Independencia', claves: [
+        'Comuneros (1781) y 20 de julio de 1810',
+        'Patria Boba, Reconquista y Campaña Libertadora',
+        'Batalla de Boyacá, Angostura y la Gran Colombia',
+        'Qué cambió y qué no cambió con la independencia',
+      ] },
+      { id: 'siglo-xix', grado: 8, nombre: 'La república del siglo XIX', claves: [
+        'Los nombres del país y sus constituciones',
+        'Federalismo y centralismo; Rionegro 1863 y la Regeneración de 1886',
+        'Abolición de la esclavitud (1851) y nacimiento de los partidos',
+        'Del tabaco y la quina al café; guerras civiles',
+      ] },
+      { id: 'siglo-xx-inicio', grado: 9, nombre: 'Inicios del siglo XX (1900-1930)', claves: [
+        'Guerra de los Mil Días y separación de Panamá',
+        'Hegemonía Conservadora y danza de los millones',
+        'Masacre de las bananeras y movimiento obrero',
+        'Misión Kemmerer, Banco de la República y crisis de 1929',
+      ] },
+      { id: 'republica-violencia', grado: 9, nombre: 'República Liberal y La Violencia', claves: [
+        'Revolución en Marcha y reforma constitucional de 1936',
+        'Voto femenino (1954) y plebiscito de 1957',
+        '9 de abril de 1948: Gaitán y el Bogotazo',
+        'La Violencia bipartidista, Rojas Pinilla y el éxodo rural',
+      ] },
+      { id: 'frente-nacional', grado: 9, nombre: 'Frente Nacional', claves: [
+        'Alternancia y paridad: qué resolvió y qué cerró',
+        'Surgimiento de las guerrillas (FARC, ELN, EPL, M-19)',
+        'Reforma agraria del INCORA y paro cívico de 1977',
+        'Bonanza marimbera y modernización urbana',
+      ] },
+      { id: 'conflicto-constitucion', grado: 10, nombre: 'Conflicto, narcotráfico y Constitución de 1991', claves: [
+        'Carteles, Palacio de Justicia y magnicidios de 1989-1990',
+        'Paramilitarismo y desplazamiento forzado',
+        'Séptima Papeleta y Asamblea Constituyente',
+        'Novedades de la Constitución de 1991 y descentralización',
+      ] },
+      { id: 'colombia-reciente', grado: 10, nombre: 'Colombia reciente', claves: [
+        'Acuerdo de paz de 2016 y plebiscito',
+        'JEP, Comisión de la Verdad y Ley de Víctimas',
+        'Desmovilización de las AUC y migración venezolana',
+        'Memoria histórica y cómo leer fuentes sobre hechos en disputa',
+      ] },
+    ],
+  },
+  {
+    id: 'lectura',
+    nombre: 'Lectura crítica',
+    icono: '📖',
+    resumen: 'Leer textos, gráficas e imágenes y responder: idea principal, inferencias, intención, argumentos y datos.',
+    temas: [
+      { id: 'idea-principal', grado: 6, nombre: 'Idea principal y tema', claves: [
+        'Distinguir el tema (de qué habla) de la idea principal (qué dice)',
+        'Descartar opciones demasiado amplias o demasiado estrechas',
+        'Un título que cubra todo el texto, no solo un párrafo',
+      ] },
+      { id: 'detalles', grado: 6, nombre: 'Detalles explícitos', claves: [
+        'Volver al texto y señalar la línea exacta',
+        'Cuidado con las opciones que cambian una palabra',
+        'Datos, fechas y cifras',
+      ] },
+      { id: 'inferencias', grado: 8, nombre: 'Inferencias y conclusiones', claves: [
+        'Lo que se deduce sin estar escrito',
+        'No traer información de fuera del texto',
+        'Distinguir inferencia de suposición',
+      ] },
+      { id: 'vocabulario-contexto', grado: 7, nombre: 'Vocabulario en contexto', claves: [
+        'Sustituir la palabra y verificar que el sentido no cambie',
+        'Palabras con varios significados',
+        'Pistas de la oración anterior y la siguiente',
+      ] },
+      { id: 'proposito-tono', grado: 9, nombre: 'Propósito, intención y tono', claves: [
+        'Informar, persuadir, narrar o criticar',
+        'Tono: irónico, crítico, admirativo, neutral',
+        'A quién le habla el autor',
+      ] },
+      { id: 'estructura', grado: 9, nombre: 'Estructura y organización', claves: [
+        'Función de un párrafo dentro del texto',
+        'Conectores y relaciones entre ideas',
+        'Ejemplo, contraste, causa y consecuencia',
+      ] },
+      { id: 'argumentacion', grado: 10, nombre: 'Argumentación', claves: [
+        'Separar tesis, argumento y ejemplo',
+        'Qué dato debilita o refuerza una postura',
+        'Falacias frecuentes y generalizaciones',
+      ] },
+      { id: 'datos-texto', grado: 8, nombre: 'Datos dentro del texto', claves: [
+        'Interpretar cifras, porcentajes y comparaciones',
+        'Qué se puede afirmar con los datos dados',
+        'Diferencia entre correlación y causa',
+      ] },
+      { id: 'discontinuos', grado: 9, nombre: 'Textos discontinuos: gráficas y tablas', claves: [
+        'Leer barras, líneas, circulares y pictogramas',
+        'Calcular diferencias, sumas de sectores y proporciones',
+        'Qué NO se puede concluir de un gráfico',
+        'El eje truncado y otros efectos que engañan a la vista',
+      ] },
+      { id: 'imagen', grado: 10, nombre: 'Análisis de la imagen', claves: [
+        'Denotación y connotación: describir antes de interpretar',
+        'Leer planos, mapas con leyenda, escala y orientación',
+        'Ángulo, encuadre e intención en fotografía y publicidad',
+        'Caricatura: contexto, símbolos y exageración',
+      ] },
+    ],
+  },
+
+  {
+    id: 'ingles',
+    nombre: 'Inglés',
+    icono: 'EN',
+    resumen: 'Gramática, vocabulario y lectura al nivel A2–B2 que piden las pruebas de admisión.',
+    temas: [
+      { id: 'tiempos-verbales', grado: 7, nombre: 'Verb tenses', claves: [
+        'Present simple vs. present continuous',
+        'Past simple vs. present perfect (for, since, ago, yet)',
+        'Future: will, going to, present continuous',
+      ] },
+      { id: 'condicionales', grado: 10, nombre: 'Conditionals', claves: [
+        'Zero, first, second and third conditional',
+        'If / unless / as long as',
+        'Wish y would rather',
+      ] },
+      { id: 'modales', grado: 9, nombre: 'Modal verbs', claves: [
+        'Obligación, prohibición y ausencia de obligación',
+        "Deducción: must be / can't be / might be",
+        'Modales en pasado: should have, could have',
+      ] },
+      { id: 'voz-pasiva', grado: 10, nombre: 'Passive voice', claves: [
+        'Pasar de activa a pasiva en cada tiempo',
+        'Pasiva con by y sin agente',
+        'Verbos con dos objetos',
+      ] },
+      { id: 'reported-speech', grado: 11, nombre: 'Reported speech', claves: [
+        'Un paso atrás en el tiempo verbal',
+        'Cambios de pronombres, tiempo y lugar',
+        'Preguntas y órdenes reportadas',
+      ] },
+      { id: 'relativas', grado: 10, nombre: 'Relative clauses', claves: [
+        'who, which, that, whose, where',
+        'Defining vs. non-defining',
+        'Cuándo se puede omitir el relativo',
+      ] },
+      { id: 'preposiciones', grado: 7, nombre: 'Prepositions', claves: [
+        'in / on / at de tiempo y de lugar',
+        'Verbos con preposición fija',
+        'Adjetivos con preposición (interested in, afraid of)',
+      ] },
+      { id: 'cuantificadores', grado: 8, nombre: 'Articles and quantifiers', claves: [
+        'a / an / the / sin artículo',
+        'much, many, a few, a little, plenty of',
+        'Contables e incontables',
+      ] },
+      { id: 'conectores', grado: 10, nombre: 'Linking words', claves: [
+        'although, however, despite, in spite of',
+        'so, such, therefore, because of',
+        'Orden de la oración con cada conector',
+      ] },
+      { id: 'phrasal-verbs', grado: 10, nombre: 'Phrasal verbs', claves: [
+        'Los más frecuentes en examen',
+        'Significado que cambia con la partícula',
+        'Separables y no separables',
+      ] },
+      { id: 'vocabulario', grado: 6, nombre: 'Vocabulary and word formation', claves: [
+        'Prefijos y sufijos para formar palabras',
+        'Collocations frecuentes',
+        'Falsos amigos con el español',
+      ] },
+      { id: 'reading', grado: 9, nombre: 'Reading comprehension', claves: [
+        'Idea general y detalle específico',
+        'Inferir el significado de una palabra por contexto',
+        'Verdadero, falso o no se dice',
+      ] },
+    ],
+  },
+  {
+    id: 'lengua',
+    nombre: 'Lengua y escritura',
+    icono: 'Ñ',
+    resumen: 'Ortografía, gramática, sintaxis y redacción: el idioma como objeto de estudio.',
+    temas: [
+      { id: 'acentuacion', grado: 6, nombre: 'Acentuación y tilde', claves: [
+        'Agudas, graves, esdrújulas y sobresdrújulas',
+        'Diptongo, hiato y tilde en la vocal débil',
+        'Tilde diacrítica: tú/tu, él/el, sí/si, más/mas, qué/que',
+      ] },
+      { id: 'ortografia', grado: 6, nombre: 'Ortografía de letras', claves: [
+        'Uso de b y v, g y j, h, ll y y',
+        'Palabras homófonas: haber/a ver, hay/ahí/ay, echo/hecho',
+        'Mayúsculas y escritura de números',
+      ] },
+      { id: 'puntuacion', grado: 7, nombre: 'Puntuación', claves: [
+        'La coma que cambia el sentido y la coma que sobra',
+        'Punto y coma, dos puntos y paréntesis',
+        'Comillas, raya de diálogo y puntos suspensivos',
+      ] },
+      { id: 'gramatica', grado: 7, nombre: 'Categorías gramaticales', claves: [
+        'Sustantivo, adjetivo, verbo, adverbio y determinante',
+        'Pronombres y su función',
+        'Preposiciones y conjunciones',
+      ] },
+      { id: 'verbos', grado: 8, nombre: 'El verbo: tiempo y modo', claves: [
+        'Indicativo, subjuntivo e imperativo',
+        'Tiempos compuestos y participios irregulares',
+        'Perífrasis verbales y gerundio mal usado',
+      ] },
+      { id: 'sintaxis', grado: 9, nombre: 'Sintaxis de la oración', claves: [
+        'Sujeto, predicado y núcleos',
+        'Complemento directo, indirecto y circunstancial',
+        'Oración simple, compuesta y subordinada',
+      ] },
+      { id: 'concordancia', grado: 8, nombre: 'Concordancia y régimen', claves: [
+        'Concordancia de género y número',
+        'Sujetos colectivos y verbos en singular o plural',
+        'Régimen preposicional: de qué se acompaña cada verbo',
+      ] },
+      { id: 'errores', grado: 9, nombre: 'Errores frecuentes del español', claves: [
+        'Dequeísmo y queísmo',
+        'Laísmo, leísmo y loísmo',
+        'Anacoluto, pleonasmo y muletillas',
+      ] },
+      { id: 'cohesion', grado: 10, nombre: 'Conectores y cohesión', claves: [
+        'Conectores de causa, consecuencia, contraste y adición',
+        'Referencia: pronombres y sinónimos que evitan repetir',
+        'El conector que contradice lo que dice la frase',
+      ] },
+      { id: 'lexico', grado: 8, nombre: 'Léxico y precisión', claves: [
+        'Sinónimos, antónimos y matices',
+        'Palabras que se confunden: infligir/infringir, adolecer, álgido',
+        'Prefijos, sufijos y familias de palabras',
+      ] },
+      { id: 'redaccion', grado: 10, nombre: 'Redacción del párrafo', claves: [
+        'Idea principal y oraciones de apoyo',
+        'Orden de las ideas y transiciones',
+        'Frases largas: cuándo partirlas',
+      ] },
+      { id: 'citacion', grado: 11, nombre: 'Citación y uso de fuentes', claves: [
+        'Cita textual, paráfrasis y referencia',
+        'Qué es plagio y cómo se evita',
+        'Elementos de una referencia bibliográfica',
+      ] },
+    ],
+  },
+  {
+    id: 'literatura',
+    nombre: 'Literatura',
+    icono: '📖',
+    resumen: 'Géneros, recursos, movimientos y las obras que las pruebas dan por sabidas.',
+    temas: [
+      { id: 'generos', grado: 6, nombre: 'Géneros literarios', claves: [
+        'Narrativo, lírico y dramático',
+        'Subgéneros: novela, cuento, fábula, soneto, tragedia',
+        'Rasgos que distinguen a cada uno',
+      ] },
+      { id: 'figuras', grado: 7, nombre: 'Figuras literarias', claves: [
+        'Metáfora, símil, personificación e hipérbole',
+        'Anáfora, aliteración y paralelismo',
+        'Ironía, paradoja, oxímoron y metonimia',
+      ] },
+      { id: 'verso', grado: 8, nombre: 'Verso, métrica y rima', claves: [
+        'Contar sílabas métricas: sinalefa y ley del acento final',
+        'Rima consonante y asonante',
+        'Estrofas: soneto, romance, copla',
+      ] },
+      { id: 'narrador', grado: 8, nombre: 'Narrador y punto de vista', claves: [
+        'Primera persona, tercera omnisciente y observador',
+        'Narrador poco fiable',
+        'Tiempo del relato: analepsis y prolepsis',
+      ] },
+      { id: 'universal', grado: 9, nombre: 'Literatura universal', claves: [
+        'Épica antigua y teatro griego',
+        'Del Renacimiento al Romanticismo',
+        'Realismo, vanguardias y siglo XX',
+      ] },
+      { id: 'espanola', grado: 10, nombre: 'Literatura española', claves: [
+        'Siglo de Oro: Cervantes, Quevedo, Góngora, Lope',
+        'Generación del 98 y del 27',
+        'El Quijote y su lugar en la novela moderna',
+      ] },
+      { id: 'latinoamericana', grado: 11, nombre: 'Literatura latinoamericana', claves: [
+        'Modernismo y Rubén Darío',
+        'El boom: Cortázar, Rulfo, Vargas Llosa, Borges',
+        'Poesía: Neruda, Vallejo, Mistral',
+      ] },
+      { id: 'colombiana', grado: 11, nombre: 'Literatura colombiana', claves: [
+        'Del costumbrismo a "María" de Jorge Isaacs',
+        'García Márquez y el realismo mágico',
+        'Voces contemporáneas y literatura del conflicto',
+      ] },
+      { id: 'analisis', grado: 10, nombre: 'Análisis del texto literario', claves: [
+        'Tema, motivo y símbolo',
+        'Personajes: caracterización y conflicto',
+        'Relación entre forma y sentido',
+      ] },
+      { id: 'contexto', grado: 11, nombre: 'Literatura y contexto', claves: [
+        'Obra, época y condiciones de producción',
+        'Intertextualidad: obras que dialogan con otras',
+        'Canon, censura y recepción',
+      ] },
+    ],
+  },
+  {
+    id: 'filosofia',
+    nombre: 'Ética y filosofía',
+    icono: '⚖',
+    resumen: 'Cómo se argumenta una decisión moral y qué han respondido los filósofos.',
+    temas: [
+      { id: 'que-es-etica', grado: 9, nombre: 'Ética, moral y valores', claves: [
+        'Diferencia entre ética, moral, derecho y costumbre',
+        'Valores, normas y principios',
+        'Relativismo y universalismo moral',
+      ] },
+      { id: 'corrientes', grado: 11, nombre: 'Corrientes éticas', claves: [
+        'Utilitarismo: las consecuencias',
+        'Deontología kantiana: el deber y el imperativo categórico',
+        'Ética de la virtud y ética del cuidado',
+      ] },
+      { id: 'dilemas', grado: 10, nombre: 'Dilemas morales', claves: [
+        'Qué hace que un caso sea un dilema y no una duda',
+        'Conflictos entre deberes',
+        'Cómo se justifica una decisión difícil',
+      ] },
+      { id: 'bioetica', grado: 11, nombre: 'Bioética', claves: [
+        'Autonomía, beneficencia, no maleficencia y justicia',
+        'Consentimiento informado y confidencialidad',
+        'Debates: final de la vida, reproducción, edición genética',
+      ] },
+      { id: 'etica-ambiental', grado: 9, nombre: 'Ética ambiental y animal', claves: [
+        'Antropocentrismo y biocentrismo',
+        'Deberes con las generaciones futuras',
+        'Trato a los animales y consumo',
+      ] },
+      { id: 'etica-digital', grado: 9, nombre: 'Ética digital y tecnológica', claves: [
+        'Privacidad, datos y vigilancia',
+        'Responsabilidad de los algoritmos y la IA',
+        'Plagio, autoría y honestidad académica',
+      ] },
+      { id: 'antigua', grado: 10, nombre: 'Filosofía antigua', claves: [
+        'Presocráticos y el paso del mito al logos',
+        'Sócrates, Platón y el mundo de las ideas',
+        'Aristóteles: lógica, virtud y felicidad',
+      ] },
+      { id: 'moderna', grado: 11, nombre: 'Filosofía moderna', claves: [
+        'Racionalismo y empirismo: Descartes, Hume',
+        'Kant y los límites del conocimiento',
+        'Contrato social: Hobbes, Locke, Rousseau',
+      ] },
+      { id: 'contemporanea', grado: 11, nombre: 'Filosofía contemporánea', claves: [
+        'Marx, Nietzsche y Freud: la sospecha',
+        'Existencialismo y sentido de la vida',
+        'Justicia y desigualdad: Rawls y sus críticos',
+      ] },
+      { id: 'logica', grado: 10, nombre: 'Lógica y argumentación filosófica', claves: [
+        'Validez y verdad no son lo mismo',
+        'Falacias formales e informales',
+        'Cómo se reconstruye y se evalúa un argumento',
+      ] },
+    ],
+  },
+  {
+    id: 'universal',
+    nombre: 'Historia universal',
+    icono: '🌍',
+    resumen: 'De las primeras civilizaciones al mundo actual, por causas y no por fechas.',
+    temas: [
+      { id: 'antiguas', grado: 6, nombre: 'Civilizaciones antiguas', claves: [
+        'Revolución neolítica y primeras ciudades',
+        'Mesopotamia, Egipto, India y China',
+        'Escritura, leyes y organización del Estado',
+      ] },
+      { id: 'clasica', grado: 6, nombre: 'Grecia y Roma', claves: [
+        'Polis, democracia ateniense y ciudadanía',
+        'República e Imperio romano',
+        'Herencia clásica: derecho, lengua y pensamiento',
+      ] },
+      { id: 'medieval', grado: 7, nombre: 'Edad Media', claves: [
+        'Feudalismo y sociedad estamental',
+        'Islam, Bizancio y las cruzadas',
+        'Peste negra y crisis del siglo XIV',
+      ] },
+      { id: 'moderna', grado: 7, nombre: 'Renacimiento y expansión europea', claves: [
+        'Humanismo, imprenta y revolución científica',
+        'Reforma protestante y guerras de religión',
+        'Colonialismo y economía atlántica',
+      ] },
+      { id: 'revoluciones', grado: 8, nombre: 'Revoluciones burguesas', claves: [
+        'Ilustración y sus ideas políticas',
+        'Independencia de Estados Unidos y Revolución francesa',
+        'Napoleón y el mapa europeo',
+      ] },
+      { id: 'industrial', grado: 8, nombre: 'Revolución industrial', claves: [
+        'Máquina de vapor, fábrica y ciudad',
+        'Clase obrera, sindicatos y socialismo',
+        'Segunda revolución industrial',
+      ] },
+      { id: 'imperialismo', grado: 9, nombre: 'Imperialismo y siglo XIX', claves: [
+        'Reparto de África y Asia',
+        'Nacionalismos y unificaciones',
+        'Causas profundas de la Gran Guerra',
+      ] },
+      { id: 'guerras', grado: 9, nombre: 'Las guerras mundiales', claves: [
+        'Primera Guerra Mundial y tratado de Versalles',
+        'Crisis de 1929, fascismo y nazismo',
+        'Segunda Guerra Mundial y el Holocausto',
+      ] },
+      { id: 'guerra-fria', grado: 9, nombre: 'Guerra Fría y descolonización', claves: [
+        'Bloques, carrera armamentista y espacial',
+        'Independencias de África y Asia',
+        'Caída del muro y fin de la URSS',
+      ] },
+      { id: 'actual', grado: 10, nombre: 'Mundo contemporáneo', claves: [
+        'Globalización y organismos multilaterales',
+        'Migraciones, terrorismo y crisis financieras',
+        'Cambio climático como problema histórico',
+      ] },
+    ],
+  },
+  {
+    id: 'economia',
+    nombre: 'Economía',
+    icono: '📈',
+    resumen: 'Cómo se decide con recursos escasos y cómo se leen los indicadores.',
+    temas: [
+      { id: 'escasez', grado: 9, nombre: 'Escasez y decisiones', claves: [
+        'Necesidades, bienes y recursos',
+        'Costo de oportunidad',
+        'Frontera de posibilidades de producción',
+      ] },
+      { id: 'oferta-demanda', grado: 10, nombre: 'Oferta, demanda y precios', claves: [
+        'Ley de la oferta y de la demanda',
+        'Equilibrio, escasez y excedente',
+        'Qué desplaza una curva y qué la recorre',
+      ] },
+      { id: 'mercados', grado: 10, nombre: 'Mercados y competencia', claves: [
+        'Competencia perfecta, monopolio y oligopolio',
+        'Fallas de mercado y externalidades',
+        'Papel del Estado: regulación y bienes públicos',
+      ] },
+      { id: 'indicadores', grado: 10, nombre: 'Indicadores macroeconómicos', claves: [
+        'PIB, PIB per cápita y sus límites',
+        'Inflación, IPC y poder adquisitivo',
+        'Desempleo, informalidad y población económicamente activa',
+      ] },
+      { id: 'dinero', grado: 10, nombre: 'Dinero, banca y política monetaria', claves: [
+        'Funciones del dinero y del sistema financiero',
+        'Tasa de interés y banco central',
+        'Crédito, ahorro e inversión',
+      ] },
+      { id: 'internacional', grado: 11, nombre: 'Comercio internacional', claves: [
+        'Ventaja comparativa y especialización',
+        'Aranceles, tratados y balanza comercial',
+        'Tasa de cambio, devaluación y revaluación',
+      ] },
+      { id: 'desigualdad', grado: 11, nombre: 'Desigualdad, pobreza y desarrollo', claves: [
+        'Medición de la pobreza y coeficiente de Gini',
+        'Desarrollo humano frente a crecimiento',
+        'Política social y redistribución',
+      ] },
+      { id: 'colombiana', grado: 11, nombre: 'Economía colombiana', claves: [
+        'Estructura productiva y dependencia de materias primas',
+        'Informalidad laboral y sistema pensional',
+        'Historia económica reciente y apertura',
+      ] },
+    ],
+  },
+];
+
+export const MAPA_ASIGNATURAS = Object.fromEntries(ASIGNATURAS.map((a) => [a.id, a]));
+
+export function asignatura(id) {
+  return MAPA_ASIGNATURAS[id] || null;
+}
+
+export function tema(asignaturaId, temaId) {
+  return asignatura(asignaturaId)?.temas.find((t) => t.id === temaId) || null;
+}
+
+export function nombreTema(asignaturaId, temaId) {
+  return tema(asignaturaId, temaId)?.nombre || temaId;
+}
+
+export function nombreAsignatura(id) {
+  return asignatura(id)?.nombre || id;
+}
+
+/** Todos los temas en una sola lista, útil para validar el banco. */
+export function todosLosTemas() {
+  return ASIGNATURAS.flatMap((a) => a.temas.map((t) => ({ asignatura: a.id, ...t })));
+}
+
+/**
+ * Grados del bachillerato colombiano. Cada tema lleva el grado en que se ve
+ * normalmente; dentro de un mismo tema la exigencia la marca el nivel, no el
+ * grado. Lo anterior a sexto se marca como 6: el examen lo da por sabido.
+ */
+export const GRADOS = [6, 7, 8, 9, 10, 11];
+
+export const NOMBRE_GRADO = Object.fromEntries(GRADOS.map((g) => [g, g + '.º']));
+
+/** El grado de una pregunta es el de su tema. */
+export function gradoDeTema(asignaturaId, temaId) {
+  return tema(asignaturaId, temaId)?.grado || null;
+}
+
+export const NIVELES = {
+  1: 'Básico',
+  2: 'Intermedio',
+  3: 'Avanzado',
+  4: 'Experto',
+};
+
+/**
+ * Qué significa cada nivel. Está escrito para que la clasificación sea
+ * comparable entre asignaturas: lo que sube no es la rareza del dato, es la
+ * cantidad de razonamiento que hay que poner.
+ */
+export const DESCRIPCION_NIVELES = {
+  1: 'Aplicar una definición o una fórmula de forma directa, en un solo paso.',
+  2: 'Dos pasos, o elegir el procedimiento correcto entre varios posibles.',
+  3: 'Combinar dos conceptos, interpretar un caso concreto o evitar una trampa frecuente.',
+  4: 'Varios pasos encadenados, un caso límite, o distinguir entre dos ideas que casi todo el mundo confunde.',
+};

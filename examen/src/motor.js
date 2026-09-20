@@ -1,0 +1,275 @@
+/**
+ * motor.js — La lógica del estudio, sin DOM.
+ *
+ * Aquí viven cuatro decisiones:
+ *   1. Barajar las opciones, para que la posición nunca sea una pista.
+ *   2. Elegir qué preguntas tocan: primero lo que toca repasar, después lo que
+ *      nunca se ha visto y al final lo que peor va.
+ *   3. Repaso espaciado con cajas (Leitner): acertar aleja la pregunta, fallar
+ *      la devuelve al día siguiente.
+ *   4. Calcular estadísticas por asignatura y por tema.
+ *
+ * Todo son funciones puras para poder probarlas con node, sin navegador.
+ */
+
+const DIA = 24 * 60 * 60 * 1000;
+
+/** Generador con semilla: los simulacros se pueden repetir igual si hace falta. */
+export function aleatorioConSemilla(semilla) {
+  let s = semilla >>> 0 || 1;
+  return function siguiente() {
+    s |= 0; s = (s + 0x6D2B79F5) | 0;
+    let t = Math.imul(s ^ (s >>> 15), 1 | s);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+export function barajar(lista, rnd = Math.random) {
+  const copia = [...lista];
+  for (let i = copia.length - 1; i > 0; i--) {
+    const j = Math.floor(rnd() * (i + 1));
+    [copia[i], copia[j]] = [copia[j], copia[i]];
+  }
+  return copia;
+}
+
+/**
+ * Devuelve la pregunta con las opciones en otro orden y `correcta` ya ajustada.
+ * `orden` guarda de dónde vino cada opción, por si hay que rehacer el camino.
+ */
+export function prepararPregunta(pregunta, rnd = Math.random) {
+  const indices = barajar(pregunta.opciones.map((_, i) => i), rnd);
+  const opciones = indices.map((i) => pregunta.opciones[i]);
+  const figuras = pregunta.figuras?.opciones
+    ? { ...pregunta.figuras, opciones: indices.map((i) => pregunta.figuras.opciones[i]) }
+    : pregunta.figuras;
+  return {
+    ...pregunta,
+    opciones,
+    figuras,
+    correcta: indices.indexOf(pregunta.correcta),
+    orden: indices,
+  };
+}
+
+export function filtrar(banco, { asignatura, asignaturas, temas, dificultades, grado, modoGrado = 'hasta' } = {}) {
+  const lista = asignaturas?.length ? asignaturas : (asignatura ? [asignatura] : null);
+  return banco.filter((p) => {
+    if (lista && !lista.includes(p.asignatura)) return false;
+    if (temas?.length && !temas.includes(p.tema)) return false;
+    if (dificultades?.length && !dificultades.includes(p.dificultad)) return false;
+    // 'hasta' trae todo lo que ya se debería dominar a esa altura del colegio;
+    // 'solo' aísla lo que se ve ese año. Una pregunta sin grado nunca se filtra.
+    if (grado && p.grado) {
+      if (modoGrado === 'solo' ? p.grado !== grado : p.grado > grado) return false;
+    }
+    return true;
+  });
+}
+
+// ---------------------------------------------------------------- repaso
+
+/** Días que espera una pregunta según la caja en la que está (1 a 6). */
+export const DIAS_POR_CAJA = [0, 1, 3, 7, 16, 35];
+
+export function actualizarRepaso(previo, acierto, ahora = Date.now()) {
+  const cajaPrevia = previo?.caja || 1;
+  const caja = acierto ? Math.min(cajaPrevia + 1, DIAS_POR_CAJA.length) : 1;
+  return {
+    caja,
+    proxima: ahora + DIAS_POR_CAJA[caja - 1] * DIA,
+    aciertos: (previo?.aciertos || 0) + (acierto ? 1 : 0),
+    fallos: (previo?.fallos || 0) + (acierto ? 0 : 1),
+    ultima: ahora,
+  };
+}
+
+export function toca(repaso, id, ahora = Date.now()) {
+  const dato = repaso?.[id];
+  if (!dato) return false;              // nunca vista: no es repaso, es nueva
+  return (dato.proxima ?? 0) <= ahora;
+}
+
+export function pendientesDeRepaso(banco, repaso, ahora = Date.now()) {
+  return banco.filter((p) => toca(repaso, p.id, ahora));
+}
+
+/**
+ * Elige las preguntas de una sesión de práctica.
+ * Orden de prioridad: repasos vencidos > preguntas nuevas > las que peor van.
+ */
+export function seleccionarPreguntas({
+  banco, repaso = {}, cantidad = 10, ahora = Date.now(), rnd = Math.random, soloRepaso = false,
+}) {
+  const vencidas = barajar(banco.filter((p) => toca(repaso, p.id, ahora)), rnd);
+  if (soloRepaso) return vencidas.slice(0, cantidad);
+
+  const nuevas = barajar(banco.filter((p) => !repaso[p.id]), rnd);
+  const resto = banco
+    .filter((p) => repaso[p.id] && !toca(repaso, p.id, ahora))
+    .sort((a, b) => tasa(repaso[a.id]) - tasa(repaso[b.id]));
+
+  const salida = [];
+  for (const lista of [vencidas, nuevas, resto]) {
+    for (const p of lista) {
+      if (salida.length >= cantidad) return salida;
+      salida.push(p);
+    }
+  }
+  return salida;
+}
+
+function tasa(dato) {
+  const total = (dato?.aciertos || 0) + (dato?.fallos || 0);
+  return total ? (dato.aciertos || 0) / total : 0;
+}
+
+// ---------------------------------------------------------------- simulacro
+
+/** Cuántas preguntas de cada asignatura y cuánto tiempo, como en el examen real. */
+export const MODELOS_SIMULACRO = {
+  completo: {
+    nombre: 'Completo', minutos: 162,
+    reparto: {
+      matematicas: 16, trigonometria: 6, abstracto: 10, fisica: 8, quimica: 8, salud: 8,
+      geografia: 6, historia: 6, universal: 5, ciudadania: 6, economia: 5, cotidiana: 6, lectura: 10, lengua: 6, literatura: 5, filosofia: 5, ingles: 12,
+    },
+  },
+  corto: {
+    nombre: 'Corto', minutos: 70,
+    reparto: {
+      matematicas: 8, trigonometria: 3, abstracto: 5, fisica: 4, quimica: 4, salud: 4,
+      geografia: 3, historia: 3, universal: 3, ciudadania: 3, economia: 3, cotidiana: 3, lectura: 5, lengua: 3, literatura: 3, filosofia: 3, ingles: 6,
+    },
+  },
+  express: {
+    nombre: 'Exprés', minutos: 36,
+    reparto: {
+      matematicas: 4, trigonometria: 2, abstracto: 2, fisica: 2, quimica: 2, salud: 2,
+      geografia: 2, historia: 2, universal: 2, ciudadania: 2, economia: 2, cotidiana: 2, lectura: 2, lengua: 2, literatura: 2, filosofia: 2, ingles: 2,
+    },
+  },
+};
+
+/**
+ * Sesión diaria: media hora, todos los días.
+ *
+ * Un simulacro completo de 128 preguntas es un ensayo general, no una rutina:
+ * nadie lo hace dos días seguidos. Para sostener meses de estudio hace falta
+ * algo que quepa en media hora y que, aun así, termine cubriendo el temario.
+ *
+ * De ahí el reparto: un núcleo fijo con lo que pesa en todos los exámenes
+ * (matemáticas, lectura crítica e inglés) más seis asignaturas que rotan. El
+ * ciclo es de siete días y está calculado para que cada una de las catorce
+ * asignaturas restantes aparezca exactamente tres veces por semana.
+ */
+export const NUCLEO_DIARIO = { matematicas: 5, lectura: 4, ingles: 3 };
+
+export const ROTACION_DIARIA = [
+  'trigonometria', 'abstracto', 'fisica', 'quimica', 'salud', 'geografia', 'historia',
+  'universal', 'ciudadania', 'economia', 'cotidiana', 'lengua', 'literatura', 'filosofia',
+];
+
+export const DIAS_CICLO = 7;
+const ASIGNATURAS_POR_DIA = 6;
+const POR_ASIGNATURA_ROTADA = 3;
+
+/** Qué día del ciclo toca hoy. Depende de la fecha, no de cuántas sesiones se hayan hecho. */
+export function diaDelCiclo(ahora = Date.now()) {
+  return Math.floor(ahora / DIA) % DIAS_CICLO;
+}
+
+/** El modelo de simulacro que corresponde a un día del ciclo. */
+export function modeloDiario(dia = diaDelCiclo()) {
+  const reparto = { ...NUCLEO_DIARIO };
+  for (let i = 0; i < ASIGNATURAS_POR_DIA; i++) {
+    const cual = ROTACION_DIARIA[(dia * ASIGNATURAS_POR_DIA + i) % ROTACION_DIARIA.length];
+    reparto[cual] = POR_ASIGNATURA_ROTADA;
+  }
+  return { id: 'diario', nombre: 'Diario', minutos: 30, dia, reparto };
+}
+
+/**
+ * Arma el simulacro respetando el reparto. Si una asignatura no tiene
+ * suficientes preguntas, usa las que haya en vez de fallar.
+ */
+export function armarSimulacro(banco, modelo = MODELOS_SIMULACRO.completo, rnd = Math.random,
+  { repaso = null, ahora = Date.now() } = {}) {
+  const salida = [];
+  for (const [asignatura, cuantas] of Object.entries(modelo.reparto)) {
+    const disponibles = banco.filter((p) => p.asignatura === asignatura);
+    // Con `repaso` la selección respeta las cajas: primero lo vencido, luego lo
+    // nuevo. Sin él, el simulacro elige al azar, como un examen de verdad.
+    salida.push(...(repaso
+      ? seleccionarPreguntas({ banco: disponibles, repaso, cantidad: cuantas, ahora, rnd })
+      : barajar(disponibles, rnd).slice(0, cuantas)));
+  }
+  return barajarPorAsignatura(salida, rnd);
+}
+
+/** Agrupa por asignatura (como en el examen real) pero mezcla dentro de cada bloque. */
+function barajarPorAsignatura(preguntas, rnd) {
+  const orden = ['matematicas', 'trigonometria', 'abstracto', 'fisica', 'quimica', 'salud',
+    'geografia', 'historia', 'universal', 'ciudadania', 'economia', 'cotidiana', 'lectura', 'lengua', 'literatura', 'filosofia', 'ingles'];
+  return orden.flatMap((a) => barajar(preguntas.filter((p) => p.asignatura === a), rnd));
+}
+
+// ---------------------------------------------------------------- resultados
+
+/** { aciertos, total, porcentaje } de una lista de respuestas. */
+export function puntaje(respuestas) {
+  const total = respuestas.length;
+  const aciertos = respuestas.filter((r) => r.correcta).length;
+  return { aciertos, total, porcentaje: total ? Math.round((aciertos / total) * 100) : 0 };
+}
+
+export function agruparPor(respuestas, clave) {
+  const mapa = {};
+  for (const r of respuestas) {
+    const k = r[clave];
+    if (!k) continue;
+    mapa[k] ||= { aciertos: 0, total: 0, ms: 0 };
+    mapa[k].total++;
+    mapa[k].ms += r.ms || 0;
+    if (r.correcta) mapa[k].aciertos++;
+  }
+  for (const v of Object.values(mapa)) {
+    v.porcentaje = Math.round((v.aciertos / v.total) * 100);
+    v.msMedio = Math.round(v.ms / v.total);
+  }
+  return mapa;
+}
+
+/**
+ * Los temas más flojos, para decirle al estudiante por dónde empezar.
+ * Se piden al menos `minimo` intentos para no señalar un tema por un solo fallo.
+ */
+export function temasDebiles(respuestas, { minimo = 3, cuantos = 5 } = {}) {
+  const porTema = agruparPor(respuestas, 'tema');
+  return Object.entries(porTema)
+    .filter(([, v]) => v.total >= minimo)
+    .map(([tema, v]) => ({ tema, ...v, asignatura: respuestas.find((r) => r.tema === tema)?.asignatura }))
+    .sort((a, b) => a.porcentaje - b.porcentaje)
+    .slice(0, cuantos);
+}
+
+/** Racha de días seguidos con al menos una respuesta, contando hacia atrás desde hoy. */
+export function racha(respuestas, ahora = Date.now()) {
+  if (!respuestas.length) return 0;
+  const dias = new Set(respuestas.map((r) => Math.floor(r.at / DIA)));
+  const hoy = Math.floor(ahora / DIA);
+  if (!dias.has(hoy) && !dias.has(hoy - 1)) return 0;
+  let cuenta = 0;
+  let dia = dias.has(hoy) ? hoy : hoy - 1;
+  while (dias.has(dia)) { cuenta++; dia--; }
+  return cuenta;
+}
+
+/** Nota escalada de 0 a 100 con el mismo peso para cada asignatura presente. */
+export function notaGlobal(respuestas) {
+  const porAsignatura = agruparPor(respuestas, 'asignatura');
+  const valores = Object.values(porAsignatura);
+  if (!valores.length) return 0;
+  return Math.round(valores.reduce((s, v) => s + v.porcentaje, 0) / valores.length);
+}
