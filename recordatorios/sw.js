@@ -1,0 +1,62 @@
+/**
+ * sw.js — Service worker: la app se instala y funciona sin internet.
+ * Un recordatorio que solo aparece con cobertura no sirve de mucho.
+ */
+
+const VERSION = 'recordatorios-v1';
+const ARCHIVOS = [
+  './', './index.html', './manifest.webmanifest',
+  './assets/estilos.css', './assets/icono.svg',
+  './src/app.js', './src/store.js', './src/modelo.js', './src/fechas.js',
+  './src/recurrencia.js', './src/naturales.js', './src/filtros.js', './src/calendario.js',
+  './src/tiempo.js', './src/inversiones.js', './src/plantillas.js', './src/exportar.js',
+  './src/notificaciones.js', './src/componentes.js', './src/seed.js',
+  './src/views/hoy.js', './src/views/proximos.js', './src/views/calendario.js',
+  './src/views/enfoque.js', './src/views/planificar.js', './src/views/lista.js',
+  './src/views/inversiones.js', './src/views/docencia.js', './src/views/investigacion.js',
+  './src/views/alabanza.js', './src/views/revision.js', './src/views/ajustes.js',
+  '../src/ui.js',
+];
+
+self.addEventListener('install', (e) => {
+  e.waitUntil((async () => {
+    const cache = await caches.open(VERSION);
+    // Uno a uno: si un archivo falla, el resto igual queda guardado.
+    await Promise.all(ARCHIVOS.map((url) => cache.add(url).catch(() => null)));
+    self.skipWaiting();
+  })());
+});
+
+self.addEventListener('activate', (e) => {
+  e.waitUntil((async () => {
+    const nombres = await caches.keys();
+    await Promise.all(nombres.filter((n) => n !== VERSION).map((n) => caches.delete(n)));
+    self.clients.claim();
+  })());
+});
+
+self.addEventListener('fetch', (e) => {
+  const url = new URL(e.request.url);
+  if (e.request.method !== 'GET' || url.origin !== location.origin) return;
+
+  e.respondWith((async () => {
+    const cacheado = await caches.match(e.request, { ignoreSearch: true });
+    if (cacheado) {
+      fetch(e.request).then((res) => {
+        if (res.ok) caches.open(VERSION).then((c) => c.put(e.request, res.clone()));
+      }).catch(() => {});
+      return cacheado;
+    }
+    try {
+      const res = await fetch(e.request);
+      if (res.ok) {
+        const cache = await caches.open(VERSION);
+        cache.put(e.request, res.clone());
+      }
+      return res;
+    } catch {
+      const index = await caches.match('./index.html');
+      return index || new Response('Sin conexión y sin copia guardada.', { status: 503 });
+    }
+  })());
+});
