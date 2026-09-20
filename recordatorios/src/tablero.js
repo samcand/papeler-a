@@ -8,11 +8,20 @@
 
 import { aISO, deISO, diferenciaDias, hoy, inicioSemana, sumarDias } from './fechas.js';
 
+/**
+ * Último día de "esta semana". Si hoy ya es el último (un domingo), la columna
+ * miraría a un cajón vacío, así que se estira a la semana siguiente.
+ */
+export function finDeLaSemana(hoyISO) {
+  const domingo = aISO(sumarDias(inicioSemana(hoyISO), 6));
+  return domingo > hoyISO ? domingo : aISO(sumarDias(domingo, 7));
+}
+
 export const COLUMNAS = [
   { id: 'bandeja', nombre: 'Bandeja', descripcion: 'Sin decidir', fecha: () => null },
   { id: 'hoy', nombre: 'Hoy', descripcion: 'Hoy y lo atrasado', fecha: (hoyISO) => hoyISO },
-  { id: 'semana', nombre: 'Esta semana', descripcion: 'Antes del domingo', fecha: (hoyISO) => aISO(sumarDias(inicioSemana(hoyISO), 4)) },
-  { id: 'despues', nombre: 'Después', descripcion: 'Más adelante', fecha: (hoyISO) => aISO(sumarDias(inicioSemana(hoyISO), 7)) },
+  { id: 'semana', nombre: 'Esta semana', descripcion: 'Hasta el domingo', fecha: (hoyISO) => aISO(sumarDias(finDeLaSemana(hoyISO), -2)) },
+  { id: 'despues', nombre: 'Después', descripcion: 'Más adelante', fecha: (hoyISO) => aISO(sumarDias(finDeLaSemana(hoyISO), 1)) },
   { id: 'hechas', nombre: 'Hechas', descripcion: 'Últimos 7 días', fecha: () => null },
 ];
 
@@ -24,8 +33,7 @@ export function columnaDe(tarea, hoyISO = aISO(hoy())) {
   }
   if (!tarea.fecha) return tarea.proyecto || tarea.modulo ? 'despues' : 'bandeja';
   if (tarea.fecha <= hoyISO) return 'hoy';
-  const finDeSemana = aISO(sumarDias(inicioSemana(hoyISO), 6));
-  return tarea.fecha <= finDeSemana ? 'semana' : 'despues';
+  return tarea.fecha <= finDeLaSemana(hoyISO) ? 'semana' : 'despues';
 }
 
 /** El tablero completo, con las tarjetas ya repartidas y ordenadas. */

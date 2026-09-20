@@ -360,7 +360,7 @@ Alt y las flechas.
 ## Pruebas
 
 ```bash
-npm test                  # 247 pruebas de lógica, sin navegador
+npm test                  # 248 pruebas de lógica, sin navegador
 npm run test:navegador    # recorre la app en Chromium (necesita Playwright)
 ```
 

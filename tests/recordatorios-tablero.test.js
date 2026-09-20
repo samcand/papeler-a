@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { COLUMNAS, alSoltar, columnaDe, tablero, trabajoEnCurso } from '../recordatorios/src/tablero.js';
+import { COLUMNAS, alSoltar, columnaDe, finDeLaSemana, tablero, trabajoEnCurso } from '../recordatorios/src/tablero.js';
 import { crearTarea } from '../recordatorios/src/modelo.js';
 
 let passed = 0;
@@ -29,6 +29,15 @@ t('cada tarea cae en su columna por la fecha, sin campos nuevos', () => {
   assert.equal(columnaDe(TAREAS[7], HOY), null);        // hecha hace mucho: fuera del tablero
 });
 
+t('en domingo, "esta semana" mira a la semana que viene', () => {
+  const DOMINGO = '2026-09-20';
+  assert.equal(finDeLaSemana(DOMINGO), '2026-09-27');       // no al domingo de hoy
+  assert.equal(finDeLaSemana('2026-09-23'), '2026-09-27');  // un miércoles, el domingo normal
+  assert.equal(columnaDe(crearTarea({ fecha: '2026-09-23' }), DOMINGO), 'semana');
+  assert.equal(columnaDe(crearTarea({ fecha: '2026-09-28' }), DOMINGO), 'despues');
+  assert.equal(alSoltar(crearTarea({ fecha: null }), 'semana', DOMINGO).fecha, '2026-09-25');
+});
+
 t('el tablero reparte y suma los minutos de cada columna', () => {
   const t1 = tablero([...TAREAS, crearTarea({ titulo: 'Larga', fecha: HOY, duracion: 120 })], HOY);
   assert.equal(t1.length, COLUMNAS.length);
@@ -47,7 +56,7 @@ t('el tablero se puede acotar a un módulo o proyecto', () => {
 t('soltar una tarjeta en otra columna cambia la fecha', () => {
   assert.deepEqual(alSoltar(TAREAS[0], 'hoy', HOY), { fecha: HOY });
   assert.equal(alSoltar(TAREAS[2], 'semana', HOY).fecha, '2026-09-25');   // viernes de esta semana
-  assert.equal(alSoltar(TAREAS[2], 'despues', HOY).fecha, '2026-09-28');  // lunes que viene
+  assert.equal(alSoltar(TAREAS[2], 'despues', HOY).fecha, '2026-09-28');  // el lunes que viene
   assert.deepEqual(alSoltar(TAREAS[2], 'bandeja', HOY), { fecha: null, proyecto: null, modulo: null });
   assert.deepEqual(alSoltar(TAREAS[2], 'hechas', HOY), { completar: true });
   assert.equal(alSoltar(TAREAS[6], 'hechas', HOY), null);                 // ya estaba hecha
