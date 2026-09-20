@@ -13,6 +13,7 @@ import { panelDeVida } from './panel.js';
 import { resumenRutinas } from './rutinas.js';
 import { tocaPreparar } from './personas.js';
 import { aRevisar } from './objetivos.js';
+import { buscarTodo } from './buscador.js';
 
 import { vistaHoy } from './views/hoy.js';
 import { vistaBandeja } from './views/bandeja.js';
@@ -347,14 +348,100 @@ function abrirCaptura() {
   panel.querySelector('[data-rapida]')?.focus();
 }
 
+
+/* ------------------------------------------------------------------ *
+ * Paleta: buscar cualquier cosa y saltar
+ * ------------------------------------------------------------------ */
+
+/**
+ * Una caja sobre todo lo demás que busca en las diez clases de cosas que la app
+ * guarda, y además abre pantallas por su nombre. Se mueve con las flechas y se
+ * entra con Enter, porque quien la usa no quiere soltar el teclado.
+ */
+function abrirPaleta(inicial = '') {
+  const abierta = document.querySelector('.paleta');
+  if (abierta) { abierta.querySelector('input')?.focus(); return; }
+
+  let elegido = 0;
+  let resultados = [];
+
+  const campo = el('input', {
+    class: 'input', type: 'search', value: inicial,
+    placeholder: 'Buscar en todo… tareas, notas, fichas, personas, gastos, pantallas',
+    onInput: () => pintarResultados(),
+  });
+  const lista = el('div', { class: 'paleta-lista' });
+  const pie = el('p', { class: 'muted small' });
+
+  const caja = el('div', { class: 'paleta' },
+    el('div', { class: 'paleta-caja' },
+      el('div', { class: 'paleta-cabecera' }, campo,
+        button('✕', cerrar, { variant: 'ghost chico', title: 'Cerrar' })),
+      lista, pie));
+
+  function cerrar() {
+    caja.remove();
+    document.removeEventListener('keydown', alPulsar, true);
+  }
+
+  function ir(r) {
+    cerrar();
+    // Las tareas no tienen pantalla propia: se abren en la búsqueda de tareas.
+    navegar(r.ruta);
+  }
+
+  function pintarResultados() {
+    const r = buscarTodo(store.estado, campo.value, { limite: 25 });
+    resultados = r.resultados;
+    elegido = 0;
+    pie.textContent = r.frase;
+    pintar(lista, ...r.grupos.flatMap((g) => [
+      el('div', { class: 'paleta-titulo' }, `${g.icono} ${g.nombre}`),
+      ...g.resultados.map((x) => {
+        const i = resultados.indexOf(x);
+        return el('button', {
+          class: `paleta-item ${i === elegido ? 'activo' : ''}`.trim(),
+          type: 'button',
+          dataset: { i: String(i) },
+          onClick: () => ir(x),
+        }, el('span', { class: 'grow' }, x.titulo),
+        x.detalle ? el('span', { class: 'muted small' }, x.detalle) : null);
+      }),
+    ]));
+  }
+
+  function mover(paso) {
+    if (!resultados.length) return;
+    elegido = (elegido + paso + resultados.length) % resultados.length;
+    lista.querySelectorAll('.paleta-item').forEach((b) => {
+      const activo = Number(b.dataset.i) === elegido;
+      b.classList.toggle('activo', activo);
+      if (activo) b.scrollIntoView({ block: 'nearest' });
+    });
+  }
+
+  function alPulsar(e) {
+    if (!document.body.contains(caja)) return;
+    if (e.key === 'Escape') { e.preventDefault(); cerrar(); return; }
+    if (e.key === 'ArrowDown') { e.preventDefault(); mover(1); return; }
+    if (e.key === 'ArrowUp') { e.preventDefault(); mover(-1); return; }
+    if (e.key === 'Enter' && resultados[elegido]) { e.preventDefault(); ir(resultados[elegido]); }
+  }
+
+  caja.addEventListener('click', (e) => { if (e.target === caja) cerrar(); });
+  document.addEventListener('keydown', alPulsar, true);
+  document.body.append(caja);
+  pintarResultados();
+  campo.focus();
+  campo.select();
+}
+
 function buscador() {
   const campo = el('input', {
-    class: 'input', type: 'search', placeholder: 'Buscar…  (/)',
-    onKeydown: (e) => {
-      if (e.key !== 'Enter') return;
-      const q = e.target.value.trim();
-      if (q) navegar(`/buscar/${encodeURIComponent(q)}`);
-    },
+    class: 'input', type: 'search', placeholder: 'Buscar en todo…  (/)',
+    readOnly: true,
+    onFocus: () => abrirPaleta(),
+    onClick: () => abrirPaleta(),
   });
   campo.id = 'buscador';
   return el('div', { style: 'padding:0 10px 10px' }, campo);
@@ -382,6 +469,12 @@ function refrescarArmazon() {
 
 function atajos() {
   document.addEventListener('keydown', (e) => {
+    // Buscar y deshacer funcionan siempre, incluso escribiendo en un campo.
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+      e.preventDefault();
+      abrirPaleta();
+      return;
+    }
     // Deshacer funciona siempre, incluso escribiendo en un campo.
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
       if (!store.puedeDeshacer) return;
@@ -393,7 +486,7 @@ function atajos() {
     }
     const escribiendo = /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName);
     if (escribiendo) return;
-    if (e.key === '/') { e.preventDefault(); document.getElementById('buscador')?.focus(); return; }
+    if (e.key === '/') { e.preventDefault(); abrirPaleta(); return; }
     if (e.key === 'a') { e.preventDefault(); document.querySelector('[data-rapida]')?.focus(); return; }
     if (e.key === 'n') { e.preventDefault(); abrirCaptura(); return; }
     const destinos = { b: '/bandeja', h: '/hoy', p: '/proximos', t: '/tablero', c: '/calendario', e: '/enfoque', i: '/inversiones', g: '/proyectos', r: '/revision', k: '/copiloto', f: '/informes', v: '/panel', d: '/notas' };

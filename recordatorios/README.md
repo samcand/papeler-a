@@ -145,6 +145,17 @@ cuando no recuerdas la sintaxis:
   Debajo, seis atajos de un toque y el campo de texto libre — y siempre la
   previsualización de las tres próximas fechas antes de guardar.
 
+### Buscar en todo, con una sola caja
+
+`Ctrl+K` (o `/`) abre la paleta desde cualquier pantalla: busca a la vez en
+tareas, proyectos, notas, fichas de colecciones, personas, objetivos, gastos,
+viajes, lecturas y planes, y también **abre pantallas por su nombre** —escribe
+«pomodoro» y te lleva a Enfoque—. Se mueve con las flechas y se entra con Enter.
+
+Lo que empieza por lo escrito sale antes que lo que solo lo contiene, lo cerrado
+pesa menos que lo vivo, y hay que escribir todas las palabras: «ana regalo» no
+trae todo lo que diga «ana».
+
 ### Buscar con operadores
 
 La caja de búsqueda detecta si escribes un filtro (`#Cartera & p1`, `hoy`,
@@ -493,7 +504,7 @@ descargar. Si la semana fue floja se nota, que es justo para lo que sirve.
 
 ## Lo que queda
 
-La pestaña **Lo que queda** es la hoja de ruta real de la app: **108 hechas y 12
+La pestaña **Lo que queda** es la hoja de ruta real de la app: **109 hechas y 12
 descartadas**, y hoy no queda nada pendiente. Las diez últimas (111-120) salieron
 de revisar una lista de 50 ideas de productividad personal y resumirlas en cuatro
 piezas genéricas —notas, colecciones, objetivos y gastos— en vez de treinta
@@ -533,7 +544,7 @@ Alt y las flechas.
 ## Pruebas
 
 ```bash
-npm test                  # 330 pruebas de lógica, sin navegador
+npm test                  # 339 pruebas de lógica, sin navegador
 npm run test:navegador    # recorre la app en Chromium (necesita Playwright)
 ```
 

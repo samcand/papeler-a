@@ -458,6 +458,33 @@ body.concentrado .contenido { max-width: none; display: grid; place-items: cente
 }
 
 
+/* ---- Paleta de búsqueda ---- */
+.paleta {
+  position: fixed; inset: 0; z-index: 120;
+  background: rgba(0, 0, 0, .55);
+  display: flex; justify-content: center; align-items: flex-start;
+  padding: 10vh 16px 16px;
+}
+.paleta-caja {
+  width: min(680px, 100%); max-height: 70vh; display: flex; flex-direction: column;
+  background: var(--bg-soft); border: 1px solid var(--line); border-radius: 14px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, .45); overflow: hidden;
+}
+.paleta-cabecera { display: flex; gap: 8px; align-items: center; padding: 12px; border-bottom: 1px solid var(--line); }
+.paleta-cabecera .input { flex: 1; }
+.paleta-lista { overflow-y: auto; padding: 6px; }
+.paleta-titulo {
+  font-size: .72rem; text-transform: uppercase; letter-spacing: .06em;
+  color: var(--muted); padding: 10px 10px 4px;
+}
+.paleta-item {
+  display: flex; gap: 10px; align-items: center; width: 100%; text-align: left;
+  background: none; border: 0; color: inherit; font: inherit;
+  padding: 8px 10px; border-radius: 8px; cursor: pointer;
+}
+.paleta-item:hover, .paleta-item.activo { background: color-mix(in oklab, var(--accent-2, #4a9eff) 22%, transparent); }
+.paleta .muted.small { padding: 8px 14px 12px; margin: 0; border-top: 1px solid var(--line); }
+
 /* ---- Panel de vida ---- */
 .panel-vida .tarjeta-panel {
   display: block; text-decoration: none; color: inherit;

@@ -189,6 +189,7 @@ export const IDEAS = [
   { n: 118, c: 'vida', estado: 'hecho', t: 'El viaje como ficha: itinerario, papeles y presupuesto', d: 'Cuenta atrás, itinerario día a día sacado de las tareas que caen entre las fechas, la preparación pendiente y lo gastado frente al presupuesto, por día y por persona. No guarda nada por duplicado: un gasto del viaje es un gasto.' },
   { n: 119, c: 'notas', estado: 'hecho', t: 'Diario del día', d: 'Una entrada por día con su ánimo, escrita donde ya viven las notas, con la racha de días seguidos y el “hace un año, un día como hoy” que es media gracia de llevar un diario.' },
   { n: 120, c: 'vida', estado: 'hecho', t: 'Panel de vida', d: 'Ocho tarjetas —día, rutinas, dinero, objetivos, personas, mantenimiento, viajes y notas— y arriba lo que pide atención, ordenado por urgencia. Ningún dato nuevo: los que ya hay, juntos. Lo que todavía está vacío lo dice en vez de enseñar un cero con pinta de dato.' },
+  { n: 121, c: 'organizar', estado: 'hecho', t: 'Buscador universal con paleta', d: 'Ctrl+K (o “/”) abre una caja que busca en las diez clases de cosas que la app guarda —tareas, proyectos, notas, fichas, personas, objetivos, gastos, viajes, lecturas y planes— y además abre pantallas escribiendo su nombre. Lo que empieza por lo escrito va antes que lo que solo lo contiene, lo cerrado pesa menos que lo vivo, y hay que escribir todas las palabras: “ana regalo” no trae todo lo que diga “ana”.' },
 ];
 
 export const HECHAS = IDEAS.filter((i) => i.estado === 'hecho').map((i) => i.n);

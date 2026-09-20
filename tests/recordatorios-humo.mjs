@@ -795,6 +795,37 @@ if (tarjetasPanel !== 8) errores.push(`el panel debería tener 8 tarjetas, tiene
 else if (!/Pide atención/.test(panel)) errores.push('el panel no listó los avisos: ' + panel.slice(0, 250));
 else console.log('  ok  panel de vida: 8 tarjetas y los avisos arriba');
 
+
+// Paleta: buscar en todo y saltar con el teclado
+await pagina.goto(BASE + '#/hoy');
+await pagina.waitForTimeout(400);
+await pagina.keyboard.press('Control+k');
+await pagina.waitForTimeout(400);
+if (!(await pagina.locator('.paleta').count())) errores.push('Ctrl+K no abrió la paleta de búsqueda');
+else {
+  await pagina.locator('.paleta input').fill('cumpleaños');
+  await pagina.waitForTimeout(400);
+  const primero = await pagina.locator('.paleta-item').first().textContent();
+  await pagina.keyboard.press('Enter');
+  await pagina.waitForTimeout(500);
+  if (!/personas/i.test(primero || '') || !/#\/personas/.test(pagina.url())) {
+    errores.push(`la paleta no llevó a Personas (primero: ${primero}, url: ${pagina.url()})`);
+  } else console.log('  ok  paleta: Ctrl+K, buscar una pantalla y entrar con Enter');
+
+  // Y encuentra cosas, no solo pantallas
+  await pagina.keyboard.press('/');
+  await pagina.waitForTimeout(400);
+  await pagina.locator('.paleta input').fill('mazda');
+  await pagina.waitForTimeout(400);
+  const grupos = (await pagina.textContent('.paleta-lista')).replace(/\s+/g, ' ');
+  if (!/Fichas/.test(grupos) || !/Mazda 3/.test(grupos)) {
+    errores.push('la paleta no encontró la ficha del carro: ' + grupos.slice(0, 160));
+  } else console.log('  ok  paleta: encuentra fichas, no solo pantallas');
+  await pagina.keyboard.press('Escape');
+  await pagina.waitForTimeout(300);
+  if (await pagina.locator('.paleta').count()) errores.push('Escape no cerró la paleta');
+}
+
 // Accesibilidad básica
 const a11y = await pagina.evaluate(() => {
   const saltar = document.querySelector('.saltar');
