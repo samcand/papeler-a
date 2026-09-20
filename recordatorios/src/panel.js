@@ -24,6 +24,12 @@ import { resumenViajes, cuentaAtras } from './viajes.js';
 import { vencimientos } from './colecciones.js';
 import { resumenEsperas } from './esperas.js';
 
+/** Baja solo la primera letra: pegar una frase dentro de otra no la desarma. */
+function minuscula(frase) {
+  const t = String(frase || '');
+  return t.charAt(0).toLowerCase() + t.slice(1);
+}
+
 /**
  * Una tarjeta por ámbito de la vida. `nivel` ordena el color: 'mal' pide algo
  * hoy, 'ojo' pide algo esta semana, 'bien' no pide nada y 'vacio' es que
@@ -116,7 +122,7 @@ export function panelDeVida(estado = {}, hoyISO = aISO(hoy())) {
   const avisos = [];
   if (vencidas.length) avisos.push({ nivel: 'alto', texto: `${vencidas.length} tarea(s) atrasadas.`, ruta: '/hoy' });
   for (const e of manten.estados.filter((x) => x.vencido)) {
-    avisos.push({ nivel: 'alto', texto: `${e.servicio.nombre}: ${e.texto.toLowerCase()}`, ruta: '/colecciones' });
+    avisos.push({ nivel: 'alto', texto: `${e.servicio.nombre}: ${minuscula(e.texto)}`, ruta: '/colecciones' });
   }
   for (const v of avisosColecciones.filter((x) => x.vencido)) {
     avisos.push({ nivel: 'alto', texto: v.texto, ruta: '/colecciones' });
@@ -132,7 +138,7 @@ export function panelDeVida(estado = {}, hoyISO = aISO(hoy())) {
   }
   if (esperas.vencidas) avisos.push({ nivel: 'medio', texto: `${esperas.vencidas} espera(s) fuera de plazo.`, ruta: '/revision' });
   for (const o of objetivos.lista.filter((x) => x.progreso.alDia === false)) {
-    avisos.push({ nivel: 'bajo', texto: `${o.objetivo.que}: ${o.progreso.frase.toLowerCase()}`, ruta: '/objetivos' });
+    avisos.push({ nivel: 'bajo', texto: `${o.objetivo.que}: ${minuscula(o.progreso.frase)}`, ruta: '/objetivos' });
   }
 
   const orden = { alto: 0, medio: 1, bajo: 2 };

@@ -469,6 +469,12 @@ body.concentrado .contenido { max-width: none; display: grid; place-items: cente
 .panel-vida .tarjeta-panel.bien { border-left-color: var(--ok, #35c48b); }
 .panel-vida .tarjeta-panel.vacio { opacity: .72; }
 
+/* Los campos dentro de la tabla de fichas: legibles, y la tabla ya hace scroll. */
+.tabla td .input { min-width: 130px; }
+.tabla td .input[type="number"] { min-width: 90px; }
+.tabla td .input[type="date"] { min-width: 160px; }
+.tabla td select.input { min-width: 120px; }
+
 /* ---- Notas ---- */
 .card.nota.fijada { border-left: 3px solid var(--warn, #e0a33e); }
 .card.nota.abierta { border-left: 3px solid var(--accent-2, #4a9eff); }

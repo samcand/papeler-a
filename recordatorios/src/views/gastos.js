@@ -28,6 +28,7 @@ export function vistaGastos(root, ctx = {}) {
     const { desde, hasta } = rangoDelMes(mes);
     const r = resumenGastos(gastos(), desde, hasta);
     const pres = presupuestoDelMes(gastos(), store.estado.presupuestos || {}, mes, hoyISO);
+    const deViajes = r.total - pres.total;
     const meses = porMes(gastos(), 6, hoyISO);
 
     render(host,
@@ -40,7 +41,11 @@ export function vistaGastos(root, ctx = {}) {
 
       el('div', { class: 'tarjetas' },
         dato(r.total.toLocaleString('es'), 'gastado este mes',
-          { clase: pres.pasadas.length ? 'negativo' : '', pie: pres.totalLimite ? `de ${pres.totalLimite.toLocaleString('es')}` : 'sin presupuesto' }),
+          {
+            clase: pres.pasadas.length ? 'negativo' : '',
+            // Ojo: el presupuesto se compara sin los viajes, que van a su propia cuenta.
+            pie: deViajes ? `${deViajes.toLocaleString('es')} de viajes, aparte del presupuesto` : (pres.totalLimite ? `presupuesto de ${pres.totalLimite.toLocaleString('es')}` : 'sin presupuesto'),
+          }),
         dato(r.media.toLocaleString('es'), 'al día'),
         dato(r.fijos.toLocaleString('es'), 'en recibos fijos'),
         dato(pres.porDiaRestante != null ? pres.porDiaRestante.toLocaleString('es') : '—', 'por día que queda',
@@ -112,7 +117,8 @@ export function vistaGastos(root, ctx = {}) {
   function panelPresupuesto(pres) {
     return el('section', { class: 'card' },
       el('h2', { class: 'card-title' }, 'Presupuesto del mes'),
-      el('p', { class: 'muted small' }, 'Pon un tope por categoría; déjalo en blanco para no ponerlo.'),
+      el('p', { class: 'muted small' },
+        'Pon un tope por categoría; déjalo en blanco para no ponerlo. Lo marcado como de un viaje no cuenta aquí: tiene su propio presupuesto.'),
       ...CATEGORIAS_GASTO.map((c) => {
         const fila = pres.filas.find((f) => f.categoria === c.id);
         const gastado = fila?.gastado || 0;
@@ -152,10 +158,11 @@ export function vistaGastos(root, ctx = {}) {
         }, { variant: 'ghost chico' })),
       !r.gastos.length ? vacio('Ningún gasto este mes.', '🧾')
         : el('div', {}, ...[...r.gastos].sort((a, b) => b.fecha.localeCompare(a.fecha)).map((g) => el('div', { class: 'salud-fila' },
-          el('span', { style: 'min-width:36px' }, iconoCategoria(g.categoria)),
-          el('span', { class: 'grow' }, g.que, g.fijo ? el('span', { class: 'muted small' }, ' · fijo') : null,
+          el('span', { style: 'min-width:30px' }, iconoCategoria(g.categoria)),
+          el('span', { class: 'grow' }, g.que,
+            g.fijo ? el('span', { class: 'muted small' }, ' · fijo') : null,
             g.viaje ? el('span', { class: 'muted small' }, ` · ${(store.estado.viajes || []).find((v) => v.id === g.viaje)?.nombre || 'viaje'}`) : null),
-          el('span', { class: 'muted small' }, textoRelativo(g.fecha)),
+          el('span', { class: 'muted small', style: 'min-width:110px;text-align:right' }, textoRelativo(g.fecha)),
           el('span', { style: 'min-width:90px;text-align:right' }, g.importe.toLocaleString('es')),
           button('✕', () => { store.borrarEn('gastos', g.id); pintar(); },
             { variant: 'ghost chico danger', title: 'Borrar el apunte' })))));
