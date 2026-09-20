@@ -1,0 +1,370 @@
+/**
+ * temario.js — Qué se pregunta en cada asignatura.
+ *
+ * Es el mapa del examen: cinco asignaturas, y dentro de cada una los temas que
+ * aparecen una y otra vez en las pruebas de ingreso, con lo que hay que saber
+ * hacer en cada uno. Todas las preguntas del banco apuntan a un `tema` de aquí
+ * (hay una prueba que lo verifica), así que el temario y el banco no se separan.
+ */
+
+export const ASIGNATURAS = [
+  {
+    id: 'matematicas',
+    nombre: 'Matemáticas',
+    icono: '∑',
+    resumen: 'Aritmética, álgebra, geometría, estadística y problemas de aplicación.',
+    temas: [
+      { id: 'aritmetica', nombre: 'Números y operaciones', claves: [
+        'Jerarquía de operaciones y signos de agrupación',
+        'Divisibilidad, mcd y mcm',
+        'Números enteros, orden y valor absoluto',
+      ] },
+      { id: 'fracciones', nombre: 'Fracciones, decimales y notación científica', claves: [
+        'Sumar, restar, multiplicar y dividir fracciones',
+        'Fracción de una fracción y partes que quedan',
+        'Mover la coma: potencias de 10 y notación científica',
+      ] },
+      { id: 'razones', nombre: 'Razones, proporciones y regla de tres', claves: [
+        'Repartir una cantidad en una razón dada',
+        'Proporción directa e inversa (obreros, velocidad, escalas)',
+        'Escalas de mapas y planos',
+      ] },
+      { id: 'porcentajes', nombre: 'Porcentajes, descuentos e interés', claves: [
+        'Porcentaje de una cantidad y cantidad a partir del porcentaje',
+        'Aumentos y descuentos sucesivos (no se suman)',
+        'Interés simple y compuesto',
+      ] },
+      { id: 'potencias', nombre: 'Potencias, raíces y radicales', claves: [
+        'Leyes de los exponentes, incluidos negativos y fraccionarios',
+        'Simplificar y racionalizar radicales',
+        'Operar con expresiones con letras',
+      ] },
+      { id: 'logaritmos', nombre: 'Logaritmos y exponenciales', claves: [
+        'Definición: log_b x = y equivale a b^y = x',
+        'Propiedades del producto, cociente y potencia',
+        'Ecuaciones exponenciales con bases iguales',
+      ] },
+      { id: 'algebra', nombre: 'Expresiones algebraicas y factorización', claves: [
+        'Productos notables',
+        'Factorizar trinomios y diferencia de cuadrados',
+        'Simplificar fracciones algebraicas',
+      ] },
+      { id: 'ecuaciones', nombre: 'Ecuaciones lineales y sistemas', claves: [
+        'Despejar con paréntesis y denominadores',
+        'Sistemas 2x2 por sustitución, igualación o reducción',
+        'Plantear la ecuación a partir del enunciado',
+      ] },
+      { id: 'cuadraticas', nombre: 'Ecuación cuadrática', claves: [
+        'Factorización y fórmula general',
+        'Discriminante: cuántas raíces reales hay',
+        'Suma y producto de raíces',
+      ] },
+      { id: 'desigualdades', nombre: 'Desigualdades, valor absoluto e intervalos', claves: [
+        'Al multiplicar por un negativo se voltea el signo',
+        'Desigualdades con valor absoluto',
+        'Escribir la solución como intervalo',
+      ] },
+      { id: 'funciones', nombre: 'Funciones y gráficas', claves: [
+        'Evaluar, dominio y rango',
+        'Composición de funciones y función inversa',
+        'Leer una gráfica: cortes, crecimiento y vértice',
+      ] },
+      { id: 'sucesiones', nombre: 'Sucesiones y progresiones', claves: [
+        'Progresión aritmética: término general y suma',
+        'Progresión geométrica: término general y suma',
+        'Descubrir el patrón de una sucesión',
+      ] },
+      { id: 'geometria-plana', nombre: 'Geometría plana', claves: [
+        'Ángulos entre paralelas y en polígonos',
+        'Perímetro y área de triángulos, cuadriláteros y círculos',
+        'Teorema de Pitágoras y semejanza',
+      ] },
+      { id: 'geometria-espacio', nombre: 'Cuerpos: área y volumen', claves: [
+        'Prisma, cilindro, cono, pirámide y esfera',
+        'Qué pasa con el volumen si cambian las medidas',
+        'Área total y área lateral',
+      ] },
+      { id: 'geometria-analitica', nombre: 'Geometría analítica', claves: [
+        'Distancia, punto medio y pendiente',
+        'Ecuación de la recta; paralelas y perpendiculares',
+        'Circunferencia: centro y radio',
+      ] },
+      { id: 'estadistica', nombre: 'Estadística descriptiva', claves: [
+        'Media, mediana, moda y rango',
+        'Media ponderada y efecto de agregar o quitar datos',
+        'Leer tablas y gráficos de barras o circulares',
+      ] },
+      { id: 'probabilidad', nombre: 'Conteo y probabilidad', claves: [
+        'Principio multiplicativo, permutaciones y combinaciones',
+        'Probabilidad simple, con y sin reemplazo',
+        'Eventos independientes y complementarios',
+      ] },
+      { id: 'problemas', nombre: 'Problemas de aplicación', claves: [
+        'Mezclas y aleaciones',
+        'Móviles: encuentro y alcance',
+        'Trabajo conjunto y problemas de edades',
+      ] },
+    ],
+  },
+
+  {
+    id: 'trigonometria',
+    nombre: 'Trigonometría',
+    icono: '△',
+    resumen: 'Del triángulo rectángulo a las identidades, ecuaciones y leyes de senos y cosenos.',
+    temas: [
+      { id: 'angulos', nombre: 'Ángulos, grados y radianes', claves: [
+        'Convertir grados a radianes y al revés',
+        'Ángulos coterminales y de referencia',
+        'Longitud de arco y área de sector',
+      ] },
+      { id: 'triangulo-rectangulo', nombre: 'Razones en el triángulo rectángulo', claves: [
+        'seno, coseno, tangente y sus recíprocas',
+        'Dada una razón, hallar las demás con Pitágoras',
+        'Resolver el triángulo rectángulo completo',
+      ] },
+      { id: 'notables', nombre: 'Ángulos notables', claves: [
+        'Valores exactos de 30°, 45°, 60°, 90°',
+        'Operar sin calculadora con esos valores',
+        'Los dos triángulos que hay que recordar',
+      ] },
+      { id: 'circunferencia', nombre: 'Circunferencia unitaria y cuadrantes', claves: [
+        'Signo de cada razón por cuadrante',
+        'Reducir un ángulo al primer cuadrante',
+        'Razones de ángulos mayores de 90° o negativos',
+      ] },
+      { id: 'identidades', nombre: 'Identidades fundamentales', claves: [
+        'sen²x + cos²x = 1 y sus derivadas',
+        'Pasar todo a senos y cosenos para simplificar',
+        'Demostrar o verificar una identidad',
+      ] },
+      { id: 'suma-angulos', nombre: 'Suma, resta y ángulo doble', claves: [
+        'sen(A±B), cos(A±B), tan(A±B)',
+        'Ángulo doble y ángulo mitad',
+        'Valores exactos de 15°, 75°, 105°',
+      ] },
+      { id: 'ecuaciones-trig', nombre: 'Ecuaciones trigonométricas', claves: [
+        'Todas las soluciones en un intervalo dado',
+        'Ecuaciones que se vuelven cuadráticas',
+        'Cuidado con las soluciones que se pierden al dividir',
+      ] },
+      { id: 'graficas-trig', nombre: 'Gráficas: amplitud, periodo y desfase', claves: [
+        'y = A sen(Bx + C) + D pieza por pieza',
+        'Periodo de seno, coseno y tangente',
+        'Rango y desplazamiento vertical',
+      ] },
+      { id: 'leyes', nombre: 'Ley de senos y ley de cosenos', claves: [
+        'Cuándo usar cada una según los datos',
+        'Área del triángulo con dos lados y el ángulo entre ellos',
+        'Caso ambiguo del lado-lado-ángulo',
+      ] },
+      { id: 'aplicaciones', nombre: 'Aplicaciones', claves: [
+        'Ángulos de elevación y depresión',
+        'Alturas, distancias y escaleras',
+        'Rumbos y navegación',
+      ] },
+    ],
+  },
+
+  {
+    id: 'abstracto',
+    nombre: 'Razonamiento abstracto',
+    icono: '◪',
+    resumen: 'Encontrar la regla: series de figuras, matrices, series numéricas, analogías y lógica.',
+    temas: [
+      { id: 'series-figuras', nombre: 'Series de figuras', claves: [
+        'Qué cambia y qué se mantiene de una figura a la siguiente',
+        'Cambios combinados: lados, relleno, giro y puntos',
+        'Descartar opciones por un solo atributo a la vez',
+      ] },
+      { id: 'matrices', nombre: 'Matrices y analogías figurales', claves: [
+        'Leer la matriz por filas y por columnas',
+        'Analogía "A es a B como C es a ?"',
+        'Sumar, restar o superponer elementos',
+      ] },
+      { id: 'diferente', nombre: 'El que no pertenece', claves: [
+        'Buscar el criterio que comparten tres de cuatro',
+        'Contar lados, ejes de simetría y elementos',
+        'No quedarse con el primer criterio que aparece',
+      ] },
+      { id: 'rotacion', nombre: 'Rotación y simetría', claves: [
+        'Distinguir giro de reflexión',
+        'Giros de 45°, 90° y 180°',
+        'Figuras que quedan igual al girarlas',
+      ] },
+      { id: 'plegado', nombre: 'Plegado, cubos y vistas', claves: [
+        'Caras opuestas en el desarrollo de un cubo',
+        'Perforaciones sobre papel doblado',
+        'Vistas desde arriba, de frente y de lado',
+      ] },
+      { id: 'series-numericas', nombre: 'Series numéricas', claves: [
+        'Diferencias sucesivas y segundas diferencias',
+        'Factores, cuadrados, cubos y factoriales',
+        'Series alternadas o con dos series entrelazadas',
+      ] },
+      { id: 'series-alfanumericas', nombre: 'Series de letras y alfanuméricas', claves: [
+        'Posición de cada letra en el alfabeto',
+        'Saltos crecientes y recorridos hacia atrás',
+        'Combinaciones de letra con número',
+      ] },
+      { id: 'logica', nombre: 'Lógica, silogismos y ordenamientos', claves: [
+        'Qué se concluye de verdad y qué no',
+        'Negar correctamente "todos", "algunos" y "ninguno"',
+        'Ordenar personas u objetos con pistas',
+        'Conjuntos: diagramas de Venn con tres grupos',
+      ] },
+      { id: 'analogias', nombre: 'Analogías y relaciones', claves: [
+        'Nombrar la relación antes de mirar las opciones',
+        'Parte-todo, causa-efecto, instrumento-función',
+        'Mantener el mismo orden de la relación',
+      ] },
+    ],
+  },
+
+  {
+    id: 'lectura',
+    nombre: 'Comprensión de lectura',
+    icono: '📖',
+    resumen: 'Leer un texto y responder: idea principal, inferencias, vocabulario, intención y argumentos.',
+    temas: [
+      { id: 'idea-principal', nombre: 'Idea principal y tema', claves: [
+        'Distinguir el tema (de qué habla) de la idea principal (qué dice)',
+        'Descartar opciones demasiado amplias o demasiado estrechas',
+        'Un título que cubra todo el texto, no solo un párrafo',
+      ] },
+      { id: 'detalles', nombre: 'Detalles explícitos', claves: [
+        'Volver al texto y señalar la línea exacta',
+        'Cuidado con las opciones que cambian una palabra',
+        'Datos, fechas y cifras',
+      ] },
+      { id: 'inferencias', nombre: 'Inferencias y conclusiones', claves: [
+        'Lo que se deduce sin estar escrito',
+        'No traer información de fuera del texto',
+        'Distinguir inferencia de suposición',
+      ] },
+      { id: 'vocabulario-contexto', nombre: 'Vocabulario en contexto', claves: [
+        'Sustituir la palabra y verificar que el sentido no cambie',
+        'Palabras con varios significados',
+        'Pistas de la oración anterior y la siguiente',
+      ] },
+      { id: 'proposito-tono', nombre: 'Propósito, intención y tono', claves: [
+        'Informar, persuadir, narrar o criticar',
+        'Tono: irónico, crítico, admirativo, neutral',
+        'A quién le habla el autor',
+      ] },
+      { id: 'estructura', nombre: 'Estructura y organización', claves: [
+        'Función de un párrafo dentro del texto',
+        'Conectores y relaciones entre ideas',
+        'Ejemplo, contraste, causa y consecuencia',
+      ] },
+      { id: 'argumentacion', nombre: 'Argumentación', claves: [
+        'Separar tesis, argumento y ejemplo',
+        'Qué dato debilita o refuerza una postura',
+        'Falacias frecuentes y generalizaciones',
+      ] },
+      { id: 'datos-texto', nombre: 'Datos dentro del texto', claves: [
+        'Interpretar cifras, porcentajes y comparaciones',
+        'Qué se puede afirmar con los datos dados',
+        'Diferencia entre correlación y causa',
+      ] },
+    ],
+  },
+
+  {
+    id: 'ingles',
+    nombre: 'Inglés',
+    icono: 'EN',
+    resumen: 'Gramática, vocabulario y lectura al nivel A2–B2 que piden las pruebas de admisión.',
+    temas: [
+      { id: 'tiempos-verbales', nombre: 'Verb tenses', claves: [
+        'Present simple vs. present continuous',
+        'Past simple vs. present perfect (for, since, ago, yet)',
+        'Future: will, going to, present continuous',
+      ] },
+      { id: 'condicionales', nombre: 'Conditionals', claves: [
+        'Zero, first, second and third conditional',
+        'If / unless / as long as',
+        'Wish y would rather',
+      ] },
+      { id: 'modales', nombre: 'Modal verbs', claves: [
+        'Obligación, prohibición y ausencia de obligación',
+        "Deducción: must be / can't be / might be",
+        'Modales en pasado: should have, could have',
+      ] },
+      { id: 'voz-pasiva', nombre: 'Passive voice', claves: [
+        'Pasar de activa a pasiva en cada tiempo',
+        'Pasiva con by y sin agente',
+        'Verbos con dos objetos',
+      ] },
+      { id: 'reported-speech', nombre: 'Reported speech', claves: [
+        'Un paso atrás en el tiempo verbal',
+        'Cambios de pronombres, tiempo y lugar',
+        'Preguntas y órdenes reportadas',
+      ] },
+      { id: 'relativas', nombre: 'Relative clauses', claves: [
+        'who, which, that, whose, where',
+        'Defining vs. non-defining',
+        'Cuándo se puede omitir el relativo',
+      ] },
+      { id: 'preposiciones', nombre: 'Prepositions', claves: [
+        'in / on / at de tiempo y de lugar',
+        'Verbos con preposición fija',
+        'Adjetivos con preposición (interested in, afraid of)',
+      ] },
+      { id: 'cuantificadores', nombre: 'Articles and quantifiers', claves: [
+        'a / an / the / sin artículo',
+        'much, many, a few, a little, plenty of',
+        'Contables e incontables',
+      ] },
+      { id: 'conectores', nombre: 'Linking words', claves: [
+        'although, however, despite, in spite of',
+        'so, such, therefore, because of',
+        'Orden de la oración con cada conector',
+      ] },
+      { id: 'phrasal-verbs', nombre: 'Phrasal verbs', claves: [
+        'Los más frecuentes en examen',
+        'Significado que cambia con la partícula',
+        'Separables y no separables',
+      ] },
+      { id: 'vocabulario', nombre: 'Vocabulary and word formation', claves: [
+        'Prefijos y sufijos para formar palabras',
+        'Collocations frecuentes',
+        'Falsos amigos con el español',
+      ] },
+      { id: 'reading', nombre: 'Reading comprehension', claves: [
+        'Idea general y detalle específico',
+        'Inferir el significado de una palabra por contexto',
+        'Verdadero, falso o no se dice',
+      ] },
+    ],
+  },
+];
+
+export const MAPA_ASIGNATURAS = Object.fromEntries(ASIGNATURAS.map((a) => [a.id, a]));
+
+export function asignatura(id) {
+  return MAPA_ASIGNATURAS[id] || null;
+}
+
+export function tema(asignaturaId, temaId) {
+  return asignatura(asignaturaId)?.temas.find((t) => t.id === temaId) || null;
+}
+
+export function nombreTema(asignaturaId, temaId) {
+  return tema(asignaturaId, temaId)?.nombre || temaId;
+}
+
+export function nombreAsignatura(id) {
+  return asignatura(id)?.nombre || id;
+}
+
+/** Todos los temas en una sola lista, útil para validar el banco. */
+export function todosLosTemas() {
+  return ASIGNATURAS.flatMap((a) => a.temas.map((t) => ({ asignatura: a.id, ...t })));
+}
+
+export const NIVELES = {
+  1: 'Básico',
+  2: 'Intermedio',
+  3: 'Avanzado',
+};

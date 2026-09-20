@@ -8,6 +8,11 @@ video de YouTube** para saber qué tocar en cada instante, **academia de música
 No necesita servidor, ni cuenta, ni internet (salvo para el video de YouTube).
 Todo se guarda en tu dispositivo.
 
+Este repositorio también contiene una segunda app, independiente de esta:
+**[Ingreso](examen/README.md)**, una plataforma de preguntas para pruebas de
+admisión a la universidad (matemáticas, trigonometría, razonamiento abstracto,
+comprensión de lectura e inglés). Se abre en `http://localhost:8080/examen/`.
+
 ## Cómo abrirla
 
 ```bash
@@ -290,14 +295,17 @@ tests/                Pruebas: teoría musical, señal (acordes y afinación),
                       digitaciones y formato de hoja
 tools/gen-docs.mjs    Genera el documento de las 100 ideas
 tools/servidor.mjs    Servidor estático para desarrollo (sin dependencias)
+examen/               App aparte: banco de preguntas para la prueba de ingreso
+                      a la universidad (ver examen/README.md)
 ```
 
 ## Comandos
 
 ```bash
 npm start    # servidor local (Node, sin dependencias)
-npm test     # 64 pruebas: teoría, señal, digitaciones, formato de hoja,
-             # voz, estiramiento de tiempo, clic, QR, compartir e historial
+npm test     # 92 pruebas: teoría, señal, digitaciones, formato de hoja,
+             # voz, estiramiento de tiempo, clic, QR, compartir, historial
+             # y el banco y el motor de la app de ingreso (examen/)
 npm run docs # regenera docs/100-ideas-alabanza.md desde src/ideas.js
 ```
 

@@ -1,0 +1,19 @@
+{
+  "name": "Ingreso — preparación para la prueba de admisión",
+  "short_name": "Ingreso",
+  "description": "Banco de preguntas y simulacros de matemáticas, trigonometría, razonamiento abstracto, comprensión de lectura e inglés para pruebas de ingreso a la universidad.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0b1020",
+  "theme_color": "#0b1020",
+  "lang": "es",
+  "icons": [
+    {
+      "src": "assets/icono.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
