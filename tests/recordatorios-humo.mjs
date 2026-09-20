@@ -192,7 +192,7 @@ else {
 await pagina.goto(BASE + '#/proyectos');
 await pagina.waitForTimeout(500);
 // columnas: EDT, tarea, días, optimista, pesimista, comienzo, fin…
-const COL_FIN = 6;
+const COL_FIN = 7;
 const antesFin = await pagina.locator('.tabla-plan tbody tr').nth(1).locator('td').nth(COL_FIN).textContent();
 const barra = pagina.locator('.gantt-barra').nth(1);
 const caja = await barra.boundingBox();

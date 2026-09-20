@@ -12,6 +12,8 @@ import { store } from './store.js';
 import { vistaHoy } from './views/hoy.js';
 import { vistaBandeja } from './views/bandeja.js';
 import { vistaProximos } from './views/proximos.js';
+import { vistaTablero } from './views/tablero.js';
+import { vistaConcentracion } from './views/concentracion.js';
 import { vistaCalendario } from './views/calendario.js';
 import { vistaEnfoque } from './views/enfoque.js';
 import { vistaPlanificar } from './views/planificar.js';
@@ -31,7 +33,9 @@ const RUTAS = [
   { ruta: /^\/hoy$/, vista: vistaHoy, nav: 'hoy' },
   { ruta: /^\/bandeja$/, vista: vistaBandeja, nav: 'bandeja' },
   { ruta: /^\/proximos$/, vista: vistaProximos, nav: 'proximos' },
+  { ruta: /^\/tablero$/, vista: vistaTablero, nav: 'tablero' },
   { ruta: /^\/calendario$/, vista: vistaCalendario, nav: 'calendario' },
+  { ruta: /^\/concentracion(?:\/([^/]+))?$/, vista: vistaConcentracion, claves: ['id'] },
   { ruta: /^\/enfoque$/, vista: vistaEnfoque, nav: 'enfoque' },
   { ruta: /^\/planificar$/, vista: vistaPlanificar, nav: 'planificar' },
   { ruta: /^\/revision$/, vista: vistaRevision, nav: 'revision' },
@@ -112,6 +116,7 @@ const PRINCIPAL = [
   { id: 'bandeja', icono: '📥', texto: 'Bandeja', href: '#/bandeja' },
   { id: 'hoy', icono: '📋', texto: 'Hoy', href: '#/hoy' },
   { id: 'proximos', icono: '🗓️', texto: 'Próximos', href: '#/proximos' },
+  { id: 'tablero', icono: '🗂️', texto: 'Tablero', href: '#/tablero' },
   { id: 'calendario', icono: '📅', texto: 'Calendario', href: '#/calendario' },
   { id: 'enfoque', icono: '⏱️', texto: 'Enfoque', href: '#/enfoque' },
   { id: 'planificar', icono: '🧭', texto: 'Planificar', href: '#/planificar' },
@@ -129,6 +134,7 @@ const TRABAJO = [
 
 const MOVIL = [
   { id: 'hoy', icono: '📋', texto: 'Hoy', href: '#/hoy' },
+  { id: 'tablero', icono: '🗂️', texto: 'Tablero', href: '#/tablero' },
   { id: 'calendario', icono: '📅', texto: 'Calendario', href: '#/calendario' },
   { id: 'enfoque', icono: '⏱️', texto: 'Enfoque', href: '#/enfoque' },
   { id: 'inversiones', icono: '📈', texto: 'Cartera', href: '#/inversiones' },
@@ -244,7 +250,7 @@ function atajos() {
     if (escribiendo) return;
     if (e.key === '/') { e.preventDefault(); document.getElementById('buscador')?.focus(); return; }
     if (e.key === 'a') { e.preventDefault(); document.querySelector('[data-rapida]')?.focus(); return; }
-    const destinos = { b: '/bandeja', h: '/hoy', p: '/proximos', c: '/calendario', e: '/enfoque', i: '/inversiones', g: '/proyectos', r: '/revision' };
+    const destinos = { b: '/bandeja', h: '/hoy', p: '/proximos', t: '/tablero', c: '/calendario', e: '/enfoque', i: '/inversiones', g: '/proyectos', r: '/revision' };
     if (e.key === 'z' && store.puedeDeshacer) { e.preventDefault(); const etq = store.deshacer(); toast(`Deshecho: ${etq}`); dibujar(); return; }
     if (destinos[e.key]) { e.preventDefault(); navegar(destinos[e.key]); }
   });

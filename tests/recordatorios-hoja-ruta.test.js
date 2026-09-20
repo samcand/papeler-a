@@ -28,7 +28,11 @@ t('cada pendiente tiene ola y cada descartada su motivo', () => {
 t('las tres olas suman todo lo pendiente', () => {
   const suma = OLAS.reduce((s, o) => s + porOla(o.n).length, 0);
   assert.equal(suma, PENDIENTES.length);
-  assert.ok(porOla(1).length >= 10, 'la primera ola debería tener trabajo concreto');
+  // Las olas se vacían según se terminan: lo que debe cumplirse es que mientras
+  // queden pendientes haya al menos una ola con trabajo.
+  if (PENDIENTES.length) {
+    assert.ok(OLAS.some((o) => porOla(o.n).length), 'quedan pendientes pero ninguna ola los recoge');
+  }
 });
 
 t('los estados no se solapan', () => {

@@ -40,6 +40,10 @@ export function vistaAjustes(root) {
             el('span', { class: 'field-label' }, 'Meta diaria de tareas'),
             el('input', { class: 'input', type: 'number', min: 1, value: a.metaDiaria, onChange: (e) => store.ajustar({ metaDiaria: Number(e.target.value) || 5 }) })),
           el('label', { class: 'field', style: 'width:170px' },
+            el('span', { class: 'field-label' }, 'Tope de tareas en curso'),
+            el('input', { class: 'input', type: 'number', min: 1, max: 20, value: a.limiteWIP || 5,
+              onChange: (e) => store.ajustar({ limiteWIP: Number(e.target.value) || 5 }) })),
+          el('label', { class: 'field', style: 'width:170px' },
             el('span', { class: 'field-label' }, 'Orden por defecto'),
             el('select', { class: 'input', onChange: (e) => store.ajustar({ ordenPorDefecto: e.target.value }) },
               ...[['fecha', 'Por fecha'], ['prioridad', 'Por prioridad'], ['manual', 'Manual'], ['alfabetico', 'A–Z']]

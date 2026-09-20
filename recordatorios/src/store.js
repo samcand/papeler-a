@@ -52,6 +52,7 @@ const ESTADO_INICIAL = {
     horaResumen: '07:00',
     resumenVistoEn: null,
     minutosFinde: 240,
+    limiteWIP: 5,
     tresDelDia: null,
     saludPrevia: null,
     primerDiaSemana: 1,

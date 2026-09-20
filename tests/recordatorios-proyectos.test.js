@@ -23,6 +23,9 @@ t('el calendario laboral salta fines de semana y festivos', () => {
   assert.equal(fechaDeIndice('2026-09-21', 4), '2026-09-25');
   assert.equal(fechaDeIndice('2026-09-21', 5), '2026-09-28');
   assert.equal(indiceDeFecha('2026-09-21', '2026-09-28'), 5);
+  // un sábado no es un día hábil: su índice es el del lunes siguiente
+  assert.equal(indiceDeFecha('2026-09-21', '2026-09-26'), 5);
+  assert.equal(indiceDeFecha('2026-09-21', '2026-09-25'), 4);
   assert.equal(diasHabiles('2026-09-21', '2026-09-27'), 5);
   // un sábado como inicio se corre al lunes
   assert.equal(fechaDeIndice('2026-09-19', 0), '2026-09-21');

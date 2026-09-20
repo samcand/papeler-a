@@ -14,7 +14,7 @@
  * calibración medido: tú ya sabes cuánto te pasas, y la simulación lo usa.
  */
 
-import { aISO, deISO, diasDelMes, diferenciaDias, fecha, sumarDias } from './fechas.js';
+import { aISO, deISO, diferenciaDias, sumarDias } from './fechas.js';
 import { cambiarDuracion, diasHabiles, esResumen, fechaDeIndice, moverTarea, programar } from './proyectos.js';
 
 /* ------------------------------------------------------------------ *
@@ -223,38 +223,43 @@ export function queSiPasa(proyecto, cambios = []) {
     if (c.dias) moverTarea(copia, c.tareaId, c.dias, programar(copia));
   }
   const despues = programar(copia);
+  return {
+    ...compararPlanes(antes, despues, proyecto.calendario, cambios.map((c) => c.tareaId)),
+    plan: despues,
+    proyectoSimulado: copia,
+  };
+}
+
+/**
+ * Diferencias entre dos versiones del mismo plan: qué se movió, cuántos días,
+ * qué hitos y si la ruta crítica cambió de sitio.
+ */
+export function compararPlanes(antes, despues, calendario, directas = []) {
+  const distancia = (a, b) => (a === b ? 0
+    : signo(a, b) * Math.max(0, diasHabiles(a < b ? a : b, a < b ? b : a, calendario) - 1));
 
   const movidas = [];
   for (const t of despues.tareas) {
     const previa = antes.tareas.find((x) => x.id === t.id);
     if (!previa || t.resumen) continue;
-    const dias = previa.inicio === t.inicio ? 0 : signo(previa.inicio, t.inicio) * Math.max(0, diasHabiles(
-      previa.inicio < t.inicio ? previa.inicio : t.inicio,
-      previa.inicio < t.inicio ? t.inicio : previa.inicio,
-      proyecto.calendario) - 1);
+    const dias = distancia(previa.inicio, t.inicio);
     if (!dias && previa.fin === t.fin) continue;
     movidas.push({
       id: t.id, nombre: t.nombre, esHito: t.esHito, critica: t.critica,
       antesInicio: previa.inicio, ahoraInicio: t.inicio,
       antesFin: previa.fin, ahoraFin: t.fin,
       dias,
-      directa: cambios.some((c) => c.tareaId === t.id),
+      directa: directas.includes(t.id),
     });
   }
 
   const criticasAntes = new Set(antes.critica);
   const criticasDespues = new Set(despues.critica);
-  const diasProyecto = antes.fin === despues.fin ? 0
-    : signo(antes.fin, despues.fin) * Math.max(0, diasHabiles(
-      antes.fin < despues.fin ? antes.fin : despues.fin,
-      antes.fin < despues.fin ? despues.fin : antes.fin,
-      proyecto.calendario) - 1);
-
   return {
     posible: true,
     finAntes: antes.fin,
     finDespues: despues.fin,
-    diasProyecto,
+    diasProyecto: distancia(antes.fin, despues.fin),
     movidas: movidas.sort((a, b) => Math.abs(b.dias) - Math.abs(a.dias)),
     hitos: movidas.filter((m) => m.esHito),
     arrastradas: movidas.filter((m) => !m.directa).length,
@@ -262,8 +267,45 @@ export function queSiPasa(proyecto, cambios = []) {
       .map((id) => despues.tareas.find((t) => t.id === id)?.nombre).filter(Boolean),
     yaNoCriticas: [...criticasAntes].filter((id) => !criticasDespues.has(id))
       .map((id) => antes.tareas.find((t) => t.id === id)?.nombre).filter(Boolean),
+  };
+}
+
+/**
+ * "Me voy dos semanas": qué pasa si un recurso no está disponible entre dos
+ * fechas. Las tareas suyas que caen dentro se empujan hasta después de la
+ * vuelta y el resto del plan se recalcula.
+ */
+export function simularAusencia(proyecto, { recurso, desde, hasta } = {}) {
+  if (!recurso || !desde || !hasta) return { posible: false, motivo: 'Falta el recurso o las fechas.' };
+  const antes = programar(proyecto);
+  if (antes.ciclo) return { posible: false, motivo: 'El plan tiene dependencias circulares.' };
+
+  const copia = typeof structuredClone === 'function' ? structuredClone(proyecto) : JSON.parse(JSON.stringify(proyecto));
+  const vuelta = aISO(sumarDias(hasta, 1));
+  const afectadas = antes.tareas.filter((t) => !t.resumen && t.recurso === recurso
+    && t.fin >= desde && t.inicio <= hasta);
+
+  for (const t of afectadas) {
+    const tarea = copia.tareas.find((x) => x.id === t.id);
+    if (tarea) tarea.noAntesDe = vuelta;
+  }
+  const despues = programar(copia);
+
+  const comparacion = compararPlanes(antes, despues, proyecto.calendario, afectadas.map((t) => t.id));
+  return {
+    ...comparacion,
+    recurso,
+    desde,
+    hasta,
+    diasFuera: diferenciaDias(desde, hasta) + 1,
+    afectadas: afectadas.map((t) => ({ id: t.id, nombre: t.nombre, inicio: t.inicio, fin: t.fin })),
     plan: despues,
     proyectoSimulado: copia,
+    frase: !afectadas.length
+      ? `${recurso} no tiene nada planificado entre el ${desde} y el ${hasta}: puede irse tranquilo.`
+      : comparacion.diasProyecto > 0
+        ? `${afectadas.length} tarea${afectadas.length === 1 ? '' : 's'} de ${recurso} se van al otro lado de la ausencia y el proyecto termina ${comparacion.diasProyecto} días más tarde.`
+        : `${afectadas.length} tarea${afectadas.length === 1 ? '' : 's'} se mueven, pero la holgura absorbe la ausencia: la fecha final no cambia.`,
   };
 }
 

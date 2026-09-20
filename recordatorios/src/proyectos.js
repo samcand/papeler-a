@@ -80,17 +80,22 @@ export function fechaDeIndice(inicio, indice, cal = CALENDARIO_POR_DEFECTO) {
   return aISO(cursor);
 }
 
-/** Índice de día hábil de una fecha (el inverso de `fechaDeIndice`). */
+/**
+ * Índice de día hábil de una fecha: el del **primer día hábil a partir de
+ * ella**. Si cae en sábado, el índice es el del lunes siguiente — si no, una
+ * restricción de "no empezar antes del sábado" dejaría empezar el viernes.
+ */
 export function indiceDeFecha(inicio, fecha, cal = CALENDARIO_POR_DEFECTO) {
   const objetivo = aISO(fecha);
   let cursor = deISO(inicio);
   let guarda = 0;
   while (!esLaborable(cursor, cal) && guarda++ < 400) cursor = sumarDias(cursor, 1);
   if (objetivo <= aISO(cursor)) return 0;
+  // Días hábiles en [inicio, objetivo): justo el índice del primero que queda.
   let i = 0;
   while (aISO(cursor) < objetivo && guarda++ < 40000) {
-    cursor = sumarDias(cursor, 1);
     if (esLaborable(cursor, cal)) i++;
+    cursor = sumarDias(cursor, 1);
   }
   return i;
 }
@@ -564,41 +569,182 @@ export function desviaciones(plan, lineaBase, calendario = CALENDARIO_POR_DEFECT
 /**
  * Valor ganado a una fecha de corte: qué se planeó gastar, qué vale lo hecho y
  * qué se gastó de verdad. SPI < 1 = vas tarde; CPI < 1 = vas caro.
+ *
+ * Con `unidad: 'esfuerzo'` la moneda son **días de trabajo** en vez de dinero,
+ * que es lo que de verdad gastas en un artículo o en un semestre. El coste real
+ * sale de `diasReales`; si no lo has apuntado, el CPI se devuelve como null en
+ * vez de inventarse un número.
  */
-export function valorGanado(plan, fechaEstado) {
+export function valorGanado(plan, fechaEstado, opciones = {}) {
   const corte = fechaEstado || aISO(new Date());
+  const esfuerzo = opciones.unidad === 'esfuerzo';
   let pv = 0;
   let ev = 0;
   let ac = 0;
   let bac = 0;
+  let hayReales = false;
 
   for (const t of plan.tareas) {
     if (t.resumen) continue;
-    const costo = Number(t.costo) || 0;
-    bac += costo;
-    ac += Number(t.costoReal) || 0;
-    ev += costo * ((Number(t.avance) || 0) / 100);
+    const presupuesto = esfuerzo ? Math.max(0, Number(t.duracion) || 0) : (Number(t.costo) || 0);
+    const real = esfuerzo ? Number(t.diasReales) : Number(t.costoReal);
+    bac += presupuesto;
+    if (Number.isFinite(real) && real > 0) { ac += real; hayReales = true; }
+    ev += presupuesto * ((Number(t.avance) || 0) / 100);
 
     // Fracción planificada: proporción del tramo de la tarea ya transcurrida.
     const total = Math.max(1, diferenciaDias(t.inicio, t.fin) + 1);
     const transcurrido = diferenciaDias(t.inicio, corte) + 1;
     const fraccion = Math.min(1, Math.max(0, transcurrido / total));
-    pv += costo * fraccion;
+    pv += presupuesto * fraccion;
   }
 
   const redondea = (n) => Math.round(n * 100) / 100;
+  const cpi = hayReales && ac > 0 ? redondea(ev / ac) : null;
+  const eac = cpi ? redondea(bac / cpi) : bac;
   return {
     fecha: corte,
+    unidad: esfuerzo ? 'días' : 'coste',
     bac: redondea(bac),
     pv: redondea(pv),
     ev: redondea(ev),
     ac: redondea(ac),
+    hayReales,
     spi: pv > 0 ? redondea(ev / pv) : null,
-    cpi: ac > 0 ? redondea(ev / ac) : null,
+    cpi,
     variacionCronograma: redondea(ev - pv),
-    variacionCosto: redondea(ev - ac),
-    estimacionFinal: ac > 0 && ev > 0 ? redondea(bac / (ev / ac)) : bac,
+    variacionCosto: hayReales ? redondea(ev - ac) : null,
+    // Estimaciones al terminar: cuánto falta (ETC), cuánto acabará costando
+    // (EAC), cuánto te desvías (VAC) y a qué rendimiento tendrías que ir para
+    // llegar al presupuesto (TCPI).
+    etc: redondea(Math.max(0, eac - ac)),
+    estimacionFinal: eac,
+    eac,
+    vac: redondea(bac - eac),
+    tcpi: bac - ac > 0 ? redondea((bac - ev) / (bac - ac)) : null,
   };
+}
+
+/**
+ * Curva S: el valor planificado acumulado semana a semana, con el valor ganado
+ * y el coste real marcados en la fecha de estado.
+ *
+ * Solo la curva planificada es una curva: del valor ganado y del coste real no
+ * se guarda historia, así que se enseñan como puntos y no como líneas
+ * inventadas hacia atrás.
+ */
+export function curvaS(plan, fechaEstado, opciones = {}) {
+  const corte = fechaEstado || aISO(new Date());
+  const ev = valorGanado(plan, corte, opciones);
+  const hojas = plan.tareas.filter((t) => !t.resumen);
+  if (!hojas.length || !ev.bac) return { puntos: [], hoy: ev, sinDatos: true };
+
+  const fin = hojas.reduce((max, t) => (t.fin > max ? t.fin : max), plan.inicio);
+  const puntos = [];
+  let cursor = plan.inicio;
+  let guarda = 0;
+  while (cursor <= fin && guarda++ < 260) {
+    let acumulado = 0;
+    for (const t of hojas) {
+      const presupuesto = opciones.unidad === 'esfuerzo' ? Math.max(0, Number(t.duracion) || 0) : (Number(t.costo) || 0);
+      const total = Math.max(1, diferenciaDias(t.inicio, t.fin) + 1);
+      const transcurrido = diferenciaDias(t.inicio, cursor) + 1;
+      acumulado += presupuesto * Math.min(1, Math.max(0, transcurrido / total));
+    }
+    puntos.push({
+      fecha: cursor,
+      pv: Math.round(acumulado * 100) / 100,
+      pct: Math.round((acumulado / ev.bac) * 100),
+      esCorte: cursor >= corte && (!puntos.length || puntos[puntos.length - 1].fecha < corte),
+    });
+    cursor = aISO(sumarDias(cursor, 7));
+  }
+  if (puntos.length && puntos[puntos.length - 1].fecha < fin) {
+    puntos.push({ fecha: fin, pv: ev.bac, pct: 100, esCorte: false });
+  }
+  return { puntos, hoy: ev, sinDatos: false };
+}
+
+/* ------------------------------------------------------------------ *
+ * Avisos del cronograma
+ * ------------------------------------------------------------------ */
+
+/**
+ * Ruta casi crítica: lo que tiene poca holgura y se pinta igual que lo que
+ * tiene treinta días. Son las tareas que dan las sorpresas.
+ */
+export function casiCriticas(plan, umbral = 3) {
+  return plan.tareas
+    .filter((t) => !t.resumen && !t.critica && t.holgura > 0 && t.holgura <= umbral)
+    .sort((a, b) => a.holgura - b.holgura);
+}
+
+/** Cuánto colchón queda hasta cada hito. */
+export function margenHitos(plan) {
+  return plan.tareas
+    .filter((t) => t.esHito)
+    .map((t) => ({
+      id: t.id, nombre: t.nombre, fecha: t.fin, holgura: t.holgura, critica: t.critica,
+      texto: t.critica
+        ? `${t.nombre}: sin margen, cualquier retraso lo mueve.`
+        : `${t.nombre}: ${t.holgura} días de colchón.`,
+    }))
+    .sort((a, b) => a.fecha.localeCompare(b.fecha));
+}
+
+/**
+ * Problemas estructurales del plan: lo que no cabe antes de la fecha a la que
+ * te comprometiste y lo que cuelga de la nada.
+ */
+export function problemasDePlan(plan, proyecto = {}) {
+  const problemas = [];
+  const hojas = plan.tareas.filter((t) => !t.resumen);
+  const objetivo = proyecto.fechaObjetivo;
+
+  if (objetivo && plan.fin > objetivo) {
+    const dias = Math.max(0, diasHabiles(objetivo, plan.fin, proyecto.calendario) - 1);
+    problemas.push({
+      tipo: 'objetivo', gravedad: 'alto',
+      texto: `El plan termina el ${plan.fin} y te comprometiste al ${objetivo}: sobran ${dias} días hábiles.`,
+      accion: 'Quitar alcance, solapar tareas con desfase negativo o mover la fecha antes de prometerla.',
+    });
+  }
+
+  for (const t of hojas) {
+    if (objetivo && t.fin > objetivo) {
+      problemas.push({
+        tipo: 'imposible', gravedad: 'alto', tarea: t.id,
+        texto: `“${t.nombre}” termina el ${t.fin}, después de la fecha comprometida.`,
+        accion: 'Adelantarla, acortarla o aceptar que la fecha se mueve.',
+      });
+    }
+    if (t.noAntesDe && t.inicio > t.noAntesDe) {
+      problemas.push({
+        tipo: 'restriccion', gravedad: 'medio', tarea: t.id,
+        texto: `“${t.nombre}” está fijada al ${t.noAntesDe} pero sus dependencias la empujan al ${t.inicio}.`,
+        accion: 'La chincheta ya no manda: quítala para no engañarte.',
+      });
+    }
+  }
+
+  if (hojas.length > 1) {
+    const conSucesoras = new Set();
+    for (const t of hojas) for (const d of t.dependencias || []) conSucesoras.add(d.de);
+    for (const t of hojas) {
+      const sinPredecesoras = !(t.dependencias || []).length;
+      const sinSucesoras = !conSucesoras.has(t.id);
+      if (sinPredecesoras && sinSucesoras && !t.noAntesDe) {
+        problemas.push({
+          tipo: 'huerfana', gravedad: 'bajo', tarea: t.id,
+          texto: `“${t.nombre}” no depende de nada ni bloquea nada: flota en el plan.`,
+          accion: '¿Va después de algo? ¿Bloquea algo? Si no, quizá no es de este proyecto.',
+        });
+      }
+    }
+  }
+
+  const orden = { alto: 0, medio: 1, bajo: 2 };
+  return problemas.sort((a, b) => orden[a.gravedad] - orden[b.gravedad]);
 }
 
 /** Resumen de una línea: lo que se enseña arriba del Gantt. */

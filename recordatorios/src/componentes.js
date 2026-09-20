@@ -191,6 +191,10 @@ export function itemTarea(tarea, opciones = {}) {
     }, { variant: `ghost chico${enLasTres ? ' estrella' : ''}`, title: 'Una de las tres de hoy' }) : null,
     tarea.completada ? button('📦', () => { store.archivar(tarea.id); toast('Archivada'); refrescar(); },
       { variant: 'ghost chico', title: 'Archivar' }) : null,
+    !tarea.completada ? el('a', {
+      class: 'btn ghost chico', href: `#/concentracion/${tarea.id}`, title: 'Trabajar en esto y nada más',
+      onClick: (e) => e.stopPropagation(),
+    }, '🎯') : null,
     !tarea.completada ? button('📅', () => { store.aplazar(tarea.id, hoyISO); refrescar(); }, { variant: 'ghost chico', title: 'Mover a hoy' }) : null,
     !tarea.completada ? button('→', () => { store.aplazar(tarea.id, aISO(sumarDias(tarea.fecha || hoyISO, 1))); refrescar(); }, { variant: 'ghost chico', title: 'Posponer un día' }) : null,
     button('✎', () => panelTarea(tarea, refrescar), { variant: 'ghost chico', title: 'Editar' }),
@@ -211,14 +215,42 @@ export function itemTarea(tarea, opciones = {}) {
 export function listaTareas(tareas, opciones = {}) {
   if (!tareas.length) return vacio(opciones.vacio || 'Nada por aquí.', opciones.icono);
   const orden = opciones.orden || store.estado.ajustes.ordenPorDefecto;
-  const lista = el('div', { class: 'lista-tareas' });
+  const lista = el('div', { class: `lista-tareas${orden === 'manual' ? ' ordenable' : ''}` });
   for (const t of ordenarTareas(tareas, orden)) {
-    lista.append(itemTarea(t, opciones));
+    const fila = itemTarea(t, opciones);
+    if (orden === 'manual') hacerOrdenable(fila, t, opciones.alCambiar || (() => {}));
+    lista.append(fila);
     if (opciones.conSubtareas) {
       for (const h of store.tareas.filter((x) => x.padre === t.id)) lista.append(itemTarea(h, { ...opciones, sub: true }));
     }
   }
   return lista;
+}
+
+/**
+ * Arrastrar para reordenar, solo con el orden manual: en una lista ordenada por
+ * fecha, mover a mano no significaría nada.
+ */
+function hacerOrdenable(fila, tarea, alCambiar) {
+  fila.draggable = true;
+  fila.classList.add('arrastrable');
+  fila.addEventListener('dragstart', (e) => {
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', tarea.id);
+    fila.classList.add('arrastrando');
+  });
+  fila.addEventListener('dragend', () => fila.classList.remove('arrastrando'));
+  fila.addEventListener('dragover', (e) => { e.preventDefault(); fila.classList.add('destino'); });
+  fila.addEventListener('dragleave', () => fila.classList.remove('destino'));
+  fila.addEventListener('drop', (e) => {
+    e.preventDefault();
+    fila.classList.remove('destino');
+    const id = e.dataTransfer.getData('text/plain');
+    if (!id || id === tarea.id) return;
+    store.instantanea('Reordenar');
+    store.reordenar(id, tarea.id);
+    alCambiar();
+  });
 }
 
 export function vacio(mensaje, icono = '🌤️') {

@@ -33,8 +33,12 @@ export function vistaLista(root, ctx = {}) {
       tareas = store.tareas.filter((t) => (t.etiquetas || []).includes(clave));
       titulo = '@' + clave;
     } else if (tipo === 'buscar') {
-      tareas = aplicarFiltro(`buscar: ${clave}`, store.tareas, { hoy: hoyISO });
+      // Si la búsqueda trae operadores, se usa tal cual como filtro; si no, es
+      // texto libre. Así "#Cartera & p1" funciona desde la misma caja.
+      const conOperadores = /[#@&|!]|p[1-4]\b|módulo:|modulo:|antes de:|después de:|despues de:|\bhoy\b|\bvencidas\b|sin fecha/i.test(clave);
+      tareas = aplicarFiltro(conOperadores ? clave : `buscar: ${clave}`, store.tareas, { hoy: hoyISO });
       titulo = `Resultados de “${clave}”`;
+      subtitulo = conOperadores ? 'interpretado como filtro' : `${tareas.length} coincidencias en título y notas`;
     } else {
       tareas = store.tareas.filter((t) => t.proyecto === clave);
       titulo = clave;
@@ -59,8 +63,9 @@ export function vistaLista(root, ctx = {}) {
       av.total ? el('p', { class: 'small muted' }, `${av.hechas} de ${av.total} completadas (${av.pct} %)`) : null,
       entradaRapida({ proyecto: tipo === 'proyecto' ? clave : null, modulo: proyecto?.modulo || null }, pintar),
       raices.length
-        ? listaTareas(raices, { alCambiar: pintar, hoy: hoyISO, orden, conSubtareas: true })
-        : vacio('Esta lista está vacía. Escribe arriba para empezar.', '🗒️'),
+        ? (tipo === 'buscar' ? agrupadoPorProyecto(raices, pintar, hoyISO, orden)
+          : listaTareas(raices, { alCambiar: pintar, hoy: hoyISO, orden, conSubtareas: true }))
+        : vacio(tipo === 'buscar' ? 'Sin coincidencias. Prueba con menos palabras, o con operadores: #Proyecto, @etiqueta, p1, hoy.' : 'Esta lista está vacía. Escribe arriba para empezar.', '🗒️'),
 
       tipo === 'proyecto' && proyecto ? el('div', { class: 'fila', style: 'margin-top:20px' },
         button('Borrar proyecto', () => {
@@ -75,6 +80,21 @@ export function vistaLista(root, ctx = {}) {
 
   pintar();
   render(root, host);
+}
+
+/** Los resultados de una búsqueda se leen mejor agrupados por proyecto. */
+function agrupadoPorProyecto(tareas, alCambiar, hoyISO, orden) {
+  const grupos = new Map();
+  for (const t of tareas) {
+    const clave = t.proyecto || 'Sin proyecto';
+    if (!grupos.has(clave)) grupos.set(clave, []);
+    grupos.get(clave).push(t);
+  }
+  return el('div', {}, ...[...grupos.entries()]
+    .sort((a, b) => b[1].length - a[1].length)
+    .map(([nombre, lista]) => el('section', { class: 'grupo-dia' },
+      el('h3', {}, nombre, ' ', el('span', { class: 'muted' }, `${lista.length}`)),
+      listaTareas(lista, { alCambiar, hoy: hoyISO, orden }))));
 }
 
 /** Pantalla para crear un filtro nuevo con ayuda del lenguaje de filtros. */

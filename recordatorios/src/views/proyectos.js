@@ -10,12 +10,12 @@ import { button, download, el, input, render, toast } from '../../../src/ui.js';
 import { aISO, deISO, diferenciaDias, hoy as fechaHoy, sumarDias, textoRelativo, MESES_CORTO } from '../fechas.js';
 import {
   PLANTILLAS_PROYECTO, TIPOS_DEPENDENCIA, aTareasDeAgenda, cambiarDuracion, cargaRecursos,
-  desdePlantilla, desviaciones, diasHabiles, indiceDeFecha, moverTarea, nivelarRecursos, numerarEDT,
-  programar, proyectoVacio, quitarRestriccion, resumenProyecto, tareaProyecto, tomarLineaBase,
-  valorGanado,
+  casiCriticas, curvaS, desdePlantilla, desviaciones, diasHabiles, indiceDeFecha, margenHitos,
+  moverTarea, nivelarRecursos, numerarEDT, problemasDePlan, programar, proyectoVacio,
+  quitarRestriccion, resumenProyecto, tareaProyecto, tomarLineaBase, valorGanado,
 } from '../proyectos.js';
 import { dato, tituloVista, vacio } from '../componentes.js';
-import { probabilidadDeLlegar, queSiPasa, resumenQueSiPasa, simularProyecto } from '../simulacion.js';
+import { probabilidadDeLlegar, queSiPasa, resumenQueSiPasa, simularAusencia, simularProyecto } from '../simulacion.js';
 import { calibracion } from '../calibracion.js';
 import { store } from '../store.js';
 
@@ -30,6 +30,7 @@ export function vistaProyectos(root, ctx = {}) {
   let seleccionado = ctx.query?.p || store.estado.planes[0]?.id || null;
   let nivelacion = null;   // resultado de la última nivelación, para poder deshacerla
   const escenario = { tareaId: null, modo: 'retraso', valor: 5 };
+  const ausencia = { recurso: null, desde: null, hasta: null };
 
   const proyecto = () => store.estado.planes.find((p) => p.id === seleccionado) || null;
   const guardar = () => { store.guardar(); pintar(); };
@@ -49,7 +50,7 @@ export function vistaProyectos(root, ctx = {}) {
     return el('div', { class: 'tabla-scroll' },
       el('table', { class: 'tabla tabla-plan' },
         el('thead', {}, el('tr', {},
-          ...['EDT', 'Tarea', 'Días', 'Opt.', 'Pes.', 'Comienzo', 'Fin', '%', 'Recurso', 'Coste', 'Depende de', 'Holgura', ''].map((h) => el('th', {}, h)))),
+          ...['EDT', 'Tarea', 'Días', 'Opt.', 'Pes.', 'Reales', 'Comienzo', 'Fin', '%', 'Recurso', 'Coste', 'Depende de', 'Holgura', ''].map((h) => el('th', {}, h)))),
         el('tbody', {},
           ...plan.tareas.map((t) => {
             const original = p.tareas.find((x) => x.id === t.id);
@@ -74,6 +75,7 @@ export function vistaProyectos(root, ctx = {}) {
               el('td', {}, t.resumen ? el('span', { class: 'muted' }, String(t.duracion)) : editable('duracion', 'number', 60, { min: 0 })),
               el('td', {}, t.resumen ? '' : editable('optimista', 'number', 55, { min: 0, title: 'Duración si todo sale bien' })),
               el('td', {}, t.resumen ? '' : editable('pesimista', 'number', 55, { min: 0, title: 'Duración si se tuerce' })),
+              el('td', {}, t.resumen ? '' : editable('diasReales', 'number', 60, { min: 0, title: 'Días de trabajo que te ha costado de verdad' })),
               el('td', { class: 'small' },
                 formatoCorto(t.inicio),
                 original.noAntesDe ? el('button', {
@@ -404,6 +406,8 @@ export function vistaProyectos(root, ctx = {}) {
         el('h2', { class: 'card-title' }, 'Hay que arreglar esto'),
         ...plan.errores.map((e) => el('div', { class: 'alerta alto' }, el('div', {}, e.texto)))) : null,
 
+      panelAvisosPlan(plan, p),
+
       plan.ciclo ? null : el('section', { class: 'card', style: 'margin-top:12px;padding:10px' },
         el('h2', { class: 'card-title' }, 'Diagrama de Gantt'),
         el('p', { class: 'muted small' }, 'En rojo, la ruta crítica: si una de esas tareas se retrasa un día, el proyecto entero se retrasa un día.'),
@@ -436,6 +440,35 @@ export function vistaProyectos(root, ctx = {}) {
             for (const t of plan.tareas) filas.push([t.edt, t.nombre, t.duracion, t.inicio, t.fin, t.avance, t.recurso || '', t.holgura ?? '', t.critica ? 'sí' : 'no']);
             download(`${p.nombre}.csv`, filas.map((f) => f.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n'), 'text/csv');
           }, { variant: 'ghost' }))));
+  }
+
+  /**
+   * Lo que el Gantt no enseña: lo que no cabe antes de la fecha comprometida, lo
+   * que flota sin depender de nada y lo que tiene tan poca holgura que da igual
+   * que no sea crítico.
+   */
+  function panelAvisosPlan(plan, p) {
+    const problemas = problemasDePlan(plan, p);
+    const casi = casiCriticas(plan, 3);
+    const hitos = margenHitos(plan);
+    if (!problemas.length && !casi.length && !hitos.length) return null;
+
+    return el('section', { class: 'card', style: 'margin-top:12px' },
+      el('h2', { class: 'card-title' }, 'Avisos del cronograma'),
+      ...problemas.map((x) => el('div', { class: `alerta ${x.gravedad}` },
+        el('div', {}, el('div', {}, x.texto), el('div', { class: 'accion' }, x.accion)))),
+
+      casi.length ? el('div', { style: 'margin-top:8px' },
+        el('p', { class: 'field-label' }, 'Ruta casi crítica (tres días o menos de holgura)'),
+        el('div', { class: 'chip-list' },
+          ...casi.map((t) => el('span', { class: 'chip', style: 'border-color:var(--warn)' },
+            `${t.nombre} · ${t.holgura} d`))),
+        el('p', { class: 'muted small' }, 'Se pintan como no críticas, pero cualquier tropiezo las mete en la ruta crítica.')) : null,
+
+      hitos.length ? el('div', { style: 'margin-top:10px' },
+        el('p', { class: 'field-label' }, 'Margen hasta cada hito'),
+        ...hitos.map((h) => el('p', { class: `small ${h.critica ? 'negativo' : 'muted'}`, style: 'margin:2px 0' },
+          `🏁 ${formatoCorto(h.fecha)} · ${h.texto}`))) : null);
   }
 
   function panelRecursos(p) {
@@ -642,6 +675,10 @@ export function vistaProyectos(root, ctx = {}) {
             el('div', {}, `${t.edt} ${t.nombre}`),
             el('div', { class: 'accion' }, `Fin previsto ${formatoCorto(t.fin)} (${textoRelativo(t.fin)}), avance ${t.avance || 0} %.`))))) : null,
 
+      panelEsfuerzo(p, plan),
+      panelCurvaS(p, plan),
+      panelAusencia(p),
+
       desvios.length ? el('section', { class: 'card' },
         el('h2', { class: 'card-title' }, 'Desviación frente a la línea base'),
         el('table', { class: 'tabla' },
@@ -652,6 +689,94 @@ export function vistaProyectos(root, ctx = {}) {
             el('td', { class: 'small' }, d.nueva ? '' : formatoCorto(plan.tareas.find((t) => t.id === d.id)?.fin)),
             el('td', { class: `num ${d.desvioFin > 0 ? 'negativo' : 'positivo'}` },
               d.nueva ? '—' : `${d.desvioFin > 0 ? '+' : ''}${d.desvioFin}`)))))) : null);
+  }
+
+  /** Valor ganado en días de trabajo: la moneda que de verdad gastas. */
+  function panelEsfuerzo(p, plan) {
+    const ev = valorGanado(plan, p.fechaEstado || hoyISO, { unidad: 'esfuerzo' });
+    if (!ev.bac) return null;
+    return el('section', { class: 'card' },
+      el('h2', { class: 'card-title' }, 'Valor ganado en días de trabajo'),
+      el('div', { class: 'tarjetas' },
+        dato(`${ev.bac} d`, 'presupuesto (BAC)'),
+        dato(`${ev.ev} d`, 'hecho (EV)', { pie: `planificado a hoy: ${ev.pv} d` }),
+        dato(ev.hayReales ? `${ev.ac} d` : '—', 'invertido (AC)', { pie: ev.hayReales ? '' : 'apunta días reales en la tabla' }),
+        dato(`${ev.etc} d`, 'falta (ETC)'),
+        dato(ev.vac, 'desvío final (VAC)', { clase: ev.vac < 0 ? 'negativo' : 'positivo', pie: ev.vac < 0 ? 'te pasarás' : 'dentro' }),
+        dato(ev.tcpi ?? '—', 'TCPI', { clase: (ev.tcpi ?? 1) > 1.1 ? 'negativo' : '', pie: 'ritmo que haría falta' })),
+      !ev.hayReales ? el('p', { class: 'muted small', style: 'margin-top:8px' },
+        'Sin días reales apuntados no hay CPI: preferimos no dar un número inventado. Añade "Reales" en la tabla del plan.') : null);
+  }
+
+  /** La curva S: lo planificado acumulado, con el hoy marcado. */
+  function panelCurvaS(p, plan) {
+    const c = curvaS(plan, p.fechaEstado || hoyISO, { unidad: 'esfuerzo' });
+    if (c.sinDatos || c.puntos.length < 2) return null;
+    const ancho = 560;
+    const alto = 160;
+    const x = (i) => (i / (c.puntos.length - 1)) * (ancho - 40) + 30;
+    const y = (pct) => alto - 20 - (pct / 100) * (alto - 40);
+    const linea = c.puntos.map((pt, i) => `${x(i)},${y(pt.pct)}`).join(' ');
+    const iCorte = Math.max(0, c.puntos.findIndex((pt) => pt.fecha >= (p.fechaEstado || hoyISO)));
+    const pctEV = c.hoy.bac ? Math.round((c.hoy.ev / c.hoy.bac) * 100) : 0;
+
+    const lienzo = svg('svg', { class: 'curva-s', viewBox: `0 0 ${ancho} ${alto}`, width: '100%', height: alto });
+    lienzo.append(
+      svg('line', { x1: 30, y1: y(0), x2: ancho - 10, y2: y(0), stroke: 'var(--line)' }),
+      svg('polyline', { points: linea, fill: 'none', stroke: 'var(--accent)', 'stroke-width': 2 }),
+      svg('line', { x1: x(iCorte), y1: 10, x2: x(iCorte), y2: y(0), stroke: 'var(--accent-2)', 'stroke-dasharray': '4 3' }),
+      svg('circle', { cx: x(iCorte), cy: y(pctEV), r: 5, fill: 'var(--ok)' }));
+    const etiqueta = svg('text', { x: x(iCorte) + 8, y: y(pctEV) - 8, fill: 'var(--ok)', 'font-size': 11 });
+    etiqueta.textContent = `hecho: ${pctEV} %`;
+    lienzo.append(etiqueta);
+
+    return el('section', { class: 'card' },
+      el('h2', { class: 'card-title' }, 'Curva S'),
+      el('p', { class: 'muted small' },
+        'La línea es lo que el plan dice que deberías llevar hecho; el punto verde, lo que llevas de verdad.'),
+      el('div', { class: 'gantt-caja', style: 'padding:6px' }, lienzo),
+      el('div', { class: 'fila entre small muted' },
+        el('span', {}, formatoCorto(c.puntos[0].fecha)),
+        el('span', {}, formatoCorto(c.puntos[c.puntos.length - 1].fecha))));
+  }
+
+  /** "Me voy dos semanas": qué se rompe. */
+  function panelAusencia(p) {
+    const plan = programar(p);
+    const recursos = [...new Set(plan.tareas.filter((t) => t.recurso).map((t) => t.recurso))];
+    if (!recursos.length) return null;
+    const r = ausencia.recurso && ausencia.desde && ausencia.hasta ? simularAusencia(p, ausencia) : null;
+
+    return el('section', { class: 'card' },
+      el('h2', { class: 'card-title' }, 'Simulación de ausencia'),
+      el('p', { class: 'muted small' }, 'Vacaciones, un congreso, una baja: qué pasa si alguien no está.'),
+      el('div', { class: 'fila' },
+        el('select', { class: 'input', style: 'width:auto', onChange: (e) => { ausencia.recurso = e.target.value || null; pintar(); } },
+          el('option', { value: '' }, '— quién —'),
+          ...recursos.map((x) => el('option', { value: x, selected: x === ausencia.recurso }, x))),
+        el('label', { class: 'field', style: 'width:160px;margin:0' },
+          el('span', { class: 'field-label' }, 'Desde'),
+          el('input', { class: 'input', type: 'date', value: ausencia.desde || '', onChange: (e) => { ausencia.desde = e.target.value; pintar(); } })),
+        el('label', { class: 'field', style: 'width:160px;margin:0' },
+          el('span', { class: 'field-label' }, 'Hasta'),
+          el('input', { class: 'input', type: 'date', value: ausencia.hasta || '', onChange: (e) => { ausencia.hasta = e.target.value; pintar(); } }))),
+
+      r?.posible ? el('div', { style: 'margin-top:10px' },
+        el('p', { class: r.diasProyecto > 0 ? 'negativo' : 'positivo' }, r.frase),
+        r.movidas.length ? el('table', { class: 'tabla' },
+          el('thead', {}, el('tr', {}, el('th', {}, 'Tarea'), el('th', {}, 'Antes'), el('th', {}, 'Después'), el('th', { class: 'num' }, 'Días'))),
+          el('tbody', {}, ...r.movidas.slice(0, 8).map((m) => el('tr', {},
+            el('td', {}, m.nombre),
+            el('td', { class: 'small muted' }, formatoCorto(m.antesInicio)),
+            el('td', { class: 'small' }, formatoCorto(m.ahoraInicio)),
+            el('td', { class: `num ${m.dias > 0 ? 'negativo' : ''}` }, m.dias ? `+${m.dias}` : '—'))))) : null,
+        r.afectadas.length ? el('div', { class: 'fila', style: 'margin-top:8px' },
+          button('Aplicar (reprogramar de verdad)', () => {
+            store.instantanea('Aplicar ausencia');
+            p.tareas = r.proyectoSimulado.tareas;
+            guardar();
+            toast('Reprogramado. Ctrl+Z lo deshace.');
+          }, { variant: 'primary' })) : null) : null);
   }
 
   /* -------------------------- selector y raíz -------------------------- */

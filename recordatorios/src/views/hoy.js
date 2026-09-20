@@ -8,6 +8,7 @@ import { rachaHabito } from '../plantillas.js';
 import { barra, dato, entradaRapida, listaTareas, tituloVista, vacio } from '../componentes.js';
 import { resumenDelDia, textoResumen, tocaResumen } from '../resumen.js';
 import { SALIDAS_ZOMBI, alternarTres, proponerTres, tresDelDia, zombis } from '../dia.js';
+import { trabajoEnCurso } from '../tablero.js';
 import { estadoBandeja } from '../modelo.js';
 import { formatoMinutos, resumenTiempo } from '../tiempo.js';
 import { store } from '../store.js';
@@ -103,6 +104,7 @@ export function vistaHoy(root, ctx = {}) {
           ? listaTareas(deHoy, { alCambiar: pintar, hoy: hoyISO, conSubtareas: true })
           : vacio(vencidas.length ? 'Nada más para hoy: primero lo atrasado.' : 'Día limpio. Disfrútalo o adelanta lo de mañana.', '✅')),
 
+      panelWIP(hoyISO),
       panelTres(hoyISO, pintar),
       panelZombis(hoyISO, pintar),
       avisoBandeja(hoyISO),
@@ -123,6 +125,18 @@ export function vistaHoy(root, ctx = {}) {
 
   pintar();
   render(root, host);
+}
+
+/** El trabajo en curso es deuda, no progreso. */
+function panelWIP(hoyISO) {
+  const limite = store.estado.ajustes.limiteWIP || 5;
+  const wip = trabajoEnCurso(store.tareas, hoyISO, limite);
+  if (!wip.excedido) return null;
+  return el('div', { class: 'alerta medio', style: 'margin-top:12px' },
+    el('div', {},
+      el('div', {}, `Demasiado abierto a la vez: ${wip.total} contra un límite de ${limite}`),
+      el('div', { class: 'accion' }, wip.frase, ' ',
+        el('a', { href: '#/tablero' }, 'Verlo en el tablero'), '.')));
 }
 
 /**
