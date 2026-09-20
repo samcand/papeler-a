@@ -105,6 +105,15 @@ export function progreso(objetivo, datos = {}, hoyISO = aISO(hoy())) {
     };
   }
 
+  if (objetivo.desde && hoyISO < objetivo.desde) {
+    return {
+      ...base, conFecha: true, pctTiempo: 0, alDia: null,
+      restan: diferenciaDias(hoyISO, objetivo.hasta), porSemana: null,
+      empieza: objetivo.desde,
+      frase: base.logrado ? 'Logrado.' : `Todavía no empieza: es a partir del ${objetivo.desde}.`,
+    };
+  }
+
   const total = Math.max(1, diferenciaDias(objetivo.desde, objetivo.hasta));
   const pasados = Math.min(total, Math.max(0, diferenciaDias(objetivo.desde, hoyISO)));
   const pctTiempo = Math.round((pasados / total) * 100);
@@ -175,7 +184,7 @@ export function progresoConHijos(objetivo, objetivos = [], datos = {}, hoyISO = 
     logrado: !!objetivo.logradoEn || pct >= 100,
     alDia: atrasadas ? false : null,
     frase: `${logradas} de ${hijas.length} metas de dentro cumplidas`
-      + (atrasadas ? `, ${atrasadas} van tarde.` : '.'),
+      + (atrasadas ? `, ${atrasadas} ${atrasadas === 1 ? 'va' : 'van'} tarde.` : '.'),
   };
 }
 

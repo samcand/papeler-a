@@ -138,12 +138,14 @@ export function vistaObjetivos(root) {
 
     return el('div', {
       class: `meta ${p.alDia === false ? 'tarde' : ''} ${p.logrado ? 'lograda' : ''}`.trim(),
-      style: rama.nivel ? `margin-left:${rama.nivel * 20}px` : '',
     },
       el('div', { class: 'fila entre' },
         el('div', { class: 'grow' },
           el('b', {}, `${ambito?.icono || '🎯'} ${o.que || 'Sin nombre'}`),
-          p.desdeHijas ? el('span', { class: 'muted small' }, ` · ${p.hijas} metas dentro`) : null),
+          p.desdeHijas ? el('span', { class: 'muted small' }, ` · ${p.hijas} metas dentro`) : null,
+          // Agrupar por horizonte separa a las hijas de su madre: que al menos
+          // digan de dónde cuelgan.
+          madreDe(o) ? el('span', { class: 'muted small' }, ` · ↳ ${madreDe(o)}`) : null),
         el('span', { class: 'meta-cifra' },
           p.logrado ? '✓'
             : o.tipo === 'siNo' ? (o.hecho ? '✓' : '—')
@@ -168,6 +170,8 @@ export function vistaObjetivos(root) {
       tocaRevisar ? el('p', { class: 'negativo small' },
         `Tocaba revisarla el ${o.revisarEn}: ¿sigue teniendo sentido?`) : null);
   }
+
+  const madreDe = (o) => (o.padre ? (metas().find((x) => x.id === o.padre)?.que || null) : null);
 
   function filaCerrada(o) {
     return el('div', { class: 'salud-fila' },

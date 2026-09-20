@@ -39,6 +39,13 @@ t('el avance del padre sale de sus hijas, no de un número a mano', () => {
   assert.equal(p.logradas, 1);          // el borrador está al 100 %
   assert.equal(p.pct, 50);              // (100 + 0) / 2
   assert.match(p.frase, /1 de 2 metas de dentro/);
+  // Y en singular: "1 va tarde", no "1 van tarde".
+  const conUnaTarde = progresoConHijos(lista[0], [
+    lista[0],
+    { ...lista[1], actual: 1 },
+    { ...lista[2], desde: '2026-01-01', hasta: '2026-12-31' },
+  ], {}, HOY);
+  assert.match(conUnaTarde.frase, /2 van tarde|1 va tarde/);
 });
 
 t('una hija abandonada deja de arrastrar al padre', () => {
@@ -47,6 +54,14 @@ t('una hija abandonada deja de arrastrar al padre', () => {
   const p = progresoConHijos(lista[0], lista, {}, HOY);
   assert.equal(p.hijas, 1);
   assert.equal(p.pct, 100);
+});
+
+t('una meta que todavía no empieza no "va al día": no ha empezado', () => {
+  const futura = objetivoNuevo({ que: 'Buscar editorial', desde: '2027-01-01', hasta: '2027-12-31', tipo: 'siNo' });
+  const p = progreso(futura, {}, HOY);
+  assert.equal(p.alDia, null);
+  assert.equal(p.pctTiempo, 0);
+  assert.match(p.frase, /Todavía no empieza/);
 });
 
 t('una meta de vida sin fecha no "va tarde": va', () => {
