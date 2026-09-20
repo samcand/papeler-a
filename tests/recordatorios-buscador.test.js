@@ -115,4 +115,15 @@ t('el límite recorta pero el total sigue siendo el de verdad', () => {
   assert.match(r.frase, /se enseñan 3/);
 });
 
+t('el grupo que manda es el del mejor resultado, y el orden plano lo respeta', () => {
+  // Con "tesis", la nota gana (su título empieza por ahí): su grupo va primero.
+  const r = buscarTodo(ESTADO, 'tesis', { hoy: HOY });
+  assert.equal(r.grupos[0].id, 'nota');
+  assert.equal(r.resultados[0].titulo, 'Tesis de NVDA');
+  // Lo que se pinta y lo que recorren las flechas son la misma lista.
+  assert.deepEqual(r.resultados, r.grupos.flatMap((g) => g.resultados));
+  // Y con el nombre de una pantalla, manda la pantalla.
+  assert.equal(buscarTodo(ESTADO, 'pomodoro', { hoy: HOY }).grupos[0].id, 'vista');
+});
+
 console.log(`\n${passed} pruebas del buscador universal OK`);

@@ -175,14 +175,22 @@ export function buscarTodo(estado = {}, consulta = '', opciones = {}) {
     || a.titulo.localeCompare(b.titulo, 'es'));
 
   const recortada = salida.slice(0, limite);
+
+  // Los grupos van por su mejor resultado, no por un orden fijo de tipos: si lo
+  // que mejor encaja es una nota, el grupo de notas va arriba. Así lo que se ve
+  // primero es también lo que se elige al pulsar Enter, que si no desconcierta.
   const grupos = TIPOS
     .map((t) => ({ ...t, resultados: recortada.filter((r) => r.tipo === t.id) }))
-    .filter((g) => g.resultados.length);
+    .filter((g) => g.resultados.length)
+    .sort((a, b) => b.resultados[0].puntos - a.resultados[0].puntos);
+
+  // El orden plano es el orden en que se pintan: flechas y ojo van de la mano.
+  const ordenados = grupos.flatMap((g) => g.resultados);
 
   return {
     consulta: q,
     total: salida.length,
-    resultados: recortada,
+    resultados: ordenados,
     grupos,
     vacio: !recortada.length,
     frase: !q ? 'Escribe para buscar en todo: tareas, notas, fichas, personas, gastos, viajes…'

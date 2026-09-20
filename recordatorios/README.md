@@ -544,7 +544,7 @@ Alt y las flechas.
 ## Pruebas
 
 ```bash
-npm test                  # 339 pruebas de lógica, sin navegador
+npm test                  # 340 pruebas de lógica, sin navegador
 npm run test:navegador    # recorre la app en Chromium (necesita Playwright)
 ```
 
