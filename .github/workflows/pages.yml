@@ -1,0 +1,51 @@
+# Publica las dos apps en GitHub Pages.
+#
+# No hay nada que compilar: son archivos estáticos, así que se sube el
+# repositorio tal cual. La app de alabanza queda en la raíz y la de
+# recordatorios en /recordatorios/.
+#
+# Para que funcione hay que encenderlo una vez en el repositorio:
+# Settings -> Pages -> Build and deployment -> Source: GitHub Actions.
+name: Publicar en GitHub Pages
+
+on:
+  push:
+    branches:
+      - claude/custom-reminders-app-3rp0y4
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Si llegan dos cambios seguidos, se publica el último y se deja el anterior.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  pruebas:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      # Sin dependencias que instalar: las pruebas son node a secas.
+      - run: npm test
+
+  publicar:
+    needs: pruebas
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.despliegue.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+      - id: despliegue
+        uses: actions/deploy-pages@v4

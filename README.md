@@ -20,6 +20,12 @@ dispositivo. Con `npm start` se sirven las dos: la de alabanza en
 `http://localhost:8080/` y la de recordatorios en
 `http://localhost:8080/recordatorios/`.
 
+También están publicadas, sin instalar nada:
+[alabanza](https://samcand.github.io/papeler-a/) ·
+[recordatorios](https://samcand.github.io/papeler-a/recordatorios/).
+Los datos siguen guardándose solo en tu navegador: lo que está en internet es
+el código, no lo que escribes.
+
 ## Cómo abrirla
 
 ```bash

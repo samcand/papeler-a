@@ -7,6 +7,11 @@ personas, el carro y los viajes.
 
 Sin servidor, sin cuenta y sin internet. Todo se guarda en tu dispositivo.
 
+**En la web**, sin instalar nada:
+<https://samcand.github.io/papeler-a/recordatorios/>
+
+**En tu máquina**, si prefieres tenerlo local:
+
 ```bash
 npm start                 # http://localhost:8080
 # y abre http://localhost:8080/recordatorios/
