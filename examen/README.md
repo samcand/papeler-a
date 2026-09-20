@@ -67,6 +67,21 @@ y `figuras.js` la convierte en SVG:
 Así el banco sigue siendo texto —se versiona, se revisa y se exporta— y la app
 no depende de ninguna imagen.
 
+## Para qué prueba
+
+El temario se armó cruzando lo que piden varias pruebas de la región. Si tu
+objetivo es una prueba colombiana en concreto, hay un documento aparte con el
+mapa completo —qué evalúa cada examen, cuántas preguntas trae cada área y qué
+de eso cubre hoy la plataforma—:
+
+**[Qué evalúan las pruebas colombianas](docs/pruebas-colombia.md)**: Saber 11,
+examen de admisión de la Universidad Nacional y Saber Pro. Incluye lo que
+todavía falta en el banco, empezando por física y química, que son parte de
+ciencias naturales, la prueba con más preguntas del Saber 11.
+
+Un aviso que conviene tener claro: **Saber Pro no es una prueba de ingreso**,
+es el examen de salida de la universidad. Para entrar, la prueba es Saber 11.
+
 ## Qué preguntan de geografía en las pruebas de ingreso
 
 El temario de geografía no se inventó: se armó cruzando lo que piden las
@@ -212,6 +227,7 @@ examen/
                          ciudadania, salud, cotidiana, lectura, ingles)
     vistas/             inicio, temario, practicar, simulacro y progreso
   tests/                pruebas del banco y del motor (node, sin navegador)
+  docs/                 qué evalúa cada prueba colombiana y qué falta cubrir
 ```
 
 ## Pruebas

@@ -13,7 +13,9 @@ Este repositorio también contiene una segunda app, independiente de esta:
 admisión a la universidad: 993 preguntas con explicación en nueve asignaturas
 —matemáticas, trigonometría, razonamiento abstracto, geografía, política y
 ciudadanía, salud, vida cotidiana, comprensión de lectura e inglés—. Se abre en
-`http://localhost:8080/examen/`.
+`http://localhost:8080/examen/`. Incluye un mapa de
+[qué evalúan las pruebas colombianas](examen/docs/pruebas-colombia.md)
+—Saber 11, admisión UNAL y Saber Pro— y qué de eso cubre el banco.
 
 ## Cómo abrirla
 
