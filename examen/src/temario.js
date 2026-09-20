@@ -1,7 +1,7 @@
 /**
  * temario.js — Qué se pregunta en cada asignatura.
  *
- * Es el mapa del examen: catorce asignaturas, y dentro de cada una los temas que
+ * Es el mapa del examen: quince asignaturas, y dentro de cada una los temas que
  * aparecen una y otra vez en las pruebas de ingreso, con lo que hay que saber
  * hacer en cada uno. Todas las preguntas del banco apuntan a un `tema` de aquí
  * (hay una prueba que lo verifica), así que el temario y el banco no se separan.
@@ -987,6 +987,64 @@ export const ASIGNATURAS = [
         'Obra, época y condiciones de producción',
         'Intertextualidad: obras que dialogan con otras',
         'Canon, censura y recepción',
+      ] },
+    ],
+  },
+  {
+    id: 'filosofia',
+    nombre: 'Ética y filosofía',
+    icono: '⚖',
+    resumen: 'Cómo se argumenta una decisión moral y qué han respondido los filósofos.',
+    temas: [
+      { id: 'que-es-etica', nombre: 'Ética, moral y valores', claves: [
+        'Diferencia entre ética, moral, derecho y costumbre',
+        'Valores, normas y principios',
+        'Relativismo y universalismo moral',
+      ] },
+      { id: 'corrientes', nombre: 'Corrientes éticas', claves: [
+        'Utilitarismo: las consecuencias',
+        'Deontología kantiana: el deber y el imperativo categórico',
+        'Ética de la virtud y ética del cuidado',
+      ] },
+      { id: 'dilemas', nombre: 'Dilemas morales', claves: [
+        'Qué hace que un caso sea un dilema y no una duda',
+        'Conflictos entre deberes',
+        'Cómo se justifica una decisión difícil',
+      ] },
+      { id: 'bioetica', nombre: 'Bioética', claves: [
+        'Autonomía, beneficencia, no maleficencia y justicia',
+        'Consentimiento informado y confidencialidad',
+        'Debates: final de la vida, reproducción, edición genética',
+      ] },
+      { id: 'etica-ambiental', nombre: 'Ética ambiental y animal', claves: [
+        'Antropocentrismo y biocentrismo',
+        'Deberes con las generaciones futuras',
+        'Trato a los animales y consumo',
+      ] },
+      { id: 'etica-digital', nombre: 'Ética digital y tecnológica', claves: [
+        'Privacidad, datos y vigilancia',
+        'Responsabilidad de los algoritmos y la IA',
+        'Plagio, autoría y honestidad académica',
+      ] },
+      { id: 'antigua', nombre: 'Filosofía antigua', claves: [
+        'Presocráticos y el paso del mito al logos',
+        'Sócrates, Platón y el mundo de las ideas',
+        'Aristóteles: lógica, virtud y felicidad',
+      ] },
+      { id: 'moderna', nombre: 'Filosofía moderna', claves: [
+        'Racionalismo y empirismo: Descartes, Hume',
+        'Kant y los límites del conocimiento',
+        'Contrato social: Hobbes, Locke, Rousseau',
+      ] },
+      { id: 'contemporanea', nombre: 'Filosofía contemporánea', claves: [
+        'Marx, Nietzsche y Freud: la sospecha',
+        'Existencialismo y sentido de la vida',
+        'Justicia y desigualdad: Rawls y sus críticos',
+      ] },
+      { id: 'logica', nombre: 'Lógica y argumentación filosófica', claves: [
+        'Validez y verdad no son lo mismo',
+        'Falacias formales e informales',
+        'Cómo se reconstruye y se evalúa un argumento',
       ] },
     ],
   },
