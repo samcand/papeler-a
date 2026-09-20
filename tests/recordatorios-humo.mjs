@@ -20,7 +20,7 @@ import { createRequire } from 'node:module';
 const PUERTO = 8123;
 const BASE = `http://localhost:${PUERTO}/recordatorios/index.html`;
 const PANTALLAS = ['hoy', 'bandeja', 'proximos', 'calendario', 'enfoque', 'planificar', 'revision',
-  'inversiones', 'proyectos', 'docencia', 'investigacion', 'alabanza', 'plantillas', 'ideas', 'ajustes'];
+  'inversiones', 'proyectos', 'docencia', 'investigacion', 'alabanza', 'plantillas', 'tablero', 'ideas', 'ajustes'];
 
 /** Busca Playwright en el proyecto y, si no, en la instalación global. */
 async function cargarPlaywright() {
@@ -357,6 +357,129 @@ else {
   if (!/(más tarde|no cambia|antes)/.test(escenario)) errores.push('el escenario no calculó el impacto');
   else console.log(`  ok  fecha probabilística y "¿qué pasa si?" (${opciones - 1} tareas)`);
 }
+
+// Tablero: arrastrar una tarjeta de columna cambia su fecha
+await pagina.goto(BASE + '#/tablero');
+await pagina.waitForTimeout(500);
+const enBandeja = await pagina.locator('[data-columna="bandeja"] .tarjeta').count();
+if (!(await pagina.locator('.columna-tablero').count())) errores.push('el tablero no dibujó columnas');
+else {
+  const tarjeta = pagina.locator('[data-columna="hoy"] .tarjeta').first();
+  if (await tarjeta.count()) {
+    const origen = await tarjeta.boundingBox();
+    const destino = await pagina.locator('[data-columna="despues"]').boundingBox();
+    await pagina.mouse.move(origen.x + 20, origen.y + 10);
+    await pagina.mouse.down();
+    await pagina.mouse.move(destino.x + 60, destino.y + 60, { steps: 10 });
+    await pagina.mouse.up();
+    await pagina.waitForTimeout(500);
+    const despues = await pagina.locator('[data-columna="despues"] .tarjeta').count();
+    if (!despues) errores.push('arrastrar en el tablero no movió la tarjeta');
+    else console.log('  ok  tablero: arrastrar entre columnas');
+  }
+}
+
+// Modo concentración
+await pagina.goto(BASE + '#/hoy');
+await pagina.waitForTimeout(300);
+await pagina.locator('.tarea').first().getByTitle('Trabajar en esto y nada más').click();
+await pagina.waitForTimeout(500);
+const concentrado = await pagina.locator('.concentracion .aro-progreso').count();
+const lateralOculta = !(await pagina.locator('.lateral').isVisible().catch(() => false));
+if (!concentrado || !lateralOculta) errores.push('el modo concentración no escondió el resto de la app');
+else console.log('  ok  modo concentración');
+await pagina.keyboard.press('Escape');
+await pagina.waitForTimeout(300);
+
+// Informe de tiempo
+await pagina.goto(BASE + '#/enfoque');
+await pagina.waitForTimeout(300);
+await pagina.locator('.pestana', { hasText: 'Informe' }).click();
+await pagina.waitForTimeout(500);
+const informe = (await pagina.textContent('#app')).replace(/\s+/g, ' ');
+if (!/A dónde se fue el tiempo/.test(informe)) errores.push('el informe de tiempo no salió');
+else console.log('  ok  informe de tiempo');
+
+// Prueba de estrés y plan de aportes
+await pagina.evaluate(async () => {
+  const { store } = await import('./src/store.js');
+  store.estado.inversiones.posiciones = [
+    { ticker: 'NVDA', cantidad: 40, entrada: 118, precio: 176, stop: 150, sector: 'Tecnología', tesis: 'x', revisadaEn: '2026-09-20' },
+    { ticker: 'KO', cantidad: 60, entrada: 58, precio: 62, sector: 'Consumo', tesis: 'y', revisadaEn: '2026-09-20' },
+  ];
+  store.guardar();
+});
+await pagina.goto(BASE + '#/hoy');
+await pagina.goto(BASE + '#/inversiones');
+await pagina.waitForTimeout(400);
+await pagina.locator('.pestana', { hasText: 'Estrés y aportes' }).click();
+await pagina.waitForTimeout(500);
+const estres = (await pagina.textContent('#app')).replace(/\s+/g, ' ');
+if (!/stops que saltan/.test(estres)) errores.push('la prueba de estrés no salió: ' + estres.slice(0, 160));
+else console.log('  ok  prueba de estrés y plan de aportes');
+
+// Informe fiscal
+await pagina.locator('.pestana', { hasText: 'Fiscal' }).click();
+await pagina.waitForTimeout(400);
+if (!/Plusvalías realizadas/.test(await pagina.textContent('#app'))) errores.push('el informe fiscal no salió');
+else console.log('  ok  informe fiscal');
+
+// Compartir una lista por enlace y volver a importarla
+await pagina.goto(BASE + '#/proyecto/Cartera');
+await pagina.waitForTimeout(400);
+await pagina.getByRole('button', { name: /Compartir/ }).first().click();
+await pagina.waitForTimeout(700);
+const enlace = await pagina.locator('.drawer-body .field-hint').textContent().catch(() => '');
+if (!/#\/importar-lista\?d=/.test(enlace || '')) errores.push('compartir no generó el enlace: ' + enlace);
+else {
+  const qr = await pagina.locator('.qr svg').count();
+  await pagina.goto(enlace.trim());
+  await pagina.waitForTimeout(800);
+  const importar = (await pagina.textContent('#app')).replace(/\s+/g, ' ');
+  if (!/Qué trae/.test(importar)) errores.push('el enlace compartido no se pudo leer: ' + importar.slice(0, 160));
+  else console.log(`  ok  compartir por enlace${qr ? ' y QR' : ''}, y leerlo de vuelta`);
+}
+
+// Respaldo cifrado: exportar e intentar leerlo
+const cifrado = await pagina.evaluate(async () => {
+  const { cifrar, descifrar, esArchivoCifrado } = await import('./src/compartir.js');
+  const sobre = await cifrar('{"secreto":true}', 'clave de prueba');
+  const leido = await descifrar(sobre, 'clave de prueba');
+  let falla = false;
+  try { await descifrar(sobre, 'otra'); } catch { falla = true; }
+  return { esCifrado: esArchivoCifrado(sobre), enClaro: sobre.includes('secreto'), leido, falla };
+});
+if (!cifrado.esCifrado || cifrado.enClaro || cifrado.leido !== '{"secreto":true}' || !cifrado.falla) {
+  errores.push('el respaldo cifrado no se comporta: ' + JSON.stringify(cifrado));
+} else console.log('  ok  respaldo cifrado (y con otra contraseña, falla)');
+
+// Adjuntos en IndexedDB
+const adj = await pagina.evaluate(async () => {
+  const m = await import('./src/adjuntos.js');
+  const archivo = new File([new Uint8Array([1, 2, 3, 4])], 'prueba.txt', { type: 'text/plain' });
+  const ficha = await m.guardar('tarea-de-prueba', archivo);
+  const lista = await m.listar('tarea-de-prueba');
+  await m.borrar(ficha.id);
+  const despues = await m.listar('tarea-de-prueba');
+  return { guardado: lista.length, borrado: despues.length, nombre: lista[0]?.nombre };
+});
+if (adj.guardado !== 1 || adj.borrado !== 0) errores.push('los adjuntos no se guardan o no se borran: ' + JSON.stringify(adj));
+else console.log('  ok  adjuntos en IndexedDB');
+
+// Accesibilidad básica
+const a11y = await pagina.evaluate(() => {
+  const saltar = document.querySelector('.saltar');
+  const iconos = [...document.querySelectorAll('.btn')].filter((b) => !/[\p{L}\p{N}]/u.test(b.textContent || ''));
+  return {
+    saltar: !!saltar,
+    main: !!document.querySelector('main#app'),
+    navs: document.querySelectorAll('nav[aria-label]').length,
+    iconosSinNombre: iconos.filter((b) => !b.getAttribute('aria-label') && !b.getAttribute('title')).length,
+  };
+});
+if (!a11y.saltar || !a11y.main || a11y.navs < 1 || a11y.iconosSinNombre) {
+  errores.push('accesibilidad: ' + JSON.stringify(a11y));
+} else console.log(`  ok  accesibilidad (${a11y.navs} zonas de navegación, ningún icono sin nombre)`);
 
 await pagina.setViewportSize({ width: 390, height: 844 });
 await pagina.goto(BASE + '#/hoy');

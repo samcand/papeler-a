@@ -3,7 +3,9 @@
  * una etiqueta o una búsqueda. Todas comparten la misma pantalla.
  */
 
-import { button, el, input, render, toast } from '../../../src/ui.js';
+import { button, copyText, el, input, render, toast } from '../../../src/ui.js';
+import { qrSVG } from '../../../src/qr.js';
+import { enlaceDeLista } from '../compartir.js';
 import { aISO, hoy as fechaHoy } from '../fechas.js';
 import { aplicarFiltro } from '../filtros.js';
 import { MODULOS, progreso } from '../modelo.js';
@@ -53,6 +55,7 @@ export function vistaLista(root, ctx = {}) {
       tituloVista(titulo, subtitulo,
         el('span', { class: 'grow' }),
         el('button', { class: `chip ${mostrarHechas ? 'activa' : ''}`.trim(), onClick: () => { mostrarHechas = !mostrarHechas; pintar(); } }, 'ver hechas'),
+        button('📤 Compartir', () => compartir(titulo, visibles.filter((t) => !t.completada)), { variant: 'ghost chico', title: 'Enlace con la lista dentro, sin servidor' }),
         el('select', {
           class: 'input', style: 'width:auto',
           onChange: (e) => { orden = e.target.value; pintar(); },
@@ -80,6 +83,39 @@ export function vistaLista(root, ctx = {}) {
 
   pintar();
   render(root, host);
+}
+
+/**
+ * Comparte la lista metiéndola comprimida dentro del propio enlace: quien lo
+ * abre la importa en su dispositivo y no hay servidor por medio.
+ */
+async function compartir(nombre, tareas) {
+  if (!tareas.length) { toast('No hay nada pendiente que compartir', 'warn'); return; }
+  const enlace = await enlaceDeLista(tareas, { nombre });
+  const panel = el('div', { class: 'drawer' },
+    el('div', {},
+      el('div', { class: 'drawer-head' }, el('h3', {}, 'Compartir la lista'),
+        button('✕', () => panel.remove(), { variant: 'ghost' })),
+      el('div', { class: 'drawer-body' },
+        el('p', { class: 'muted small' },
+          `${tareas.length} tareas viajan comprimidas dentro del enlace. No se sube nada a ningún sitio.`),
+        el('div', { class: 'fila' },
+          button('Copiar enlace', () => copyText(enlace), { variant: 'primary' }),
+          navigator.share ? button('Compartir…', () => navigator.share({ title: nombre, url: enlace }).catch(() => {})) : null),
+        el('p', { class: 'field-label', style: 'margin-top:14px' }, 'O que lo escaneen'),
+        (() => {
+          try {
+            const caja = el('div', { class: 'qr' });
+            caja.innerHTML = qrSVG(enlace, { tamaño: 240 });
+            return caja;
+          } catch {
+            return el('p', { class: 'muted small' },
+              'El enlace es demasiado largo para un QR legible: mándalo por chat.');
+          }
+        })(),
+        el('p', { class: 'field-hint', style: 'word-break:break-all;margin-top:12px' }, enlace))));
+  panel.addEventListener('click', (e) => { if (e.target === panel) panel.remove(); });
+  document.body.append(panel);
 }
 
 /** Los resultados de una búsqueda se leen mejor agrupados por proyecto. */

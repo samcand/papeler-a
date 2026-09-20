@@ -3,11 +3,12 @@
  * generación automática de las tareas que se derivan de ellos.
  */
 
-import { button, el, render, toast } from '../../../src/ui.js';
+import { button, download, el, render, toast } from '../../../src/ui.js';
 import { aISO, hoy as fechaHoy, textoRelativo, DIAS } from '../fechas.js';
 import { avanceSemestre, clonarSemestre, RUTINA_DOCENCIA, tareasDeCurso, tareasDeSemestre } from '../plantillas.js';
 import { parseRegla } from '../recurrencia.js';
 import { barra, dato, listaTareas, tituloVista } from '../componentes.js';
+import { aICS } from '../exportar.js';
 import { store } from '../store.js';
 
 export function vistaDocencia(root) {
@@ -121,7 +122,20 @@ export function vistaDocencia(root) {
         button('🔔 Generar tareas de este curso', () => {
           const n = store.sembrarTareas(tareasDeCurso(curso), `curso-${curso.nombre}`);
           toast(n ? `${n} tareas creadas` : 'Ya estaban creadas');
-        }, { variant: 'ghost chico' })));
+        }, { variant: 'ghost chico' }),
+        button('📅 Calendario para los estudiantes', () => {
+          const eventos = (curso.evaluaciones || []).filter((e) => e.fecha).map((e) => ({
+            id: `${curso.codigo || curso.nombre}-${e.nombre}`,
+            titulo: `${e.nombre} · ${curso.nombre}`,
+            fecha: e.fecha,
+            duracion: e.duracionMin || 120,
+            notas: `${e.peso ? `Vale el ${e.peso} % de la nota. ` : ''}${curso.codigo || ''}`.trim(),
+          }));
+          if (!eventos.length) { toast('Este curso no tiene evaluaciones con fecha', 'warn'); return; }
+          download(`${(curso.codigo || curso.nombre).replace(/\s+/g, '-')}.ics`,
+            aICS(eventos, { nombre: `${curso.nombre} — fechas` }), 'text/calendar');
+          toast(`${eventos.length} fechas exportadas: ya puedes pasarles el archivo`);
+        }, { variant: 'ghost chico', title: 'Un .ics solo con exámenes y entregas, sin tus tareas' })));
   }
 
   pintar();

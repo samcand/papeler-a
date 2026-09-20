@@ -10,11 +10,13 @@ import { button, el, render, toast } from '../../../src/ui.js';
 import { aISO, hoy as fechaHoy } from '../fechas.js';
 import {
   CONFIG_POMODORO, FASES, crearCronometro, crearPomodoro, crearTemporizador, cronoIniciar, cronoPausar,
-  cronoReiniciar, cronoTranscurrido, cronoVuelta, duracionFase, formatoMinutos, formatoReloj, iniciar,
-  pausar, progresoFase, reiniciarFase, restante, resumenTiempo, siguienteFase, termino, TEMPORIZADORES_RAPIDOS,
+  cronoReiniciar, cronoTranscurrido, cronoVuelta, duracionFase, formatoMinutos, formatoReloj, informeTiempo,
+  iniciar, pausar, progresoFase, reiniciarFase, restante, resumenTiempo, siguienteFase, termino,
+  TEMPORIZADORES_RAPIDOS,
 } from '../tiempo.js';
 import { avisarPomodoro, mantenerPantalla, pedirPermiso } from '../notificaciones.js';
 import { dato, grafico, tituloVista } from '../componentes.js';
+import { MODULOS } from '../modelo.js';
 import { calibracion } from '../calibracion.js';
 import { store } from '../store.js';
 
@@ -205,6 +207,55 @@ export function vistaEnfoque(root, ctx = {}) {
           el('td', { class: 'num' }, formatoMinutos(x.minutos)))))) : null);
   }
 
+  /** A dónde se fue el tiempo, comparado con lo que dijiste que era prioritario. */
+  function panelInforme() {
+    const r = informeTiempo(store.estado.tiempo, store.todasLasTareas, hoyISO, { dias: 28 });
+    if (!r.total) {
+      return el('section', { class: 'card' },
+        el('h2', { class: 'card-title' }, 'A dónde se fue el tiempo'),
+        el('p', { class: 'muted' }, 'Todavía no hay tiempo medido en los últimos 28 días. Usa el pomodoro sobre tus tareas y vuelve.'));
+    }
+    const maxSemana = Math.max(...r.porSemana.map((x) => x.minutos), 1);
+    const nombreModulo = (id) => MODULOS.find((m) => m.id === id)?.nombre || 'Sin módulo';
+    const iconoModulo = (id) => MODULOS.find((m) => m.id === id)?.icono || '•';
+
+    return el('div', {},
+      el('section', { class: 'card' },
+        el('h2', { class: 'card-title' }, `A dónde se fue el tiempo (${r.dias} días)`),
+        el('div', { class: 'tarjetas' },
+          dato(formatoMinutos(r.total), 'medido en total'),
+          dato(formatoMinutos(r.mediaDiaria), 'media al día'),
+          dato(r.sesiones, 'sesiones'),
+          dato(formatoMinutos(r.sinTarea), 'sin tarea concreta', { clase: r.sinTarea > r.total / 3 ? 'negativo' : '' })),
+
+        el('p', { class: 'field-label', style: 'margin-top:14px' }, 'Por módulo, frente a lo que habías planificado'),
+        el('table', { class: 'tabla' },
+          el('thead', {}, el('tr', {}, el('th', {}, 'Módulo'), el('th', { class: 'num' }, 'Real'),
+            el('th', { class: 'num' }, 'Planificado'), el('th', { class: 'num' }, 'Desvío'), el('th', { class: 'num' }, '%'))),
+          el('tbody', {}, ...r.porModulo.map((m) => el('tr', {},
+            el('td', {}, `${iconoModulo(m.clave)} ${nombreModulo(m.clave)}`),
+            el('td', { class: 'num' }, formatoMinutos(m.minutos)),
+            el('td', { class: 'num muted' }, m.planificado ? formatoMinutos(m.planificado) : '—'),
+            el('td', { class: `num ${m.desvio > 0 ? 'negativo' : 'positivo'}` },
+              m.planificado ? `${m.desvio > 0 ? '+' : ''}${formatoMinutos(Math.abs(m.desvio))}` : '—'),
+            el('td', { class: 'num muted' }, `${m.pct} %`))))),
+
+        el('p', { class: 'field-label', style: 'margin-top:14px' }, 'Por semana'),
+        el('div', { class: 'grafico' },
+          ...r.porSemana.map((s2) => el('div', {
+            style: `height:${Math.round((s2.minutos / maxSemana) * 100)}%`,
+            title: `Semana del ${s2.desde}: ${formatoMinutos(s2.minutos)}`,
+          })))),
+
+      r.porProyecto.length ? el('section', { class: 'card' },
+        el('h2', { class: 'card-title' }, 'Por proyecto'),
+        ...r.porProyecto.slice(0, 8).map((x) => el('div', { style: 'margin-bottom:6px' },
+          el('div', { class: 'fila entre small' },
+            el('span', {}, x.clave),
+            el('span', { class: 'muted' }, `${formatoMinutos(x.minutos)} · ${x.pct} %`)),
+          el('div', { class: 'barra' }, el('div', { style: `width:${x.pct}%` }))))) : null);
+  }
+
   /** Estimado frente a real: el único modo de aprender a estimar. */
   function panelCalibracion() {
     const cal = calibracion(store.tareas, store.estado.tiempo);
@@ -258,11 +309,10 @@ export function vistaEnfoque(root, ctx = {}) {
     render(host,
       tituloVista('Enfoque', 'Trabaja por bloques y deja constancia del tiempo'),
       el('div', { class: 'pestanas' },
-        ...[['pomo', 'Pomo'], ['crono', 'Cronómetro'], ['tempo', 'Temporizador']].map(([id, txt]) =>
+        ...[['pomo', 'Pomo'], ['crono', 'Cronómetro'], ['tempo', 'Temporizador'], ['informe', 'Informe']].map(([id, txt]) =>
           el('button', { class: `pestana ${pestana === id ? 'activa' : ''}`.trim(), onClick: () => { pestana = id; pintar(); } }, txt))),
-      pestana === 'pomo' ? panelPomo() : pestana === 'crono' ? panelCrono() : panelTempo(),
-      panelEstadisticas(),
-      panelCalibracion());
+      pestana === 'pomo' ? panelPomo() : pestana === 'crono' ? panelCrono() : pestana === 'tempo' ? panelTempo() : null,
+      pestana === 'informe' ? panelInforme() : el('div', {}, panelEstadisticas(), panelCalibracion()));
   };
 
   pintar();

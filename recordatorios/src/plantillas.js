@@ -206,6 +206,31 @@ export function tareasDeInvestigacion(datos = {}, hoyISO = aISO(hoy())) {
   return tareas;
 }
 
+/**
+ * Lo que hay que hacer cuando un artículo pasa a publicado y nunca se hace:
+ * el CV, el repositorio, el perfil y contarlo.
+ */
+export const AL_PUBLICAR = [
+  { titulo: 'Añadir el artículo al CV', dias: 3, prioridad: 2 },
+  { titulo: 'Subir el preprint o la versión aceptada al repositorio institucional', dias: 5, prioridad: 2 },
+  { titulo: 'Actualizar el perfil (ORCID, Scholar, web del departamento)', dias: 7, prioridad: 3 },
+  { titulo: 'Contarlo: correo al grupo, redes o seminario', dias: 10, prioridad: 4 },
+  { titulo: 'Mandar copia a quien ayudó con los datos', dias: 10, prioridad: 4 },
+];
+
+/** Genera esas tareas para un artículo concreto. */
+export function tareasAlPublicar(articulo = {}, hoyISO = aISO(hoy())) {
+  return AL_PUBLICAR.map((x) => ({
+    titulo: `${x.titulo}: ${articulo.titulo || 'artículo'}`,
+    fecha: aISO(sumarDias(hoyISO, x.dias)),
+    prioridad: x.prioridad,
+    modulo: 'investigacion',
+    proyecto: articulo.titulo || 'Artículos',
+    etiquetas: ['publicado'],
+    notas: articulo.revista ? `Publicado en ${articulo.revista}.` : '',
+  }));
+}
+
 export const RUTINA_INVESTIGACION = [
   { titulo: 'Escritura profunda (sin correo, sin móvil)', regla: 'cada día hábil', hora: '07:00', duracion: 90, prioridad: 1 },
   { titulo: 'Leer un artículo del área', regla: 'cada martes y jueves', duracion: 45, prioridad: 3 },

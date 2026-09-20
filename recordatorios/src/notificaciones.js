@@ -29,8 +29,30 @@ export async function pedirPermiso() {
   }
 }
 
+/**
+ * ¿Estamos en franja de silencio? Un aviso ignorado enseña a ignorar los avisos,
+ * así que de noche o en clase mejor no sonar.
+ */
+export function enSilencio(ajustes = {}, ahora = new Date()) {
+  const silencio = ajustes.silencio;
+  if (!silencio?.activo) return false;
+  const minutos = ahora.getHours() * 60 + ahora.getMinutes();
+  const aMin = (t) => {
+    const [h, m] = String(t || '00:00').split(':').map(Number);
+    return h * 60 + m;
+  };
+  const desde = aMin(silencio.desde || '22:00');
+  const hasta = aMin(silencio.hasta || '07:00');
+  // Una franja que cruza la medianoche es dos tramos.
+  const dentro = desde <= hasta ? (minutos >= desde && minutos < hasta) : (minutos >= desde || minutos < hasta);
+  if (dentro) return true;
+  const dia = ahora.getDay();
+  return (silencio.dias || []).includes(dia);
+}
+
 export function avisar(titulo, cuerpo, opciones = {}) {
   if (!soportadas() || Notification.permission !== 'granted') return null;
+  if (!opciones.saltarSilencio && enSilencio(opciones.ajustes || {})) return null;
   try {
     return new Notification(titulo, {
       body: cuerpo,

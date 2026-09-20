@@ -9,15 +9,58 @@
   "background_color": "#0f1115",
   "theme_color": "#0f1115",
   "lang": "es",
-  "categories": ["productivity", "finance", "education"],
+  "categories": [
+    "productivity",
+    "finance",
+    "education"
+  ],
   "icons": [
-    { "src": "assets/icono.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
-    { "src": "assets/icono.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+    {
+      "src": "assets/icono.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icono.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
   ],
   "shortcuts": [
-    { "name": "Hoy", "url": "./index.html#/hoy" },
-    { "name": "Enfoque (pomodoro)", "url": "./index.html#/enfoque" },
-    { "name": "Calendario", "url": "./index.html#/calendario" },
-    { "name": "Inversiones", "url": "./index.html#/inversiones" }
-  ]
+    {
+      "name": "Hoy",
+      "url": "./index.html#/hoy"
+    },
+    {
+      "name": "Enfoque (pomodoro)",
+      "url": "./index.html#/enfoque"
+    },
+    {
+      "name": "Calendario",
+      "url": "./index.html#/calendario"
+    },
+    {
+      "name": "Inversiones",
+      "url": "./index.html#/inversiones"
+    },
+    {
+      "name": "Bandeja",
+      "url": "./index.html#/bandeja"
+    },
+    {
+      "name": "Tablero",
+      "url": "./index.html#/tablero"
+    }
+  ],
+  "share_target": {
+    "action": "./index.html",
+    "method": "GET",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  }
 }

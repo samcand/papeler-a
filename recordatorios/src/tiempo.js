@@ -237,6 +237,65 @@ export function resumenTiempo(registros = [], hoyISO = aISO(hoy())) {
   };
 }
 
+/**
+ * Informe de dónde se fue el tiempo: por módulo, por proyecto y por semana,
+ * comparado con lo que dices que es tu prioridad.
+ */
+export function informeTiempo(registros = [], tareas = [], hoyISO = aISO(hoy()), opciones = {}) {
+  const dias = opciones.dias || 28;
+  const desde = aISO(sumarDias(hoyISO, -dias + 1));
+  const enRango = registros.filter((r) => r.fecha >= desde && r.fecha <= hoyISO);
+  const porTarea = new Map(tareas.map((t) => [t.id, t]));
+
+  const acumula = (clave) => {
+    const mapa = new Map();
+    for (const r of enRango) {
+      const t = porTarea.get(r.tareaId);
+      const k = (t && t[clave]) || (clave === 'modulo' ? 'sin-modulo' : 'Sin proyecto');
+      mapa.set(k, (mapa.get(k) || 0) + r.minutos);
+    }
+    return mapa;
+  };
+
+  const total = enRango.reduce((s, r) => s + r.minutos, 0);
+  const aLista = (mapa) => [...mapa.entries()]
+    .map(([clave, minutos]) => ({ clave, minutos, pct: total ? Math.round((minutos / total) * 100) : 0 }))
+    .sort((a, b) => b.minutos - a.minutos);
+
+  const semanas = new Map();
+  for (const r of enRango) {
+    const lunes = aISO(inicioSemana(r.fecha));
+    semanas.set(lunes, (semanas.get(lunes) || 0) + r.minutos);
+  }
+
+  // Lo que dices que importa: lo que tiene prioridad 1 o 2 y fecha en el rango.
+  const comprometido = new Map();
+  for (const t of tareas) {
+    if (!t.duracion || !t.fecha || t.fecha < desde || t.fecha > hoyISO) continue;
+    const k = t.modulo || 'sin-modulo';
+    comprometido.set(k, (comprometido.get(k) || 0) + Number(t.duracion));
+  }
+
+  const porModulo = aLista(acumula('modulo')).map((x) => ({
+    ...x,
+    planificado: comprometido.get(x.clave) || 0,
+    desvio: x.minutos - (comprometido.get(x.clave) || 0),
+  }));
+
+  return {
+    desde,
+    hasta: hoyISO,
+    dias,
+    total,
+    sesiones: enRango.length,
+    mediaDiaria: Math.round(total / dias),
+    porModulo,
+    porProyecto: aLista(acumula('proyecto')),
+    porSemana: [...semanas.entries()].map(([desde, minutos]) => ({ desde, minutos })).sort((a, b) => a.desde.localeCompare(b.desde)),
+    sinTarea: enRango.filter((r) => !r.tareaId).reduce((s, r) => s + r.minutos, 0),
+  };
+}
+
 /* ------------------------------------------------------------------ *
  * Planificar el día por bloques
  * ------------------------------------------------------------------ */

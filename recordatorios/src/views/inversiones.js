@@ -7,12 +7,12 @@
  * de lo que escribes sale de este dispositivo.
  */
 
-import { button, el, input, render, toast } from '../../../src/ui.js';
+import { button, download, el, input, render, toast } from '../../../src/ui.js';
 import { aISO, hoy as fechaHoy, textoRelativo } from '../fechas.js';
 import {
-  CHECKLIST_COMPRA, CHECKLIST_POSTMORTEM, CHECKLIST_VENTA, alertasCartera, diversificacion,
-  proximosVencimientos, rMultiplo, rebalanceo, resultadoOperacion, resumenOperaciones,
-  tamanoPosicion, tareasDeCartera, valoraCartera,
+  CHECKLIST_COMPRA, CHECKLIST_POSTMORTEM, CHECKLIST_VENTA, ESCENARIOS, alertasCartera, diversificacion,
+  informeFiscal, planDeAportes, proximosVencimientos, pruebaDeEstres, rMultiplo, rebalanceo,
+  resultadoOperacion, resumenOperaciones, tamanoPosicion, tareasDeCartera, valoraCartera,
 } from '../inversiones.js';
 import { dato, tituloVista } from '../componentes.js';
 import { importarMovimientosBroker, reconstruirPosiciones } from '../exportar.js';
@@ -334,6 +334,164 @@ export function vistaInversiones(root, ctx = {}) {
       { title: 'Empareja compras y ventas por FIFO y reconstruye la cartera' }), entrada);
   }
 
+  /* -------------------- estrés y plan de aportes -------------------- */
+
+  function panelEstres() {
+    const guardado = inv().estres || { caida: 20, sector: '' };
+    const sectores = [...new Set(inv().posiciones.map((p) => p.sector).filter(Boolean))];
+    const r = pruebaDeEstres(inv().posiciones, Number(guardado.caida) || 20,
+      { efectivo: inv().efectivo, sector: guardado.sector || null });
+    const plan = planDeAportes(inv().aportes || {}, hoyISO);
+
+    return el('div', {},
+      el('section', { class: 'card' },
+        el('h2', { class: 'card-title' }, 'Prueba de estrés'),
+        el('p', { class: 'muted small' },
+          'Lo interesante no es el número final: es qué stops saltan. Ahí se ve si el plan aguanta escrito o solo en la cabeza.'),
+        el('div', { class: 'chip-list' },
+          ...ESCENARIOS.map((e) => el('button', {
+            class: `chip ${Number(guardado.caida) === e.caida ? 'activa' : ''}`.trim(),
+            onClick: () => {
+              inv().estres = { caida: e.caida, sector: e.soloSector ? (sectores[0] || '') : '' };
+              guardar();
+            },
+          }, e.nombre))),
+        el('div', { class: 'fila', style: 'margin-top:10px' },
+          el('label', { class: 'field', style: 'width:150px;margin:0' },
+            el('span', { class: 'field-label' }, 'Caída (%)'),
+            el('input', {
+              class: 'input', type: 'number', min: 1, max: 90, value: guardado.caida,
+              onChange: (e) => { inv().estres = { ...guardado, caida: Number(e.target.value) || 20 }; guardar(); },
+            })),
+          sectores.length ? el('label', { class: 'field', style: 'width:180px;margin:0' },
+            el('span', { class: 'field-label' }, 'Solo este sector'),
+            el('select', { class: 'input', onChange: (e) => { inv().estres = { ...guardado, sector: e.target.value }; guardar(); } },
+              el('option', { value: '' }, 'Toda la cartera'),
+              ...sectores.map((x) => el('option', { value: x, selected: x === guardado.sector }, x)))) : null),
+
+        el('div', { class: 'tarjetas', style: 'margin-top:12px' },
+          dato(moneda(r.totalAntes), 'cartera ahora'),
+          dato(moneda(r.totalDespues), 'después del golpe', { clase: 'negativo' }),
+          dato(`${r.perdidaPct} %`, 'caída de la cartera', { clase: 'negativo', pie: moneda(r.perdida) }),
+          dato(r.stopsQueSaltan.length, 'stops que saltan', { clase: r.stopsQueSaltan.length ? 'negativo' : 'positivo' })),
+
+        el('p', { style: 'margin-top:10px' }, r.frase),
+
+        el('div', { class: 'tabla-scroll' },
+          el('table', { class: 'tabla' },
+            el('thead', {}, el('tr', {}, el('th', {}, 'Ticker'), el('th', { class: 'num' }, 'Precio'),
+              el('th', { class: 'num' }, 'Después'), el('th', { class: 'num' }, 'Pierdes'), el('th', {}, 'Stop'))),
+            el('tbody', {}, ...r.filas.map((f) => el('tr', {},
+              el('td', {}, f.ticker),
+              el('td', { class: 'num muted' }, String(f.precioAntes)),
+              el('td', { class: 'num' }, String(f.precioDespues)),
+              el('td', { class: 'num negativo' }, moneda(f.perdida)),
+              el('td', { class: f.stopSaltado ? 'negativo' : 'muted' },
+                f.sinStop ? 'sin stop' : f.stopSaltado ? `salta (${f.stop})` : `aguanta (${f.stop})`)))))),
+
+        r.stopsQueSaltan.length ? el('div', { class: 'fila', style: 'margin-top:10px' },
+          button('Crear la tarea de decidir ahora', () => {
+            store.agregar({
+              titulo: `Decidir por escrito qué haré si cae un ${r.caidaPct} %`,
+              modulo: 'inversiones', proyecto: 'Cartera', prioridad: 2, fecha: hoyISO,
+              notas: `${r.frase}\nAfectadas: ${r.stopsQueSaltan.map((f) => f.ticker).join(', ')}.`,
+            });
+            toast('Tarea creada');
+          })) : null),
+
+      el('section', { class: 'card' },
+        el('h2', { class: 'card-title' }, 'Plan de aportes'),
+        el('div', { class: 'fila' },
+          el('label', { class: 'field', style: 'width:180px' },
+            el('span', { class: 'field-label' }, 'Objetivo del año'),
+            el('input', {
+              class: 'input', type: 'number', value: (inv().aportes || {}).objetivoAnual || '',
+              onChange: (e) => {
+                inv().aportes = { ...(inv().aportes || {}), objetivoAnual: Number(e.target.value) || 0 };
+                guardar();
+              },
+            })),
+          button('+ Apuntar aporte', () => {
+            const importe = Number(window.prompt('¿Cuánto has aportado?', '0'));
+            if (!importe) return;
+            const aportes = inv().aportes || {};
+            inv().aportes = { ...aportes, aportes: [...(aportes.aportes || []), { fecha: hoyISO, importe }] };
+            guardar();
+          })),
+
+        plan.objetivo ? el('div', {},
+          el('div', { class: 'barra', style: 'margin:10px 0 6px' },
+            el('div', { style: `width:${Math.min(100, plan.pct)}%;background:${plan.alDia ? 'var(--ok)' : 'var(--warn)'}` })),
+          el('p', { class: plan.alDia ? 'positivo' : 'negativo' }, plan.frase),
+          el('div', { class: 'tarjetas' },
+            dato(moneda(plan.aportado), 'aportado', { pie: `${plan.pct} % del objetivo` }),
+            dato(moneda(plan.deberiaLlevar), 'deberías llevar'),
+            dato(moneda(plan.ritmoNecesario), 'al mes para llegar', { pie: `${plan.mesesRestantes} meses` })),
+          plan.aportes.length ? el('details', { style: 'margin-top:10px' },
+            el('summary', { class: 'muted small' }, `Aportes del año (${plan.aportes.length})`),
+            el('table', { class: 'tabla' },
+              el('tbody', {}, ...plan.aportes.map((x, i) => el('tr', {},
+                el('td', { class: 'muted small' }, x.fecha),
+                el('td', { class: 'num' }, moneda(x.importe)),
+                el('td', {}, button('🗑', () => {
+                  const aportes = inv().aportes;
+                  inv().aportes = { ...aportes, aportes: aportes.aportes.filter((y) => y !== x) };
+                  guardar();
+                }, { variant: 'ghost chico danger' }))))))) : null)
+          : el('p', { class: 'muted' }, plan.frase)));
+  }
+
+  /* ----------------------------- fiscal ----------------------------- */
+
+  function panelFiscal() {
+    const anio = inv().anioFiscal || Number(hoyISO.slice(0, 4));
+    const r = informeFiscal(inv().operaciones, anio);
+
+    return el('div', {},
+      el('section', { class: 'card' },
+        el('div', { class: 'fila entre' },
+          el('h2', { class: 'card-title', style: 'margin:0' }, `Plusvalías realizadas en ${anio}`),
+          el('select', { class: 'input', style: 'width:auto', onChange: (e) => { inv().anioFiscal = Number(e.target.value); guardar(); } },
+            ...[0, 1, 2, 3].map((d) => {
+              const y = Number(hoyISO.slice(0, 4)) - d;
+              return el('option', { value: y, selected: y === anio }, String(y));
+            }))),
+        el('p', { class: 'muted small' },
+          'Es un informe, no un consejo fiscal: cada país tiene sus reglas de compensación y de plazos. ',
+          'La app te da el número y los datos ordenados; la norma la aplicas tú o quien te lleve los impuestos.'),
+
+        el('div', { class: 'tarjetas' },
+          dato(moneda(r.ganancias), 'ganancias', { clase: 'positivo' }),
+          dato(moneda(r.perdidas), 'pérdidas', { clase: 'negativo' }),
+          dato(moneda(r.neto), 'neto', { clase: r.neto >= 0 ? 'positivo' : 'negativo' }),
+          dato(moneda(r.comisiones), 'comisiones'),
+          dato(r.operaciones.length, 'operaciones cerradas')),
+
+        ...r.avisos.map((a) => el('div', { class: 'alerta medio', style: 'margin-top:10px' }, el('div', {}, a))),
+
+        r.operaciones.length ? el('div', { class: 'tabla-scroll', style: 'margin-top:12px' },
+          el('table', { class: 'tabla' },
+            el('thead', {}, el('tr', {}, el('th', {}, 'Ticker'), el('th', {}, 'Compra'), el('th', {}, 'Venta'),
+              el('th', { class: 'num' }, 'Cant.'), el('th', { class: 'num' }, 'Entrada'), el('th', { class: 'num' }, 'Salida'),
+              el('th', { class: 'num' }, 'Resultado'))),
+            el('tbody', {}, ...r.operaciones.map((f) => el('tr', {},
+              el('td', {}, f.ticker),
+              el('td', { class: 'small muted' }, f.fechaEntrada || '—'),
+              el('td', { class: 'small' }, f.fechaSalida),
+              el('td', { class: 'num' }, String(f.cantidad)),
+              el('td', { class: 'num muted' }, String(f.entrada)),
+              el('td', { class: 'num' }, String(f.salida)),
+              el('td', { class: `num ${f.resultado >= 0 ? 'positivo' : 'negativo'}` }, moneda(f.resultado)))))))
+          : el('p', { class: 'muted' }, 'No hay operaciones cerradas en ese año.'),
+
+        r.operaciones.length ? el('div', { class: 'fila', style: 'margin-top:10px' },
+          button('⬇ Exportar CSV para el gestor', () => {
+            const filas = [['Ticker', 'Compra', 'Venta', 'Cantidad', 'Entrada', 'Salida', 'Comisiones', 'Resultado']];
+            for (const f of r.operaciones) filas.push([f.ticker, f.fechaEntrada, f.fechaSalida, f.cantidad, f.entrada, f.salida, f.comisiones, f.resultado]);
+            download(`plusvalias-${anio}.csv`, filas.map((x) => x.join(',')).join('\n'), 'text/csv');
+          })) : null));
+  }
+
   /* ----------------------------- chequeos ----------------------------- */
 
   function panelChequeos() {
@@ -374,11 +532,14 @@ export function vistaInversiones(root, ctx = {}) {
     render(host,
       tituloVista('Inversiones', 'Precios a mano, cálculo y disciplina de la app'),
       el('div', { class: 'pestanas' },
-        ...[['cartera', 'Cartera'], ['calculadora', 'Riesgo'], ['diario', 'Diario'], ['chequeos', 'Chequeos']].map(([id, txt]) =>
+        ...[['cartera', 'Cartera'], ['calculadora', 'Riesgo'], ['estres', 'Estrés y aportes'],
+          ['diario', 'Diario'], ['fiscal', 'Fiscal'], ['chequeos', 'Chequeos']].map(([id, txt]) =>
           el('button', { class: `pestana ${pestana === id ? 'activa' : ''}`.trim(), onClick: () => { pestana = id; pintar(); } }, txt))),
       pestana === 'cartera' ? panelCartera()
         : pestana === 'calculadora' ? panelCalculadora()
-          : pestana === 'diario' ? panelDiario() : panelChequeos());
+          : pestana === 'estres' ? panelEstres()
+            : pestana === 'diario' ? panelDiario()
+              : pestana === 'fiscal' ? panelFiscal() : panelChequeos());
   };
 
   pintar();

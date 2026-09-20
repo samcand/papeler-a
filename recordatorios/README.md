@@ -19,6 +19,8 @@ Se instala como app (Chrome/Edge/Android: “Instalar”; iPhone: Compartir →
 | Pantalla | Para qué sirve |
 | --- | --- |
 | **Bandeja** | Donde se suelta lo capturado sin decidir nada, con un modo de procesarlo de una en una. |
+| **Tablero** | Kanban cuyas columnas son fechas: arrastrar una tarjeta es cambiarle el día. |
+| **Concentración** | Una tarea, su reloj y sus subtareas. El resto de la app también distrae. |
 | **Papelera y archivo** | Lo borrado espera 30 días; lo terminado se archiva sin perderse (en Ajustes). |
 | **Hoy** | El resumen del día, lo de hoy, lo que se quedó atrás, las horas comprometidas y los hábitos. |
 | **Próximos** | Los siguientes 7, 14 o 30 días agrupados por fecha, más lo que no tiene fecha y hay que decidir. |
@@ -120,6 +122,12 @@ cuando no recuerdas la sintaxis:
   Debajo, seis atajos de un toque y el campo de texto libre — y siempre la
   previsualización de las tres próximas fechas antes de guardar.
 
+### Buscar con operadores
+
+La caja de búsqueda detecta si escribes un filtro (`#Cartera & p1`, `hoy`,
+`@espera`) y lo aplica como tal; si no, busca texto en títulos y notas. Los
+resultados salen agrupados por proyecto.
+
 ### Filtros guardados
 
 ```
@@ -146,6 +154,10 @@ y puedes crear los tuyos.
   fijas, mete descansos cada 90 minutos y **dice qué no cabe**. Un día no rinde
   más por meterle más cosas en la lista.
 - **Registro de tiempo** por tarea y por día, con racha y gráfico de 14 días.
+- **Informe de 28 días**: a dónde se fue el tiempo por módulo, por proyecto y por
+  semana, y cuánto se desvía de lo que habías planificado.
+- **Modo concentración**: pantalla completa con una tarea, su reloj y sus
+  subtareas; se sale con Esc.
 - **Tu capacidad real** (en Planificar): mapa de calor de cuatro semanas con las
   horas disponibles frente a las comprometidas, el reparto entre los cinco
   módulos y la frase que importa — *«has prometido 46 h y tienes 40: no es
@@ -155,6 +167,16 @@ y puedes crear los tuyos.
   desastroso no desplace la cuenta, y por módulo cuando hay datos suficientes
   (calificar y leer un artículo no fallan igual). Al estimar una tarea nueva, la
   app avisa: *«con tu historial esto son más bien 90 min»*.
+
+## Compartir sin servidor
+
+Desde cualquier lista, **📤 Compartir** mete las tareas comprimidas **dentro del
+propio enlace** y lo acompaña de un QR. Quien lo abre ve qué trae antes de
+aceptar nada. No hay servidor, ni cuentas, ni nada que se suba a ningún lado —
+igual que la app de alabanza comparte el set del domingo.
+
+La app también se registra como destino de **Compartir** del sistema: mandarle
+un enlace o un texto desde otra app crea una tarea en la bandeja.
 
 ## Proyectos (planificación tipo Project)
 
@@ -193,6 +215,13 @@ dependencias y fechas que se arrastran unas a otras:
   cuánto se retrasa el final. Se aplica de verdad solo si quieres.
 - **Plantillas** listas: artículo de investigación, montar un curso y estudio de
   una inversión, con sus dependencias ya puestas.
+- **Avisos del cronograma**: lo que no cabe antes de la fecha comprometida, las
+  chinchetas que ya no mandan, las tareas que flotan sin depender de nada, la
+  **ruta casi crítica** (tres días o menos de holgura) y el margen hasta cada hito.
+- **Valor ganado en días de trabajo** con ETC, VAC, TCPI y **curva S**. Sin días
+  reales apuntados, el CPI se deja en blanco en vez de inventarse un número.
+- **Simulación de ausencia**: "me voy dos semanas" empuja solo las tareas de esa
+  persona y dice si la holgura lo absorbe o la fecha se mueve.
 - **Arrastrar para reprogramar**: mover una barra fija la tarea a esa fecha (queda
   marcada con 📌, y la chincheta la suelta) y estirar su borde derecho cambia la
   duración. Al soltar se recalculan dependencias, holguras y ruta crítica.
@@ -215,6 +244,13 @@ funciona sin internet, no depende de ninguna API y nada sale del dispositivo.
 - **Tamaño de posición**: cuántas acciones comprar para arriesgar solo el % que
   decidiste, con avisos si el stop está tan cerca que te saca el ruido normal
   del mercado o tan lejos que la tesis no lo aguanta.
+- **Prueba de estrés**: qué pasa si cae un 10, un 20 o un 35 %, o si se hunde un
+  sector entero. Lo que importa no es el número final sino **qué stops saltan**.
+- **Plan de aportes**: objetivo del año, cuánto llevas, cuánto deberías llevar y
+  a qué ritmo mensual haría falta ir.
+- **Informe fiscal** del año: ganancias, pérdidas, comisiones y operación por
+  operación, exportable a CSV. Con aviso de recompra poco después de vender en
+  pérdidas — es un informe, no un consejo fiscal: la norma la pones tú.
 - **Importar del bróker**: lee el CSV de operaciones (reconoce los nombres de
   columna de cada bróker y los dos formatos de número), empareja compras y
   ventas por **FIFO** y reconstruye posiciones y diario, avisando de lo que no
@@ -276,13 +312,22 @@ así que “cada tercer viernes” sigue repitiéndose en tu calendario.
   Markdown.
 - Importar: tu copia `.json` y el CSV que exportan **Todoist** y **TickTick**.
 
-Los datos viven en el almacenamiento de este navegador. Si borras los datos del
-sitio, se van: exporta de vez en cuando.
+- **Respaldo cifrado**: la copia lleva tu cartera entera, así que puede salir
+  cifrada con contraseña (AES-GCM con clave derivada por PBKDF2, todo en tu
+  navegador). Sin la contraseña no hay forma de abrirla, tampoco para ti.
+- **Fusionar copias entre dispositivos**: se unen dos archivos y gana la versión
+  modificada más tarde; lo que solo existe en uno se conserva. Sin cuentas y sin
+  nube.
+- **Franjas de silencio**: no molestar de noche o los días que elijas.
+
+Los datos viven en el almacenamiento de este navegador (y los archivos adjuntos
+en IndexedDB). Si borras los datos del sitio, se van: exporta de vez en cuando.
 
 ## Lo que queda
 
-La pestaña **Lo que queda** es la hoja de ruta real de la app: **56 hechas, 42
-pendientes y 12 descartadas** (la ola 1 está terminada). Lo pendiente va en tres olas —lo próximo, después
+La pestaña **Lo que queda** es la hoja de ruta real de la app: **78 hechas, 20
+pendientes y 12 descartadas**. Las olas 1 y 2 están terminadas; lo que queda es
+la ola 3, el "algún día". Lo pendiente va en tres olas —lo próximo, después
 y algún día— y cualquier entrada se convierte en tarea con un botón.
 
 Lo descartado se queda escrito **con su motivo** (notificaciones push, correo a
@@ -304,12 +349,18 @@ que se genera con `npm run docs`.
 ## Atajos de teclado
 
 `a` añadir · `/` buscar · `h` Hoy · `p` Próximos · `c` Calendario · `e` Enfoque ·
-`b` Bandeja · `i` Inversiones · `g` Proyectos · `r` Revisión · `Esc` cerrar.
+`b` Bandeja · `t` Tablero · `i` Inversiones · `g` Proyectos · `r` Revisión ·
+`Ctrl+Z` deshacer · `Alt+↑/↓` reordenar en orden manual · `Esc` salir o cerrar.
+
+La app es navegable entera con el teclado: hay enlace para saltar los menús, el
+foco se ve siempre, los botones que solo son iconos tienen nombre para los
+lectores de pantalla y lo que se puede arrastrar también se puede mover con
+Alt y las flechas.
 
 ## Pruebas
 
 ```bash
-npm test                  # 179 pruebas de lógica, sin navegador
+npm test                  # 247 pruebas de lógica, sin navegador
 npm run test:navegador    # recorre la app en Chromium (necesita Playwright)
 ```
 

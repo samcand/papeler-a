@@ -12,6 +12,7 @@ import { calibracion, pistaEstimacion } from './calibracion.js';
 import { aplicar, fuentesDe, sugerencias } from './autocompletar.js';
 import { alternarTres, tresDelDia } from './dia.js';
 import { crearEspera, estadoEspera, tareaDePerseguir } from './esperas.js';
+import * as adjuntos from './adjuntos.js';
 import { store } from './store.js';
 
 export const colorModulo = (id) => MODULOS.find((m) => m.id === id)?.color || 'var(--muted)';
@@ -152,6 +153,8 @@ export function itemTarea(tarea, opciones = {}) {
   const casilla = el('button', {
     class: `casilla p${tarea.prioridad}${tarea.completada ? ' marcada' : ''}`,
     title: tarea.completada ? 'Reabrir' : 'Completar',
+    'aria-label': `${tarea.completada ? 'Reabrir' : 'Completar'}: ${tarea.titulo}`,
+    'aria-pressed': tarea.completada ? 'true' : 'false',
     onClick: (e) => {
       e.stopPropagation();
       const res = store.alternarCompletada(tarea.id, hoyISO);
@@ -204,9 +207,17 @@ export function itemTarea(tarea, opciones = {}) {
       refrescar();
     }, { variant: 'ghost chico danger', title: 'Borrar' }));
 
-  return el('div', { class: `tarea${tarea.completada ? ' hecha' : ''}${opciones.sub ? ' sub' : ''}`, dataset: { id: tarea.id } },
+  return el('div', {
+    class: `tarea${tarea.completada ? ' hecha' : ''}${opciones.sub ? ' sub' : ''}`,
+    dataset: { id: tarea.id }, role: 'listitem',
+  },
     casilla,
-    el('div', { class: 'tarea-cuerpo', onClick: () => panelTarea(tarea, refrescar) },
+    el('div', {
+      class: 'tarea-cuerpo', role: 'button', tabindex: '0',
+      'aria-label': `Abrir ${tarea.titulo}`,
+      onKeydown: (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); panelTarea(tarea, refrescar); } },
+      onClick: () => panelTarea(tarea, refrescar),
+    },
       el('div', { class: 'tarea-titulo' }, tarea.titulo),
       meta.length ? el('div', { class: 'tarea-meta' }, ...meta) : null),
     acciones);
@@ -215,7 +226,7 @@ export function itemTarea(tarea, opciones = {}) {
 export function listaTareas(tareas, opciones = {}) {
   if (!tareas.length) return vacio(opciones.vacio || 'Nada por aquí.', opciones.icono);
   const orden = opciones.orden || store.estado.ajustes.ordenPorDefecto;
-  const lista = el('div', { class: `lista-tareas${orden === 'manual' ? ' ordenable' : ''}` });
+  const lista = el('div', { class: `lista-tareas${orden === 'manual' ? ' ordenable' : ''}`, role: 'list' });
   for (const t of ordenarTareas(tareas, orden)) {
     const fila = itemTarea(t, opciones);
     if (orden === 'manual') hacerOrdenable(fila, t, opciones.alCambiar || (() => {}));
@@ -230,9 +241,26 @@ export function listaTareas(tareas, opciones = {}) {
 /**
  * Arrastrar para reordenar, solo con el orden manual: en una lista ordenada por
  * fecha, mover a mano no significaría nada.
+ *
+ * Arrastrar no se puede hacer con el teclado, así que la misma fila responde a
+ * Alt+↑ y Alt+↓: una función que solo existe con ratón es una función que no
+ * existe para todo el mundo.
  */
 function hacerOrdenable(fila, tarea, alCambiar) {
   fila.draggable = true;
+  fila.tabIndex = 0;
+  fila.setAttribute('aria-label', `${tarea.titulo}. Alt y flechas para moverla.`);
+  fila.addEventListener('keydown', (e) => {
+    if (!e.altKey || (e.key !== 'ArrowUp' && e.key !== 'ArrowDown')) return;
+    e.preventDefault();
+    const filas = [...fila.parentElement.querySelectorAll('.tarea')];
+    const i = filas.indexOf(fila);
+    const destino = filas[e.key === 'ArrowUp' ? i - 1 : i + 1];
+    if (!destino) return;
+    store.instantanea('Reordenar');
+    store.reordenar(tarea.id, destino.dataset.id);
+    alCambiar();
+  });
   fila.classList.add('arrastrable');
   fila.addEventListener('dragstart', (e) => {
     e.dataTransfer.effectAllowed = 'move';
@@ -316,6 +344,7 @@ export function panelTarea(tarea, alGuardar = () => {}) {
       borrador.etiquetas = v.split(',').map((s) => s.trim().replace(/^@/, '')).filter(Boolean);
     }, { placeholder: 'mercado, espera, tesis' })),
     campoEspera(borrador, alGuardar, cerrar),
+    campoAdjuntos(borrador),
     campo('Avisar antes (min)', input((borrador.recordatorios || []).join(', '), (v) => {
       borrador.recordatorios = v.split(',').map((s) => Number(s.trim())).filter((n) => Number.isFinite(n));
     }, { placeholder: '0, 30, 60' }), 'Solo funciona con la app abierta o instalada. Para lo importante, exporta al calendario.'),
@@ -504,6 +533,57 @@ function reglaDeTipo(tipo, anterior) {
 
 function diaSemanaDeHoy() {
   return hoy().getDay();
+}
+
+/** Archivos pegados a la tarea: la foto del pizarrón vive con la tarea. */
+function campoAdjuntos(tarea) {
+  const lista = el('div', { class: 'chip-list' });
+  const entrada = el('input', {
+    type: 'file', multiple: true, style: 'display:none',
+    onChange: async (e) => {
+      for (const archivo of e.target.files || []) {
+        try {
+          await adjuntos.guardar(tarea.id, archivo);
+        } catch (err) {
+          toast(err.message || 'No se pudo guardar el archivo', 'warn');
+        }
+      }
+      entrada.value = '';
+      pintar();
+    },
+  });
+
+  async function pintar() {
+    let fichas = [];
+    try {
+      fichas = await adjuntos.listar(tarea.id);
+    } catch {
+      render(lista, el('span', { class: 'muted small' }, 'Este navegador no guarda archivos.'));
+      return;
+    }
+    render(lista, ...fichas.map((f) => el('span', { class: 'chip' },
+      el('button', {
+        class: 'btn ghost chico', title: 'Abrir',
+        onClick: async (e) => {
+          e.preventDefault();
+          const completo = await adjuntos.obtener(f.id);
+          const url = adjuntos.urlDe(completo);
+          window.open(url, '_blank', 'noopener');
+          setTimeout(() => URL.revokeObjectURL(url), 30000);
+        },
+      }, `📎 ${f.nombre}`),
+      el('span', { class: 'muted small' }, adjuntos.tamañoLegible(f.bytes)),
+      el('button', {
+        class: 'btn ghost chico danger', title: 'Quitar',
+        onClick: async (e) => { e.preventDefault(); await adjuntos.borrar(f.id); pintar(); },
+      }, '✕'))));
+  }
+  pintar();
+
+  return el('div', { class: 'field' },
+    el('span', { class: 'field-label' }, 'Archivos'),
+    lista,
+    el('div', {}, button('📎 Adjuntar', () => entrada.click(), { variant: 'ghost chico' }), entrada));
 }
 
 /** Campos de "esto no depende de mí": quién, desde cuándo y hasta cuándo. */

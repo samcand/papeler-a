@@ -42,7 +42,7 @@ t('los estados no se solapan', () => {
 t('lo que salió de la revisión de herramientas profesionales está dentro', () => {
   const nuevas = IDEAS.filter((i) => i.n >= 101);
   assert.equal(nuevas.length, 10);
-  assert.ok(nuevas.every((i) => i.estado === 'pendiente'));
+  assert.ok(nuevas.every((i) => ['hecho', 'pendiente', 'descartado'].includes(i.estado)));
   const titulos = nuevas.map((i) => i.t).join(' | ');
   assert.match(titulos, /¿qué pasa si\?/);
   assert.match(titulos, /capacidad real/i);

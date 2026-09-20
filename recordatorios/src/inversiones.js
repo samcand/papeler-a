@@ -345,8 +345,174 @@ export function tareasDeCartera(cartera = {}, hoyISO = aISO(new Date()), reglas 
 }
 
 /* ------------------------------------------------------------------ *
- * Listas de chequeo: la disciplina que se olvida cuando hay prisa
+ * Fiscalidad del año
  * ------------------------------------------------------------------ */
+
+/**
+ * Plusvalías realizadas por año a partir del diario.
+ *
+ * Es un **informe, no un consejo fiscal**: cada país tiene sus reglas de
+ * compensación, de plazos y de recompra. Lo que hace la app es darte el número
+ * y los datos ordenados para que tú (o quien te lleve los impuestos) hagáis el
+ * resto sin copiar nada a mano.
+ */
+export function informeFiscal(operaciones = [], anio = new Date().getFullYear()) {
+  const cerradas = operaciones
+    .filter((o) => o.salida != null && o.salida !== '' && o.fechaSalida)
+    .filter((o) => String(o.fechaSalida).slice(0, 4) === String(anio));
+
+  const filas = cerradas.map((o) => {
+    const r = resultadoOperacion(o);
+    return {
+      ticker: o.ticker,
+      cantidad: Number(o.cantidad) || 0,
+      fechaEntrada: o.fechaEntrada,
+      fechaSalida: o.fechaSalida,
+      entrada: Number(o.entrada) || 0,
+      salida: Number(o.salida) || 0,
+      comisiones: Number(o.comisiones) || 0,
+      resultado: r ? r.pnl : 0,
+      dias: r ? r.dias : null,
+    };
+  }).sort((a, b) => String(a.fechaSalida).localeCompare(String(b.fechaSalida)));
+
+  const ganancias = filas.filter((f) => f.resultado > 0).reduce((s, f) => s + f.resultado, 0);
+  const perdidas = filas.filter((f) => f.resultado < 0).reduce((s, f) => s + f.resultado, 0);
+
+  // Recompra del mismo valor poco después de venderlo en pérdidas: en varios
+  // países eso impide compensar la pérdida. La app avisa; la norma la pones tú.
+  const avisos = [];
+  for (const f of filas.filter((x) => x.resultado < 0)) {
+    const recompra = operaciones.find((o) => o.ticker === f.ticker && o.fechaEntrada
+      && o.fechaEntrada > f.fechaSalida && diferenciaDias(f.fechaSalida, o.fechaEntrada) <= 60);
+    if (recompra) {
+      avisos.push(`${f.ticker}: vendida en pérdidas el ${f.fechaSalida} y recomprada el ${recompra.fechaEntrada} `
+        + `(${diferenciaDias(f.fechaSalida, recompra.fechaEntrada)} días después). Revisa la regla de recompra de tu país antes de compensar.`);
+    }
+  }
+
+  const porTicker = new Map();
+  for (const f of filas) porTicker.set(f.ticker, (porTicker.get(f.ticker) || 0) + f.resultado);
+
+  return {
+    anio,
+    operaciones: filas,
+    ganancias: redondea(ganancias),
+    perdidas: redondea(perdidas),
+    neto: redondea(ganancias + perdidas),
+    comisiones: redondea(filas.reduce((s, f) => s + f.comisiones, 0)),
+    porTicker: [...porTicker.entries()].map(([ticker, resultado]) => ({ ticker, resultado: redondea(resultado) }))
+      .sort((a, b) => b.resultado - a.resultado),
+    avisos,
+  };
+}
+
+/* ------------------------------------------------------------------ *
+ * Escenarios y pruebas de estrés
+ * ------------------------------------------------------------------ */
+
+export const ESCENARIOS = [
+  { id: 'correccion', nombre: 'Corrección del 10 %', caida: 10 },
+  { id: 'mercadoBajista', nombre: 'Mercado bajista (−20 %)', caida: 20 },
+  { id: 'crisis', nombre: 'Crisis (−35 %)', caida: 35 },
+  { id: 'burbuja', nombre: 'Estallido sectorial (−50 % en un sector)', caida: 50, soloSector: true },
+];
+
+/**
+ * Qué le pasa a la cartera si cae lo que sea. Lo interesante no es el número
+ * final sino **qué stops saltan**: ahí se ve si el plan aguanta escrito o solo
+ * en la cabeza.
+ */
+export function pruebaDeEstres(posiciones = [], caidaPct = 20, opciones = {}) {
+  const sector = opciones.sector || null;
+  const efectivo = Number(opciones.efectivo) || 0;
+  const antes = valoraCartera(posiciones, efectivo);
+
+  const filas = antes.filas.map((f) => {
+    const afectada = !sector || f.sector === sector;
+    const caida = afectada ? caidaPct : 0;
+    const precio = (Number(f.precio ?? f.entrada) || 0) * (1 - caida / 100);
+    const valor = precio * (Number(f.cantidad) || 0);
+    const stopSaltado = !!f.stop && precio <= Number(f.stop);
+    return {
+      ticker: f.ticker,
+      sector: f.sector || 'Sin sector',
+      precioAntes: f.precio ?? f.entrada,
+      precioDespues: redondea(precio),
+      valorAntes: f.valor,
+      valorDespues: redondea(valor),
+      perdida: redondea(valor - f.valor),
+      stop: f.stop || null,
+      stopSaltado,
+      sinStop: !f.stop,
+      pnlPct: f.coste ? redondea(((valor - f.coste) / f.coste) * 100) : 0,
+    };
+  });
+
+  const valorDespues = filas.reduce((s, f) => s + f.valorDespues, 0) + efectivo;
+  const saltan = filas.filter((f) => f.stopSaltado);
+  const sinStop = filas.filter((f) => f.sinStop && f.perdida < 0);
+
+  return {
+    caidaPct,
+    sector,
+    totalAntes: antes.total,
+    totalDespues: redondea(valorDespues),
+    perdida: redondea(valorDespues - antes.total),
+    perdidaPct: antes.total ? redondea(((valorDespues - antes.total) / antes.total) * 100) : 0,
+    filas: filas.sort((a, b) => a.perdida - b.perdida),
+    stopsQueSaltan: saltan,
+    sinStop,
+    frase: saltan.length
+      ? `Saltarían ${saltan.length} stop${saltan.length === 1 ? '' : 's'} (${saltan.map((f) => f.ticker).join(', ')}). ¿Los vas a respetar o los vas a mover?`
+      : sinStop.length
+        ? `Ningún stop salta porque ${sinStop.length} posicion${sinStop.length === 1 ? '' : 'es'} no tienen stop. Eso no es aguantar, es no haber decidido.`
+        : 'Ningún stop salta: la caída cabe dentro de tu plan.',
+  };
+}
+
+/* ------------------------------------------------------------------ *
+ * Plan de aportes
+ * ------------------------------------------------------------------ */
+
+/**
+ * Cuánto tocaba aportar, cuánto llevas y a qué ritmo tendrías que ir para
+ * llegar. Sin hoja de cálculo aparte.
+ */
+export function planDeAportes(plan = {}, hoyISO = aISO(new Date())) {
+  const objetivo = Number(plan.objetivoAnual) || 0;
+  const anio = Number(String(hoyISO).slice(0, 4));
+  const aportes = (plan.aportes || []).filter((a) => String(a.fecha).slice(0, 4) === String(anio));
+  const aportado = aportes.reduce((s, a) => s + (Number(a.importe) || 0), 0);
+
+  const inicio = `${anio}-01-01`;
+  const fin = `${anio}-12-31`;
+  const diasTotales = diferenciaDias(inicio, fin) + 1;
+  const diasPasados = Math.min(diasTotales, Math.max(0, diferenciaDias(inicio, hoyISO) + 1));
+  const mesesRestantes = Math.max(0, 12 - (Number(String(hoyISO).slice(5, 7))) + 1);
+
+  const deberia = objetivo * (diasPasados / diasTotales);
+  const falta = Math.max(0, objetivo - aportado);
+
+  return {
+    anio,
+    objetivo: redondea(objetivo),
+    aportado: redondea(aportado),
+    falta: redondea(falta),
+    pct: objetivo ? Math.round((aportado / objetivo) * 100) : 0,
+    deberiaLlevar: redondea(deberia),
+    desvio: redondea(aportado - deberia),
+    alDia: aportado >= deberia,
+    mesesRestantes,
+    ritmoNecesario: mesesRestantes ? redondea(falta / mesesRestantes) : falta,
+    aportes: [...aportes].sort((a, b) => String(b.fecha).localeCompare(String(a.fecha))),
+    frase: !objetivo ? 'Pon un objetivo anual para poder seguirlo.'
+      : aportado >= objetivo ? `Objetivo cumplido: llevas ${redondea(aportado)} de ${redondea(objetivo)}.`
+        : aportado >= deberia
+          ? `Vas al día: ${redondea(aportado)} de ${redondea(objetivo)}. Quedan ${redondea(falta)} en ${mesesRestantes} meses.`
+          : `Vas ${redondea(deberia - aportado)} por detrás del ritmo. Harían falta ${mesesRestantes ? redondea(falta / mesesRestantes) : falta} al mes para llegar.`,
+  };
+}
 
 export const CHECKLIST_COMPRA = [
   'Puedo explicar en dos frases qué hace la empresa y cómo gana dinero.',

@@ -9,6 +9,8 @@ import { aCSV, aICS, aTexto, importarCSV, resumenMarkdown } from '../exportar.js
 import { pedirPermiso, permiso, programarDelDia } from '../notificaciones.js';
 import { tituloVista } from '../componentes.js';
 import { archivadas, candidatasAArchivar, diasRestantes } from '../papelera.js';
+import { cifrar, descifrar, esArchivoCifrado, fusionarEstados } from '../compartir.js';
+import { espacioUsado, tamañoLegible } from '../adjuntos.js';
 import { store } from '../store.js';
 
 export function vistaAjustes(root) {
@@ -86,6 +88,35 @@ export function vistaAjustes(root) {
           }))),
 
       el('section', { class: 'card' },
+        el('h2', { class: 'card-title' }, 'Franjas de silencio'),
+        el('p', { class: 'muted small' }, 'Un aviso ignorado enseña a ignorar los avisos.'),
+        el('div', { class: 'fila' },
+          el('label', { class: 'chip', style: 'cursor:pointer' },
+            el('input', {
+              type: 'checkbox', checked: !!a.silencio?.activo,
+              onChange: (e) => { store.ajustar({ silencio: { ...(a.silencio || { desde: '22:00', hasta: '07:00' }), activo: e.target.checked } }); pintar(); },
+            }), 'No molestar'),
+          el('label', { class: 'field', style: 'width:130px;margin:0' },
+            el('span', { class: 'field-label' }, 'Desde'),
+            el('input', { class: 'input', type: 'time', value: a.silencio?.desde || '22:00',
+              onChange: (e) => store.ajustar({ silencio: { ...(a.silencio || {}), desde: e.target.value } }) })),
+          el('label', { class: 'field', style: 'width:130px;margin:0' },
+            el('span', { class: 'field-label' }, 'Hasta'),
+            el('input', { class: 'input', type: 'time', value: a.silencio?.hasta || '07:00',
+              onChange: (e) => store.ajustar({ silencio: { ...(a.silencio || {}), hasta: e.target.value } }) }))),
+        el('div', { class: 'chip-list', style: 'margin-top:10px' },
+          ...['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'].map((d, i) => el('button', {
+            class: `chip ${(a.silencio?.dias || []).includes(i) ? 'activa' : ''}`.trim(),
+            title: 'Silenciar el día entero',
+            onClick: () => {
+              const dias = new Set(a.silencio?.dias || []);
+              dias.has(i) ? dias.delete(i) : dias.add(i);
+              store.ajustar({ silencio: { ...(a.silencio || {}), dias: [...dias] } });
+              pintar();
+            },
+          }, d)))),
+
+      el('section', { class: 'card' },
         el('h2', { class: 'card-title' }, 'Proyectos'),
         el('div', { class: 'chip-list' },
           ...store.estado.proyectos.map((p) => el('span', { class: 'chip' },
@@ -115,13 +146,48 @@ export function vistaAjustes(root) {
           button('⬇ Calendario (.ics)', () => download(`recordatorios-${hoyISO}.ics`, aICS(store.tareas.filter((t) => t.fecha && !t.completada)), 'text/calendar')),
           button('⬇ El día en texto', () => download(`hoy-${hoyISO}.md`, resumenMarkdown(store.tareas, hoyISO), 'text/markdown'))),
 
+        el('div', { class: 'fila', style: 'margin-top:10px' },
+          button('🔒 Exportar cifrado', async () => {
+            const clave = window.prompt('Contraseña para cifrar la copia (apúntala: sin ella no hay forma de abrirla)');
+            if (!clave) return;
+            try {
+              download(`recordatorios-${hoyISO}.json.enc`, await cifrar(store.exportar(), clave), 'application/json');
+              toast('Copia cifrada descargada');
+            } catch (err) { toast(err.message, 'warn'); }
+          }, { title: 'AES-GCM con clave derivada de tu contraseña, todo en tu navegador' })),
+
         el('p', { class: 'field-label', style: 'margin-top:14px' }, 'Importar'),
         el('div', { class: 'fila' },
-          archivo('Restaurar copia (.json)', '.json', async (texto) => {
+          archivo('Restaurar copia (.json o .enc)', '.json,.enc', async (texto) => {
+            let contenido = texto;
+            if (esArchivoCifrado(texto)) {
+              const clave = window.prompt('Contraseña de la copia cifrada');
+              if (!clave) return;
+              try { contenido = await descifrar(texto, clave); } catch (err) { toast(err.message, 'warn'); return; }
+            }
             if (!window.confirm('Esto reemplaza todo lo que hay ahora. ¿Seguir?')) return;
             try {
-              const n = store.importar(texto, 'reemplazar');
+              store.instantanea('Restaurar copia');
+              const n = store.importar(contenido, 'reemplazar');
               toast(`${n} tareas restauradas`);
+              pintar();
+            } catch (err) { toast('El archivo no se pudo leer', 'warn'); }
+          }),
+          archivo('Fusionar copia de otro dispositivo', '.json,.enc', async (texto) => {
+            let contenido = texto;
+            if (esArchivoCifrado(texto)) {
+              const clave = window.prompt('Contraseña de la copia cifrada');
+              if (!clave) return;
+              try { contenido = await descifrar(texto, clave); } catch (err) { toast(err.message, 'warn'); return; }
+            }
+            try {
+              const otro = JSON.parse(contenido);
+              const { estado, frase } = fusionarEstados(store.estado, otro);
+              if (!window.confirm(`${frase}\n\nGana siempre la versión modificada más tarde. ¿Fusionar?`)) return;
+              store.instantanea('Fusionar copia');
+              store.estado = store.fusionar(estado);
+              store.guardar();
+              toast(frase);
               pintar();
             } catch (err) { toast('El archivo no se pudo leer', 'warn'); }
           }),

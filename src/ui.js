@@ -40,10 +40,10 @@ export function clear(node) { while (node.firstChild) node.firstChild.remove(); 
 export function toast(message, kind = 'info') {
   let host = $('#toasts');
   if (!host) {
-    host = el('div', { id: 'toasts' });
+    host = el('div', { id: 'toasts', 'aria-live': 'polite', 'aria-atomic': 'true' });
     document.body.append(host);
   }
-  const node = el('div', { class: `toast ${kind}` }, message);
+  const node = el('div', { class: `toast ${kind}`, role: 'status' }, message);
   host.append(node);
   setTimeout(() => { node.classList.add('out'); setTimeout(() => node.remove(), 300); }, 2600);
 }
@@ -64,7 +64,18 @@ export function field(label, control, hint) {
 }
 
 export function button(label, onClick, opts = {}) {
-  return el('button', { class: `btn ${opts.variant || ''}`.trim(), type: 'button', onClick, title: opts.title || label, ...(opts.attrs || {}) }, label);
+  const texto = typeof label === 'string' ? label : '';
+  const titulo = opts.title || texto;
+  // Un botón que solo es un icono no dice nada a un lector de pantalla, así que
+  // su título viaja como aria-label. Si el botón ya tiene palabras, no se toca:
+  // un aria-label distinto del texto visible rompe el dictado por voz.
+  const soloIcono = !/[\p{L}\p{N}]/u.test(texto);
+  return el('button', {
+    class: `btn ${opts.variant || ''}`.trim(), type: 'button', onClick,
+    title: titulo,
+    'aria-label': soloIcono && titulo ? titulo : undefined,
+    ...(opts.attrs || {}),
+  }, label);
 }
 
 export function select(options, value, onChange, opts = {}) {

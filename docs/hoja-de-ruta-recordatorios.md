@@ -1,6 +1,6 @@
 # Hoja de ruta de la app de recordatorios
 
-**56 hechas · 42 pendientes · 12 descartadas.**
+**78 hechas · 20 pendientes · 12 descartadas.**
 
 Esta lista empezó como “100 ideas” y hoy es la lista de trabajo real. Lo
 pendiente va por olas, que son un orden recomendado y no un compromiso. Lo
@@ -18,75 +18,9 @@ pendiente en tarea con un botón.
 
 _Quita fricción real o evita un error caro. Vale la pena hacerlo ya._
 
-## Después (22)
+## Después (0)
 
 _Suma de verdad, pero puede esperar a que lo de arriba esté asentado._
-
-**5. Compartir desde otra app** · Capturar sin fricción  
-Registrar la app como destino de "Compartir" (Web Share Target) para convertir un enlace, un correo o un mensaje en tarea con su contexto.
-
-**10. Adjuntar archivos y fotos a la tarea** · Capturar sin fricción  
-La foto del pizarrón o el PDF del examen viven con la tarea, no en una carpeta que nadie vuelve a abrir.
-
-**14. Vista de tablero Kanban** · Organizar y encontrar  
-Las mismas tareas en columnas por estado, que para trabajo en curso se lee mejor que una lista.
-
-**15. Reordenar arrastrando** · Organizar y encontrar  
-El orden manual es una forma de prioridad que no cabe en cuatro niveles.
-
-**18. Búsqueda con operadores y resultados agrupados** · Organizar y encontrar  
-Buscar por texto, proyecto y rango de fechas a la vez, con los resultados agrupados por proyecto.
-
-**28. Límite de tareas en curso** · Priorizar y planificar  
-Avisar cuando hay demasiado empezado a la vez: el trabajo en curso es deuda, no progreso.
-
-**36. Modo concentración a pantalla completa** · Tiempo y concentración  
-Solo la tarea y el reloj, sin barra lateral ni contadores: el resto de la app también distrae.
-
-**39. Informe de dónde se fue el tiempo** · Tiempo y concentración  
-Reparto por proyecto y por módulo, comparado con lo que dices que es tu prioridad.
-
-**47. Franjas de silencio** · Recordatorios y avisos  
-No molestar de noche ni en clase: un aviso ignorado enseña a ignorar los avisos.
-
-**51. Compartir una lista por enlace o QR** · Equipo y delegación  
-Como la app de alabanza comparte el set del domingo: sin cuentas, con los datos dentro del propio enlace.
-
-**67. Cálculo fiscal del año** · Inversiones  
-Plusvalías realizadas por método FIFO y aviso de la ventana de lavado antes de cerrar posiciones en diciembre.
-
-**68. Escenarios y pruebas de estrés** · Inversiones  
-Qué le pasa a la cartera si el sector cae un 30 %, calculado antes de que pase.
-
-**69. Plan de aportes y seguimiento** · Inversiones  
-Cuánto tocaba aportar este año, cuánto llevas y qué falta, sin abrir una hoja de cálculo.
-
-**77. Calendario público para los estudiantes** · Docencia e investigación  
-Exportar fechas de parciales y entregas en un .ics que ellos puedan suscribir.
-
-**78. Recordar actualizar el CV al publicar** · Docencia e investigación  
-Cuando un artículo pasa a publicado, crear la tarea de añadirlo al CV, al repositorio y al perfil.
-
-**93. Respaldo cifrado con contraseña** · Datos, privacidad y automatización  
-El archivo de copia lleva la cartera entera: merece cifrado antes de acabar en una carpeta de descargas.
-
-**94. Sincronizar entre dispositivos sin servidor** · Datos, privacidad y automatización  
-Por archivo en tu nube o entre navegadores por WebRTC, manteniendo la promesa de que nada pasa por terceros.
-
-**98. Accesibilidad de verdad** · Datos, privacidad y automatización  
-Teclado completo, foco visible, contraste suficiente, tamaño de letra ajustable y lectores de pantalla contemplados.
-
-**104. Valor ganado en horas: ETC, VAC, TCPI y curva S** · Gestión de proyectos  
-Para un paper o un semestre el presupuesto son horas, no euros: cuánto falta por invertir, cuánto te has pasado y a qué ritmo tendrías que ir para llegar.
-
-**105. Ruta casi crítica y margen hasta el hito** · Gestión de proyectos  
-Las tareas con uno o tres días de holgura son las que sorprenden; hoy se pintan igual que las que tienen treinta. Y cuántos días de colchón queda hasta cada entrega.
-
-**106. Fechas imposibles y tareas huérfanas** · Gestión de proyectos  
-Avisar al planificar de lo que no cabe antes de su fecha límite y de lo que no cuelga de nada ni tiene día, en vez de descubrirlo en noviembre.
-
-**107. Simulación de ausencia** · Gestión de proyectos  
-"Me voy dos semanas en enero": qué se rompe, qué se puede adelantar y qué hay que mover antes de irte.
 
 ## Algún día (20)
 
@@ -144,7 +78,7 @@ Si una tarea entra con la etiqueta X, ponerle proyecto, prioridad y fecha: las m
 Elegir qué medir y verlo en una gráfica, sin exportar a una hoja de cálculo para hacerlo a mano.
 
 **108. Riesgos ligeros por proyecto** · Gestión de proyectos  
-Cinco líneas: qué puede romperlo, probabilidad por impacto, el disparador que lo convierte en problema y cuándo revisarlo. Sin registro formal ni reservas de contingencia.
+Cinco líneas por proyecto: qué puede romperlo, probabilidad por impacto, el disparador que lo convierte en problema y cuándo revisarlo. Sin registro formal ni reservas de contingencia.
 
 **109. Detector de alcance que crece** · Gestión de proyectos  
 Cuánto ha engordado un plan desde que fijaste la línea base, en días y en tareas añadidas: "el paper ha crecido 12 días desde marzo".
@@ -155,34 +89,34 @@ Preguntas del plan respondidas con cálculo, no con lenguaje: qué se va a retra
 ## Ya está hecho
 
 **Capturar sin fricción**  
-1. Escribir la tarea en una sola línea · 2. Enseñar lo que la app entendió antes de guardar · 3. Bandeja de entrada universal · 8. Plantillas de listas reutilizables · 9. Autocompletar proyectos y etiquetas al escribir
+1. Escribir la tarea en una sola línea · 2. Enseñar lo que la app entendió antes de guardar · 3. Bandeja de entrada universal · 5. Compartir desde otra app · 8. Plantillas de listas reutilizables · 9. Autocompletar proyectos y etiquetas al escribir · 10. Adjuntar archivos y fotos a la tarea
 
 **Organizar y encontrar**  
-11. Proyectos, subtareas y etiquetas · 12. Filtros guardados con lenguaje de consulta · 16. Archivar en vez de borrar · 17. Papelera con recuperación
+11. Proyectos, subtareas y etiquetas · 12. Filtros guardados con lenguaje de consulta · 14. Vista de tablero Kanban · 15. Reordenar arrastrando · 16. Archivar en vez de borrar · 17. Papelera con recuperación · 18. Búsqueda con operadores y resultados agrupados
 
 **Priorizar y planificar**  
-21. Cuatro niveles de prioridad con color · 22. Matriz urgente / importante · 23. Estimar duración y ver la carga del día · 24. Planificador que dice qué no cabe · 25. Las tres cosas del día · 26. Aplazar con un toque · 29. Revisión semanal guiada · 30. Avisar de lo que lleva demasiado abierto · 102. Tu capacidad real entre los cinco módulos
+21. Cuatro niveles de prioridad con color · 22. Matriz urgente / importante · 23. Estimar duración y ver la carga del día · 24. Planificador que dice qué no cabe · 25. Las tres cosas del día · 26. Aplazar con un toque · 28. Límite de tareas en curso · 29. Revisión semanal guiada · 30. Avisar de lo que lleva demasiado abierto · 102. Tu capacidad real entre los cinco módulos
 
 **Tiempo y concentración**  
-31. Pomodoro configurable · 32. Cronómetro con vueltas · 33. Temporizadores rápidos · 34. Medir el tiempo con marcas de reloj, no contando ticks · 35. Estimado frente a real
+31. Pomodoro configurable · 32. Cronómetro con vueltas · 33. Temporizadores rápidos · 34. Medir el tiempo con marcas de reloj, no contando ticks · 35. Estimado frente a real · 36. Modo concentración a pantalla completa · 39. Informe de dónde se fue el tiempo
 
 **Recordatorios y avisos**  
-41. Aviso con antelación configurable · 42. Exportar al calendario con las repeticiones intactas · 43. Repeticiones que se entienden · 44. Resumen matutino · 46. Escalado de las aplazadas
+41. Aviso con antelación configurable · 42. Exportar al calendario con las repeticiones intactas · 43. Repeticiones que se entienden · 44. Resumen matutino · 46. Escalado de las aplazadas · 47. Franjas de silencio
 
 **Equipo y delegación**  
-53. Lista de "esperando respuesta" · 54. Dependencias externas: dueño, fecha y seguimiento
+51. Compartir una lista por enlace o QR · 53. Lista de "esperando respuesta" · 54. Dependencias externas: dueño, fecha y seguimiento
 
 **Inversiones**  
-61. Tamaño de posición calculado desde el riesgo · 62. Alertas contra tus propias reglas · 63. Diario con expectativa en R · 64. Calendario propio del mercado · 65. Listas de chequeo antes de comprar y de vender · 66. Importar movimientos del bróker
+61. Tamaño de posición calculado desde el riesgo · 62. Alertas contra tus propias reglas · 63. Diario con expectativa en R · 64. Calendario propio del mercado · 65. Listas de chequeo antes de comprar y de vender · 66. Importar movimientos del bróker · 67. Cálculo fiscal del año · 68. Escenarios y pruebas de estrés · 69. Plan de aportes y seguimiento
 
 **Docencia e investigación**  
-71. El semestre genera sus propias tareas · 72. Aviso cuando un artículo lleva demasiado parado · 73. Convocatorias con su cuenta atrás · 74. Seguimiento de tesis dirigidas · 75. Banco de tareas por curso reutilizable
+71. El semestre genera sus propias tareas · 72. Aviso cuando un artículo lleva demasiado parado · 73. Convocatorias con su cuenta atrás · 74. Seguimiento de tesis dirigidas · 75. Banco de tareas por curso reutilizable · 77. Calendario público para los estudiantes · 78. Recordar actualizar el CV al publicar
 
 **Gestión de proyectos**  
-81. EDT con tareas resumen · 82. Dependencias de los cuatro tipos con desfase · 83. Ruta crítica y holgura · 84. Gantt con dependencias dibujadas · 85. Línea base y desviación en días hábiles · 86. Valor ganado (SPI y CPI) · 87. Mover tareas arrastrando en el Gantt · 88. Nivelación automática de recursos · 89. Fecha final probabilística (PERT + Monte Carlo) · 101. Simulación "¿qué pasa si?" y propagación del impacto · 103. Salud explicada y aviso temprano
+81. EDT con tareas resumen · 82. Dependencias de los cuatro tipos con desfase · 83. Ruta crítica y holgura · 84. Gantt con dependencias dibujadas · 85. Línea base y desviación en días hábiles · 86. Valor ganado (SPI y CPI) · 87. Mover tareas arrastrando en el Gantt · 88. Nivelación automática de recursos · 89. Fecha final probabilística (PERT + Monte Carlo) · 101. Simulación "¿qué pasa si?" y propagación del impacto · 103. Salud explicada y aviso temprano · 104. Valor ganado en horas: ETC, VAC, TCPI y curva S · 105. Ruta casi crítica y margen hasta el hito · 106. Fechas imposibles y tareas huérfanas · 107. Simulación de ausencia
 
 **Datos, privacidad y automatización**  
-91. Todo local, sin cuenta y sin servidor · 92. Exportar e importar de verdad · 95. Deshacer global y papelera · 99. Tema claro y oscuro, y que quepa en el móvil
+91. Todo local, sin cuenta y sin servidor · 92. Exportar e importar de verdad · 93. Respaldo cifrado con contraseña · 94. Sincronizar entre dispositivos sin servidor · 95. Deshacer global y papelera · 98. Accesibilidad de verdad · 99. Tema claro y oscuro, y que quepa en el móvil
 
 ## Descartado, y por qué
 

@@ -13,6 +13,7 @@ import { vistaHoy } from './views/hoy.js';
 import { vistaBandeja } from './views/bandeja.js';
 import { vistaProximos } from './views/proximos.js';
 import { vistaTablero } from './views/tablero.js';
+import { vistaImportarLista } from './views/importar-lista.js';
 import { vistaConcentracion } from './views/concentracion.js';
 import { vistaCalendario } from './views/calendario.js';
 import { vistaEnfoque } from './views/enfoque.js';
@@ -45,6 +46,7 @@ const RUTAS = [
   { ruta: /^\/investigacion$/, vista: vistaInvestigacion, nav: 'investigacion' },
   { ruta: /^\/alabanza$/, vista: vistaAlabanza, nav: 'alabanza' },
   { ruta: /^\/plantillas$/, vista: vistaPlantillas, nav: 'plantillas' },
+  { ruta: /^\/importar-lista$/, vista: vistaImportarLista },
   { ruta: /^\/ideas$/, vista: vistaIdeas, nav: 'ideas' },
   { ruta: /^\/ajustes$/, vista: vistaAjustes, nav: 'ajustes' },
   { ruta: /^\/filtro\/nuevo$/, vista: vistaFiltroNuevo },
@@ -104,7 +106,11 @@ function dibujar() {
 
 function marcarNav(id) {
   document.querySelectorAll('[data-nav]').forEach((a) => {
-    a.classList.toggle('activo', a.dataset.nav === id);
+    const activo = a.dataset.nav === id;
+    a.classList.toggle('activo', activo);
+    // Para un lector de pantalla, "la página en la que estás" es aria-current.
+    if (activo) a.setAttribute('aria-current', 'page');
+    else a.removeAttribute('aria-current');
   });
 }
 
@@ -154,7 +160,7 @@ function montarArmazon() {
   const cuentaHoy = pendientes.filter((t) => t.fecha && t.fecha <= hoyISO).length;
   const vencidas = pendientes.filter((t) => estaVencida(t, hoyISO)).length;
 
-  const lateral = el('aside', { class: 'lateral' },
+  const lateral = el('nav', { class: 'lateral', 'aria-label': 'Secciones de la app' },
     el('div', { class: 'marca' }, el('span', {}, '✓'), 'Recordatorios'),
     buscador(),
     ...PRINCIPAL.map((i) => enlace(i, cuentaDeNav(i.id))),
@@ -175,12 +181,16 @@ function montarArmazon() {
     enlace({ id: 'ideas', icono: '💡', texto: 'Lo que queda', href: '#/ideas' }),
     enlace({ id: 'ajustes', icono: '⚙️', texto: 'Ajustes', href: '#/ajustes' }));
 
-  const inferior = el('nav', { class: 'barra-inferior' },
+  const inferior = el('nav', { class: 'barra-inferior', 'aria-label': 'Navegación principal' },
     ...MOVIL.map((i) => el('a', { class: 'nav-item', href: i.href, dataset: { nav: i.id } },
       el('span', {}, i.icono), el('span', {}, i.texto))));
 
-  const marco = el('div', { class: 'marco' }, lateral, el('main', { class: 'contenido', id: 'app' }));
+  const marco = el('div', { class: 'marco' }, lateral,
+    el('main', { class: 'contenido', id: 'app', tabindex: '-1' }));
   document.body.prepend(marco);
+  if (!document.querySelector('.saltar')) {
+    document.body.prepend(el('a', { class: 'saltar', href: '#app' }, 'Saltar al contenido'));
+  }
   document.body.append(inferior);
 
   function cuentaDeNav(id) {
@@ -270,10 +280,30 @@ if ('serviceWorker' in navigator) {
   });
 }
 
+/**
+ * Compartir desde otra app: el navegador nos manda aquí con lo compartido en la
+ * URL. Entra en la bandeja, que es donde va lo capturado sin decidir.
+ */
+function recogerCompartido() {
+  const params = new URLSearchParams(location.search);
+  const titulo = params.get('title') || params.get('name');
+  const texto = params.get('text');
+  const url = params.get('url');
+  if (!titulo && !texto && !url) return;
+  const tarea = store.agregar({
+    titulo: (titulo || texto || url || 'Algo compartido').slice(0, 140),
+    notas: [texto && texto !== titulo ? texto : null, url].filter(Boolean).join('\n'),
+  });
+  history.replaceState(null, '', location.pathname);
+  location.hash = '#/bandeja';
+  toast(`Guardado en la bandeja: ${tarea.titulo.slice(0, 40)}`);
+}
+
 window.addEventListener('hashchange', dibujar);
 window.addEventListener('DOMContentLoaded', () => {
   montarArmazon();
   atajos();
+  recogerCompartido();
   if (!location.hash || location.hash === '#/') location.hash = '#/' + (store.estado.ajustes.vistaInicio || 'hoy');
   dibujar();
 

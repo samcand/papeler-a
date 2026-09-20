@@ -6,7 +6,7 @@
 
 import { button, el, render, toast } from '../../../src/ui.js';
 import { aISO, diferenciaDias, hoy as fechaHoy, textoRelativo } from '../fechas.js';
-import { ESTADOS_ARTICULO, estadoArticulo, RUTINA_INVESTIGACION, tareasDeInvestigacion } from '../plantillas.js';
+import { ESTADOS_ARTICULO, estadoArticulo, RUTINA_INVESTIGACION, tareasAlPublicar, tareasDeInvestigacion } from '../plantillas.js';
 import { parseRegla } from '../recurrencia.js';
 import { dato, listaTareas, tituloVista } from '../componentes.js';
 import { store } from '../store.js';
@@ -43,7 +43,19 @@ export function vistaInvestigacion(root) {
               el('input', { class: 'input', style: 'max-width:320px', value: art.titulo || '', onChange: (e) => { art.titulo = e.target.value; guardar(); } }),
               el('select', {
                 class: 'input', style: 'width:auto',
-                onChange: (e) => { art.estado = e.target.value; art.desde = hoyISO; guardar(); },
+                onChange: (e) => {
+                  const nuevo = e.target.value;
+                  const pasaAPublicado = nuevo === 'publicado' && art.estado !== 'publicado';
+                  art.estado = nuevo;
+                  art.desde = hoyISO;
+                  guardar();
+                  // Lo que se olvida siempre: el CV, el repositorio y contarlo.
+                  if (pasaAPublicado && window.confirm('¿Creo las tareas de después de publicar (CV, repositorio, perfil y difusión)?')) {
+                    const n = store.sembrarTareas(tareasAlPublicar(art, hoyISO), `publicado-${art.titulo}`);
+                    toast(n ? `${n} tareas creadas` : 'Ya estaban creadas');
+                    pintar();
+                  }
+                },
               }, ...ESTADOS_ARTICULO.map((x) => el('option', { value: x.id, selected: x.id === art.estado }, x.nombre))),
               el('input', { class: 'input', style: 'width:150px', placeholder: 'Revista', value: art.revista || '', onChange: (e) => { art.revista = e.target.value; guardar(); } }),
               el('input', { class: 'input', style: 'width:150px', type: 'date', value: art.deadline || '', onChange: (e) => { art.deadline = e.target.value; guardar(); } }),
