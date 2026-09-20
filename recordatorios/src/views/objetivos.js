@@ -177,9 +177,14 @@ export function vistaObjetivos(root) {
       barra(p.pct, p.logrado ? 'var(--ok, #35c48b)' : (p.alDia === false ? 'var(--danger)' : 'var(--accent-2)')),
       p.conFecha ? el('div', { class: 'barra tiempo' }, el('div', { style: `width:${p.pctTiempo}%` })) : null,
 
-      el('div', { class: 'fila entre' },
-        el('span', { class: `small ${p.alDia === false ? 'negativo' : 'muted'}`.trim() }, p.frase),
-        el('div', { class: 'fila' },
+      // El texto en una columna y los botones quietos a la derecha: si se deja
+      // todo en la misma línea, una frase larga empuja el +1 al renglón de
+      // abajo y cada meta acaba con los botones en un sitio distinto.
+      el('div', { class: 'fila entre meta-pie' },
+        el('div', { class: 'grow' },
+          el('div', { class: `small ${p.alDia === false ? 'negativo' : 'muted'}`.trim() }, p.frase),
+          lineaRitmo(o)),
+        el('div', { class: 'fila meta-botones' },
           !p.logrado && o.tipo === 'siNo'
             ? button('Hecho', () => suma(1), { variant: 'ok chico' })
             : null,
@@ -189,8 +194,6 @@ export function vistaObjetivos(root) {
               button('+1', () => suma(1), { variant: 'ok chico', title: 'Sumar uno' }))
             : null,
           button('✎', () => { editando = o.id; pintar(); }, { variant: 'ghost chico', title: 'Editar la meta' }))),
-
-      lineaRitmo(o),
 
       tocaRevisar ? el('p', { class: 'negativo small' },
         `Tocaba revisarla el ${o.revisarEn}: ¿sigue teniendo sentido?`) : null);
@@ -330,11 +333,17 @@ export function vistaObjetivos(root) {
       const rm = ritmo(meta, datos(), hoyISO);
       return el('div', { class: 'field' },
         el('span', { class: 'field-label' }, 'Últimos 30 días'),
-        el('div', { class: 'chispa' }, ...serie.map((d) => el('i', {
-          class: d.valor > 0 ? 'lleno' : '',
-          style: `height:${d.valor > 0 ? Math.max(18, Math.round((d.valor / tope) * 100)) : 6}%`,
-          title: `${d.fecha}: ${d.valor}`,
-        }))),
+        el('div', { class: 'chispa' }, ...serie.map((d) => {
+          // Cada día es una columna entera: la parte de abajo es lo que hiciste.
+          // Con barritas sueltas, treinta días vacíos parecían una línea de
+          // puntos y no se entendía nada.
+          const alto = d.valor > 0 ? Math.max(20, Math.round((d.valor / tope) * 100)) : 0;
+          return el('i', {
+            class: d.valor > 0 ? 'lleno' : '',
+            style: `background: linear-gradient(to top, var(--ok, #35c48b) ${alto}%, var(--line) ${alto}%)`,
+            title: `${d.fecha}: ${d.valor}`,
+          });
+        })),
         el('span', { class: 'field-hint' },
           `${dias} de 30 días con avance. ${rm.frase}`
           + (rm.porSemana ? ` Vas a ${rm.porSemana}${meta.unidad ? ` ${meta.unidad}` : ''} por semana.` : '')

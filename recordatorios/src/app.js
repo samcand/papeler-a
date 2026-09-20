@@ -171,7 +171,7 @@ const VIDA = [
   { id: 'panel', icono: '🧭', texto: 'Panel de vida', href: '#/panel' },
   { id: 'rutinas', icono: '🌅', texto: 'Rutinas', href: '#/rutinas' },
   { id: 'notas', icono: '📔', texto: 'Notas y diario', href: '#/notas' },
-  { id: 'objetivos', icono: '🎯', texto: 'Objetivos', href: '#/objetivos' },
+  { id: 'objetivos', icono: '🎯', texto: 'Metas', href: '#/objetivos' },
   { id: 'gastos', icono: '💳', texto: 'Gastos', href: '#/gastos' },
   { id: 'personas', icono: '🎂', texto: 'Personas', href: '#/personas' },
   { id: 'colecciones', icono: '🗃️', texto: 'Colecciones', href: '#/colecciones' },

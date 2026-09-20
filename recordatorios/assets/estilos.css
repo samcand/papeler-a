@@ -589,11 +589,13 @@ body.concentrado .contenido { max-width: none; display: grid; place-items: cente
   display: flex; align-items: flex-end; gap: 2px;
   height: 34px; margin: 4px 0 2px;
 }
-.chispa i {
-  flex: 1; border-radius: 2px 2px 0 0;
-  background: var(--line); min-height: 2px;
-}
-.chispa i.lleno { background: var(--ok, #35c48b); }
+.chispa i { flex: 1; align-self: stretch; border-radius: 2px; opacity: .6; }
+.chispa i.lleno { opacity: 1; }
+
+/* Un campo con pista no puede descolocar a los de su fila. */
+.drawer-body .fila { align-items: flex-start; }
+.meta-pie { align-items: flex-start; gap: 10px; }
+.meta-botones { flex: 0 0 auto; align-items: center; }
 
 /* ---- Objetivos y rutinas ---- */
 .card.objetivo.atrasado { border-left: 3px solid var(--danger); }
