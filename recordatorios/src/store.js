@@ -10,6 +10,7 @@ import { siguienteFecha } from './recurrencia.js';
 import { CONFIG_POMODORO } from './tiempo.js';
 import { completar, crearTarea, uid } from './modelo.js';
 import { FILTROS_PREDEFINIDOS } from './filtros.js';
+import { PLANTILLAS_INICIALES } from './plantillasLista.js';
 import { TAREAS_EJEMPLO, PROYECTOS_EJEMPLO } from './seed.js';
 
 const CLAVE = 'recordatorios.v1';
@@ -36,6 +37,7 @@ const ESTADO_INICIAL = {
   // Ojo: `proyectos` son las listas de tareas; `planes` son los proyectos con
   // EDT, dependencias y ruta crítica. Son cosas distintas y no deben mezclarse.
   planes: [],
+  plantillas: [],       // listas reutilizables con desfases relativos a una fecha
   pomodoro: { config: { ...CONFIG_POMODORO }, estado: null },
   ajustes: {
     tema: 'dark',
@@ -85,6 +87,7 @@ class Store {
       investigacion: { ...base.investigacion, ...(guardado.investigacion || {}) },
       alabanza: { ...base.alabanza, ...(guardado.alabanza || {}) },
       planes: guardado.planes || base.planes,
+      plantillas: guardado.plantillas || base.plantillas,
       pomodoro: { ...base.pomodoro, ...(guardado.pomodoro || {}), config: { ...base.pomodoro.config, ...(guardado.pomodoro?.config || {}) } },
       ajustes: { ...base.ajustes, ...(guardado.ajustes || {}), jornada: { ...base.ajustes.jornada, ...(guardado.ajustes?.jornada || {}) } },
     };
@@ -99,6 +102,7 @@ class Store {
       fecha: t.fecha || (t.regla ? siguienteFecha(t.regla, ayer) : null),
     }));
     base.filtros = clonar(FILTROS_PREDEFINIDOS);
+    base.plantillas = clonar(PLANTILLAS_INICIALES);
     return base;
   }
 
@@ -286,6 +290,19 @@ class Store {
     this.guardar();
   }
 
+  /* ---------------- plantillas de listas ---------------- */
+
+  agregarPlantilla(plantilla) {
+    this.estado.plantillas.push(plantilla);
+    this.guardar();
+    return plantilla;
+  }
+
+  borrarPlantilla(id) {
+    this.estado.plantillas = this.estado.plantillas.filter((p) => p.id !== id);
+    this.guardar();
+  }
+
   /* ---------------- ajustes y respaldo ---------------- */
 
   ajustar(cambios) {
@@ -316,6 +333,7 @@ class Store {
   vaciar() {
     this.estado = clonar(ESTADO_INICIAL);
     this.estado.filtros = clonar(FILTROS_PREDEFINIDOS);
+    this.estado.plantillas = clonar(PLANTILLAS_INICIALES);
     this.guardar();
   }
 }

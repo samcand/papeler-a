@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import {
   aTareasDeAgenda, cambiarDuracion, cargaRecursos, desdePlantilla, desviaciones, diasHabiles,
-  fechaDeIndice, indiceDeFecha, moverTarea, numerarEDT, PLANTILLAS_PROYECTO, programar,
+  fechaDeIndice, indiceDeFecha, moverTarea, nivelarRecursos, numerarEDT, PLANTILLAS_PROYECTO,
+  primerConflicto, programar,
   proyectoVacio, quitarRestriccion, resumenProyecto, tareaProyecto, tomarLineaBase, validar,
   valorGanado,
 } from '../recordatorios/src/proyectos.js';
@@ -256,6 +257,91 @@ t('soltar la restricción devuelve la tarea a su sitio', () => {
   assert.equal(quitarRestriccion(p, 'b'), true);
   assert.equal(quitarRestriccion(p, 'b'), false);
   assert.equal(programar(p).tareas.find((x) => x.id === 'b').inicio, '2026-09-28');
+});
+
+t('encuentra el primer día en que alguien está en dos sitios', () => {
+  const plan = programar(proyecto([
+    T('a', { nombre: 'A', duracion: 5, recurso: 'Yo' }),
+    T('b', { nombre: 'B', duracion: 3, recurso: 'Yo' }),
+    T('c', { nombre: 'C', duracion: 5, recurso: 'Ana' }),
+  ]));
+  const conflicto = primerConflicto(plan);
+  assert.equal(conflicto.recurso, 'Yo');
+  assert.equal(conflicto.dia, 0);
+  assert.equal(conflicto.carga, 200);
+  assert.deepEqual(conflicto.tareas.map((t) => t.nombre).sort(), ['A', 'B']);
+});
+
+t('nivelar retrasa la tarea con holgura y no alarga el proyecto', () => {
+  const p = proyecto([
+    T('ancla', { nombre: 'Ancla', duracion: 10, recurso: 'Ana' }),   // marca la duración
+    T('larga', { nombre: 'Larga', duracion: 5, recurso: 'Yo' }),
+    T('corta', { nombre: 'Corta', duracion: 3, recurso: 'Yo' }),
+    T('fin', { nombre: 'Fin', duracion: 1, dependencias: [{ de: 'ancla' }, { de: 'larga' }, { de: 'corta' }] }),
+  ]);
+  assert.equal(programar(p).duracion, 11);
+  const res = nivelarRecursos(p);
+  assert.equal(res.resuelto, true);
+  assert.equal(res.movimientos.length, 1);
+  assert.equal(res.movimientos[0].tarea, 'Corta');       // la de más holgura
+  assert.equal(res.movimientos[0].despuesDe, 'Larga');
+  assert.equal(res.movimientos[0].dias, 5);
+  assert.equal(res.plan.duracion, 11);                   // el final no se mueve
+  assert.equal(cargaRecursos(res.plan).find((r) => r.recurso === 'Yo').sobreasignado, false);
+});
+
+t('si separar dos tareas no cabe en la holgura, lo dice con números', () => {
+  const p = proyecto([
+    T('larga', { nombre: 'Larga', duracion: 10, recurso: 'Yo' }),
+    T('corta', { nombre: 'Corta', duracion: 3, recurso: 'Yo' }),
+    T('fin', { nombre: 'Fin', duracion: 2, dependencias: [{ de: 'larga' }, { de: 'corta' }] }),
+  ]);
+  const res = nivelarRecursos(p);
+  assert.equal(res.movimientos.length, 0);
+  assert.equal(res.resuelto, false);
+  assert.match(res.pendientes[0].motivo, /pide 10 días y solo hay 7 de holgura: el proyecto se retrasaría 3 días/);
+  assert.equal(programar(p).duracion, 12);               // no se ha tocado nada
+});
+
+t('no toca la ruta crítica sin permiso, y lo explica', () => {
+  const p = proyecto([
+    T('a', { nombre: 'A', duracion: 5, recurso: 'Yo' }),
+    T('b', { nombre: 'B', duracion: 5, recurso: 'Yo' }),
+  ]);
+  const res = nivelarRecursos(p);
+  assert.equal(res.movimientos.length, 0);
+  assert.equal(res.resuelto, false);
+  assert.equal(res.pendientes.length, 1);
+  assert.match(res.pendientes[0].motivo, /ninguna tiene holgura/);
+
+  // con permiso explícito sí se mueve, y el proyecto se alarga
+  const res2 = nivelarRecursos(p, { retrasarProyecto: true });
+  assert.equal(res2.resuelto, true);
+  assert.equal(res2.plan.duracion, 10);
+});
+
+t('una tarea que ya pide más del 100 % se reporta, no se mueve', () => {
+  const p = proyecto([T('a', { nombre: 'A', duracion: 4, recurso: 'Yo', unidades: 150 })]);
+  const res = nivelarRecursos(p);
+  assert.equal(res.movimientos.length, 0);
+  assert.equal(res.pendientes.length, 1);
+  assert.match(res.pendientes[0].motivo, /pide el 150 %/);
+});
+
+t('nivela varios choques seguidos y termina', () => {
+  const p = proyecto([
+    T('ancla', { nombre: 'Ancla', duracion: 10, recurso: 'Ana' }),
+    T('x', { nombre: 'X', duracion: 2, recurso: 'Yo' }),
+    T('y', { nombre: 'Y', duracion: 2, recurso: 'Yo' }),
+    T('z', { nombre: 'Z', duracion: 2, recurso: 'Yo' }),
+    T('cierre', { nombre: 'Cierre', duracion: 1, dependencias: [{ de: 'ancla' }, { de: 'x' }, { de: 'y' }, { de: 'z' }] }),
+  ]);
+  const res = nivelarRecursos(p);
+  assert.equal(res.resuelto, true);
+  assert.ok(res.movimientos.length >= 2, 'debería haber movido al menos dos');
+  const carga = cargaRecursos(res.plan).find((r) => r.recurso === 'Yo');
+  assert.equal(carga.picoCarga, 100);
+  assert.equal(res.plan.duracion, 11);      // las tres caben en la holgura
 });
 
 console.log(`\n${passed} pruebas de gestión de proyectos OK`);

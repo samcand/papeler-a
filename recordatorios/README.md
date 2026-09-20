@@ -25,7 +25,8 @@ Se instala como app (Chrome/Edge/Android: “Instalar”; iPhone: Compartir →
 | **Enfoque** | Pomodoro, cronómetro con vueltas y temporizador, con el tiempo registrado por tarea. |
 | **Planificar** | El día repartido en bloques reales y la matriz urgente/importante. |
 | **Revisión** | La revisión semanal y mensual, hábitos con racha y estadísticas de las dos últimas semanas. |
-| **Proyectos (Gantt)** | Planificación tipo MS Project: EDT, dependencias, ruta crítica, recursos y seguimiento. |
+| **Proyectos (Gantt)** | Planificación tipo MS Project: EDT, dependencias, ruta crítica, recursos, nivelación y seguimiento. |
+| **Plantillas** | Listas que se repiten enteras: eliges el día señalado y las fechas se calculan solas. |
 | **Listas y filtros** | Listas propias y filtros guardados con un lenguaje corto de consultas. |
 | **100 ideas** | Lo que la app ya hace y lo que vendría bien añadir, como lista de chequeo. |
 
@@ -62,6 +63,20 @@ saltar, `Supr` borrar.
 
 La app solo insiste con la bandeja cuando de verdad toca: cinco cosas
 acumuladas o algo esperando más de tres días.
+
+### Plantillas de listas
+
+Un parcial, un congreso, el cierre de semestre o estudiar una inversión son
+siempre los mismos pasos con las mismas distancias entre ellos. Una plantilla
+guarda esos **desfases relativos a un día ancla**: eliges la fecha del examen (o
+del viaje, o de la decisión) y la app calcula el resto, hacia atrás y hacia
+adelante, con hora, duración y prioridad de cada paso. Antes de crear nada se ve
+la lista exacta de fechas.
+
+Vienen seis puestas — parcial, congreso, cierre de semestre, *due diligence*,
+semana del servicio y viaje — y cualquier proyecto que ya tengas se puede
+**guardar como plantilla**: la app toma la fecha más tardía como ancla y
+convierte el resto en desfases.
 
 ### El resumen del día
 
@@ -112,6 +127,11 @@ y puedes crear los tuyos.
   fijas, mete descansos cada 90 minutos y **dice qué no cabe**. Un día no rinde
   más por meterle más cosas en la lista.
 - **Registro de tiempo** por tarea y por día, con racha y gráfico de 14 días.
+- **Estimado frente a real**: compara lo que dijiste que ibas a tardar con lo
+  medido y saca tu factor de corrección — por **mediana**, para que un día
+  desastroso no desplace la cuenta, y por módulo cuando hay datos suficientes
+  (calificar y leer un artículo no fallan igual). Al estimar una tarea nueva, la
+  app avisa: *«con tu historial esto son más bien 90 min»*.
 
 ## Proyectos (planificación tipo Project)
 
@@ -131,7 +151,12 @@ dependencias y fechas que se arrastran unas a otras:
 - **Duraciones en días hábiles**, con los festivos que tú pongas: nada se
   planifica en domingo por accidente.
 - **Recursos**: carga por persona y detección de sobreasignación (más del
-  100 % un mismo día), con las cuatro salidas posibles escritas.
+  100 % un mismo día).
+- **Nivelación automática**: retrasa la tarea con más holgura hasta deshacer el
+  choque. No toca la ruta crítica salvo que lo pidas, y cuando separar dos
+  tareas no cabe en la holgura lo dice con números (*«pide 10 días y solo hay 7:
+  el proyecto se retrasaría 3»*) en vez de alargar el plan a tus espaldas. Cada
+  movimiento se ve en una tabla y se deshace de una vez.
 - **Seguimiento**: línea base, desviación en días hábiles y **valor ganado**
   (BAC, PV, EV, AC, SPI y CPI) para saber si vas tarde o vas caro antes de que
   sea evidente.
@@ -213,7 +238,7 @@ sitio, se van: exporta de vez en cuando.
 ## 100 ideas
 
 La pestaña **100 ideas** es a la vez lista de chequeo y hoja de ruta: 100 cosas
-que vale la pena tener en una app así, agrupadas en diez temas, con las **40 ya
+que vale la pena tener en una app así, agrupadas en diez temas, con las **43 ya
 implementadas** marcadas y el resto convertible en tarea con un botón. El mismo
 contenido está en [`docs/100-ideas-recordatorios.md`](../docs/100-ideas-recordatorios.md),
 que se genera con `npm run docs`.
@@ -226,7 +251,7 @@ que se genera con `npm run docs`.
 ## Pruebas
 
 ```bash
-npm test                  # 157 pruebas de lógica, sin navegador
+npm test                  # 177 pruebas de lógica, sin navegador
 npm run test:navegador    # recorre la app en Chromium (necesita Playwright)
 ```
 
@@ -234,4 +259,5 @@ La lógica que importa está probada aparte de la interfaz: aritmética de fecha
 motor de repeticiones, lenguaje natural, filtros, calendario, pomodoro,
 planificación, cálculo de riesgo y estadísticas de cartera, plantillas de los
 módulos, cronograma de proyectos (CPM, calendario laboral, recursos, valor
-ganado), bandeja de entrada, resumen del día e importación/exportación.
+ganado, nivelación de recursos), bandeja de entrada, resumen del día,
+calibración de estimaciones, plantillas de listas e importación/exportación.

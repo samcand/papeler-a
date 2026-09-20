@@ -418,6 +418,111 @@ export function cargaRecursos(plan) {
   }).sort((a, b) => b.picoCarga - a.picoCarga);
 }
 
+/**
+ * Primer día en el que un recurso está en dos sitios a la vez.
+ * Devuelve el conflicto más temprano, que es por donde hay que empezar.
+ */
+export function primerConflicto(plan, ignorar = new Set()) {
+  const porRecurso = new Map();
+  for (const t of plan.tareas) {
+    if (t.resumen || !t.recurso || t.esHito) continue;
+    if (!porRecurso.has(t.recurso)) porRecurso.set(t.recurso, new Map());
+    const dias = porRecurso.get(t.recurso);
+    for (let i = t.indiceInicio; i < Math.max(t.indiceFin, t.indiceInicio + 1); i++) {
+      if (!dias.has(i)) dias.set(i, []);
+      dias.get(i).push(t);
+    }
+  }
+
+  let mejor = null;
+  for (const [recurso, dias] of porRecurso) {
+    for (const [dia, tareas] of dias) {
+      const carga = tareas.reduce((s, t) => s + (Number(t.unidades) || 100), 0);
+      if (carga <= 100) continue;
+      const clave = `${recurso}:${tareas.map((t) => t.id).sort().join('+')}`;
+      if (ignorar.has(clave)) continue;
+      if (!mejor || dia < mejor.dia) mejor = { recurso, dia, carga, tareas, clave };
+    }
+  }
+  return mejor;
+}
+
+/**
+ * Nivelación de recursos: retrasa tareas hasta que nadie esté en dos sitios a
+ * la vez.
+ *
+ * Se mueve siempre la que más holgura tiene, que es justo para lo que sirve la
+ * holgura. Por defecto **no toca la ruta crítica**: si la única salida sería
+ * retrasar el final del proyecto, lo dice en vez de hacerlo a tus espaldas.
+ *
+ * Devuelve los movimientos aplicados y lo que no se pudo resolver. Como cada
+ * movimiento es una restricción de fecha, se deshace quitando la chincheta.
+ */
+export function nivelarRecursos(proyecto, opciones = {}) {
+  const { maxIteraciones = 60, retrasarProyecto = false } = opciones;
+  const movimientos = [];
+  const pendientes = [];
+  const ignorar = new Set();
+
+  for (let i = 0; i < maxIteraciones; i++) {
+    const plan = programar(proyecto);
+    if (plan.ciclo) break;
+    const conflicto = primerConflicto(plan, ignorar);
+    if (!conflicto) break;
+
+    // Una sola tarea que ya pide más del 100 % no se arregla moviéndola.
+    if (conflicto.tareas.length === 1) {
+      pendientes.push({
+        recurso: conflicto.recurso,
+        tareas: [conflicto.tareas[0].nombre],
+        motivo: `${conflicto.tareas[0].nombre} pide el ${conflicto.tareas[0].unidades || 100} % de ${conflicto.recurso} por sí sola.`,
+      });
+      ignorar.add(conflicto.clave);
+      continue;
+    }
+
+    const orden = [...conflicto.tareas].sort((a, b) =>
+      b.holgura - a.holgura || b.indiceInicio - a.indiceInicio || a.duracion - b.duracion);
+    const aMover = orden[0];
+    const seQueda = orden[orden.length - 1];
+
+    const delta = seQueda.indiceFin - aMover.indiceInicio;
+    if (delta <= 0) { ignorar.add(conflicto.clave); continue; }
+
+    // La holgura es el presupuesto: mover más allá alarga el proyecto, y eso
+    // solo se hace si se ha pedido explícitamente.
+    if (!retrasarProyecto && delta > aMover.holgura) {
+      pendientes.push({
+        recurso: conflicto.recurso,
+        tareas: conflicto.tareas.map((t) => t.nombre),
+        motivo: aMover.holgura <= 0
+          ? `“${aMover.nombre}” y “${seQueda.nombre}” coinciden y ninguna tiene holgura: resolverlo retrasaría el proyecto.`
+          : `Separar “${aMover.nombre}” de “${seQueda.nombre}” pide ${delta} días y solo hay ${aMover.holgura} de holgura: el proyecto se retrasaría ${delta - aMover.holgura} días.`,
+      });
+      ignorar.add(conflicto.clave);
+      continue;
+    }
+
+    moverTarea(proyecto, aMover.id, delta, plan);
+    movimientos.push({
+      id: aMover.id,
+      tarea: aMover.nombre,
+      recurso: conflicto.recurso,
+      dias: delta,
+      despuesDe: seQueda.nombre,
+      holguraQueTenia: aMover.holgura,
+    });
+  }
+
+  const plan = programar(proyecto);
+  return {
+    movimientos,
+    pendientes,
+    resuelto: !primerConflicto(plan),
+    plan,
+  };
+}
+
 /* ------------------------------------------------------------------ *
  * Seguimiento: línea base y valor ganado
  * ------------------------------------------------------------------ */

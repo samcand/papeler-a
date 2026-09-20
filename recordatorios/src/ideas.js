@@ -30,7 +30,7 @@ export const IDEAS = [
   { n: 5, c: 'captura', t: 'Compartir desde otra app', d: 'Registrar la app como destino de "Compartir" (Web Share Target) para convertir un enlace, un correo o un mensaje en tarea con su contexto.' },
   { n: 6, c: 'captura', t: 'Dictar la tarea', d: 'Reconocimiento de voz para cuando tienes las manos ocupadas, pasando el texto por el mismo analizador de lenguaje natural.' },
   { n: 7, c: 'captura', t: 'Correo a tarea', d: 'Reenviar un correo a una dirección propia y que se convierta en tarea con el asunto de título y el cuerpo de nota.' },
-  { n: 8, c: 'captura', t: 'Plantillas de listas reutilizables', d: 'Cerrar un semestre, preparar un viaje o publicar un artículo son siempre las mismas quince tareas: que se inserten de golpe con fechas relativas.' },
+  { n: 8, c: 'captura', hecho: true, t: 'Plantillas de listas reutilizables', d: 'Cerrar un semestre, preparar un congreso o estudiar una inversión son las mismas quince tareas: la plantilla guarda los desfases y al aplicarla eliges el día señalado.' },
   { n: 9, c: 'captura', t: 'Autocompletar proyectos y etiquetas al escribir', d: 'Al teclear # o @ se sugiere lo que ya existe, que es como se evita tener "cartera", "Cartera" y "carteras".' },
   { n: 10, c: 'captura', t: 'Adjuntar archivos y fotos a la tarea', d: 'La foto del pizarrón o el PDF del examen viven con la tarea, no en una carpeta que nadie vuelve a abrir.' },
 
@@ -63,7 +63,7 @@ export const IDEAS = [
   { n: 32, c: 'tiempo', hecho: true, t: 'Cronómetro con vueltas', d: 'Para lo que no cabe en bloques fijos: medir de verdad cuánto tarda algo que siempre subestimas.' },
   { n: 33, c: 'tiempo', hecho: true, t: 'Temporizadores rápidos', d: 'Dos minutos para arrancar, cuarenta y cinco para un bloque profundo: la cuenta atrás es un compromiso pequeño.' },
   { n: 34, c: 'tiempo', hecho: true, t: 'Medir el tiempo con marcas de reloj, no contando ticks', d: 'Si el móvil suspende la pestaña o bloqueas la pantalla, al volver la cuenta tiene que seguir siendo correcta.' },
-  { n: 35, c: 'tiempo', t: 'Estimado frente a real', d: 'Comparar lo que creías que iba a durar con lo que duró es la única forma de aprender a estimar.' },
+  { n: 35, c: 'tiempo', hecho: true, t: 'Estimado frente a real', d: 'Compara lo estimado con lo medido y saca tu factor de corrección por mediana, general y por módulo, con una pista al estimar la próxima tarea.' },
   { n: 36, c: 'tiempo', t: 'Modo concentración a pantalla completa', d: 'Solo la tarea y el reloj, sin barra lateral ni contadores: el resto de la app también distrae.' },
   { n: 37, c: 'tiempo', t: 'Sonido ambiente', d: 'Ruido blanco, lluvia o café generados en el navegador para tapar el ruido de fuera.' },
   { n: 38, c: 'tiempo', t: 'Registro de interrupciones', d: 'Un botón para anotar cada vez que te cortan: al final de la semana el patrón salta a la vista.' },
@@ -126,7 +126,7 @@ export const IDEAS = [
   { n: 85, c: 'proyectos', hecho: true, t: 'Línea base y desviación en días hábiles', d: 'Comparar el plan aprobado con la realidad, sin que un fin de semana convierta tres días de retraso en cinco.' },
   { n: 86, c: 'proyectos', hecho: true, t: 'Valor ganado (SPI y CPI)', d: 'Si vas tarde o vas caro, en dos números, antes de que sea evidente por otros medios.' },
   { n: 87, c: 'proyectos', hecho: true, t: 'Mover tareas arrastrando en el Gantt', d: 'Arrastrar la barra fija la tarea a una fecha y estirar su borde derecho cambia la duración; al soltar se recalculan dependencias y ruta crítica.' },
-  { n: 88, c: 'proyectos', t: 'Nivelación automática de recursos', d: 'Retrasar sola la tarea con holgura cuando alguien está en dos sitios a la vez, y decir qué se movió.' },
+  { n: 88, c: 'proyectos', hecho: true, t: 'Nivelación automática de recursos', d: 'Retrasa la tarea con más holgura hasta deshacer el choque, sin tocar la ruta crítica salvo que lo pidas, y enseña cada movimiento con opción de deshacerlo.' },
   { n: 89, c: 'proyectos', t: 'Simulación Monte Carlo de la fecha final', d: 'Con duraciones optimista, probable y pesimista, dar la probabilidad de terminar en una fecha en vez de un número que nadie se cree.' },
   { n: 90, c: 'proyectos', t: 'Importar y exportar MS Project XML', d: 'Para intercambiar el plan con quien use Project o Primavera sin volver a teclearlo.' },
 

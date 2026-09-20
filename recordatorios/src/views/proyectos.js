@@ -10,8 +10,9 @@ import { button, download, el, input, render, toast } from '../../../src/ui.js';
 import { aISO, deISO, diferenciaDias, hoy as fechaHoy, sumarDias, textoRelativo, MESES_CORTO } from '../fechas.js';
 import {
   PLANTILLAS_PROYECTO, TIPOS_DEPENDENCIA, aTareasDeAgenda, cambiarDuracion, cargaRecursos,
-  desdePlantilla, desviaciones, diasHabiles, indiceDeFecha, moverTarea, numerarEDT, programar,
-  proyectoVacio, quitarRestriccion, resumenProyecto, tareaProyecto, tomarLineaBase, valorGanado,
+  desdePlantilla, desviaciones, diasHabiles, indiceDeFecha, moverTarea, nivelarRecursos, numerarEDT,
+  programar, proyectoVacio, quitarRestriccion, resumenProyecto, tareaProyecto, tomarLineaBase,
+  valorGanado,
 } from '../proyectos.js';
 import { dato, tituloVista, vacio } from '../componentes.js';
 import { store } from '../store.js';
@@ -25,6 +26,7 @@ export function vistaProyectos(root, ctx = {}) {
   let pestana = ctx.query?.tab || 'plan';
   let escala = 'semana';
   let seleccionado = ctx.query?.p || store.estado.planes[0]?.id || null;
+  let nivelacion = null;   // resultado de la última nivelación, para poder deshacerla
 
   const proyecto = () => store.estado.planes.find((p) => p.id === seleccionado) || null;
   const guardar = () => { store.guardar(); pintar(); };
@@ -450,8 +452,37 @@ export function vistaProyectos(root, ctx = {}) {
             el('td', { class: r.sobreasignado ? 'negativo' : 'positivo' },
               r.sobreasignado ? `sobreasignado ${r.diasSobreasignados.length} días` : 'bien')))))) : vacio('Pon un recurso en las tareas para ver la carga.', '👥'),
 
+      carga.some((r) => r.sobreasignado) || nivelacion ? el('section', { class: 'card' },
+        el('h2', { class: 'card-title' }, 'Nivelación automática'),
+        el('p', { class: 'muted small' },
+          'Retrasa las tareas que tienen holgura hasta que nadie esté en dos sitios a la vez. ',
+          'No toca la ruta crítica salvo que lo pidas, porque eso retrasaría el proyecto entero.'),
+        el('div', { class: 'fila' },
+          button('Nivelar con la holgura disponible', () => ejecutarNivelacion(false), { variant: 'primary' }),
+          button('Nivelar aunque retrase el proyecto', () => ejecutarNivelacion(true), { variant: 'ghost' }),
+          nivelacion?.movimientos.length ? button('Deshacer', () => {
+            for (const m of nivelacion.movimientos) quitarRestriccion(p, m.id);
+            nivelacion = null;
+            guardar();
+            toast('Nivelación deshecha');
+          }, { variant: 'ghost danger' }) : null),
+
+        nivelacion ? el('div', { style: 'margin-top:12px' },
+          nivelacion.movimientos.length ? el('table', { class: 'tabla' },
+            el('thead', {}, el('tr', {}, el('th', {}, 'Tarea'), el('th', {}, 'Recurso'),
+              el('th', { class: 'num' }, 'Días'), el('th', {}, 'Va después de'))),
+            el('tbody', {}, ...nivelacion.movimientos.map((m) => el('tr', {},
+              el('td', {}, m.tarea),
+              el('td', { class: 'muted' }, m.recurso),
+              el('td', { class: 'num' }, `+${m.dias}`),
+              el('td', { class: 'muted' }, m.despuesDe)))))
+            : el('p', { class: 'muted small' }, 'No hizo falta mover nada.'),
+          ...nivelacion.pendientes.map((x) => el('div', { class: 'alerta medio' },
+            el('div', {}, el('div', {}, `${x.recurso}: sigue habiendo choque`), el('div', { class: 'accion' }, x.motivo)))),
+          nivelacion.resuelto ? el('p', { class: 'positivo small' }, 'Ya no hay nadie sobreasignado.') : null) : null) : null,
+
       carga.some((r) => r.sobreasignado) ? el('section', { class: 'card' },
-        el('h2', { class: 'card-title' }, 'Qué hacer con la sobreasignación'),
+        el('h2', { class: 'card-title' }, 'Si prefieres resolverlo a mano'),
         el('ul', { class: 'small muted' },
           el('li', {}, 'Retrasar la tarea con holgura hasta que el recurso se libere (nivelación manual).'),
           el('li', {}, 'Bajar el porcentaje de dedicación si de verdad puede repartirse entre dos cosas.'),
@@ -461,6 +492,17 @@ export function vistaProyectos(root, ctx = {}) {
       sinRecurso.length ? el('section', { class: 'card' },
         el('h2', { class: 'card-title' }, `Sin recurso asignado (${sinRecurso.length})`),
         el('div', { class: 'chip-list' }, ...sinRecurso.map((t) => el('span', { class: 'chip' }, t.nombre)))) : null);
+  }
+
+  /** Ejecuta la nivelación sobre el proyecto y guarda el resultado. */
+  function ejecutarNivelacion(retrasarProyecto) {
+    const p = proyecto();
+    nivelacion = nivelarRecursos(p, { retrasarProyecto });
+    store.guardar();
+    toast(nivelacion.movimientos.length
+      ? `${nivelacion.movimientos.length} tarea${nivelacion.movimientos.length === 1 ? '' : 's'} movida${nivelacion.movimientos.length === 1 ? '' : 's'}`
+      : 'No se pudo mover nada dentro de la holgura');
+    pintar();
   }
 
   function panelSeguimiento(p) {

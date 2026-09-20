@@ -21,6 +21,7 @@ import { vistaDocencia } from './views/docencia.js';
 import { vistaInvestigacion } from './views/investigacion.js';
 import { vistaAlabanza } from './views/alabanza.js';
 import { vistaRevision } from './views/revision.js';
+import { vistaPlantillas } from './views/plantillas.js';
 import { vistaIdeas } from './views/ideas.js';
 import { vistaAjustes } from './views/ajustes.js';
 
@@ -38,6 +39,7 @@ const RUTAS = [
   { ruta: /^\/docencia$/, vista: vistaDocencia, nav: 'docencia' },
   { ruta: /^\/investigacion$/, vista: vistaInvestigacion, nav: 'investigacion' },
   { ruta: /^\/alabanza$/, vista: vistaAlabanza, nav: 'alabanza' },
+  { ruta: /^\/plantillas$/, vista: vistaPlantillas, nav: 'plantillas' },
   { ruta: /^\/ideas$/, vista: vistaIdeas, nav: 'ideas' },
   { ruta: /^\/ajustes$/, vista: vistaAjustes, nav: 'ajustes' },
   { ruta: /^\/filtro\/nuevo$/, vista: vistaFiltroNuevo },
@@ -112,6 +114,7 @@ const PRINCIPAL = [
   { id: 'calendario', icono: '📅', texto: 'Calendario', href: '#/calendario' },
   { id: 'enfoque', icono: '⏱️', texto: 'Enfoque', href: '#/enfoque' },
   { id: 'planificar', icono: '🧭', texto: 'Planificar', href: '#/planificar' },
+  { id: 'plantillas', icono: '📋', texto: 'Plantillas', href: '#/plantillas' },
   { id: 'revision', icono: '🔄', texto: 'Revisión', href: '#/revision' },
 ];
 

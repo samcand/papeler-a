@@ -20,7 +20,7 @@ import { createRequire } from 'node:module';
 const PUERTO = 8123;
 const BASE = `http://localhost:${PUERTO}/recordatorios/index.html`;
 const PANTALLAS = ['hoy', 'bandeja', 'proximos', 'calendario', 'enfoque', 'planificar', 'revision',
-  'inversiones', 'proyectos', 'docencia', 'investigacion', 'alabanza', 'ideas', 'ajustes'];
+  'inversiones', 'proyectos', 'docencia', 'investigacion', 'alabanza', 'plantillas', 'ideas', 'ajustes'];
 
 /** Busca Playwright en el proyecto y, si no, en la instalación global. */
 async function cargarPlaywright() {
@@ -204,6 +204,71 @@ const chincheta = await pagina.locator('.tabla-plan tbody tr').nth(1).getByRole(
 if (antesFin === despuesFin) errores.push(`arrastrar en el Gantt no movió la tarea (seguía en ${antesFin})`);
 else if (!chincheta) errores.push('la tarea movida no quedó marcada como fijada');
 else console.log(`  ok  arrastrar en el Gantt: ${antesFin.trim()} → ${despuesFin.trim()}`);
+
+// Plantillas: previsualizar fechas y crear las tareas
+await pagina.goto(BASE + '#/plantillas');
+await pagina.waitForTimeout(400);
+await pagina.locator('.chip', { hasText: 'Aplicar y calificar un parcial' }).click();
+await pagina.waitForTimeout(300);
+await pagina.locator('input[type="date"]').first().fill('2026-10-15');
+await pagina.waitForTimeout(400);
+const previaPlantilla = (await pagina.textContent('#app')).replace(/\s+/g, ' ');
+if (!/05 oct/.test(previaPlantilla) || !/22 oct/.test(previaPlantilla)) {
+  errores.push('la previsualización de la plantilla no calculó las fechas: ' + previaPlantilla.slice(0, 200));
+} else {
+  await pagina.getByRole('button', { name: 'Crear las tareas' }).click();
+  await pagina.waitForTimeout(400);
+  await pagina.goto(BASE + '#/buscar/Calificar');
+  await pagina.waitForTimeout(400);
+  if (!(await pagina.textContent('#app')).includes('Calificar')) errores.push('las tareas de la plantilla no se crearon');
+  else console.log('  ok  plantillas: previsualizar y crear');
+}
+
+// Estimado frente a real
+await pagina.evaluate(async () => {
+  const { store } = await import('./src/store.js');
+  const ids = [];
+  for (const [titulo, estimado, real] of [['Calificar', 120, 180], ['Preparar', 60, 90], ['Revisar', 60, 120]]) {
+    const t = store.agregar({ titulo, duracion: estimado, modulo: 'docencia' });
+    ids.push([t.id, real]);
+  }
+  for (const [id, minutos] of ids) store.registrarTiempo({ tipo: 'pomodoro', tareaId: id, minutos, fecha: '2026-09-19' });
+});
+await pagina.goto(BASE + '#/hoy');
+await pagina.goto(BASE + '#/enfoque');
+await pagina.waitForTimeout(500);
+const calibracion = (await pagina.textContent('#app')).replace(/\s+/g, ' ');
+if (!/×1\.5/.test(calibracion) || !/50 % más/.test(calibracion)) {
+  errores.push('la calibración no salió: ' + calibracion.slice(-260));
+} else console.log('  ok  estimado frente a real: factor ×1.5');
+
+// Nivelación de recursos
+await pagina.evaluate(async () => {
+  const { store } = await import('./src/store.js');
+  const { proyectoVacio, tareaProyecto } = await import('./src/proyectos.js');
+  const p = proyectoVacio('Nivelación', '2026-09-21');
+  const ancla = tareaProyecto({ nombre: 'Ancla', duracion: 10, recurso: 'Ana' });
+  const larga = tareaProyecto({ nombre: 'Larga', duracion: 5, recurso: 'Yo' });
+  const corta = tareaProyecto({ nombre: 'Corta', duracion: 3, recurso: 'Yo' });
+  p.tareas = [ancla, larga, corta,
+    tareaProyecto({ nombre: 'Fin', duracion: 1, dependencias: [{ de: ancla.id }, { de: larga.id }, { de: corta.id }] })];
+  store.agregarPlan(p);
+  store.ajustar({ ultimoPlan: p.id });
+});
+await pagina.goto(BASE + '#/hoy');
+await pagina.goto(BASE + '#/proyectos');
+await pagina.waitForTimeout(400);
+await pagina.locator('#app select').first().selectOption({ label: 'Nivelación' });
+await pagina.waitForTimeout(300);
+await pagina.locator('.pestana', { hasText: 'Recursos' }).click();
+await pagina.waitForTimeout(300);
+const antesNivelar = (await pagina.textContent('#app')).includes('sobreasignado');
+await pagina.getByRole('button', { name: /Nivelar con la holgura/ }).click();
+await pagina.waitForTimeout(600);
+const despues = (await pagina.textContent('#app')).replace(/\s+/g, ' ');
+if (!antesNivelar) errores.push('el proyecto de prueba no marcó la sobreasignación');
+else if (!/Ya no hay nadie sobreasignado/.test(despues)) errores.push('la nivelación no resolvió el choque: ' + despues.slice(0, 300));
+else console.log('  ok  nivelación automática de recursos');
 
 await pagina.setViewportSize({ width: 390, height: 844 });
 await pagina.goto(BASE + '#/hoy');

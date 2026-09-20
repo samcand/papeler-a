@@ -8,6 +8,7 @@ import { aISO, deISO, finDeMes, hoy, inicioSemana, sumarDias, textoLargo, textoR
 import { MODULOS, PRIORIDADES, descripcionCorta, ordenarTareas } from './modelo.js';
 import { parseEntrada } from './naturales.js';
 import { parseRegla, proximasFechas, textoRegla } from './recurrencia.js';
+import { calibracion, pistaEstimacion } from './calibracion.js';
 import { store } from './store.js';
 
 export const colorModulo = (id) => MODULOS.find((m) => m.id === id)?.color || 'var(--muted)';
@@ -187,7 +188,17 @@ export function panelTarea(tarea, alGuardar = () => {}) {
       el('div', { class: 'grow' }, campo('Fecha', input(borrador.fecha || '', (v) => { borrador.fecha = v || null; }, { type: 'date' }))),
       el('div', { class: 'grow' }, campo('Hora', input(borrador.hora || '', (v) => { borrador.hora = v || null; }, { type: 'time' })))),
     campo('Prioridad', selectorPrioridad(borrador.prioridad, (v) => { borrador.prioridad = v; })),
-    campo('Duración (min)', input(borrador.duracion || '', (v) => { borrador.duracion = Number(v) || null; }, { type: 'number', min: 0, step: 5 })),
+    (() => {
+      // La pista sale del historial real: si sueles tardar más, que se vea al estimar.
+      const cal = calibracion(store.tareas, store.estado.tiempo);
+      const pista = el('span', { class: 'field-hint' }, pistaEstimacion(borrador.duracion, cal, borrador.modulo));
+      const control = input(borrador.duracion || '', (v) => {
+        borrador.duracion = Number(v) || null;
+        pista.textContent = pistaEstimacion(borrador.duracion, cal, borrador.modulo);
+      }, { type: 'number', min: 0, step: 5 });
+      return el('label', { class: 'field' },
+        el('span', { class: 'field-label' }, 'Duración (min)'), control, pista);
+    })(),
     el('div', { class: 'fila' },
       el('div', { class: 'grow' }, campo('Módulo', selModulo)),
       el('div', { class: 'grow' }, campo('Proyecto', selProyecto))),

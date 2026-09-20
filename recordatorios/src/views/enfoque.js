@@ -15,6 +15,7 @@ import {
 } from '../tiempo.js';
 import { avisarPomodoro, mantenerPantalla, pedirPermiso } from '../notificaciones.js';
 import { dato, grafico, tituloVista } from '../componentes.js';
+import { calibracion } from '../calibracion.js';
 import { store } from '../store.js';
 
 export function vistaEnfoque(root, ctx = {}) {
@@ -204,6 +205,41 @@ export function vistaEnfoque(root, ctx = {}) {
           el('td', { class: 'num' }, formatoMinutos(x.minutos)))))) : null);
   }
 
+  /** Estimado frente a real: el único modo de aprender a estimar. */
+  function panelCalibracion() {
+    const cal = calibracion(store.tareas, store.estado.tiempo);
+    if (!cal.suficiente) {
+      return el('section', { class: 'card' },
+        el('h2', { class: 'card-title' }, 'Estimado frente a real'),
+        el('p', { class: 'muted small' }, cal.frase),
+        el('p', { class: 'muted small' }, 'Se necesitan tres tareas con duración estimada y tiempo medido con el pomodoro o el cronómetro.'));
+    }
+    const color = cal.sesgo === 'subestimas' ? 'negativo' : cal.sesgo === 'sobrestimas' ? 'muted' : 'positivo';
+    return el('section', { class: 'card' },
+      el('h2', { class: 'card-title' }, 'Estimado frente a real'),
+      el('div', { class: 'tarjetas' },
+        dato(`×${cal.factor}`, 'tu factor', { clase: color, pie: `${cal.muestras} tareas medidas` }),
+        dato(formatoMinutos(cal.totalEstimado), 'estimaste en total'),
+        dato(formatoMinutos(cal.totalReal), 'tardaste de verdad', { clase: color })),
+      el('p', { class: 'small', style: 'margin-top:10px' }, cal.frase),
+
+      cal.porModulo.length ? el('div', {},
+        el('p', { class: 'field-label' }, 'Por módulo'),
+        el('div', { class: 'chip-list' },
+          ...cal.porModulo.map((m) => el('span', { class: 'chip', title: `${m.muestras} tareas` },
+            `${m.icono} ${m.nombre} ×${m.factor}`)))) : null,
+
+      el('p', { class: 'field-label', style: 'margin-top:12px' }, 'Donde más te desviaste'),
+      el('table', { class: 'tabla' },
+        el('thead', {}, el('tr', {}, el('th', {}, 'Tarea'), el('th', { class: 'num' }, 'Estimado'),
+          el('th', { class: 'num' }, 'Real'), el('th', { class: 'num' }, 'Factor'))),
+        el('tbody', {}, ...cal.peores.map((x) => el('tr', {},
+          el('td', {}, x.titulo),
+          el('td', { class: 'num muted' }, formatoMinutos(x.estimado)),
+          el('td', { class: 'num' }, formatoMinutos(x.real)),
+          el('td', { class: `num ${x.ratio > 1 ? 'negativo' : 'positivo'}` }, `×${x.ratio}`))))));
+  }
+
   function refrescarRelojes() {
     const p = document.getElementById('reloj-pomo');
     if (p) p.textContent = formatoReloj(restante(pomo));
@@ -225,7 +261,8 @@ export function vistaEnfoque(root, ctx = {}) {
         ...[['pomo', 'Pomo'], ['crono', 'Cronómetro'], ['tempo', 'Temporizador']].map(([id, txt]) =>
           el('button', { class: `pestana ${pestana === id ? 'activa' : ''}`.trim(), onClick: () => { pestana = id; pintar(); } }, txt))),
       pestana === 'pomo' ? panelPomo() : pestana === 'crono' ? panelCrono() : panelTempo(),
-      panelEstadisticas());
+      panelEstadisticas(),
+      panelCalibracion());
   };
 
   pintar();

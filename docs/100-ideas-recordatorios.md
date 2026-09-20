@@ -1,7 +1,7 @@
 # 100 ideas para una app de recordatorios y productividad
 
 Lista de trabajo para la app de `recordatorios/`: qué está hecho y qué vendría
-bien añadir. Hoy hay **40 de 100** implementadas.
+bien añadir. Hoy hay **43 de 100** implementadas.
 
 En la app, la pestaña **100 ideas** muestra lo mismo como lista de chequeo, y
 cada idea pendiente se puede convertir en tarea con un botón.
@@ -11,15 +11,15 @@ cada idea pendiente se puede convertir en tarea con un botón.
 
 ## Índice
 
-1. [Capturar sin fricción](#capturar-sin-friccion) — ideas 1 a 10 (3 hechas)
+1. [Capturar sin fricción](#capturar-sin-friccion) — ideas 1 a 10 (4 hechas)
 2. [Organizar y encontrar](#organizar-y-encontrar) — ideas 11 a 20 (2 hechas)
 3. [Priorizar y planificar](#priorizar-y-planificar) — ideas 21 a 30 (7 hechas)
-4. [Tiempo y concentración](#tiempo-y-concentracion) — ideas 31 a 40 (4 hechas)
+4. [Tiempo y concentración](#tiempo-y-concentracion) — ideas 31 a 40 (5 hechas)
 5. [Recordatorios y avisos](#recordatorios-y-avisos) — ideas 41 a 50 (4 hechas)
 6. [Equipo y delegación](#equipo-y-delegacion) — ideas 51 a 60 (1 hecha)
 7. [Inversiones](#inversiones) — ideas 61 a 70 (5 hechas)
 8. [Docencia e investigación](#docencia-e-investigacion) — ideas 71 a 80 (4 hechas)
-9. [Gestión de proyectos](#gestion-de-proyectos) — ideas 81 a 90 (7 hechas)
+9. [Gestión de proyectos](#gestion-de-proyectos) — ideas 81 a 90 (8 hechas)
 10. [Datos, privacidad y automatización](#datos-privacidad-y-automatizacion) — ideas 91 a 100 (3 hechas)
 
 Leyenda: **✅ ya está** en la app · **⭕ pendiente**.
@@ -47,8 +47,8 @@ Reconocimiento de voz para cuando tienes las manos ocupadas, pasando el texto po
 **7. Correo a tarea** ⭕  
 Reenviar un correo a una dirección propia y que se convierta en tarea con el asunto de título y el cuerpo de nota.
 
-**8. Plantillas de listas reutilizables** ⭕  
-Cerrar un semestre, preparar un viaje o publicar un artículo son siempre las mismas quince tareas: que se inserten de golpe con fechas relativas.
+**8. Plantillas de listas reutilizables** ✅  
+Cerrar un semestre, preparar un congreso o estudiar una inversión son las mismas quince tareas: la plantilla guarda los desfases y al aplicarla eliges el día señalado.
 
 **9. Autocompletar proyectos y etiquetas al escribir** ⭕  
 Al teclear # o @ se sugiere lo que ya existe, que es como se evita tener "cartera", "Cartera" y "carteras".
@@ -134,8 +134,8 @@ Dos minutos para arrancar, cuarenta y cinco para un bloque profundo: la cuenta a
 **34. Medir el tiempo con marcas de reloj, no contando ticks** ✅  
 Si el móvil suspende la pestaña o bloqueas la pantalla, al volver la cuenta tiene que seguir siendo correcta.
 
-**35. Estimado frente a real** ⭕  
-Comparar lo que creías que iba a durar con lo que duró es la única forma de aprender a estimar.
+**35. Estimado frente a real** ✅  
+Compara lo estimado con lo medido y saca tu factor de corrección por mediana, general y por módulo, con una pista al estimar la próxima tarea.
 
 **36. Modo concentración a pantalla completa** ⭕  
 Solo la tarea y el reloj, sin barra lateral ni contadores: el resto de la app también distrae.
@@ -303,8 +303,8 @@ Si vas tarde o vas caro, en dos números, antes de que sea evidente por otros me
 **87. Mover tareas arrastrando en el Gantt** ✅  
 Arrastrar la barra fija la tarea a una fecha y estirar su borde derecho cambia la duración; al soltar se recalculan dependencias y ruta crítica.
 
-**88. Nivelación automática de recursos** ⭕  
-Retrasar sola la tarea con holgura cuando alguien está en dos sitios a la vez, y decir qué se movió.
+**88. Nivelación automática de recursos** ✅  
+Retrasa la tarea con más holgura hasta deshacer el choque, sin tocar la ruta crítica salvo que lo pidas, y enseña cada movimiento con opción de deshacerlo.
 
 **89. Simulación Monte Carlo de la fecha final** ⭕  
 Con duraciones optimista, probable y pesimista, dar la probabilidad de terminar en una fecha en vez de un número que nadie se cree.
