@@ -28,6 +28,8 @@ export function vistaColecciones(root, ctx = {}) {
   let orden = null;
   let editandoCampos = false;
   let fichaAbierta = null;
+  const cajaFilas = el('div', {});
+  const campoBusqueda = input('', (v) => { consulta = v; pintarFilas(); }, { placeholder: 'Buscar en las fichas…' });
 
   const coleccion = () => store.estado.colecciones.find((c) => c.id === elegida) || null;
   const fichasDe = (c) => store.estado.fichas.filter((f) => f.coleccion === c.id);
@@ -148,15 +150,34 @@ export function vistaColecciones(root, ctx = {}) {
   }
 
   function tabla(c) {
+    pintarFilas();
+    return el('section', { class: 'card' },
+      el('div', { class: 'fila' }, campoBusqueda,
+        button('+ Ficha', () => { store.agregarEn('fichas', fichaNueva(c)); pintar(); }, { variant: 'primary' })),
+
+      fichaAbierta ? el('div', { class: 'field' },
+        el('span', { class: 'field-label' }, fichaAbierta.campo.nombre),
+        textarea(fichaAbierta.ficha.valores?.[fichaAbierta.campo.id] || '', (v) => {
+          store.actualizarFicha(fichaAbierta.ficha.id, fichaAbierta.campo.id, v);
+        }, { rows: 5 }),
+        button('Cerrar', () => { fichaAbierta = null; pintar(); }, { variant: 'ghost chico' })) : null,
+
+      cajaFilas);
+  }
+
+  /** Solo las filas: así el campo de buscar no se va mientras escribes. */
+  function pintarFilas() {
+    const c = coleccion();
+    if (!c) return;
     const fichas = ordenarFichas(filtrarFichas(fichasDe(c), consulta), c, orden || c.campos[0].id, true);
     const campoValor = (ficha, campo) => {
       const valor = ficha.valores?.[campo.id];
       const guardar = (v) => { store.actualizarFicha(ficha.id, campo.id, v); };
       if (campo.tipo === 'siNo') {
-        return el('input', { type: 'checkbox', checked: !!valor, onChange: (e) => { guardar(e.target.checked); pintar(); } });
+        return el('input', { type: 'checkbox', checked: !!valor, onChange: (e) => { guardar(e.target.checked); pintarFilas(); } });
       }
       if (campo.tipo === 'eleccion') {
-        return el('select', { class: 'input', style: 'padding:4px 6px', onChange: (e) => { guardar(e.target.value); pintar(); } },
+        return el('select', { class: 'input', style: 'padding:4px 6px', onChange: (e) => { guardar(e.target.value); pintarFilas(); } },
           el('option', { value: '' }, '—'),
           ...(campo.opciones || []).map((o) => el('option', { value: o, selected: o === valor }, o)));
       }
@@ -169,22 +190,12 @@ export function vistaColecciones(root, ctx = {}) {
           : (campo.tipo === 'enlace' ? 'url' : 'text');
       return el('input', {
         class: 'input', style: 'padding:4px 6px', type: tipo, value: valor ?? '',
+        // Al salir del campo, no en cada tecla: así no se repinta debajo del cursor.
         onChange: (e) => { guardar(tipo === 'number' ? Number(e.target.value) || 0 : e.target.value); pintar(); },
       });
     };
 
-    return el('section', { class: 'card' },
-      el('div', { class: 'fila' },
-        input(consulta, (v) => { consulta = v; pintar(); }, { placeholder: 'Buscar en las fichas…' }),
-        button('+ Ficha', () => { store.agregarEn('fichas', fichaNueva(c)); pintar(); }, { variant: 'primary' })),
-
-      fichaAbierta ? el('div', { class: 'field' },
-        el('span', { class: 'field-label' }, fichaAbierta.campo.nombre),
-        textarea(fichaAbierta.ficha.valores?.[fichaAbierta.campo.id] || '', (v) => {
-          store.actualizarFicha(fichaAbierta.ficha.id, fichaAbierta.campo.id, v);
-        }, { rows: 5 }),
-        button('Cerrar', () => { fichaAbierta = null; pintar(); }, { variant: 'ghost chico' })) : null,
-
+    render(cajaFilas,
       !fichas.length ? vacio('Ninguna ficha todavía.', '📇')
         : el('div', { class: 'tabla-scroll' },
           el('table', { class: 'tabla' },

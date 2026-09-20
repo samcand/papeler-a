@@ -1082,6 +1082,36 @@ else {
   if (await pagina.locator('.barra-crono').isVisible()) errores.push('la barra sigue visible después de parar');
 }
 
+
+// Escribir sin que el campo se escape: guardar en cada tecla rehacía la barra
+// lateral y el foco se iba al cuerpo a media palabra.
+await pagina.goto(BASE + '#/personas');
+await pagina.waitForTimeout(500);
+await pagina.getByRole('button', { name: '+ Persona' }).click();
+await pagina.waitForTimeout(400);
+const campoNombre = pagina.locator('#app input').first();
+await campoNombre.click();
+for (const c of 'Ana Ruiz') { await pagina.keyboard.type(c); await pagina.waitForTimeout(60); }
+await pagina.waitForTimeout(400);
+const escrito = await campoNombre.inputValue();
+const focoDentro = await pagina.evaluate(() => document.activeElement?.tagName === 'INPUT');
+if (escrito !== 'Ana Ruiz' || !focoDentro) {
+  errores.push(`escribir un nombre pierde el foco o caracteres: "${escrito}", foco en input: ${focoDentro}`);
+} else console.log('  ok  escribir un nombre entero sin que salte el campo');
+
+// Lo mismo en el buscador de fichas de una colección
+await pagina.goto(BASE + '#/colecciones');
+await pagina.waitForTimeout(600);
+const campoFichas = pagina.getByPlaceholder('Buscar en las fichas');
+if (await campoFichas.count()) {
+  await campoFichas.click();
+  for (const c of 'mazda') { await pagina.keyboard.type(c); await pagina.waitForTimeout(60); }
+  await pagina.waitForTimeout(300);
+  const buscado = await campoFichas.inputValue();
+  if (buscado !== 'mazda') errores.push(`el buscador de fichas pierde letras: "${buscado}"`);
+  else console.log('  ok  buscar en las fichas sin perder el foco');
+}
+
 // Accesibilidad básica
 const a11y = await pagina.evaluate(() => {
   const saltar = document.querySelector('.saltar');

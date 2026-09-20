@@ -454,7 +454,14 @@ function buscador() {
   return el('div', { style: 'padding:0 10px 10px' }, campo);
 }
 
-/** Vuelve a montar la barra lateral cuando cambian las cuentas. */
+/**
+ * Vuelve a montar la barra lateral cuando cambian las cuentas.
+ *
+ * Ojo con el foco: al sacar y volver a meter el contenido, el navegador se lo
+ * quita a lo que estuvieras escribiendo. Como las vistas guardan en cada tecla,
+ * eso se notaba como "el campo salta" al escribir un nombre. Se apunta dónde
+ * estaba el cursor y se devuelve al terminar.
+ */
 function refrescarArmazon() {
   const viejo = document.querySelector('.marco');
   const contenido = document.getElementById('app');
@@ -462,12 +469,27 @@ function refrescarArmazon() {
   const lateral = viejo.querySelector('.lateral');
   const activo = document.activeElement;
   if (activo && activo.id === 'buscador') return; // no interrumpir la escritura
+  const escribiendo = !!activo && !!contenido && contenido.contains(activo);
+  // Los campos de fecha y número no tienen cursor que restaurar, y preguntarlo
+  // lanza excepción: por eso se prueba antes.
+  let cursor = null;
+  if (escribiendo) {
+    try { cursor = [activo.selectionStart, activo.selectionEnd]; } catch { cursor = null; }
+  }
+
   lateral?.remove();
   document.querySelector('.barra-inferior')?.remove();
   viejo.remove();
   montarArmazon();
   document.getElementById('app').replaceWith(contenido);
   marcarNav(rutaActual().split('/')[1] || 'hoy');
+
+  if (escribiendo && document.contains(activo)) {
+    activo.focus({ preventScroll: true });
+    if (cursor && cursor[0] != null) {
+      try { activo.setSelectionRange(cursor[0], cursor[1]); } catch { /* ese campo no lo admite */ }
+    }
+  }
 }
 
 

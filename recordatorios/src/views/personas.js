@@ -48,7 +48,7 @@ export function vistaPersonas(root) {
         el('div', { class: 'fila entre' },
           el('h2', { class: 'card-title', style: 'margin:0' }, 'Lo que viene'),
           button('+ Persona', () => {
-            const p = store.agregarEn('personas', personaNueva({ nombre: 'Nombre' }));
+            const p = store.agregarEn('personas', personaNueva({ nombre: '' }));
             abierta = p.id;
             pintar();
           }, { variant: 'primary chico' })),
@@ -81,7 +81,7 @@ export function vistaPersonas(root) {
       return el('section', { class: 'card' },
         el('div', { class: 'fila entre' },
           el('h3', { class: 'card-title', style: 'margin:0' },
-            p.nombre, p.relacion ? el('span', { class: 'muted small' }, ` · ${p.relacion}`) : null),
+            p.nombre || 'Sin nombre', p.relacion ? el('span', { class: 'muted small' }, ` · ${p.relacion}`) : null),
           el('div', { class: 'fila' },
             el('span', { class: 'muted small' },
               p.cumple ? `${textoLargo(p.cumple).replace(/ de \d{4}$/, '')}${anios != null ? ` · ${anios} años` : ''}` : 'sin cumpleaños'),
@@ -91,7 +91,7 @@ export function vistaPersonas(root) {
     return el('section', { class: 'card' },
       el('div', { class: 'fila' },
         el('label', { class: 'field grow' }, el('span', { class: 'field-label' }, 'Nombre'),
-          input(p.nombre, (v) => { p.nombre = v; store.guardar(); })),
+          input(p.nombre, (v) => { p.nombre = v; store.guardar(); }, { placeholder: 'Cómo la llamas' })),
         el('label', { class: 'field', style: 'width:170px' }, el('span', { class: 'field-label' }, 'Relación'),
           input(p.relacion || '', (v) => { p.relacion = v; store.guardar(); }, { placeholder: 'hermana, colega…' })),
         el('label', { class: 'field', style: 'width:180px' }, el('span', { class: 'field-label' }, 'Cumpleaños'),

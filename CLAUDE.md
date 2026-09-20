@@ -74,6 +74,14 @@ export function vistaLoQueSea(root, ctx = {}) {
 - Los botones que solo son un icono llevan `title`; `ui.js` lo convierte en
   `aria-label`. Los que tienen texto, **no** llevan `aria-label` (rompe
   «Label in Name» y los selectores por nombre accesible).
+- Un **grupo de botones nunca va dentro de un `<label>`**: el navegador reenvía
+  el clic al primer control de dentro, así que pulsar el segundo acaba marcando
+  el primero.
+- **Nada que se repinte mientras se escribe.** Si un campo guarda en cada tecla
+  (o llama a `pintar()`), el elemento se reemplaza y el cursor se va a media
+  palabra. Los campos de texto se crean una vez y solo se repinta la parte que
+  depende de ellos; para el resto, guardar en `onChange` (al salir del campo)
+  en vez de en `onInput`.
 
 ## Pruebas
 

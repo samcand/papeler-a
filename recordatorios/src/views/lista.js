@@ -185,36 +185,48 @@ export function vistaFiltroNuevo(root) {
   let nombre = '';
   let expresion = 'hoy | vencidas';
 
-  const pintar = () => {
-    const resultado = (() => {
+  // Los campos se crean una vez: si la vista se repintara en cada tecla, el
+  // cursor se saldría del campo a media palabra.
+  const campoNombre = input(nombre, (v) => { nombre = v; }, { placeholder: 'Cómo se llama el filtro' });
+  const campoExpresion = input(expresion, (v) => { expresion = v; pintarResultado(); });
+  const cuenta = el('p', { class: 'muted small' });
+  const resultados = el('div', {});
+
+  function pintarResultado() {
+    const encontradas = (() => {
       try { return aplicarFiltro(expresion, store.tareas, { hoy: aISO(fechaHoy()) }); }
-      catch { return []; }
+      catch { return null; }
     })();
+    if (encontradas === null) {
+      cuenta.textContent = 'Esa expresión todavía no se entiende; sigue escribiendo.';
+      render(resultados);
+      return;
+    }
+    cuenta.textContent = `${encontradas.length} tarea${encontradas.length === 1 ? '' : 's'} coinciden ahora mismo:`;
+    render(resultados, listaTareas(encontradas.slice(0, 15), { alCambiar: pintarResultado }));
+  }
 
-    render(host,
-      tituloVista('Filtro nuevo', 'Guarda una búsqueda que uses cada semana'),
-      el('label', { class: 'field' }, el('span', { class: 'field-label' }, 'Nombre'),
-        input(nombre, (v) => { nombre = v; })),
-      el('label', { class: 'field' }, el('span', { class: 'field-label' }, 'Expresión'),
-        input(expresion, (v) => { expresion = v; pintar(); })),
-      el('div', { class: 'card' },
-        el('h2', { class: 'card-title' }, 'Cómo se escribe'),
-        el('ul', { class: 'small muted' },
-          el('li', {}, '`hoy`, `vencidas`, `7 días`, `sin fecha`, `pendientes`, `completadas`, `repetidas`'),
-          el('li', {}, '`p1`…`p4` · `#Proyecto` · `@etiqueta` · `módulo:inversiones`'),
-          el('li', {}, '`con plazo` · `sin plazo` · `en riesgo` · `bloqueadas` · `libres`'),
-          el('li', {}, '`buscar: texto` · `antes de: 15 de octubre` · `después de: mañana`'),
-          el('li', {}, 'Se combinan con `&` (y), `|` (o), `!` (no) y paréntesis.'))),
-      el('p', { class: 'muted small' }, `${resultado.length} tareas coinciden ahora mismo:`),
-      listaTareas(resultado.slice(0, 15), { alCambiar: pintar }),
-      el('div', { class: 'fila', style: 'margin-top:14px' },
-        button('Guardar filtro', () => {
-          if (!nombre.trim()) { toast('Ponle un nombre', 'warn'); return; }
-          const f = store.agregarFiltro(nombre.trim(), expresion);
-          location.hash = `#/filtro/${f.id}`;
-        }, { variant: 'primary' })));
-  };
+  render(host,
+    tituloVista('Filtro nuevo', 'Guarda una búsqueda que uses cada semana'),
+    el('label', { class: 'field' }, el('span', { class: 'field-label' }, 'Nombre'), campoNombre),
+    el('label', { class: 'field' }, el('span', { class: 'field-label' }, 'Expresión'), campoExpresion),
+    el('div', { class: 'card' },
+      el('h2', { class: 'card-title' }, 'Cómo se escribe'),
+      el('ul', { class: 'small muted' },
+        el('li', {}, '`hoy`, `vencidas`, `7 días`, `sin fecha`, `pendientes`, `completadas`, `repetidas`'),
+        el('li', {}, '`p1`…`p4` · `#Proyecto` · `@etiqueta` · `módulo:inversiones`'),
+        el('li', {}, '`con plazo` · `sin plazo` · `en riesgo` · `bloqueadas` · `libres`'),
+        el('li', {}, '`buscar: texto` · `antes de: 15 de octubre` · `después de: mañana`'),
+        el('li', {}, 'Se combinan con `&` (y), `|` (o), `!` (no) y paréntesis.'))),
+    cuenta,
+    resultados,
+    el('div', { class: 'fila', style: 'margin-top:14px' },
+      button('Guardar filtro', () => {
+        if (!nombre.trim()) { toast('Ponle un nombre', 'warn'); return; }
+        const f = store.agregarFiltro(nombre.trim(), expresion);
+        location.hash = `#/filtro/${f.id}`;
+      }, { variant: 'primary' })));
 
-  pintar();
+  pintarResultado();
   render(root, host);
 }
