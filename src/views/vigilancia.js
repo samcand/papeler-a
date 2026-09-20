@@ -127,7 +127,7 @@ export function vista(store) {
     h('ol', { class: 'lista-guia' },
       h('li', {}, h('strong', {}, 'Cada diciembre: '), 'busca el decreto de salario mínimo y el de auxilio de transporte, y la resolución de la UVT de la DIAN.'),
       h('li', {}, h('strong', {}, '1 de julio de 2027: '), 'el recargo por día de descanso y festivos pasa al 100 %; la app ya lo tiene programado.'),
-      h('li', {}, h('strong', {}, 'Cuando cambie algo: '), 'edita la tabla de ', h('code', {}, 'nomina/src/normativa.js'),
+      h('li', {}, h('strong', {}, 'Cuando cambie algo: '), 'edita la tabla de ', h('code', {}, 'src/normativa.js'),
         ' agregando una fila nueva con su fecha de vigencia. Nunca borres la anterior: las liquidaciones viejas deben seguir saliendo con los valores de su momento.'),
       h('li', {}, h('strong', {}, 'Deja constancia: '), 'anota en la bitácora la norma, la fecha de publicación y qué cambiaste.'))));
 

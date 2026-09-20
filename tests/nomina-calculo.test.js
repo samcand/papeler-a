@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
-import * as ley from '../nomina/src/normativa.js';
-import * as calc from '../nomina/src/calculo.js';
+import * as ley from '../src/normativa.js';
+import * as calc from '../src/calculo.js';
 
 let passed = 0;
 const t = (nombre, fn) => { fn(); passed++; console.log('  ok  ' + nombre); };

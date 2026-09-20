@@ -1,72 +1,65 @@
 /**
- * sw.js — Service worker: la app queda instalada y funciona sin internet.
- * Los salones de iglesia tienen wifi malo; esto hace que eso deje de importar.
- * Lo único que necesita red es el video de YouTube.
+ * sw.js — Para que la nómina se pueda liquidar sin internet.
+ * Estrategia: red primero y, si no hay, lo que esté guardado.
  */
 
-const VERSION = 'alabanza-v4';
+const CACHE = 'nomina-co-v1';
 const ARCHIVOS = [
-  './', './index.html', './proyeccion.html', './manifest.webmanifest',
-  './assets/styles.css', './assets/icono.svg',
-  './src/app.js', './src/ui.js', './src/store.js', './src/seed.js', './src/ideas.js',
-  './src/music.js', './src/chordpro.js', './src/guitar.js', './src/piano.js', './src/drums.js',
-  './src/academy.js', './src/metronome.js', './src/analysis.js', './src/youtube.js',
-  './src/fretboard.js', './src/dsp.js', './src/afinador.js', './src/transcribe.js',
-  './src/audiolab.js', './src/hoja.js', './src/docx.js', './src/zip.js',
-  './src/vocal.js', './src/timestretch.js', './src/clicktrack.js', './src/share.js',
-  './src/qr.js', './src/qr-tables.js', './src/historial.js', './src/escucha.js',
-  './src/hojasequipo.js', './src/proyeccion.js', './src/anotaciones.js',
-  './src/calentamiento.js', './src/formatos.js', './src/zipread.js',
-  './src/views/library.js', './src/views/song.js', './src/views/sheet.js',
-  './src/views/instruments.js', './src/views/sync.js', './src/views/practice.js',
-  './src/views/academy.js', './src/views/setlists.js', './src/views/ideas.js',
-  './src/views/afinador.js', './src/views/estudio.js', './src/views/atril.js',
-  './src/views/canto.js', './src/views/importar.js', './src/views/historial.js',
-  './src/views/calentamiento.js', './src/views/lienzo.js', './src/views/importador.js',
+  './',
+  './index.html',
+  './manifest.webmanifest',
+  './assets/estilos.css',
+  './src/app.js',
+  './src/ui.js',
+  './src/store.js',
+  './src/fechas.js',
+  './src/festivos.js',
+  './src/normativa.js',
+  './src/calculo.js',
+  './src/seguridad.js',
+  './src/retencion.js',
+  './src/prestaciones.js',
+  './src/nomina.js',
+  './src/liquidacion.js',
+  './src/vigilancia.js',
+  './src/views/panel.js',
+  './src/views/empleados.js',
+  './src/views/registro.js',
+  './src/views/nomina.js',
+  './src/views/liquidacion.js',
+  './src/views/calendario.js',
+  './src/views/normativa.js',
+  './src/views/vigilancia.js',
+  './src/views/ajustes.js',
 ];
 
-self.addEventListener('install', (e) => {
-  e.waitUntil((async () => {
-    const cache = await caches.open(VERSION);
-    // addAll falla entero si un archivo falla; se guardan uno a uno para ser tolerantes.
-    await Promise.all(ARCHIVOS.map((url) => cache.add(url).catch(() => null)));
-    self.skipWaiting();
-  })());
+self.addEventListener('install', (evento) => {
+  evento.waitUntil(
+    caches.open(CACHE).then((cache) => cache.addAll(ARCHIVOS)).then(() => self.skipWaiting()),
+  );
 });
 
-self.addEventListener('activate', (e) => {
-  e.waitUntil((async () => {
-    const nombres = await caches.keys();
-    await Promise.all(nombres.filter((n) => n !== VERSION).map((n) => caches.delete(n)));
-    self.clients.claim();
-  })());
+self.addEventListener('activate', (evento) => {
+  evento.waitUntil(
+    caches.keys()
+      .then((llaves) => Promise.all(llaves.filter((l) => l !== CACHE).map((l) => caches.delete(l))))
+      .then(() => self.clients.claim()),
+  );
 });
 
-self.addEventListener('fetch', (e) => {
-  const url = new URL(e.request.url);
-  if (e.request.method !== 'GET') return;
-  // YouTube y cualquier cosa de fuera: directo a la red, sin cachear.
-  if (url.origin !== location.origin) return;
+self.addEventListener('fetch', (evento) => {
+  const peticion = evento.request;
+  if (peticion.method !== 'GET') return;
+  const url = new URL(peticion.url);
+  if (url.origin !== self.location.origin) return; // las consultas de noticias van directo a la red
 
-  e.respondWith((async () => {
-    const cacheado = await caches.match(e.request, { ignoreSearch: true });
-    if (cacheado) {
-      // Se actualiza por detrás para la próxima vez.
-      fetch(e.request).then((res) => {
-        if (res.ok) caches.open(VERSION).then((c) => c.put(e.request, res.clone()));
-      }).catch(() => {});
-      return cacheado;
-    }
-    try {
-      const res = await fetch(e.request);
-      if (res.ok) {
-        const cache = await caches.open(VERSION);
-        cache.put(e.request, res.clone());
-      }
-      return res;
-    } catch {
-      const index = await caches.match('./index.html');
-      return index || new Response('Sin conexión y sin copia guardada.', { status: 503 });
-    }
-  })());
+  evento.respondWith(
+    fetch(peticion)
+      .then((respuesta) => {
+        const copia = respuesta.clone();
+        caches.open(CACHE).then((cache) => cache.put(peticion, copia)).catch(() => {});
+        return respuesta;
+      })
+      .catch(() => caches.match(peticion).then((guardada) => guardada || caches.match('./index.html'))),
+  );
 });

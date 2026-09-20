@@ -1,326 +1,116 @@
-# Alabanza
+# Nómina Colombia
 
-App para manejar las canciones de alabanza de tu equipo: **letras con acordes**,
-**guías de ejecución para guitarra, piano y batería**, **sincronización con un
-video de YouTube** para saber qué tocar en cada instante, **academia de música**
-(círculo de quintas y recursos) y **100 ideas** para ejecutar bien el servicio.
+Plataforma para llevar **contratos, días de pago y liquidaciones** de acuerdo
+con la ley laboral colombiana. Sirve para quien paga **por mes, por quincena,
+por día (jornal) o por hora**, y hace la **liquidación final** con prima,
+cesantías, intereses, vacaciones e indemnización cuando corresponde.
 
-No necesita servidor, ni cuenta, ni internet (salvo para el video de YouTube).
-Todo se guarda en tu dispositivo.
+No necesita servidor, ni cuenta, ni internet. Todo se guarda en el dispositivo.
 
 ## Cómo abrirla
 
 ```bash
 git clone https://github.com/samcand/papeler-a.git
 cd papeler-a
-git checkout claude/praise-songs-management-app-51979y
+git checkout claude/payroll-platform-colombia-1kmopq
 npm start          # http://localhost:8080
 ```
 
 No hay que instalar nada (`npm install` no hace falta: el proyecto no tiene
-dependencias). Solo necesitas **Node 18 o superior**, que trae el servidor de
-desarrollo incluido en `tools/servidor.mjs`. Si prefieres otro:
+dependencias). Solo se necesita **Node 18 o superior**.
 
-```bash
-npm start -- 3000                 # otro puerto
-npm run serve:python              # con Python, si lo tienes
-npx serve .                       # o cualquier servidor estático
-```
+También se puede publicar tal cual en GitHub Pages: son archivos estáticos. Se
+instala como app (Chrome/Edge/Android: "Instalar"; iPhone: Compartir → "Añadir a
+pantalla de inicio") y funciona sin conexión.
 
-Debe abrirse por `http://`, no con doble clic en el archivo: el navegador
-bloquea los módulos de JavaScript cargados desde `file://`.
-
-Se puede **instalar como app** (Chrome/Edge/Android: "Instalar"; iPhone: Compartir →
-"Añadir a pantalla de inicio"). Una vez instalada funciona **sin internet**: lo único que
-necesita red es el video de YouTube.
-
-También se puede publicar tal cual en GitHub Pages: son archivos estáticos.
-
-## Además: plataforma de nómina colombiana
-
-En la carpeta [`nomina/`](nomina/) vive una segunda app independiente:
-**Nómina Colombia**, para llevar contratos, días de pago y liquidaciones según
-la ley laboral colombiana (pago por mes, por quincena, por día o por hora;
-recargos y horas extra; seguridad social; liquidación final con prima,
-cesantías, intereses, vacaciones e indemnización; y un módulo de vigilancia
-normativa que avisa cuando la ley cambia).
-
-```bash
-npm start                      # http://localhost:8080/nomina/
-npm run test:nomina            # sus pruebas
-```
-
-Detalles en [`nomina/README.md`](nomina/README.md) y el resumen de las normas
-aplicadas en [`docs/nomina-normas-colombia.md`](docs/nomina-normas-colombia.md).
-
-## Qué incluye
+## Qué hace
 
 | Pantalla | Para qué sirve |
 | --- | --- |
-| **Repertorio** | Todas tus canciones, con búsqueda, etiquetas, importar y exportar. |
-| **Canción** | Letra con acordes, transposición al vuelo, capo sugerido, notación americana / latina (Do Re Mi) / Nashville (1 4 5), auto-scroll e impresión para el atril. |
-| **Instrumentos** | Qué hace cada instrumento sección por sección: rasgueos y diagramas (guitarra), voicings e inversiones (piano), grooves y dinámica (batería), fundamentales (bajo) y guía vocal. |
-| **YouTube** | Marca la estructura sobre el video y sigue en vivo qué sección, qué acorde y qué debe hacer cada instrumento en ese instante. Incluye análisis automático de un archivo de audio (tempo, energía y secciones). |
-| **Practicar** | Metrónomo con acentos, tap tempo, entrenador de cambios de acorde, progreso por acorde y rutas de aprendizaje por instrumento. |
-| **Academia** | Círculo de quintas interactivo, progresiones que funcionan, entrenamiento de oído, escalas y modos, lectura rítmica, cifrado Nashville y glosario. |
-| **Listas** | Orden del servicio, tonalidad por canción y avisos de transición entre canciones. |
-| **Modo atril** | La pantalla del domingo: letra grande, sin menús, la pantalla no se apaga, auto-scroll atado al BPM real y avance con pedal Bluetooth o teclado. Una o dos columnas. |
-| **Proyección** | Segunda ventana o proyector con **solo la letra** para la congregación, controlada desde el atril (tecla B para pantalla en negro). |
-| **Canto** | Módulo completo de voz: medir tu rango con el micrófono, elegir la tonalidad según quién canta, afinación en vivo, vocalizaciones guiadas, entrenador de armonías, reparto de voces del equipo y cuidado vocal. |
-| **Importar de otras apps** | Lee ChordPro (.cho, .chopro, .pro, .crd), OnSong (.onsong), texto con acordes (.txt) y un .zip o .onsongarchive con la biblioteca entera. Arrastra los archivos y revisa qué encontró antes de guardar nada. |
-| **Anotaciones a mano** | Marcar la hoja con el dedo o el lápiz de la tablet: círculos, flechas, resaltador. Cada músico tiene su propio perfil de marcas sobre la misma canción, y salen impresas con la hoja. |
-| **Calentamiento** | Rutina guiada con cronómetro para guitarra, ukelele, bajo, piano, batería, voz y equipo completo. Se ajusta al tiempo que tengas (5 a 20 min), pone el metrónomo al tempo de cada ejercicio y usa la canción del domingo en los ejercicios que lo piden. |
-| **Historial** | Qué se cantó cada domingo, hace cuánto no se canta algo, cuántas veces seguidas va una canción nueva y qué tonalidades se repiten. |
-| **Afinador** | Afinador cromático por micrófono para guitarra, ukelele, bajo (4 y 5 cuerdas), cuatro y afinaciones alternativas (Drop D, DADGAD). Aguja en cents, notas de referencia y guía de cómo afinar. |
-| **Estudio de audio** | Sube una canción y la app saca el tempo, la tonalidad y **los acordes con sus tiempos**; se estudia lento, en bucle A-B y con el modo karaoke. También transcribe una melodía nota por nota. |
-| **100 ideas** | Lista de chequeo para mejorar la ejecución del equipo ([documento](docs/100-ideas-alabanza.md)). |
+| **Panel** | Los valores vigentes del año, el personal activo con su antigüedad y vacaciones pendientes, las próximas fechas de ley y las alertas de cambios normativos. |
+| **Empleados** | Empleados y contratos: indefinido, fijo, obra o labor y aprendizaje; pago mensual, por día o por hora; ARL, auxilio de transporte, salario integral, día de descanso pactado. Avisa si el salario queda bajo el mínimo, si el fijo pasa de 4 años o si se acerca el preaviso. |
+| **Días** | El calendario del mes: se marca qué pasó cada día (trabajo con horario, descanso, vacaciones, incapacidad, licencia, ausencia). Al poner la entrada y la salida, muestra en el momento cuántas horas son ordinarias, nocturnas y extra, y cuánto vale el recargo. |
+| **Nómina** | Liquida el periodo (mes, quincena o fechas libres) y arma el comprobante de pago: devengados, deducciones, neto, aportes a seguridad social, retención en la fuente y el costo real del empleado. Se imprime o se exporta a CSV, y queda registrado el pago. |
+| **Liquidación** | La cuenta final del contrato: cesantías, intereses, prima, vacaciones e indemnización del artículo 64, cada renglón con su fórmula y su norma. Muestra también cuánto costaría pagar tarde. |
+| **Calendario** | Festivos del año calculados (no copiados), fechas límite de prima, cesantías, intereses y dotación, y el historial de pagos. |
+| **Normativa** | Todos los parámetros con los que liquida la app, su vigencia y la norma que los fija, con enlaces oficiales. |
+| **Vigilancia** | El módulo de noticias: qué valores están por vencer, qué cambios ya tienen fecha, consulta de fuentes y una bitácora para dejar constancia de cada cambio. |
+| **Ajustes** | Datos del empleador, exoneración de parafiscales, proxy para la consulta de noticias y respaldo en JSON. |
 
-Además, desde una lista de servicio: **compartir el set por enlace o QR**, **una hoja distinta
-para cada músico** y **pistas de clic y pads** para los in-ears.
+## Lo que aplica de la ley
 
-## El domingo, en la plataforma
+Está resumido, con normas y enlaces, en
+[`docs/nomina-normas-colombia.md`](docs/nomina-normas-colombia.md). Lo
+esencial, al 20 de septiembre de 2026:
 
-- **Modo atril** (`▶ Modo atril` en la canción o en la lista): pantalla limpia, `Wake Lock`
-  para que no se apague, auto-scroll calculado desde el BPM y la duración real, y avance
-  con pedal. Los page-turners Bluetooth mandan teclas, así que funcionan sin configurar nada:
-  `→` siguiente sección, `←` anterior, `N`/`P` cambiar de canción, `S` scroll, `M` clic,
-  `B` proyección en negro, `+`/`−` tamaño, `Esc` salir.
-- **Proyección**: el botón `📺 Proyectar` abre una segunda ventana (arrástrala al proyector
-  y pulsa `F`). Muestra solo la letra de la sección en la que va el equipo, sin acordes.
-  Se sincroniza por `BroadcastChannel`, sin servidor.
+- Salario mínimo **$1.750.905** y auxilio de transporte **$249.095**
+  (Decretos 1469 y 1470 de 2025).
+- Jornada máxima de **42 horas** desde el 15 de julio de 2026 (Ley 2101 de
+  2021): la hora ordinaria sale de dividir el sueldo entre **210**.
+- Jornada nocturna desde las **7:00 p. m.** (Ley 2466 de 2025, desde el 25 de
+  diciembre de 2025).
+- Recargo por día de descanso y festivos del **90 %** desde el 1 de julio de
+  2026, y del 100 % desde el 1 de julio de 2027.
+- Recargo nocturno 35 %, hora extra diurna 25 %, hora extra nocturna 75 %.
+- Prestaciones con el año comercial de 360 días; cesantías al fondo antes del
+  15 de febrero e intereses antes del 31 de enero.
+- Indemnización del artículo 64 del CST y sanción moratoria del artículo 65.
 
-## Compartir con el equipo
+## Cómo se mantiene al día
 
-Desde la lista de servicio, `📤 Compartir`: la app comprime las canciones (gzip) y las mete
-**dentro del propio enlace**. Quien lo abre las importa en su dispositivo; no hay servidor,
-ni cuentas, ni nada que se suba a ningún lado. Si el enlace completo sale demasiado largo
-para un QR legible, el QR lleva la versión corta (títulos, tonalidades y notas) y lo dice
-claramente; el enlace completo se manda por chat.
+Los valores no están regados por el código: viven en
+[`src/normativa.js`](src/normativa.js), cada uno con su fecha de vigencia y su
+norma. Cuando la ley cambie:
 
-`📄 Hojas por músico` genera un .docx distinto por rol con el set completo, una canción por
-página: voces (solo letra), guitarra (acordes + digitación en trastes + rasgueo), piano
-(acordes con sus notas), bajo (fundamentales y escala), batería (groove, intensidad y aviso
-por sección) y la hoja en números de Nashville.
+1. Agrega **una fila nueva** con su `desde`. No borres la anterior: las
+   liquidaciones de periodos pasados deben seguir saliendo con los valores de
+   su momento (la app ya liquida agosto de 2026 con el 90 % y mayo con el 80 %).
+2. Actualiza `VERIFICADO_EL`.
+3. Deja la anotación en la bitácora de **Vigilancia normativa**.
 
-`🥁 Pistas de clic y pads` genera archivos .wav: el clic lleva un compás de cuenta de entrada
-y un golpe agudo al empezar cada sección marcada, y el pad es un colchón sostenido en la
-tonalidad para los momentos de oración.
+El módulo de Vigilancia avisa solo cuando:
 
-## Anotaciones a mano
+- no hay valores cargados para el año en curso;
+- se acerca diciembre y todavía no está el decreto del año siguiente;
+- falta menos de 120 días para un cambio ya programado;
+- acaba de entrar a regir un escalón de la reforma;
+- pasaron más de tres meses desde la última verificación.
 
-Lo que todos hacen con lápiz sobre el papel, pero sin papel. Se activa con `✎ Anotar`
-en la canción o en el modo atril:
+Para leer las fuentes desde la propia app hace falta un **proxy con CORS**
+(las páginas del Estado no permiten que otro sitio las lea). Se configura en
+Ajustes con una plantilla tipo `https://mi-proxy/?{url}`. Sin proxy, la app
+deja los enlaces listos para abrirlos y anotar el hallazgo.
 
-- **Lápiz, resaltador y borrador**, cinco colores, deshacer y ocultar/mostrar las marcas.
-- **Rechazo de palma**: al detectar un lápiz activo se ignoran los dedos, para que apoyar
-  la mano en la tablet no deje manchas.
-- **Un perfil por músico**: las marcas del guitarrista y las del bajista conviven sobre la
-  misma canción sin pisarse.
-- **Se imprimen con la hoja**: la barra de herramientas no, las marcas sí.
+## Decisiones de cálculo que conviene conocer
 
-El detalle que lo hace útil de verdad: cada trazo se **ancla a la sección** sobre la que se
-dibujó y se guarda en coordenadas relativas a ella. Si transpones la canción o cambias el
-tamaño de letra, la hoja se reacomoda y la marca **viaja con su verso** en vez de quedarse
-flotando en el sitio equivocado.
+- **El sueldo mensual ya paga las horas ordinarias.** Por eso una hora
+  ordinaria diurna de un día común aparece en el comprobante con valor cero:
+  solo se cobran los recargos y las extras.
+- **Día de descanso trabajado**: si se dio descanso compensatorio se paga solo
+  el recargo; si no, se paga el día **y** el recargo (CST art. 180). La app lo
+  pregunta día por día.
+- **Divisor de la hora**: por omisión usa el de la jornada legal vigente en la
+  fecha del periodo (hoy, 210). Se puede fijar en 240 por contrato si así se
+  pactó.
+- **Auxilio de transporte**: proporcional a los días que causan salario; no se
+  paga sobre vacaciones ni incapacidades, y no entra al IBC.
+- **Retención en la fuente**: estimación del procedimiento 1. Ajusta las
+  deducciones con los certificados del trabajador.
+- **Días**: método comercial de 360 (meses de 30), que es el de la práctica
+  laboral colombiana.
 
-## Calentamiento
-
-Una rutina distinta por instrumento, pensada para hacerse de pie con el instrumento puesto:
-
-- **Guitarra / ukelele**: manos y muñecas, cromático, cambios de acordes por pares, rasgueo sin parar la mano, colocar y soltar la cejilla, y la canción del domingo al 80 %.
-- **Bajo**: cromático lento, escala de la tonalidad del set, bloqueo con el bombo y apagado de notas.
-- **Piano**: cinco dedos, escala de la tonalidad, tríadas e inversiones cercanas, cadencia ii–V–I y el colchón 1-5-9 sostenido (el ejercicio de *no llenar*).
-- **Batería**: golpe simple, paradiddle, independencia bombo/hi-hat, el mismo groove a tres volúmenes y fills de un compás.
-- **Canto**: respiración, vibración de labios, sirena, "ng", cinco notas, arpegios, staccato y dicción — los patrones **suenan** y suben por semitonos dentro de *tu* rango medido.
-- **Equipo completo**: afinar todos con la misma referencia, pulso compartido, subir y bajar juntos, transiciones del set y orar.
-
-Cada ejercicio dice qué se busca, cómo se hace y **qué no hay que hacer**, porque calentar mal
-lesiona. Al elegir 5 minutos la app no borra lo esencial: lo acorta (mínimo un minuto por paso).
-
-## Módulo de canto
-
-| Herramienta | Qué hace |
-| --- | --- |
-| Medir mi rango | Cantas del grave al agudo y el micrófono anota tu nota más baja y más alta; clasifica la voz (soprano, mezzo, contralto, tenor, barítono, bajo) y calcula tu zona cómoda. |
-| Tonalidad ideal | Cruza el rango de la canción con el de quien canta **y con el de la congregación**, y ordena las tonalidades explicando qué pasa en cada una. Un clic la transpone. |
-| Afinación en vivo | La app toca una nota, tú la cantas y ves en cents si estás por encima o por debajo. Incluye el ejercicio de sostenerla 6 segundos. |
-| Vocalizaciones | Ocho ejercicios (labios, sirena, "ng", cinco notas, arpegios, staccato, sostener, dicción) que suben por semitonos **dentro de tu rango**, con objetivo y advertencia de cada uno. |
-| Armonías | Calcula la segunda voz **dentro de la tonalidad** (por eso a veces la tercera es mayor y a veces menor) y toca melodía y armonía para que las compares. |
-| Equipo | Reparte melodía y armonías según el rango real de cada persona. |
-| Cuidado vocal | Qué hacer y qué no, y las señales de alarma que hay que consultar con un médico. |
-
-Un detalle importante: si la canción no tiene la melodía medida, la app **no inventa**
-recomendaciones de tonalidad — lo dice y te pide anotar la nota más grave y la más aguda
-(o transcribir la melodía en el Estudio).
-
-## Traer tu repertorio de otra app
-
-`Importar archivos` en el repertorio, o arrastra los archivos sobre la página:
-
-| Formato | De dónde suele venir |
-| --- | --- |
-| **ChordPro** (.cho, .chopro, .chordpro, .pro, .crd, .chord) | El estándar de siempre. Es lo que exportan SongSelect, Planning Center, Songbook Pro, Chordii y casi todo lo demás. |
-| **OnSong** (.onsong) | OnSong, con su cabecera de metadatos (`Key: G`, `Tempo: 72`, `CCLI:`…) y los acordes escritos encima de la letra. |
-| **Texto con acordes** (.txt) | Cualquier hoja copiada de internet, con los acordes en la línea de encima. |
-| **.zip / .onsongarchive** | La biblioteca completa de golpe: se descomprime en el navegador y se importan todas las canciones que traiga. |
-| **.json** | Respaldos de esta misma app. |
-
-Qué hace al importar:
-
-- Lee las directivas de ChordPro con sus abreviaturas oficiales (`{t}`, `{st}`, `{c}`, `{soc}`/`{eoc}`,
-  `{sov}`/`{eov}`, `{sob}`, `{sot}`/`{eot}`, `{sop}`, `{ns}`…) y los metadatos
-  (title, subtitle, artist, composer, lyricist, key, tempo, time, capo, album, year,
-  copyright, duration, keywords y los personalizados `x_algo`).
-- **Traduce las secciones**: Verse → Verso, Chorus → Coro, Bridge → Puente, Pre-Chorus → Pre-Coro.
-- Coloca en su sílaba los acordes escritos encima de la letra (formato OnSong).
-- Si el archivo no trae tonalidad, la deduce del primer acorde; entiende también `Sol`, `G major` o `Bb minor`.
-- Separa en varias canciones los archivos con `{new_song}`.
-- Conserva las tablaturas (`{sot}`…`{eot}`) tal cual.
-- Muestra una **vista previa** con lo que encontró y avisa de las que ya tienes: nada se guarda hasta que lo confirmas.
-
-Y en sentido contrario, cada canción se exporta a **ChordPro** con un botón, en la tonalidad
-que estés viendo, para llevártela a cualquier otra herramienta.
-
-> La lista de directivas se contrastó con [ChordSheetJS](https://www.npmjs.com/package/chordsheetjs),
-> la implementación de referencia del formato: los metadatos y la secuencia de acordes coinciden
-> en los archivos de prueba.
-
-## El formato de hoja del equipo (acordes sobre la letra)
-
-Además del formato interno, la app habla el formato de hojas que ya usa el equipo:
-título con la tonalidad, autor debajo, acordes en negrita sobre la sílaba,
-secciones en mayúsculas y repeticiones abreviadas con `(Igual)`.
-
-```
-10.000 RAZONES (G)
-Matt Redman
-
-CORO
-C           G           D/F#         Em
-Alma mía bendice, bendice al señor
-
-CORO (Igual)
-```
-
-- **Importar**: Repertorio → *Pegar hoja de acordes*. Pega la hoja tal cual y la app
-  coloca cada acorde en su sílaba (si un acorde cae uno o dos caracteres dentro de
-  una palabra, lo ajusta al inicio de esa palabra; una separación silábica
-  intencional como `cán-ta--le` se respeta).
-- **Exportar**: en la canción → *Hoja en el formato del equipo*: texto para pegar en
-  el chat, **.docx generado en el navegador** (título en negrita a 16pt, tabla sin
-  bordes de 1 o 2 columnas) o el JSON que consume `generar_docx.py` de la skill
-  `alabanzas-acordes`. Se exporta en la tonalidad que estés viendo, así que
-  transponer y entregar la hoja es un solo paso.
-
-## Instrumentos de cuerda
-
-Las digitaciones de ukelele, bajo, cuatro y afinaciones alternativas no vienen de un
-diccionario: se **calculan buscando sobre el mástil** las posiciones que un ser humano
-puede pisar (máximo 4 dedos, estiramiento de 4 trastes, fundamental en el bajo cuando
-se puede). Las pruebas verifican que el buscador reproduce 17 digitaciones estándar
-de guitarra y ukelele. Cada instrumento trae además tablatura de la progresión y un
-mapa del mástil con la escala de la tonalidad.
-
-## Cómo se escribe una canción
-
-El cuerpo de cada canción usa un formato de texto simple:
-
-```
-{Verso 1}
-[G]Escribe la letra con el acorde [D]entre corchetes
-justo antes de la sílaba donde cam[Em7]bia
-
-{Coro}
-| [C] | [G] | [D] |     ← compases instrumentales
-// esto es una nota solo para el músico
-```
-
-Con eso la app deduce la progresión de cada sección, transpone, calcula la
-línea de tiempo del video y genera las guías por instrumento.
-
-## Qué puede y qué no puede hacer el análisis de audio
-
-Es la parte donde conviene ser exacto, porque hay apps que prometen de más:
-
-| | |
-| --- | --- |
-| **Sí** | Reconocer acordes (mayores, menores, 7, maj7, sus) de un archivo de audio con sus tiempos y su nivel de confianza; estimar tempo y tonalidad; transcribir una melodía de **una sola voz**; afinar cualquier instrumento de cuerda por micrófono. |
-| **A medias** | El modo "karaoke" resta los dos canales del estéreo: quita lo que esté al centro (normalmente la voz), pero se lleva parte del bombo y del bajo. En audio mono no hace nada. |
-| **Sí** | Bajar la velocidad **sin que baje el tono** (estiramiento WSOLA), para tocar junto a la grabación a 0.65×. |
-| **No** | Separar de verdad voz, batería, bajo y guitarra en pistas independientes (lo que hace Moises). Eso necesita un modelo de IA en un servidor; ninguna página web lo hace sola. Tampoco transcribe un piano tocando acordes: la detección de melodía es monofónica. |
-
-Todo el procesamiento ocurre dentro del navegador: **ningún archivo se sube a
-ningún servidor**.
-
-## Sobre el "análisis" de YouTube
-
-El reproductor incrustado de YouTube **no permite leer su audio** desde el
-navegador (lo bloquea por seguridad), así que no existe forma honesta de
-analizar la onda del video dentro de una página web. La app resuelve eso de dos
-maneras, y ambas funcionan:
-
-1. **Marcas sobre el video**: reproduces y pulsas "Marcar aquí" al inicio de cada
-   sección (o dejas que se calculen desde el BPM). A partir de ahí la app sabe en
-   cada segundo qué suena y qué debe tocar cada instrumento.
-2. **Análisis real de audio**: si subes el archivo de la canción (mp3, wav, m4a),
-   se analiza con Web Audio y se estiman tempo, curva de energía y los puntos
-   donde cambian las secciones; con un clic se convierten en marcas.
-
-## Estructura del proyecto
-
-```
-index.html            Punto de entrada
-assets/styles.css     Estilos (tema oscuro y claro, responsive, impresión)
-src/music.js          Teoría: acordes, transposición, tonalidades, Nashville
-src/chordpro.js       Formato de letra con acordes
-src/guitar.js         Diagramas, digitaciones, rasgueos
-src/piano.js          Teclado, voicings, conducción de voces
-src/drums.js          Grooves, dinámica por sección, fills
-src/academy.js        Círculo de quintas, intervalos, modos, progresiones
-src/fretboard.js      Ukelele, bajo, cuatro y afinaciones: busca digitaciones reales
-src/dsp.js            FFT, cromagrama, reconocimiento de acordes y detección de tono
-src/afinador.js       Afinador por micrófono
-src/transcribe.js     Audio -> acordes, tonalidad y melodía
-src/audiolab.js       Reproductor de estudio: velocidad, bucle A-B, karaoke
-src/hoja.js           Formato de hoja del equipo (importar y exportar)
-src/docx.js + zip.js  Generación del .docx en el navegador
-src/hojasequipo.js    Una hoja distinta por músico
-src/vocal.js          Rango vocal, tonalidad por cantante, vocalizaciones y armonías
-src/calentamiento.js  Rutinas de calentamiento por instrumento y para la voz
-src/anotaciones.js    Marcas a mano: trazos, simplificación, borrador
-src/formatos.js       Importar ChordPro y OnSong, exportar ChordPro
-src/zipread.js        Lectura de .zip para importar bibliotecas enteras
-src/escucha.js        Escucha por micrófono y reconoce acordes o notas
-src/timestretch.js    Velocidad lenta sin cambiar el tono (WSOLA)
-src/clicktrack.js     Pistas de clic, pads y exportación a .wav
-src/share.js          Compartir el set dentro de un enlace comprimido
-src/qr.js             Generador de códigos QR
-src/historial.js      Qué se cantó y cuándo
-sw.js + manifest      Instalación y funcionamiento sin internet
-src/metronome.js      Metrónomo (Web Audio) y tap tempo
-src/analysis.js       Análisis de audio local
-src/youtube.js        Reproductor sincronizado y motor de "qué tocar ahora"
-src/store.js          Guardado en el navegador, importar/exportar
-src/ideas.js          Las 100 ideas (fuente única)
-src/views/            Pantallas
-tests/                Pruebas: teoría musical, señal (acordes y afinación),
-                      digitaciones y formato de hoja
-tools/gen-docs.mjs    Genera el documento de las 100 ideas
-tools/servidor.mjs    Servidor estático para desarrollo (sin dependencias)
-```
-
-## Comandos
+## Pruebas
 
 ```bash
-npm start    # servidor local (Node, sin dependencias)
-npm test     # 64 pruebas: teoría, señal, digitaciones, formato de hoja,
-             # voz, estiramiento de tiempo, clic, QR, compartir e historial
-npm run docs # regenera docs/100-ideas-alabanza.md desde src/ideas.js
+npm test    # 66 pruebas del motor de cálculo
 ```
 
-## Licencias de las canciones
+Cubren festivos (incluida la Pascua y los traslados al lunes), clasificación de
+turnos que cruzan la medianoche, los factores de cada recargo por fecha, IBC,
+exoneraciones, retención, prestaciones, indemnizaciones y el módulo de
+vigilancia.
 
-Las canciones de ejemplo son **himnos de dominio público**. Si agregas canciones
-con derechos de autor, anota el número de licencia de tu iglesia (CCLI u otra) en
-el campo correspondiente y repórtalas como corresponda: es parte de honrar al
-autor que te sirvió.
+---
+
+Esta herramienta ayuda a calcular y a llevar el registro, pero **no reemplaza el
+concepto de un contador o un abogado laboral**.

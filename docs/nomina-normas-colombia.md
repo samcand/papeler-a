@@ -1,8 +1,8 @@
 # Cómo se paga en Colombia, según la ley
 
-Resumen de las reglas que aplica la plataforma de nómina (`nomina/`), con la
+Resumen de las reglas que aplica la plataforma de nómina (en este repositorio), con la
 norma de cada una. Está al día al **20 de septiembre de 2026**. Los valores
-vivos están en `nomina/src/normativa.js`: si la ley cambia, se edita esa tabla
+vivos están en `src/normativa.js`: si la ley cambia, se edita esa tabla
 agregando una fila nueva con su fecha de vigencia (nunca se borra la anterior,
 porque las liquidaciones viejas tienen que seguir saliendo con los valores de
 su momento).

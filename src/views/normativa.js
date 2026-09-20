@@ -14,7 +14,7 @@ export function vista(store) {
     h('div', {},
       h('h1', {}, 'Normativa vigente'),
       h('p', { class: 'ayuda' }, `Datos verificados el ${formatoLargo(ley.VERIFICADO_EL)}. Si la ley cambió después, actualiza la tabla en `,
-        h('code', {}, 'nomina/src/normativa.js'), ' y deja constancia en la bitácora.'))));
+        h('code', {}, 'src/normativa.js'), ' y deja constancia en la bitácora.'))));
 
   contenedor.append(tarjeta('Valores del año',
     tabla([

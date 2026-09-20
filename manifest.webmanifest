@@ -1,22 +1,19 @@
 {
-  "name": "Alabanza — canciones, acordes e instrumentos",
-  "short_name": "Alabanza",
-  "description": "Repertorio de alabanza con acordes, guías por instrumento, afinador, estudio de audio y modo atril. Funciona sin internet.",
-  "start_url": "./index.html#/",
+  "name": "Nómina Colombia — contratos, pagos y liquidación",
+  "short_name": "Nómina",
+  "description": "Contratos, días trabajados, pagos por día o por mes y liquidación final según la ley laboral colombiana.",
+  "start_url": "./index.html#/panel",
   "scope": "./",
   "display": "standalone",
-  "orientation": "any",
   "background_color": "#0f1115",
   "theme_color": "#0f1115",
-  "lang": "es",
-  "categories": ["music", "productivity", "education"],
+  "lang": "es-CO",
   "icons": [
-    { "src": "assets/icono.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
-    { "src": "assets/icono.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
-  ],
-  "shortcuts": [
-    { "name": "Afinador", "url": "./index.html#/afinador" },
-    { "name": "Listas de servicio", "url": "./index.html#/listas" },
-    { "name": "Canto", "url": "./index.html#/canto" }
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%230f1115'/%3E%3Ctext x='50' y='72' font-size='64' text-anchor='middle'%3E%F0%9F%A7%BE%3C/text%3E%3C/svg%3E",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
   ]
 }

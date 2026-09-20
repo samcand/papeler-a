@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
-import { dias360, diasCalendario, sumarMeses, minutos, aHHMM, formatoLargo } from '../nomina/src/fechas.js';
-import { pascua, festivos, esFestivo, alLunes, diasHabiles, finDeVacaciones } from '../nomina/src/festivos.js';
+import { dias360, diasCalendario, sumarMeses, minutos, aHHMM, formatoLargo } from '../src/fechas.js';
+import { pascua, festivos, esFestivo, alLunes, diasHabiles, finDeVacaciones } from '../src/festivos.js';
 
 let passed = 0;
 const t = (nombre, fn) => { fn(); passed++; console.log('  ok  ' + nombre); };

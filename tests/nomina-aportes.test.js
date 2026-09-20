@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
-import { calcularIbc, liquidarAportes, provisiones } from '../nomina/src/seguridad.js';
-import { retencionProcedimiento1, umbralRetencion } from '../nomina/src/retencion.js';
-import { liquidarPeriodo, valorIncapacidadComun } from '../nomina/src/nomina.js';
-import { smmlv, uvt } from '../nomina/src/normativa.js';
+import { calcularIbc, liquidarAportes, provisiones } from '../src/seguridad.js';
+import { retencionProcedimiento1, umbralRetencion } from '../src/retencion.js';
+import { liquidarPeriodo, valorIncapacidadComun } from '../src/nomina.js';
+import { smmlv, uvt } from '../src/normativa.js';
 
 let passed = 0;
 const t = (nombre, fn) => { fn(); passed++; console.log('  ok  ' + nombre); };

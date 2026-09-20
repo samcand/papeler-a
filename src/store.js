@@ -1,264 +1,238 @@
 /**
- * store.js — Estado de la app guardado en el navegador (localStorage).
- * No hay servidor: tus canciones son tuyas y viven en tu dispositivo.
- * Usa exportar/importar para respaldarlas o compartirlas con el equipo.
+ * store.js — Todo vive en este dispositivo (localStorage).
+ *
+ * No hay servidor ni cuentas: los datos de nómina son sensibles y no tienen
+ * por qué salir del computador de quien liquida. Para respaldar o pasar a otro
+ * equipo está Exportar/Importar en Ajustes.
  */
 
-import { SEED_SONGS } from './seed.js';
+const CLAVE = 'nomina.co.v1';
 
-const KEY = 'alabanza.v1';
-
-const DEFAULT_STATE = {
+export const ESTADO_INICIAL = {
   version: 1,
-  songs: [],
-  setlists: [],
-  practice: {},   // { [songId]: { chordsLearned: [], minutes: 0, lastAt: null } }
-  cantantes: [],  // { id, nombre, min, max, comoda:[min,max], tipo, notas }
-  anotaciones: {},// { [songId]: { [perfil]: trazos[] } }  marcas a mano sobre la hoja
-  ideasDone: [],  // números de ideas marcadas
-  settings: {
-    instrument: 'guitarra',
-    notation: 'americana',  // 'americana' | 'latina' | 'nashville'
-    fontSize: 16,
-    theme: 'dark',
+  empresa: {
+    nombre: '',
+    nit: '',
+    ciudad: '',
+    claseArl: 'I',
+    nivelArl: 'media',
+    exonerado: true,
+    aportaCaja: true,
+    diaDescanso: 0,
+  },
+  empleados: [],
+  contratos: [],
+  novedades: {},     // { [contratoId]: { 'YYYY-MM-DD': novedad } }
+  nominas: [],       // periodos liquidados y pagados
+  liquidaciones: [], // liquidaciones finales
+  bitacora: [],      // novedades normativas registradas a mano
+  ajustes: {
+    proxy: '',
+    fuentesExtra: [],
+    ultimaRevision: '',
+    tema: 'oscuro',
   },
 };
 
-function uid() {
-  return 'id-' + Math.random().toString(36).slice(2, 9) + Date.now().toString(36).slice(-4);
+export function uid(prefijo = 'id') {
+  return `${prefijo}-${Math.random().toString(36).slice(2, 8)}${Date.now().toString(36).slice(-4)}`;
 }
 
 class Store {
   constructor() {
-    this.state = this.load();
-    this.listeners = new Set();
+    this.estado = this.cargar();
+    this.oyentes = new Set();
   }
 
-  load() {
+  cargar() {
     try {
-      const raw = localStorage.getItem(KEY);
-      if (!raw) return { ...structuredClone(DEFAULT_STATE), songs: structuredClone(SEED_SONGS) };
-      const parsed = JSON.parse(raw);
-      return { ...structuredClone(DEFAULT_STATE), ...parsed,
-        settings: { ...DEFAULT_STATE.settings, ...(parsed.settings || {}) } };
-    } catch (err) {
-      console.warn('No se pudo leer el almacenamiento, empezando limpio', err);
-      return { ...structuredClone(DEFAULT_STATE), songs: structuredClone(SEED_SONGS) };
+      const crudo = localStorage.getItem(CLAVE);
+      if (!crudo) return structuredClone(ESTADO_INICIAL);
+      const guardado = JSON.parse(crudo);
+      return { ...structuredClone(ESTADO_INICIAL), ...guardado };
+    } catch (error) {
+      console.warn('No se pudo leer lo guardado, se empieza de cero.', error);
+      return structuredClone(ESTADO_INICIAL);
     }
   }
 
-  save() {
+  guardar() {
     try {
-      localStorage.setItem(KEY, JSON.stringify(this.state));
-    } catch (err) {
-      console.warn('No se pudo guardar (¿almacenamiento lleno o modo privado?)', err);
+      localStorage.setItem(CLAVE, JSON.stringify(this.estado));
+    } catch (error) {
+      console.warn('No se pudo guardar.', error);
     }
-    this.listeners.forEach((fn) => fn(this.state));
+    for (const oyente of this.oyentes) oyente(this.estado);
   }
 
-  subscribe(fn) { this.listeners.add(fn); return () => this.listeners.delete(fn); }
-
-  // --- Canciones ---
-  get songs() { return this.state.songs; }
-
-  song(id) { return this.state.songs.find((s) => s.id === id) || null; }
-
-  newSong(partial = {}) {
-    const song = {
-      id: uid(),
-      title: 'Canción nueva',
-      author: '',
-      key: 'G',
-      originalKey: '',
-      capo: 0,
-      bpm: 80,
-      timeSignature: '4/4',
-      feel: 'balada',
-      tags: [],
-      youtubeId: '',
-      ccli: '',
-      durationSec: 0,
-      body: '{Intro}\n| [G] | [D] | [Em7] | [C] |\n\n{Verso 1}\n[G]Escribe aquí tu letra con los [D]acordes entre corchetes\n\n{Coro}\n[Em7]El acorde suena justo en esa [C]sílaba\n',
-      notes: '',
-      instrumentNotes: { guitarra: '', piano: '', bateria: '', bajo: '', voz: '' },
-      timeline: [],
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-      ...partial,
-    };
-    this.state.songs.unshift(song);
-    this.save();
-    return song;
+  suscribir(fn) {
+    this.oyentes.add(fn);
+    return () => this.oyentes.delete(fn);
   }
 
-  updateSong(id, patch) {
-    const song = this.song(id);
-    if (!song) return null;
-    Object.assign(song, patch, { updatedAt: Date.now() });
-    this.save();
-    return song;
+  // ——— Empresa ———
+  actualizarEmpresa(datos) {
+    this.estado.empresa = { ...this.estado.empresa, ...datos };
+    this.guardar();
   }
 
-  deleteSong(id) {
-    this.state.songs = this.state.songs.filter((s) => s.id !== id);
-    this.state.setlists.forEach((sl) => { sl.songs = sl.songs.filter((x) => x.songId !== id); });
-    this.save();
+  // ——— Empleados ———
+  empleados() {
+    return this.estado.empleados;
   }
 
-  duplicateSong(id, patch = {}) {
-    const song = this.song(id);
-    if (!song) return null;
-    const copy = structuredClone(song);
-    copy.id = uid();
-    copy.title = song.title + ' (copia)';
-    copy.createdAt = copy.updatedAt = Date.now();
-    Object.assign(copy, patch);
-    this.state.songs.unshift(copy);
-    this.save();
-    return copy;
+  empleado(id) {
+    return this.estado.empleados.find((e) => e.id === id) || null;
   }
 
-  // --- Listas de servicio ---
-  newSetlist(partial = {}) {
-    const setlist = {
-      id: uid(),
-      name: 'Servicio ' + new Date().toLocaleDateString('es'),
-      date: new Date().toISOString().slice(0, 10),
-      notes: '',
-      songs: [],   // [{ songId, key, notes }]
-      createdAt: Date.now(),
-      ...partial,
-    };
-    this.state.setlists.unshift(setlist);
-    this.save();
-    return setlist;
-  }
-
-  setlist(id) { return this.state.setlists.find((s) => s.id === id) || null; }
-
-  updateSetlist(id, patch) {
-    const sl = this.setlist(id);
-    if (!sl) return null;
-    Object.assign(sl, patch);
-    this.save();
-    return sl;
-  }
-
-  deleteSetlist(id) {
-    this.state.setlists = this.state.setlists.filter((s) => s.id !== id);
-    this.save();
-  }
-
-  // --- Práctica y progreso ---
-  practiceFor(songId) {
-    return this.state.practice[songId] || { chordsLearned: [], minutes: 0, lastAt: null };
-  }
-
-  toggleChordLearned(songId, chord) {
-    const p = this.practiceFor(songId);
-    const set = new Set(p.chordsLearned);
-    set.has(chord) ? set.delete(chord) : set.add(chord);
-    this.state.practice[songId] = { ...p, chordsLearned: [...set], lastAt: Date.now() };
-    this.save();
-  }
-
-  addPracticeMinutes(songId, minutes) {
-    const p = this.practiceFor(songId);
-    this.state.practice[songId] = { ...p, minutes: p.minutes + minutes, lastAt: Date.now() };
-    this.save();
-  }
-
-  // --- Anotaciones a mano sobre la hoja ---
-  anotacionesDe(songId, perfil = 'Mis notas') {
-    return this.state.anotaciones?.[songId]?.[perfil] || [];
-  }
-
-  guardarAnotaciones(songId, perfil, trazos) {
-    if (!this.state.anotaciones) this.state.anotaciones = {};
-    if (!this.state.anotaciones[songId]) this.state.anotaciones[songId] = {};
-    if (trazos.length) this.state.anotaciones[songId][perfil] = trazos;
-    else delete this.state.anotaciones[songId][perfil];
-    if (!Object.keys(this.state.anotaciones[songId]).length) delete this.state.anotaciones[songId];
-    this.save();
-  }
-
-  /** Perfiles con marcas: cada músico tiene las suyas sobre la misma canción. */
-  perfilesDeAnotaciones(songId = null) {
-    const nombres = new Set(['Mis notas']);
-    const fuentes = songId
-      ? [this.state.anotaciones?.[songId] || {}]
-      : Object.values(this.state.anotaciones || {});
-    for (const porPerfil of fuentes) for (const nombre of Object.keys(porPerfil)) nombres.add(nombre);
-    return [...nombres];
-  }
-
-  borrarAnotaciones(songId, perfil) {
-    if (!this.state.anotaciones?.[songId]) return;
-    delete this.state.anotaciones[songId][perfil];
-    if (!Object.keys(this.state.anotaciones[songId]).length) delete this.state.anotaciones[songId];
-    this.save();
-  }
-
-  // --- Cantantes (módulo de canto) ---
-  get cantantes() { return this.state.cantantes; }
-
-  cantante(id) { return this.state.cantantes.find((c) => c.id === id) || null; }
-
-  guardarCantante(datos) {
-    const existente = datos.id ? this.cantante(datos.id) : null;
-    if (existente) {
-      Object.assign(existente, datos);
-      this.save();
-      return existente;
-    }
-    const nuevo = { id: uid(), nombre: 'Sin nombre', min: null, max: null, comoda: null, tipo: null, notas: '', ...datos };
-    this.state.cantantes.push(nuevo);
-    this.save();
-    return nuevo;
-  }
-
-  borrarCantante(id) {
-    this.state.cantantes = this.state.cantantes.filter((c) => c.id !== id);
-    this.save();
-  }
-
-  toggleIdea(n) {
-    const set = new Set(this.state.ideasDone);
-    set.has(n) ? set.delete(n) : set.add(n);
-    this.state.ideasDone = [...set];
-    this.save();
-  }
-
-  setSetting(key, value) {
-    this.state.settings[key] = value;
-    this.save();
-  }
-
-  // --- Respaldo ---
-  exportJSON() {
-    return JSON.stringify({ ...this.state, exportedAt: new Date().toISOString() }, null, 2);
-  }
-
-  importJSON(text, { merge = true } = {}) {
-    const data = JSON.parse(text);
-    if (!data || !Array.isArray(data.songs)) throw new Error('El archivo no tiene canciones válidas.');
-    if (merge) {
-      const byId = new Map(this.state.songs.map((s) => [s.id, s]));
-      for (const song of data.songs) byId.set(song.id || uid(), song);
-      this.state.songs = [...byId.values()];
-      this.state.setlists = [...(data.setlists || []), ...this.state.setlists];
+  guardarEmpleado(datos) {
+    if (datos.id) {
+      const i = this.estado.empleados.findIndex((e) => e.id === datos.id);
+      if (i >= 0) this.estado.empleados[i] = { ...this.estado.empleados[i], ...datos };
     } else {
-      this.state = { ...structuredClone(DEFAULT_STATE), ...data };
+      this.estado.empleados.push({ id: uid('emp'), activo: true, ...datos });
     }
-    this.save();
-    return this.state.songs.length;
+    this.guardar();
+    return this.estado.empleados[this.estado.empleados.length - 1];
   }
 
-  resetToSeed() {
-    this.state = { ...structuredClone(DEFAULT_STATE), songs: structuredClone(SEED_SONGS) };
-    this.save();
+  borrarEmpleado(id) {
+    this.estado.empleados = this.estado.empleados.filter((e) => e.id !== id);
+    const contratos = this.estado.contratos.filter((c) => c.empleadoId === id);
+    for (const c of contratos) delete this.estado.novedades[c.id];
+    this.estado.contratos = this.estado.contratos.filter((c) => c.empleadoId !== id);
+    this.guardar();
+  }
+
+  // ——— Contratos ———
+  contratos(empleadoId = null) {
+    return this.estado.contratos.filter((c) => !empleadoId || c.empleadoId === empleadoId);
+  }
+
+  contrato(id) {
+    return this.estado.contratos.find((c) => c.id === id) || null;
+  }
+
+  contratosActivos() {
+    return this.estado.contratos.filter((c) => c.estado !== 'terminado');
+  }
+
+  guardarContrato(datos) {
+    if (datos.id) {
+      const i = this.estado.contratos.findIndex((c) => c.id === datos.id);
+      if (i >= 0) this.estado.contratos[i] = { ...this.estado.contratos[i], ...datos };
+    } else {
+      this.estado.contratos.push({ id: uid('con'), estado: 'activo', ...datos });
+    }
+    this.guardar();
+    return this.estado.contratos[this.estado.contratos.length - 1];
+  }
+
+  borrarContrato(id) {
+    this.estado.contratos = this.estado.contratos.filter((c) => c.id !== id);
+    delete this.estado.novedades[id];
+    this.guardar();
+  }
+
+  // ——— Novedades (el día a día) ———
+  novedades(contratoId) {
+    return this.estado.novedades[contratoId] || {};
+  }
+
+  guardarNovedad(contratoId, fecha, novedad) {
+    if (!this.estado.novedades[contratoId]) this.estado.novedades[contratoId] = {};
+    if (novedad === null) delete this.estado.novedades[contratoId][fecha];
+    else this.estado.novedades[contratoId][fecha] = novedad;
+    this.guardar();
+  }
+
+  /** Aplica una novedad a un rango de fechas de una sola vez. */
+  guardarNovedadesRango(contratoId, desde, hasta, novedad) {
+    if (!this.estado.novedades[contratoId]) this.estado.novedades[contratoId] = {};
+    let cursor = desde;
+    let guarda = 0;
+    while (cursor <= hasta && guarda++ < 400) {
+      if (novedad === null) delete this.estado.novedades[contratoId][cursor];
+      else this.estado.novedades[contratoId][cursor] = { ...novedad };
+      const d = new Date(Number(cursor.slice(0, 4)), Number(cursor.slice(5, 7)) - 1, Number(cursor.slice(8, 10)) + 1, 12);
+      const p = (n) => String(n).padStart(2, '0');
+      cursor = `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+    }
+    this.guardar();
+  }
+
+  // ——— Nóminas pagadas ———
+  nominas(contratoId = null) {
+    return this.estado.nominas.filter((n) => !contratoId || n.contratoId === contratoId);
+  }
+
+  registrarNomina(registro) {
+    const existente = this.estado.nominas.findIndex(
+      (n) => n.contratoId === registro.contratoId && n.desde === registro.desde && n.hasta === registro.hasta,
+    );
+    const fila = { id: registro.id || uid('nom'), ...registro };
+    if (existente >= 0) this.estado.nominas[existente] = { ...this.estado.nominas[existente], ...fila };
+    else this.estado.nominas.push(fila);
+    this.guardar();
+    return fila;
+  }
+
+  borrarNomina(id) {
+    this.estado.nominas = this.estado.nominas.filter((n) => n.id !== id);
+    this.guardar();
+  }
+
+  // ——— Liquidaciones finales ———
+  registrarLiquidacion(registro) {
+    const fila = { id: registro.id || uid('liq'), ...registro };
+    const i = this.estado.liquidaciones.findIndex((l) => l.id === fila.id);
+    if (i >= 0) this.estado.liquidaciones[i] = fila;
+    else this.estado.liquidaciones.push(fila);
+    this.guardar();
+    return fila;
+  }
+
+  // ——— Bitácora normativa ———
+  agregarBitacora(entrada) {
+    this.estado.bitacora.unshift({ id: uid('nota'), ...entrada });
+    this.guardar();
+  }
+
+  actualizarBitacora(id, datos) {
+    const i = this.estado.bitacora.findIndex((b) => b.id === id);
+    if (i >= 0) {
+      this.estado.bitacora[i] = { ...this.estado.bitacora[i], ...datos };
+      this.guardar();
+    }
+  }
+
+  borrarBitacora(id) {
+    this.estado.bitacora = this.estado.bitacora.filter((b) => b.id !== id);
+    this.guardar();
+  }
+
+  // ——— Ajustes y respaldo ———
+  actualizarAjustes(datos) {
+    this.estado.ajustes = { ...this.estado.ajustes, ...datos };
+    this.guardar();
+  }
+
+  exportar() {
+    return JSON.stringify(this.estado, null, 2);
+  }
+
+  importar(texto) {
+    const datos = JSON.parse(texto);
+    if (!datos || typeof datos !== 'object') throw new Error('El archivo no tiene el formato esperado.');
+    this.estado = { ...structuredClone(ESTADO_INICIAL), ...datos };
+    this.guardar();
+  }
+
+  limpiar() {
+    this.estado = structuredClone(ESTADO_INICIAL);
+    this.guardar();
   }
 }
 
 export const store = new Store();
-export { uid };
+export default store;

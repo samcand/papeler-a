@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import * as vig from '../nomina/src/vigilancia.js';
+import * as vig from '../src/vigilancia.js';
 
 let passed = 0;
 const t = (nombre, fn) => { fn(); passed++; console.log('  ok  ' + nombre); };

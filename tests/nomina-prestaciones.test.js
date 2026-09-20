@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
-import * as pres from '../nomina/src/prestaciones.js';
-import { liquidacionFinal, indemnizacion, sancionMoratoria, describirTiempo } from '../nomina/src/liquidacion.js';
+import * as pres from '../src/prestaciones.js';
+import { liquidacionFinal, indemnizacion, sancionMoratoria, describirTiempo } from '../src/liquidacion.js';
 
 let passed = 0;
 const t = (nombre, fn) => { fn(); passed++; console.log('  ok  ' + nombre); };

@@ -1,14 +1,12 @@
 {
-  "name": "alabanza-app",
+  "name": "nomina-colombia",
   "version": "1.0.0",
-  "description": "App para manejar canciones de alabanza: letras, acordes, guias de guitarra/piano/bateria, sincronizacion con YouTube y modo de aprendizaje. Incluye tambien la plataforma de nomina colombiana en nomina/.",
+  "description": "Plataforma para llevar contratos, dias de pago y liquidaciones de acuerdo con la ley laboral colombiana, con vigilancia de cambios normativos.",
   "type": "module",
   "private": true,
   "scripts": {
     "start": "node tools/servidor.mjs",
-    "test": "node tests/music.test.js && node tests/dsp.test.js && node tests/fretboard.test.js && node tests/hoja.test.js && node tests/vocal.test.js && node tests/audio-extra.test.js && node tests/calentamiento.test.js && node tests/anotaciones.test.js && node tests/formatos.test.js && node tests/nomina-fechas.test.js && node tests/nomina-calculo.test.js && node tests/nomina-prestaciones.test.js && node tests/nomina-aportes.test.js && node tests/nomina-vigilancia.test.js",
-    "docs": "node tools/gen-docs.mjs",
-    "serve:python": "python3 -m http.server 8080",
-    "test:nomina": "node tests/nomina-fechas.test.js && node tests/nomina-calculo.test.js && node tests/nomina-prestaciones.test.js && node tests/nomina-aportes.test.js && node tests/nomina-vigilancia.test.js"
+    "test": "node tests/nomina-fechas.test.js && node tests/nomina-calculo.test.js && node tests/nomina-prestaciones.test.js && node tests/nomina-aportes.test.js && node tests/nomina-vigilancia.test.js",
+    "serve:python": "python3 -m http.server 8080"
   }
 }
