@@ -8,7 +8,7 @@ import {
   aleatorioConSemilla, barajar, prepararPregunta, filtrar,
   actualizarRepaso, toca, pendientesDeRepaso, seleccionarPreguntas,
   armarSimulacro, MODELOS_SIMULACRO, puntaje, agruparPor, temasDebiles, racha, notaGlobal,
-  DIAS_POR_CAJA,
+  DIAS_POR_CAJA, modeloDiario, diaDelCiclo, ROTACION_DIARIA, NUCLEO_DIARIO, DIAS_CICLO,
 } from '../src/motor.js';
 
 let pasadas = 0;
@@ -138,6 +138,59 @@ t('el simulacro respeta el reparto por asignatura', () => {
     }
     assert.equal(new Set(examen.map((p) => p.id)).size, total, 'no debe repetir preguntas');
   }
+});
+
+t('la sesión diaria son 30 preguntas en 30 minutos, cualquier día del ciclo', () => {
+  for (let dia = 0; dia < DIAS_CICLO; dia++) {
+    const modelo = modeloDiario(dia);
+    const total = Object.values(modelo.reparto).reduce((a, b) => a + b, 0);
+    assert.equal(total, 30, `día ${dia}`);
+    assert.equal(modelo.minutos, 30);
+    const examen = armarSimulacro(BANCO, modelo, rnd);
+    assert.equal(examen.length, 30, `día ${dia}: el banco debe poder surtirla`);
+  }
+});
+
+t('en una semana la rotación cubre las diecisiete asignaturas', () => {
+  const veces = {};
+  for (let dia = 0; dia < DIAS_CICLO; dia++) {
+    for (const a of Object.keys(modeloDiario(dia).reparto)) veces[a] = (veces[a] || 0) + 1;
+  }
+  for (const a of Object.keys(NUCLEO_DIARIO)) {
+    assert.equal(veces[a], DIAS_CICLO, `${a} es del núcleo: debe salir todos los días`);
+  }
+  for (const a of ROTACION_DIARIA) {
+    assert.equal(veces[a], 3, `${a} debería aparecer tres veces por semana`);
+  }
+  assert.equal(Object.keys(veces).length, Object.keys(NUCLEO_DIARIO).length + ROTACION_DIARIA.length);
+});
+
+t('el día del ciclo depende de la fecha y avanza de uno en uno', () => {
+  const base = Date.UTC(2026, 0, 1);
+  const serie = [0, 1, 2, 3, 4, 5, 6, 7].map((n) => diaDelCiclo(base + n * DIA));
+  assert.equal(serie[7], serie[0], 'a los siete días vuelve a empezar');
+  for (let i = 1; i < 7; i++) {
+    assert.equal(serie[i], (serie[0] + i) % DIAS_CICLO, 'no debe saltarse días');
+  }
+});
+
+t('la sesión diaria saca primero lo que toca repasar', () => {
+  const modelo = modeloDiario(0);
+  const mates = BANCO.filter((p) => p.asignatura === 'matematicas');
+  const vencidas = mates.slice(0, 5).map((p) => p.id);
+  const ahora = Date.now();
+  const repaso = {};
+  for (const id of vencidas) repaso[id] = { caja: 1, proximo: ahora - DIA, aciertos: 1, fallos: 0 };
+  const examen = armarSimulacro(BANCO, modelo, rnd, { repaso, ahora });
+  const elegidas = examen.filter((p) => p.asignatura === 'matematicas').map((p) => p.id);
+  assert.deepEqual([...elegidas].sort(), [...vencidas].sort(),
+    'las cinco de matemáticas deben ser justo las vencidas');
+});
+
+t('los ensayos largos siguen eligiendo al azar, sin mirar el repaso', () => {
+  const sinRepaso = armarSimulacro(BANCO, MODELOS_SIMULACRO.express, aleatorioConSemilla(1));
+  const otra = armarSimulacro(BANCO, MODELOS_SIMULACRO.express, aleatorioConSemilla(2));
+  assert.notDeepEqual(sinRepaso.map((p) => p.id), otra.map((p) => p.id));
 });
 
 t('el simulacro agrupa por asignatura en el orden del examen', () => {

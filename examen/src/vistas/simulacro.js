@@ -10,14 +10,14 @@ import { el, pintar, tarjeta, barra, reloj, aviso, dato } from '../ui.js';
 import { store } from '../store.js';
 import { BANCO } from '../banco/index.js';
 import { nombreAsignatura, nombreTema } from '../temario.js';
-import { MODELOS_SIMULACRO, armarSimulacro, prepararPregunta, puntaje, agruparPor } from '../motor.js';
+import { MODELOS_SIMULACRO, modeloDiario, armarSimulacro, prepararPregunta, puntaje, agruparPor, racha } from '../motor.js';
 import { nodoEnunciado, nodoOpciones, nodoExplicacion, nodoPuntos, etiquetasPregunta } from '../componentes.js';
 
 export function simulacroVista(raiz) {
   const banco = [...BANCO, ...store.state.propias];
 
   let fase = 'inicio';
-  let modeloId = 'corto';
+  let modeloId = 'diario';
   let preguntas = [];
   let respuestas = [];      // índice elegido o null
   let marcadas = new Set();
@@ -29,22 +29,54 @@ export function simulacroVista(raiz) {
 
   function limpiar() { clearInterval(cronometro); cronometro = null; }
 
+  /** El modelo diario se recalcula cada vez, porque depende del día que sea. */
+  function modeloPorId(id) {
+    return id === 'diario' ? modeloDiario() : MODELOS_SIMULACRO[id];
+  }
+
+  function esDeHoy(at) {
+    const a = new Date(at);
+    const hoy = new Date();
+    return a.getFullYear() === hoy.getFullYear() && a.getMonth() === hoy.getMonth() && a.getDate() === hoy.getDate();
+  }
+
+  const totalDe = (modelo) => Object.values(modelo.reparto).reduce((a, b) => a + b, 0);
+  const listaDe = (modelo) => Object.entries(modelo.reparto)
+    .map(([a, n]) => `${nombreAsignatura(a)} ${n}`).join(' · ');
+
   // ------------------------------------------------------------ inicio
 
   function pintarInicio() {
     const historial = store.state.simulacros;
-    const tarjetas = Object.entries(MODELOS_SIMULACRO).map(([id, m]) => {
-      const total = Object.values(m.reparto).reduce((a, b) => a + b, 0);
-      return el('button', {
-        class: 'asignatura', style: 'text-align:left', type: 'button',
-        onClick: () => { modeloId = id; empezar(); },
-      },
-        el('div', { class: 'icono' }, '⏱'),
-        el('h3', {}, m.nombre),
-        el('p', {}, `${total} preguntas en ${m.minutos} minutos`),
-        el('p', { class: 'pequeno suave' },
-          Object.entries(m.reparto).map(([a, n]) => `${nombreAsignatura(a)} ${n}`).join(' · ')));
-    });
+
+    const hoy = modeloDiario();
+    const hechaHoy = historial.some((s) => s.modelo === 'Diario' && esDeHoy(s.at));
+    const dias = racha(store.state.respuestas);
+
+    const sesionDelDia = tarjeta(null,
+      el('div', { class: 'fila entre' },
+        el('h2', { style: 'margin:0' }, 'Sesión de hoy'),
+        el('span', { class: 'etiqueta' + (hechaHoy ? ' ok' : '') },
+          hechaHoy ? 'Ya la hiciste' : `${totalDe(hoy)} preguntas · ${hoy.minutos} min`)),
+      el('p', { class: 'sub' },
+        'Media hora al día. El núcleo de matemáticas, lectura e inglés no cambia; '
+        + 'las demás asignaturas rotan, de modo que en una semana pasas por las diecisiete.'),
+      el('p', { class: 'pequeno suave' }, 'Hoy toca: ' + listaDe(hoy)),
+      el('div', { class: 'fila', style: 'margin-top:14px' },
+        el('button', {
+          class: 'primario', type: 'button',
+          onClick: () => { modeloId = 'diario'; empezar(); },
+        }, hechaHoy ? 'Repetir la sesión de hoy' : 'Empezar la sesión'),
+        dias ? el('span', { class: 'pequeno suave' }, `Racha: ${dias} ${dias === 1 ? 'día' : 'días'}`) : null));
+
+    const tarjetas = Object.entries(MODELOS_SIMULACRO).map(([id, m]) => el('button', {
+      class: 'asignatura', style: 'text-align:left', type: 'button',
+      onClick: () => { modeloId = id; empezar(); },
+    },
+      el('div', { class: 'icono' }, '⏱'),
+      el('h3', {}, m.nombre),
+      el('p', {}, `${totalDe(m)} preguntas en ${m.minutos} minutos`),
+      el('p', { class: 'pequeno suave' }, listaDe(m))));
 
     const previos = historial.length ? tarjeta('Simulacros anteriores',
       el('table', {},
@@ -59,6 +91,9 @@ export function simulacroVista(raiz) {
     return pintar(raiz,
       el('h1', {}, 'Simulacro'),
       el('p', { class: 'sub' }, 'Como el examen real: cronómetro, todas las asignaturas mezcladas y sin ver las respuestas hasta el final. Puedes marcar preguntas para volver a ellas.'),
+      sesionDelDia,
+      el('h2', {}, 'Ensayos largos'),
+      el('p', { class: 'sub' }, 'Para medirte de vez en cuando con el formato completo. No son para todos los días.'),
       el('div', { class: 'rejilla', style: 'margin-bottom:16px' }, tarjetas),
       previos);
   }
@@ -66,8 +101,11 @@ export function simulacroVista(raiz) {
   // ------------------------------------------------------------ examen
 
   function empezar() {
-    const modelo = MODELOS_SIMULACRO[modeloId];
-    preguntas = armarSimulacro(banco, modelo).map((p) => prepararPregunta(p));
+    const modelo = modeloPorId(modeloId);
+    // En la sesión diaria las preguntas vencidas van primero: es la rutina de
+    // estudio, no un examen de muestra. Los ensayos largos siguen al azar.
+    const opciones = modeloId === 'diario' ? { repaso: store.state.repaso } : {};
+    preguntas = armarSimulacro(banco, modelo, Math.random, opciones).map((p) => prepararPregunta(p));
     if (preguntas.length === 0) { aviso('No hay preguntas suficientes', 'mal'); return; }
     respuestas = preguntas.map(() => null);
     marcadas = new Set();
@@ -113,9 +151,10 @@ export function simulacroVista(raiz) {
       store.registrar({ pregunta: p, correcta: respuestas[i] === p.correcta, ms: msMedio, modo: 'simulacro' });
     });
     const p = puntaje(detalle);
+    const modelo = modeloPorId(modeloId);
     resultado = {
-      modelo: MODELOS_SIMULACRO[modeloId].nombre,
-      minutos: MODELOS_SIMULACRO[modeloId].minutos,
+      modelo: modelo.nombre,
+      minutos: modelo.minutos,
       duracionMs,
       porcentaje: p.porcentaje,
       aciertos: p.aciertos,

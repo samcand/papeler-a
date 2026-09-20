@@ -148,14 +148,57 @@ export const MODELOS_SIMULACRO = {
 };
 
 /**
+ * Sesión diaria: media hora, todos los días.
+ *
+ * Un simulacro completo de 128 preguntas es un ensayo general, no una rutina:
+ * nadie lo hace dos días seguidos. Para sostener meses de estudio hace falta
+ * algo que quepa en media hora y que, aun así, termine cubriendo el temario.
+ *
+ * De ahí el reparto: un núcleo fijo con lo que pesa en todos los exámenes
+ * (matemáticas, lectura crítica e inglés) más seis asignaturas que rotan. El
+ * ciclo es de siete días y está calculado para que cada una de las catorce
+ * asignaturas restantes aparezca exactamente tres veces por semana.
+ */
+export const NUCLEO_DIARIO = { matematicas: 5, lectura: 4, ingles: 3 };
+
+export const ROTACION_DIARIA = [
+  'trigonometria', 'abstracto', 'fisica', 'quimica', 'salud', 'geografia', 'historia',
+  'universal', 'ciudadania', 'economia', 'cotidiana', 'lengua', 'literatura', 'filosofia',
+];
+
+export const DIAS_CICLO = 7;
+const ASIGNATURAS_POR_DIA = 6;
+const POR_ASIGNATURA_ROTADA = 3;
+
+/** Qué día del ciclo toca hoy. Depende de la fecha, no de cuántas sesiones se hayan hecho. */
+export function diaDelCiclo(ahora = Date.now()) {
+  return Math.floor(ahora / DIA) % DIAS_CICLO;
+}
+
+/** El modelo de simulacro que corresponde a un día del ciclo. */
+export function modeloDiario(dia = diaDelCiclo()) {
+  const reparto = { ...NUCLEO_DIARIO };
+  for (let i = 0; i < ASIGNATURAS_POR_DIA; i++) {
+    const cual = ROTACION_DIARIA[(dia * ASIGNATURAS_POR_DIA + i) % ROTACION_DIARIA.length];
+    reparto[cual] = POR_ASIGNATURA_ROTADA;
+  }
+  return { id: 'diario', nombre: 'Diario', minutos: 30, dia, reparto };
+}
+
+/**
  * Arma el simulacro respetando el reparto. Si una asignatura no tiene
  * suficientes preguntas, usa las que haya en vez de fallar.
  */
-export function armarSimulacro(banco, modelo = MODELOS_SIMULACRO.completo, rnd = Math.random) {
+export function armarSimulacro(banco, modelo = MODELOS_SIMULACRO.completo, rnd = Math.random,
+  { repaso = null, ahora = Date.now() } = {}) {
   const salida = [];
   for (const [asignatura, cuantas] of Object.entries(modelo.reparto)) {
     const disponibles = banco.filter((p) => p.asignatura === asignatura);
-    salida.push(...barajar(disponibles, rnd).slice(0, cuantas));
+    // Con `repaso` la selección respeta las cajas: primero lo vencido, luego lo
+    // nuevo. Sin él, el simulacro elige al azar, como un examen de verdad.
+    salida.push(...(repaso
+      ? seleccionarPreguntas({ banco: disponibles, repaso, cantidad: cuantas, ahora, rnd })
+      : barajar(disponibles, rnd).slice(0, cuantas)));
   }
   return barajarPorAsignatura(salida, rnd);
 }
