@@ -44,6 +44,7 @@ import { vistaPersonas } from './views/personas.js';
 import { vistaRutinas } from './views/rutinas.js';
 import { vistaViajes } from './views/viajes.js';
 import { vistaLogros } from './views/logros.js';
+import { vistaAnio } from './views/anio.js';
 import { vistaAjustes } from './views/ajustes.js';
 
 const RUTAS = [
@@ -75,6 +76,7 @@ const RUTAS = [
   { ruta: /^\/rutinas$/, vista: vistaRutinas, nav: 'rutinas' },
   { ruta: /^\/viajes$/, vista: vistaViajes, nav: 'viajes' },
   { ruta: /^\/logros$/, vista: vistaLogros, nav: 'logros' },
+  { ruta: /^\/anio$/, vista: vistaAnio, nav: 'anio' },
   { ruta: /^\/ideas$/, vista: vistaIdeas, nav: 'ideas' },
   { ruta: /^\/ajustes$/, vista: vistaAjustes, nav: 'ajustes' },
   { ruta: /^\/filtro\/nuevo$/, vista: vistaFiltroNuevo },
@@ -174,6 +176,7 @@ const VIDA = [
   { id: 'colecciones', icono: '🗃️', texto: 'Colecciones', href: '#/colecciones' },
   { id: 'viajes', icono: '✈️', texto: 'Viajes', href: '#/viajes' },
   { id: 'logros', icono: '🏅', texto: 'Logros', href: '#/logros' },
+  { id: 'anio', icono: '📅', texto: 'El año', href: '#/anio' },
 ];
 
 const TRABAJO = [

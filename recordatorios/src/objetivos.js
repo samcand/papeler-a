@@ -21,6 +21,16 @@ export const TIPOS_OBJETIVO = [
   { id: 'siNo', nombre: 'Hacerlo o no hacerlo', ayuda: 'Sacar el pasaporte, aprender a nadar.' },
 ];
 
+/**
+ * El horizonte cambia lo que significa "ir bien". Una meta de vida no va tarde
+ * porque este mes no la tocaras; una de trimestre, sí.
+ */
+export const HORIZONTES = [
+  { id: 'vida', nombre: 'De vida', icono: '🌄', descripcion: 'Sin fecha o a varios años. Se revisa una vez al año.' },
+  { id: 'anio', nombre: 'De este año', icono: '📅', descripcion: 'Lo que quieres que sea verdad en diciembre.' },
+  { id: 'trimestre', nombre: 'De este trimestre', icono: '🎯', descripcion: 'Doce semanas: lo que de verdad cabe.' },
+];
+
 export const AMBITOS = [
   { id: 'vida', nombre: 'Vida', icono: '🌱' },
   { id: 'aprender', nombre: 'Aprender', icono: '📚' },
@@ -34,6 +44,8 @@ export function objetivoNuevo(campos = {}) {
     id: 'obj-' + Math.random().toString(36).slice(2, 8),
     que: '',
     ambito: 'vida',
+    horizonte: 'anio',
+    padre: null,          // una meta de vida contiene las de cada año
     tipo: 'numero',
     desde: aISO(hoy()),
     hasta: null,          // sin fecha es la lista de "algún día en la vida"
@@ -84,9 +96,12 @@ export function progreso(objetivo, datos = {}, hoyISO = aISO(hoy())) {
   const base = { ...a, cerrado, logrado: a.pct >= 100 || !!objetivo.logradoEn };
 
   if (!objetivo.hasta) {
+    const deVida = objetivo.horizonte === 'vida';
     return {
       ...base, conFecha: false, pctTiempo: null, alDia: null, restan: null, porSemana: null,
-      frase: base.logrado ? 'Logrado.' : `${a.actual} de ${a.meta}${objetivo.unidad ? ` ${objetivo.unidad}` : ''}. Sin fecha: avanza cuando avance.`,
+      frase: base.logrado ? 'Logrado.'
+        : `${a.actual} de ${a.meta}${objetivo.unidad ? ` ${objetivo.unidad}` : ''}. `
+          + (deVida ? 'De vida: no va tarde, va.' : 'Sin fecha: avanza cuando avance.'),
     };
   }
 
@@ -110,6 +125,81 @@ export function progreso(objetivo, datos = {}, hoyISO = aISO(hoy())) {
     alDia: base.logrado || a.pct >= pctTiempo,
     frase,
   };
+}
+
+
+/* ------------------------------------------------------------------ *
+ * Metas que contienen metas
+ * ------------------------------------------------------------------ */
+
+/** Los hijos directos de una meta. */
+export function hijosDe(objetivo, objetivos = []) {
+  return objetivos.filter((o) => o.padre === objetivo.id);
+}
+
+/** Un padre no puede colgar de su propio hijo. */
+export function haríaCiclo(objetivoId, nuevoPadre, objetivos = []) {
+  if (!nuevoPadre || objetivoId === nuevoPadre) return objetivoId === nuevoPadre;
+  const porId = new Map(objetivos.map((o) => [o.id, o]));
+  let actual = porId.get(nuevoPadre);
+  for (let i = 0; i < 50 && actual; i++) {
+    if (actual.id === objetivoId) return true;
+    actual = actual.padre ? porId.get(actual.padre) : null;
+  }
+  return false;
+}
+
+/**
+ * El progreso de una meta que tiene hijas **sale de ellas**, no de un número a
+ * mano: si la meta de vida es "publicar un libro" y este año toca el borrador,
+ * lo honesto es que el avance del libro sea el de sus años.
+ *
+ * Las hijas abandonadas no cuentan en el reparto; una meta que se deja no debe
+ * arrastrar a la de arriba para siempre.
+ */
+export function progresoConHijos(objetivo, objetivos = [], datos = {}, hoyISO = aISO(hoy())) {
+  const hijas = hijosDe(objetivo, objetivos).filter((h) => !h.abandonadoEn);
+  if (!hijas.length) return { ...progreso(objetivo, datos, hoyISO), desdeHijas: false, hijas: 0 };
+
+  const partes = hijas.map((h) => progresoConHijos(h, objetivos, datos, hoyISO));
+  const pct = Math.round(partes.reduce((s, p) => s + p.pct, 0) / partes.length);
+  const logradas = partes.filter((p) => p.logrado).length;
+  const atrasadas = partes.filter((p) => p.alDia === false).length;
+
+  return {
+    ...progreso(objetivo, datos, hoyISO),
+    desdeHijas: true,
+    hijas: hijas.length,
+    logradas,
+    pct,
+    logrado: !!objetivo.logradoEn || pct >= 100,
+    alDia: atrasadas ? false : null,
+    frase: `${logradas} de ${hijas.length} metas de dentro cumplidas`
+      + (atrasadas ? `, ${atrasadas} van tarde.` : '.'),
+  };
+}
+
+/** El árbol entero: las de vida arriba y sus años colgando. */
+export function arbol(objetivos = [], datos = {}, hoyISO = aISO(hoy())) {
+  const raices = objetivos.filter((o) => !o.padre || !objetivos.some((x) => x.id === o.padre));
+  const rama = (o, nivel = 0) => ({
+    objetivo: o,
+    nivel,
+    progreso: progresoConHijos(o, objetivos, datos, hoyISO),
+    hijas: hijosDe(o, objetivos)
+      .sort((a, b) => String(a.hasta || '9999').localeCompare(String(b.hasta || '9999')))
+      .map((h) => rama(h, nivel + 1)),
+  });
+  const orden = { vida: 0, anio: 1, trimestre: 2 };
+  return raices
+    .sort((a, b) => (orden[a.horizonte] ?? 1) - (orden[b.horizonte] ?? 1)
+      || String(a.hasta || '9999').localeCompare(String(b.hasta || '9999')))
+    .map((o) => rama(o));
+}
+
+/** Aplana el árbol para pintarlo como lista con sangría. */
+export function aplanar(ramas = []) {
+  return ramas.flatMap((r) => [r, ...aplanar(r.hijas)]);
 }
 
 /** Los que tocaba mirar y nadie miró. */

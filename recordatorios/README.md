@@ -41,6 +41,7 @@ Se instala como app (Chrome/Edge/Android: “Instalar”; iPhone: Compartir →
 | **Copiloto** | Preguntas sobre el plan respondidas con cálculo: qué se va a retrasar, quién está sobrecargado, qué cambió. |
 | **Panel de vida** | Ocho tarjetas con el día, el dinero, los objetivos, las fechas, lo que vence y el viaje que viene. |
 | **Logros** | Medallas de bronce, plata y oro sacadas de lo que ya está medido, y las estrellas del día. |
+| **El año** | El año en una página: lo cerrado, las metas, los viajes y lo que dejaste, listo para copiar. |
 | **Lo que queda** | La hoja de ruta: lo hecho, lo pendiente por olas y lo descartado con su motivo. |
 
 ### Escribir una tarea como se habla
@@ -481,6 +482,28 @@ septiembre de un objetivo anual suena bien y va tarde. Abandonar uno pide el
 motivo, y se queda escrito. Cubre también el plan de aprendizaje, las habilidades
 por aprender y la lista de cosas para hacer alguna vez.
 
+### Metas de largo plazo
+
+Una meta puede **contener otras**: «publicar un libro» (de vida) contiene
+«terminar el borrador» (este año) y «buscar editorial» (el que viene). El avance
+del padre **sale de sus hijas**, no de un número escrito a mano, y una hija
+abandonada deja de arrastrarlo.
+
+El horizonte —de vida, de este año, de este trimestre— cambia lo que significa
+ir bien: una meta de vida sin fecha **no «va tarde», va**. Solo las que tienen
+fecha se comparan con el tiempo gastado.
+
+### El año en una página
+
+Lo que de verdad pasó, sacado de lo que ya estaba guardado: lo cerrado mes a
+mes, en qué se fue el año, la mejor racha, las horas medidas, las entregas a
+tiempo, las metas cumplidas **y las que dejaste con su motivo**, viajes,
+lecturas, días de diario, gasto y las medallas en pie.
+
+Sirve para dos cosas: revisar en enero con datos en vez de con memoria, y
+enseñarlo si apetece —se copia, se descarga en `.txt` o se imprime—. No se
+maquilla: si el año fue flojo, se nota, que para eso se mira.
+
 ### Gastos
 
 El eje que faltaba: había cartera, no había gasto. Se escribe a mano, igual que
@@ -554,7 +577,7 @@ descargar. Si la semana fue floja se nota, que es justo para lo que sirve.
 
 ## Lo que queda
 
-La pestaña **Lo que queda** es la hoja de ruta real de la app: **113 hechas y 12
+La pestaña **Lo que queda** es la hoja de ruta real de la app: **115 hechas y 12
 descartadas**, y hoy no queda nada pendiente. Las diez últimas (111-120) salieron
 de revisar una lista de 50 ideas de productividad personal y resumirlas en cuatro
 piezas genéricas —notas, colecciones, objetivos y gastos— en vez de treinta
@@ -594,7 +617,7 @@ Alt y las flechas.
 ## Pruebas
 
 ```bash
-npm test                  # 370 pruebas de lógica, sin navegador
+npm test                  # 383 pruebas de lógica, sin navegador
 npm run test:navegador    # recorre la app en Chromium (necesita Playwright)
 ```
 

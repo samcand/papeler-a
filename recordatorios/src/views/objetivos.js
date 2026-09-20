@@ -8,7 +8,8 @@
 import { button, el, input, render, toast } from '../../../src/ui.js';
 import { aISO, hoy as fechaHoy } from '../fechas.js';
 import {
-  AMBITOS, TIPOS_OBJETIVO, aRevisar, objetivoNuevo, progreso, resumenObjetivos, tareaDeObjetivo,
+  AMBITOS, HORIZONTES, TIPOS_OBJETIVO, aRevisar, aplanar, arbol, haríaCiclo,
+  objetivoNuevo, resumenObjetivos, tareaDeObjetivo,
 } from '../objetivos.js';
 import { barra, dato, tituloVista, vacio } from '../componentes.js';
 import { store } from '../store.js';
@@ -17,11 +18,13 @@ export function vistaObjetivos(root) {
   const host = el('div', {});
   const hoyISO = aISO(fechaHoy());
   let verCerrados = false;
+  let horizonte = 'todos';
 
   const datos = () => ({ tareas: store.tareas, historial: store.estado.historial });
 
   const pintar = () => {
     const objetivos = store.estado.objetivos || [];
+    const vivas = objetivos.filter((o) => !o.logradoEn && !o.abandonadoEn);
     const r = resumenObjetivos(objetivos, datos(), hoyISO);
     const tocan = new Set(aRevisar(objetivos, hoyISO).map((o) => o.id));
     const cerrados = objetivos.filter((o) => o.logradoEn || o.abandonadoEn);
@@ -47,9 +50,22 @@ export function vistaObjetivos(root) {
           onClick: () => { verCerrados = !verCerrados; pintar(); },
         }, `ver cerrados (${cerrados.length})`) : null),
 
+      el('div', { class: 'chip-list' },
+        el('button', {
+          class: `chip ${horizonte === 'todos' ? 'activa' : ''}`.trim(), type: 'button',
+          onClick: () => { horizonte = 'todos'; pintar(); },
+        }, 'Todas'),
+        ...HORIZONTES.map((h) => el('button', {
+          class: `chip ${horizonte === h.id ? 'activa' : ''}`.trim(), type: 'button', title: h.descripcion,
+          onClick: () => { horizonte = h.id; pintar(); },
+        }, `${h.icono} ${h.nombre}`))),
+
       !r.lista.length ? vacio('Ningún objetivo escrito. Lo que no se escribe se queda en intención.', '🎯') : null,
 
-      ...r.lista.map(({ objetivo, progreso: p }) => tarjeta(objetivo, p, tocan.has(objetivo.id))),
+      // El árbol: las de vida arriba y los años colgando de ellas.
+      ...aplanar(arbol(vivas, datos(), hoyISO))
+        .filter((rama) => horizonte === 'todos' || rama.objetivo.horizonte === horizonte)
+        .map((rama) => tarjeta(rama.objetivo, rama.progreso, tocan.has(rama.objetivo.id), rama.nivel)),
 
       verCerrados ? el('section', { class: 'card' },
         el('h2', { class: 'card-title' }, 'Cerrados'),
@@ -63,9 +79,12 @@ export function vistaObjetivos(root) {
           }, { variant: 'ghost chico' })))) : null);
   };
 
-  function tarjeta(o, p, tocaRevisar) {
+  function tarjeta(o, p, tocaRevisar, nivel = 0) {
     const ambito = AMBITOS.find((a) => a.id === o.ambito);
-    return el('section', { class: `card objetivo ${p.alDia === false ? 'atrasado' : ''}`.trim() },
+    return el('section', {
+      class: `card objetivo ${p.alDia === false ? 'atrasado' : ''} ${nivel ? 'dentro' : ''}`.trim(),
+      style: nivel ? `margin-left:${nivel * 22}px` : '',
+    },
       el('div', { class: 'fila' },
         el('span', {}, ambito?.icono || '🎯'),
         input(o.que, (v) => store.actualizarEn('objetivos', o.id, { que: v })),
@@ -73,6 +92,10 @@ export function vistaObjetivos(root) {
           class: 'input', style: 'width:auto',
           onChange: (e) => { store.actualizarEn('objetivos', o.id, { ambito: e.target.value }); pintar(); },
         }, ...AMBITOS.map((a) => el('option', { value: a.id, selected: a.id === o.ambito }, a.nombre))),
+        el('select', {
+          class: 'input', style: 'width:auto', title: 'Horizonte: cambia lo que significa ir bien',
+          onChange: (e) => { store.actualizarEn('objetivos', o.id, { horizonte: e.target.value }); pintar(); },
+        }, ...HORIZONTES.map((h) => el('option', { value: h.id, selected: h.id === (o.horizonte || 'anio'), title: h.descripcion }, `${h.icono} ${h.nombre}`))),
         button('✕', () => {
           if (!window.confirm('¿Borrar el objetivo?')) return;
           store.borrarEn('objetivos', o.id);
@@ -110,6 +133,23 @@ export function vistaObjetivos(root) {
           ...store.estado.proyectos.map((pr) => el('option', { value: pr.nombre, selected: pr.nombre === o.proyecto }, pr.nombre)))) : null),
 
       el('div', { class: 'fila' },
+        el('label', { class: 'field grow' }, el('span', { class: 'field-label' }, 'Dentro de la meta'),
+          el('select', {
+            class: 'input',
+            onChange: (e) => {
+              const padre = e.target.value || null;
+              if (padre && haríaCiclo(o.id, padre, store.estado.objetivos)) {
+                toast('Esa meta ya cuelga de esta', 'warn');
+                pintar();
+                return;
+              }
+              store.actualizarEn('objetivos', o.id, { padre });
+              pintar();
+            },
+          }, el('option', { value: '' }, '— suelta —'),
+          ...(store.estado.objetivos || [])
+            .filter((x) => x.id !== o.id && !x.abandonadoEn && !haríaCiclo(o.id, x.id, store.estado.objetivos))
+            .map((x) => el('option', { value: x.id, selected: x.id === o.padre }, x.que.slice(0, 50))))),
         el('label', { class: 'field', style: 'width:170px' }, el('span', { class: 'field-label' }, 'Desde'),
           el('input', {
             class: 'input', type: 'date', value: o.desde || '',
@@ -131,7 +171,9 @@ export function vistaObjetivos(root) {
         p.conFecha ? el('div', { style: 'margin-top:4px' }, barra(p.pctTiempo, 'var(--muted)')) : null,
         el('p', { class: `small ${p.alDia === false ? 'negativo' : 'muted'}`.trim(), style: 'margin-top:6px' },
           `${p.actual} de ${p.meta}${o.unidad ? ` ${o.unidad}` : ''} · ${p.frase}`),
-        el('p', { class: 'muted small' }, `La barra de abajo es el tiempo gastado. Progreso sacado de: ${p.fuente}.`)),
+        el('p', { class: 'muted small' }, p.desdeHijas
+          ? `Este avance sale de las ${p.hijas} metas que tiene dentro, no de un número a mano.`
+          : `La barra de abajo es el tiempo gastado. Progreso sacado de: ${p.fuente}.`)),
 
       tocaRevisar ? el('p', { class: 'negativo small' }, `Tocaba revisarlo el ${o.revisarEn}: ¿sigue teniendo sentido?`) : null,
 

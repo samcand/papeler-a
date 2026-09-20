@@ -22,7 +22,7 @@ const BASE = `http://localhost:${PUERTO}/recordatorios/index.html`;
 const PANTALLAS = ['hoy', 'bandeja', 'proximos', 'calendario', 'enfoque', 'planificar', 'revision',
   'inversiones', 'proyectos', 'docencia', 'investigacion', 'alabanza', 'plantillas', 'tablero',
   'informes', 'copiloto', 'panel', 'notas', 'colecciones', 'objetivos', 'gastos', 'personas',
-  'rutinas', 'viajes', 'logros', 'ideas', 'ajustes'];
+  'rutinas', 'viajes', 'logros', 'anio', 'ideas', 'ajustes'];
 
 /** Busca Playwright en el proyecto y, si no, en la instalación global. */
 async function cargarPlaywright() {
@@ -946,6 +946,60 @@ const conEstrellas = await pagina.locator('.estrellas-hoy .estrella.ganada').cou
 if (!estrellas.de || conEstrellas !== estrellas.estrellas) {
   errores.push(`las estrellas de Hoy no cuadran: ${JSON.stringify(estrellas)} frente a ${conEstrellas} pintadas`);
 } else console.log(`  ok  estrellas del día: ${estrellas.estrellas} de ${estrellas.de} en Hoy`);
+
+
+// Metas de largo plazo: una de vida con los años dentro
+const metas = await pagina.evaluate(async () => {
+  const { store } = await import('./src/store.js');
+  const { objetivoNuevo, progresoConHijos } = await import('./src/objetivos.js');
+  const vida = store.agregarEn('objetivos', objetivoNuevo({ que: 'Publicar un libro', horizonte: 'vida', hasta: null, tipo: 'siNo' }));
+  const a26 = store.agregarEn('objetivos', objetivoNuevo({ que: 'Terminar el borrador', horizonte: 'anio', padre: vida.id, meta: 10, actual: 10, desde: '2026-01-01', hasta: '2026-12-31' }));
+  store.agregarEn('objetivos', objetivoNuevo({ que: 'Buscar editorial', horizonte: 'anio', padre: vida.id, tipo: 'siNo', desde: '2027-01-01', hasta: '2027-12-31' }));
+  const p = progresoConHijos(vida, store.estado.objetivos, {}, new Date().toISOString().slice(0, 10));
+  return { pct: p.pct, desdeHijas: p.desdeHijas, vida: vida.id, a26: a26.id };
+});
+if (metas.pct !== 50 || !metas.desdeHijas) errores.push('el avance de la meta de vida no sale de sus hijas: ' + JSON.stringify(metas));
+else {
+  await pagina.goto(BASE + '#/hoy');
+  await pagina.goto(BASE + '#/objetivos');
+  await pagina.waitForTimeout(700);
+  const dentro = await pagina.locator('.card.objetivo.dentro').count();
+  const texto = (await pagina.textContent('#app')).replace(/\s+/g, ' ');
+  if (dentro !== 2) errores.push(`las metas de dentro deberían salir sangradas, salieron ${dentro}`);
+  else if (!/sale de las 2 metas que tiene dentro/.test(texto)) errores.push('no explica de dónde sale el avance: ' + texto.slice(0, 200));
+  else console.log('  ok  metas de largo plazo: la de vida contiene sus años');
+}
+
+// El año en una página
+await pagina.evaluate(async () => {
+  const { store } = await import('./src/store.js');
+  const anio = new Date().getFullYear();
+  for (let i = 0; i < 12; i++) {
+    store.estado.historial.push({ id: 'ha' + i, tareaId: 'x', titulo: 'Del año', fecha: `${anio}-0${(i % 9) + 1}-0${(i % 9) + 1}` });
+  }
+  // Una cumplida y otra dejada: el año tiene que contar las dos cosas.
+  const { objetivoNuevo } = await import('./src/objetivos.js');
+  store.agregarEn('objetivos', objetivoNuevo({ que: 'Correr 500 km', logradoEn: `${anio}-08-01` }));
+  store.agregarEn('objetivos', objetivoNuevo({ que: 'Aprender alemán', abandonadoEn: `${anio}-05-01`, porque: 'No era el año' }));
+  store.guardar();
+});
+await pagina.goto(BASE + '#/hoy');
+await pagina.goto(BASE + '#/anio');
+await pagina.waitForTimeout(700);
+const anioTexto = (await pagina.textContent('#app')).replace(/\s+/g, ' ');
+if (!/cosas cerradas/.test(anioTexto) || !/Mes a mes/.test(anioTexto)) {
+  errores.push('el resumen del año no salió: ' + anioTexto.slice(0, 250));
+} else if (!/Correr 500 km/.test(anioTexto) || !/No era el año/.test(anioTexto)) {
+  errores.push('el año no recoge las metas cumplidas y las dejadas: ' + anioTexto.slice(0, 250));
+} else {
+  const [txt] = await Promise.all([
+    pagina.waitForEvent('download'),
+    pagina.getByRole('button', { name: 'Descargar .txt' }).click(),
+  ]);
+  const contenido = readFileSync(await txt.path(), 'utf8');
+  if (!/Cerradas: /.test(contenido)) errores.push('el .txt del año no trae el resumen: ' + contenido.slice(0, 120));
+  else console.log('  ok  el año en una página, y se lo lleva en .txt');
+}
 
 // Accesibilidad básica
 const a11y = await pagina.evaluate(() => {
