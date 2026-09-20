@@ -222,3 +222,29 @@ input:focus, select:focus { outline: 2px solid var(--acento); outline-offset: 1p
   .contrato .clausula { page-break-inside: avoid; }
   .firmas { page-break-inside: avoid; }
 }
+
+/* ——— Cartas y documentos ——— */
+.carta { background: var(--fondo-3); border: 1px solid var(--borde); border-radius: 10px; padding: 20px 22px; line-height: 1.6; }
+.carta p { text-align: justify; margin: 8px 0; }
+.carta-encabezado { text-align: left !important; margin: 1px 0 !important; }
+.carta-asunto { font-weight: 700; margin: 16px 0 !important; }
+.carta-cierre { margin-top: 20px !important; }
+.verificacion { margin-top: 24px; border-top: 1px dashed var(--borde); padding-top: 12px; }
+.grupo-docs { margin-bottom: 10px; }
+.grupo-docs h3 { margin: 8px 0 6px; }
+.chip-boton {
+  background: var(--fondo-3); border: 1px solid var(--borde); color: var(--texto);
+  border-radius: 999px; padding: 6px 12px; font: inherit; font-size: 13px; cursor: pointer;
+}
+.chip-boton:hover { border-color: var(--acento); }
+.chip-boton.activo { background: var(--acento-2); border-color: var(--acento-2); color: #fff; }
+.chip-boton.activo .norma { color: rgba(255, 255, 255, .75); }
+.plano {
+  background: var(--fondo); border: 1px solid var(--borde); border-radius: 8px; padding: 10px;
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 11px; overflow-x: auto; white-space: pre;
+}
+
+@media print {
+  .carta { border: 0; background: #fff; color: #000; padding: 0; }
+  .carta p { page-break-inside: avoid; }
+}

@@ -32,6 +32,9 @@ pantalla de inicio") y funciona sin conexión.
 | **Contrato** | Genera el contrato de trabajo escrito y listo para firmar: por días, por meses, por un año, continuo (indefinido), por obra o labor o de aprendizaje. Incluye las cláusulas de ley, calcula el periodo de prueba máximo, avisa de los datos que exige el artículo 39 del CST y se imprime o se descarga. |
 | **Días** | El calendario del mes: se marca qué pasó cada día (trabajo con horario, descanso, vacaciones, incapacidad, licencia, ausencia). Al poner la entrada y la salida, muestra en el momento cuántas horas son ordinarias, nocturnas y extra, y cuánto vale el recargo. |
 | **Nómina** | Liquida el periodo (mes, quincena o fechas libres) y arma el comprobante de pago: devengados, deducciones, neto, aportes a seguridad social, retención en la fuente y el costo real del empleado. Se imprime o se exporta a CSV, y queda registrado el pago. |
+| **Aportes** | La planilla PILA del mes con sus novedades (ingreso, retiro, incapacidades, licencias, vacaciones, suspensiones), exportable a CSV y a archivo plano, y la **revisión previa al pago**: los errores por los que la UGPP sanciona, con la exposición estimada. |
+| **Documentos** | Catorce cartas y constancias del ciclo del empleado —otrosí, preaviso, descargos, terminación, dotación, autorizaciones, certificado laboral, formulario 220, paz y salvo— con **firma electrónica y huella de verificación**, y el expediente de cada trabajador. |
+| **Simulador** | Cuánto cuesta contratar a alguien (con factor prestacional real), el presupuesto del año mes a mes con los desembolsos grandes en su fecha, y cuánto sube la nómina cuando cambie la ley. |
 | **Liquidación** | La cuenta final del contrato: cesantías, intereses, prima, vacaciones e indemnización del artículo 64, cada renglón con su fórmula y su norma. Muestra también cuánto costaría pagar tarde. |
 | **Calendario** | Festivos del año calculados (no copiados), fechas límite de prima, cesantías, intereses y dotación, y el historial de pagos. |
 | **Normativa** | Todos los parámetros con los que liquida la app, su vigencia y la norma que los fija, con enlaces oficiales. |
@@ -58,6 +61,10 @@ esencial, al 20 de septiembre de 2026:
 - Indemnización del artículo 64 del CST y sanción moratoria del artículo 65.
 - Contrato escrito con los datos del artículo 39, periodo de prueba de los
   artículos 76 a 80 y tope de 4 años del término fijo (Ley 2466 de 2025).
+- Registro de trabajo suplementario obligatorio (Ley 2466 de 2025) y planilla
+  PILA con novedades (Resolución 2388 de 2016).
+- Firma electrónica con huella verificable (Ley 527 de 1999 y Decreto 2364 de
+  2012).
 
 ## Cómo se mantiene al día
 
@@ -105,13 +112,15 @@ deja los enlaces listos para abrirlos y anotar el hallazgo.
 ## Pruebas
 
 ```bash
-npm test    # 82 pruebas del motor de cálculo
+npm test    # 119 pruebas del motor de cálculo
 ```
 
 Cubren festivos (incluida la Pascua y los traslados al lunes), clasificación de
 turnos que cruzan la medianoche, los factores de cada recargo por fecha, IBC,
 exoneraciones, retención, prestaciones, indemnizaciones y el módulo de
-vigilancia, y la generación del contrato con sus cláusulas y avisos.
+vigilancia, la generación del contrato con sus cláusulas y avisos, la firma
+electrónica, las cartas del ciclo del empleado, el registro de horas extra, la
+planilla PILA, la autoauditoría y los simuladores.
 
 ---
 

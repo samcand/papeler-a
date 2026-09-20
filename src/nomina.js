@@ -51,11 +51,19 @@ export function liquidarPeriodo({
   novedades = {},
   extras = {},
 }) {
-  const fechaRef = hasta;
+  // El periodo se recorta a la vigencia del contrato: a quien entra el 8 no se
+  // le paga desde el 1, y a quien sale el 20 no se le paga hasta el 30.
+  const finContrato = contrato.terminacion
+    || (contrato.estado === 'terminado' ? contrato.fin : '')
+    || '';
+  const desdeEfectivo = contrato.inicio && contrato.inicio > desde ? contrato.inicio : desde;
+  const hastaEfectivo = finContrato && finContrato < hasta ? finContrato : hasta;
+
+  const fechaRef = hastaEfectivo;
   const modalidad = contrato.modalidad || 'mensual';
   const diaDescanso = Number(contrato.diaDescanso ?? 0);
   const diasSemana = Number(contrato.diasSemana) || 6;
-  const diasPeriodo = dias360(desde, hasta);
+  const diasPeriodo = hastaEfectivo >= desdeEfectivo ? dias360(desdeEfectivo, hastaEfectivo) : 0;
   const salarioMensual = calc.salarioMensualEquivalente(contrato, fechaRef);
   const vDia = calc.valorDia(contrato, fechaRef);
 
@@ -70,7 +78,7 @@ export function liquidarPeriodo({
   // ——— 1. Recorrido día por día ———
   const detalleDias = [];
   const turnos = [];
-  for (const fecha of rango(desde, hasta)) {
+  for (const fecha of (hastaEfectivo >= desdeEfectivo ? rango(desdeEfectivo, hastaEfectivo) : [])) {
     const nov = novedades[fecha] || null;
     const esDescansoLegal = esDiaDeDescanso(fecha, diaDescanso);
     const id = nov?.tipo || (esDescansoLegal ? 'descanso' : (modalidad === 'mensual' ? 'trabajo' : 'ausencia'));
@@ -383,11 +391,21 @@ export function liquidarPeriodo({
   if (modalidad === 'mensual' && diasSalario > 30) {
     avisos.push('El periodo tiene más de 30 días de salario: revisa las fechas.');
   }
+  if (desdeEfectivo !== desde) {
+    avisos.push(`El contrato empieza el ${formatoCorto(desdeEfectivo)}: se liquida desde esa fecha, no desde el inicio del periodo.`);
+  }
+  if (hastaEfectivo !== hasta) {
+    avisos.push(`El contrato termina el ${formatoCorto(hastaEfectivo)}: se liquida hasta esa fecha, no hasta el fin del periodo.`);
+  }
+  if (hastaEfectivo < desdeEfectivo) {
+    avisos.push('El contrato no estuvo vigente en este periodo.');
+  }
 
   return {
     contrato: contrato.id,
-    desde,
-    hasta,
+    desde: desdeEfectivo,
+    hasta: hastaEfectivo,
+    periodoSolicitado: { desde, hasta },
     diasPeriodo,
     dias,
     diasSalario,

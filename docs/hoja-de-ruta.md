@@ -10,7 +10,15 @@ Investigado el 20 de septiembre de 2026.
 
 Estado hoy: contratos, registro de días, nómina del periodo, seguridad social,
 retención, liquidación final, contrato escrito, calendario, normativa y
-vigilancia normativa. 82 pruebas.
+vigilancia normativa. 119 pruebas.
+
+**Ya construido de esta hoja de ruta** (ola 1 y parte de la 2 y la 4):
+el registro de trabajo suplementario (1.3), la planilla PILA con novedades
+(1.2), la autoauditoría UGPP (1.6), el certificado de ingresos y retenciones y
+los certificados laborales (1.4 y 1.5), la biblioteca de documentos con firma
+electrónica y expediente (2.1 y 2.2), y los simuladores de costo, presupuesto
+e impacto normativo (4.3). Queda pendiente el XML de la nómina electrónica
+(1.1), que necesita servidor para transmitirse.
 
 ---
 

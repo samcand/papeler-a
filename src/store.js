@@ -25,6 +25,7 @@ export const ESTADO_INICIAL = {
   novedades: {},     // { [contratoId]: { 'YYYY-MM-DD': novedad } }
   nominas: [],       // periodos liquidados y pagados
   liquidaciones: [], // liquidaciones finales
+  documentos: [],    // cartas y constancias generadas, con su firma
   bitacora: [],      // novedades normativas registradas a mano
   ajustes: {
     proxy: '',
@@ -190,6 +191,29 @@ class Store {
     else this.estado.liquidaciones.push(fila);
     this.guardar();
     return fila;
+  }
+
+  // ——— Documentos del ciclo del empleado ———
+  documentos(contratoId = null) {
+    return this.estado.documentos.filter((d) => !contratoId || d.contratoId === contratoId);
+  }
+
+  documento(id) {
+    return this.estado.documentos.find((d) => d.id === id) || null;
+  }
+
+  guardarDocumento(registro) {
+    const fila = { id: registro.id || uid('doc'), creado: new Date().toISOString(), ...registro };
+    const i = this.estado.documentos.findIndex((d) => d.id === fila.id);
+    if (i >= 0) this.estado.documentos[i] = { ...this.estado.documentos[i], ...fila };
+    else this.estado.documentos.unshift(fila);
+    this.guardar();
+    return fila;
+  }
+
+  borrarDocumento(id) {
+    this.estado.documentos = this.estado.documentos.filter((d) => d.id !== id);
+    this.guardar();
   }
 
   // ——— Bitácora normativa ———

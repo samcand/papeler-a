@@ -6,7 +6,7 @@
   "private": true,
   "scripts": {
     "start": "node tools/servidor.mjs",
-    "test": "node tests/nomina-fechas.test.js && node tests/nomina-calculo.test.js && node tests/nomina-prestaciones.test.js && node tests/nomina-aportes.test.js && node tests/nomina-vigilancia.test.js && node tests/nomina-contrato.test.js",
+    "test": "node tests/nomina-fechas.test.js && node tests/nomina-calculo.test.js && node tests/nomina-prestaciones.test.js && node tests/nomina-aportes.test.js && node tests/nomina-vigilancia.test.js && node tests/nomina-contrato.test.js && node tests/nomina-cumplimiento.test.js && node tests/nomina-simulador.test.js",
     "serve:python": "python3 -m http.server 8080"
   }
 }

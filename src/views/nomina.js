@@ -9,6 +9,7 @@ import {
 } from '../ui.js';
 import { sumarMeses, sumarDias, MESES } from '../fechas.js';
 import { liquidarPeriodo } from '../nomina.js';
+import { registroSuplementario, aFilasCsv as extrasCsv } from '../extras.js';
 import * as ley from '../normativa.js';
 
 export function vista(store, params = {}) {
@@ -173,6 +174,7 @@ function resultado(store, contrato, empleado, periodo, extras) {
           r.retencion.pasos.map((p) => ({ celdas: [p.paso + (p.uvt ? ` (${p.uvt} UVT)` : ''), pesos(p.valor)] })))
         : h('p', {}, `No hay retención: la base gravable (${numero(r.retencion.baseUvt, 2)} UVT) no pasa de 95 UVT, que este año son ${pesos(95 * r.retencion.valorUvt)}.`),
       h('p', { class: 'ayuda' }, r.retencion.nota)) : null,
+    registroExtras(store, contrato, empleado, r),
     tarjeta('Día por día',
       tabla([{ titulo: 'Fecha' }, { titulo: 'Tipo' }, { titulo: 'Horario' }, { titulo: 'Horas', clase: 'num' }, { titulo: 'Recargos', clase: 'num' }],
         r.detalleDias.filter((d) => d.tipo !== 'descanso' || d.valor).map((d) => ({
@@ -194,6 +196,61 @@ function resultado(store, contrato, empleado, periodo, extras) {
         { celdas: [`Recargo dominical y festivo (${r.parametros.recargoDescanso.norma})`, `${Math.round(r.parametros.recargoDescanso.factor * 100)} %`] },
         { celdas: ['Jornada nocturna', `desde las ${r.parametros.franjaDiurna.finDiurna}:00 (${r.parametros.franjaDiurna.norma})`] },
       ])));
+}
+
+/**
+ * Registro de trabajo suplementario: la Ley 2466 de 2025 obliga a llevarlo y a
+ * entregárselo al trabajador junto con el soporte del pago.
+ */
+function registroExtras(store, contrato, empleado, r) {
+  const registro = registroSuplementario({
+    contrato, empleado, desde: r.desde, hasta: r.hasta, novedades: store.novedades(contrato.id),
+  });
+  if (!registro.filas.length) return null;
+
+  const t = registro.totales;
+  const hoja = h('div', { class: 'comprobante' },
+    h('h2', {}, 'Registro de trabajo suplementario'),
+    h('p', {}, h('strong', {}, store.estado.empresa.nombre || 'Empleador'),
+      store.estado.empresa.nit ? ` · NIT ${store.estado.empresa.nit}` : ''),
+    h('p', {}, `${empleado?.nombre || ''} · ${empleado?.tipoDocumento || 'CC'} ${empleado?.documento || ''}`),
+    h('p', {}, `Del ${formatoLargo(r.desde)} al ${formatoLargo(r.hasta)}`),
+    tabla([
+      { titulo: 'Fecha' }, { titulo: 'Actividad' }, { titulo: 'Horario' },
+      { titulo: 'Extra diurna', clase: 'num' }, { titulo: 'Extra nocturna', clase: 'num' },
+      { titulo: 'Recargo nocturno', clase: 'num' }, { titulo: 'En descanso', clase: 'num' },
+      { titulo: 'Valor', clase: 'num' },
+    ], registro.filas.map((f) => ({
+      celdas: [
+        h('span', {}, formatoCorto(f.fecha), f.festivo ? h('small', { class: 'norma' }, ` ★ ${f.festivo}`) : null),
+        f.actividad, f.horario,
+        f.extraDiurna ? numero(f.extraDiurna, 2) : '—',
+        f.extraNocturna ? numero(f.extraNocturna, 2) : '—',
+        f.recargoNocturno ? numero(f.recargoNocturno, 2) : '—',
+        (f.descansoDiurna + f.descansoNocturna) ? numero(f.descansoDiurna + f.descansoNocturna, 2) : '—',
+        pesos(f.valor),
+      ],
+    })).concat([{
+      clase: 'total',
+      celdas: ['Totales', '', '', numero(t.extraDiurna, 2), numero(t.extraNocturna, 2),
+        numero(t.recargoNocturno, 2), numero(t.descansoDiurna + t.descansoNocturna, 2), pesos(t.valor)],
+    }])),
+    h('p', { class: 'ayuda' }, registro.nota),
+    h('div', { class: 'firmas' },
+      h('div', { class: 'firma' }, h('div', { class: 'firma-linea' }), h('strong', {}, 'EL EMPLEADOR')),
+      h('div', { class: 'firma' }, h('div', { class: 'firma-linea' }), h('strong', {}, 'EL TRABAJADOR'),
+        h('p', {}, 'Recibí este registro con el soporte del pago'))));
+
+  return tarjeta('Registro de trabajo suplementario',
+    registro.avisos.length ? h('div', {}, ...registro.avisos.map((a) => aviso(a, 'alerta'))) : null,
+    hoja,
+    h('div', { class: 'acciones acciones-envueltas' },
+      boton('Imprimir el registro', () => imprimir('Registro de trabajo suplementario', hoja), 'primario'),
+      boton('Exportar CSV', () => descargar(
+        `horas-extra-${empleado?.documento || contrato.id}-${r.desde}.csv`,
+        csv(extrasCsv(registro)), 'text/csv',
+      ))),
+    h('p', { class: 'ayuda' }, `Fundamento: ${registro.norma}.`));
 }
 
 function registrarPago(store, contrato, r) {

@@ -10,6 +10,9 @@ import { vista as registro } from './views/registro.js';
 import { vista as contrato } from './views/contrato.js';
 import { vista as nomina } from './views/nomina.js';
 import { vista as liquidacion } from './views/liquidacion.js';
+import { vista as documentos } from './views/documentos.js';
+import { vista as aportes } from './views/aportes.js';
+import { vista as simulador } from './views/simulador.js';
 import { vista as calendario } from './views/calendario.js';
 import { vista as normativa } from './views/normativa.js';
 import { vista as vigilancia } from './views/vigilancia.js';
@@ -22,6 +25,9 @@ const RUTAS = [
   { id: 'registro', titulo: 'Días', icono: '🗓️', render: registro },
   { id: 'nomina', titulo: 'Nómina', icono: '💵', render: nomina },
   { id: 'liquidacion', titulo: 'Liquidación', icono: '📄', render: liquidacion },
+  { id: 'aportes', titulo: 'Aportes', icono: '🏛️', render: aportes },
+  { id: 'documentos', titulo: 'Documentos', icono: '📑', render: documentos },
+  { id: 'simulador', titulo: 'Simulador', icono: '🔮', render: simulador },
   { id: 'calendario', titulo: 'Calendario', icono: '📅', render: calendario },
   { id: 'normativa', titulo: 'Normativa', icono: '⚖️', render: normativa },
   { id: 'vigilancia', titulo: 'Vigilancia', icono: '📰', render: vigilancia },
