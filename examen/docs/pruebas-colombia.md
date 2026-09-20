@@ -149,7 +149,7 @@ que al álgebra.
 | Ciencias naturales: componente físico | Física (100) | Cubierto |
 | Ciencias naturales: componente químico | Química (100) | Cubierto |
 | Ciencias naturales: competencia de indagación | Biología y salud, tema de indagación (10) | Cubierto; CTS se trabaja desde geografía y vida cotidiana |
-| **Historia de Colombia (siglos XIX y XX)** | — | **Sin cubrir** |
+| Historia de Colombia | Historia de Colombia (100) | Cubierto, del periodo prehispánico al presente |
 | **Análisis de la imagen (UNAL)** | Razonamiento abstracto (90) cubre series y matrices | **Sin cubrir** el análisis de imágenes reales |
 | **Comunicación escrita (Saber Pro)** | — | **Sin cubrir**: es pregunta abierta, no opción múltiple |
 
@@ -167,16 +167,19 @@ Saber 11 (58) y no tenía nada de física ni de química. Ahora están las tres
   evolución, biodiversidad e **indagación científica**, que es la competencia
   de leer un experimento, distinguir variables y evaluar una conclusión.
 
+También se cubrió **historia de Colombia** (100 preguntas, 10 temas), que el
+Saber 11 evalúa dentro de sociales: del periodo prehispánico al acuerdo de paz,
+preguntando por causas y consecuencias y no por listas de fechas.
+
 ### Lo que sigue faltando
 
-1. **Historia de Colombia** (siglos XIX y XX), dentro de sociales.
-2. **Análisis de la imagen** al estilo UNAL: leer fotografías, mapas, obras y
-   publicidad, no series de figuras abstractas.
+1. **Análisis de la imagen** al estilo UNAL: leer gráficos, mapas, planos,
+   pictogramas y caricaturas, no series de figuras abstractas.
+2. **Textos discontinuos** en lectura crítica: gráficas e infografías, que hoy
+   solo se trabajan con tablas de texto.
 3. **Comunicación escrita** (Saber Pro): no son preguntas de opción múltiple,
    hace falta otra pantalla — escribir un texto argumentativo contra reloj y
    evaluarlo con una rúbrica.
-4. **Textos discontinuos** en lectura crítica: gráficas, infografías y
-   caricaturas, que hoy solo se trabajan con tablas.
 
 ## Fuentes
 

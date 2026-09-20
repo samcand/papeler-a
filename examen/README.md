@@ -1,8 +1,8 @@
 # Ingreso — plataforma de preguntas para la prueba de admisión
 
 Banco de preguntas y simulacros para preparar el examen de ingreso a la
-universidad, con **el temario de lo que preguntan** y **1 233 preguntas** con
-explicación en once asignaturas, a razón de **10 por tema en todos los temas**:
+universidad, con **el temario de lo que preguntan** y **1 333 preguntas** con
+explicación en doce asignaturas, a razón de **10 por tema en todos los temas**:
 
 | Asignatura | Temas | Preguntas | Qué cubre |
 | --- | --- | --- | --- |
@@ -13,6 +13,7 @@ explicación en once asignaturas, a razón de **10 por tema en todos los temas**
 | **Trigonometría** | 10 | 100 | Grados y radianes, triángulo rectángulo, ángulos notables, circunferencia unitaria, identidades, ángulo doble, ecuaciones, gráficas, leyes de senos y cosenos y aplicaciones. |
 | **Física** | 10 | 100 | Magnitudes y vectores, cinemática, leyes de Newton, trabajo y energía, fluidos, ondas, calor, electricidad, magnetismo y gravitación. |
 | **Química** | 10 | 100 | Materia y cambios, átomo, tabla periódica, enlace, nomenclatura, reacciones, estequiometría, soluciones, ácidos y bases y química orgánica. |
+| **Historia de Colombia** | 10 | 100 | De los pueblos originarios al acuerdo de paz: conquista, Colonia, independencia, siglo XIX, Bogotazo y La Violencia, Frente Nacional, conflicto y Constitución de 1991. |
 | **Política y ciudadanía** | 10 | 100 | Ramas del poder, Constitución, derechos humanos, democracia, sistemas políticos, elecciones, impuestos, convivencia, organismos internacionales y ética pública. |
 | **Vida cotidiana y cultura general** | 10 | 100 | Dinero, precios, documentos, medidas y dosis, seguridad digital, evaluar noticias, seguridad vial, consumo responsable, primer empleo y cultura general. |
 | **Razonamiento abstracto** | 9 | 90 | Series de figuras, matrices, el que no pertenece, rotación, plegado y cubos, series numéricas y alfanuméricas, lógica y analogías. |
@@ -40,7 +41,7 @@ conexión. También se publica tal cual en GitHub Pages: son archivos estáticos
 | **Inicio** | Cuántas preguntas llevas hoy, racha, promedio, cuenta regresiva al examen y qué toca repasar. |
 | **Temario** | El mapa del examen: cada tema dice qué hay que saber hacer, cuántas preguntas hay y cómo vas. Desde ahí se practica un tema suelto. |
 | **Practicar** | Preguntas de a una con la explicación al instante. Se filtra por asignatura, tema y dificultad; las teclas 1–4 responden y Enter avanza. |
-| **Simulacro** | El examen completo con cronómetro (96 preguntas en 120 minutos, o versiones corta y exprés), mapa de preguntas, marcas para volver y nada de ayudas. Al entregar: nota, desglose por asignatura y revisión pregunta por pregunta. |
+| **Simulacro** | El examen completo con cronómetro (102 preguntas en 130 minutos, o versiones corta y exprés), mapa de preguntas, marcas para volver y nada de ayudas. Al entregar: nota, desglose por asignatura y revisión pregunta por pregunta. |
 | **Progreso** | Actividad de los últimos 14 días, aciertos por asignatura, temas más flojos, historial de simulacros, ajustes y respaldo de tus datos. |
 
 ### Repaso espaciado
@@ -117,8 +118,8 @@ La pregunta correcta no es "cuántas preguntas quedan bonitas", sino **cuántas
 hacen falta para que estudiar con el banco enseñe la materia en vez de enseñar
 el banco**. Hay tres restricciones que fijan el número, y la mayor manda.
 
-**1. Cubrir el temario, no solo tocarlo.** Son 123 temas y tres niveles de
-dificultad. Con solo dos preguntas por nivel ya hacen falta unas **738**. Por
+**1. Cubrir el temario, no solo tocarlo.** Son 133 temas y tres niveles de
+dificultad. Con solo dos preguntas por nivel ya hacen falta unas **798**. Por
 debajo de eso hay temas que solo se pueden practicar de una manera.
 
 **2. No memorizar la respuesta.** La investigación sobre práctica de
@@ -166,12 +167,13 @@ Cobertura por asignatura (meta: 10 preguntas por tema)
   Vida cotidiana y cultura general 100 preguntas · 10 temas · 10.0 por tema  → meta alcanzada
   Física                   100 preguntas · 10 temas · 10.0 por tema  → meta alcanzada
   Química                  100 preguntas · 10 temas · 10.0 por tema  → meta alcanzada
+  Historia de Colombia     100 preguntas · 10 temas · 10.0 por tema  → meta alcanzada
   Comprensión de lectura    82 preguntas ·  8 temas · 10.3 por tema  → meta alcanzada
   Inglés                   120 preguntas · 12 temas · 10.0 por tema  → meta alcanzada
-  TOTAL                   1233 preguntas · faltan 0 para la meta de 10 por tema
+  TOTAL                   1333 preguntas · faltan 0 para la meta de 10 por tema
 ```
 
-Con 123 temas, la meta de 10 por tema son 1 233 preguntas: el banco está
+Con 133 temas, la meta de 10 por tema son 1 333 preguntas: el banco está
 completo en ese nivel y dentro del rango de "gran alcance" de la tabla
 anterior. Alcanza para tres meses de estudio y varios simulacros sin repetir
 preguntas.
@@ -227,8 +229,8 @@ examen/
     ui.js               cuatro ayudas de DOM, sin framework
     banco/              las preguntas, un archivo por asignatura
                         (matematicas, trigonometria, abstracto, geografia,
-                         ciudadania, salud, fisica, quimica, cotidiana,
-                         lectura, ingles)
+                         ciudadania, salud, fisica, quimica, historia,
+                         cotidiana, lectura, ingles)
     vistas/             inicio, temario, practicar, simulacro y progreso
   tests/                pruebas del banco y del motor (node, sin navegador)
   docs/                 qué evalúa cada prueba colombiana y qué falta cubrir

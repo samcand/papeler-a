@@ -15,6 +15,7 @@ const ARCHIVOS = [
   './src/banco/index.js', './src/banco/matematicas.js', './src/banco/trigonometria.js',
   './src/banco/abstracto.js', './src/banco/geografia.js', './src/banco/ciudadania.js',
   './src/banco/salud.js', './src/banco/fisica.js', './src/banco/quimica.js',
+  './src/banco/historia.js',
   './src/banco/cotidiana.js', './src/banco/lectura.js',
   './src/banco/ingles.js',
   './src/vistas/inicio.js', './src/vistas/temario.js', './src/vistas/practica.js',
