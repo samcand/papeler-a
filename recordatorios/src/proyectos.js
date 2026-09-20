@@ -309,6 +309,54 @@ function comparaEDT(a, b) {
 }
 
 /* ------------------------------------------------------------------ *
+ * Mover y redimensionar (lo que hace el arrastre en el Gantt)
+ * ------------------------------------------------------------------ */
+
+/**
+ * Mueve una tarea `delta` días hábiles respecto a donde está programada.
+ *
+ * Se traduce en una restricción de "no empezar antes de", igual que al
+ * arrastrar en un planificador de escritorio: las dependencias siguen mandando,
+ * así que arrastrar hacia atrás más allá de lo que permite la lógica del plan
+ * no rompe nada — la tarea se queda donde puede.
+ *
+ * Devuelve `{ movida, fecha }`; no toca el proyecto si la tarea es resumen.
+ */
+export function moverTarea(proyecto, tareaId, delta, plan = null) {
+  const tarea = (proyecto.tareas || []).find((t) => t.id === tareaId);
+  if (!tarea || esResumen(tarea, proyecto.tareas)) return { movida: false };
+  const cal = { ...CALENDARIO_POR_DEFECTO, ...(proyecto.calendario || {}) };
+  const programado = (plan || programar(proyecto)).tareas.find((t) => t.id === tareaId);
+  if (!programado) return { movida: false };
+
+  const nuevoIndice = programado.indiceInicio + Math.round(delta);
+  if (nuevoIndice <= 0) {
+    // Arrastrada al principio: se quita la restricción y manda el plan.
+    delete tarea.noAntesDe;
+    return { movida: true, fecha: null };
+  }
+  tarea.noAntesDe = fechaDeIndice(proyecto.inicio, nuevoIndice, cal);
+  return { movida: true, fecha: tarea.noAntesDe };
+}
+
+/** Cambia la duración (arrastrando el borde derecho de la barra). */
+export function cambiarDuracion(proyecto, tareaId, dias) {
+  const tarea = (proyecto.tareas || []).find((t) => t.id === tareaId);
+  if (!tarea || esResumen(tarea, proyecto.tareas)) return { cambiada: false };
+  tarea.duracion = Math.max(0, Math.round(dias));
+  return { cambiada: true, duracion: tarea.duracion };
+}
+
+/** Suelta la restricción de fecha: la tarea vuelve a colgar de sus dependencias. */
+export function quitarRestriccion(proyecto, tareaId) {
+  const tarea = (proyecto.tareas || []).find((t) => t.id === tareaId);
+  if (!tarea) return false;
+  const tenia = !!tarea.noAntesDe;
+  delete tarea.noAntesDe;
+  return tenia;
+}
+
+/* ------------------------------------------------------------------ *
  * Validación
  * ------------------------------------------------------------------ */
 

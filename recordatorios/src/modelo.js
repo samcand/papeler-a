@@ -177,6 +177,35 @@ export function estadisticas(historial = [], hoyISO = aISO(hoy()), meta = 5) {
   };
 }
 
+/**
+ * La bandeja de entrada: lo capturado que todavía no se ha decidido.
+ *
+ * Una tarea sale de la bandeja en cuanto tiene proyecto o módulo, que es la
+ * decisión que de verdad cuesta. Poner fecha no basta: "llamar al banco algún
+ * martes" sigue sin tener dueño.
+ */
+export function enBandeja(tareas = []) {
+  return tareas.filter((t) => !t.completada && !t.padre && !t.proyecto && !t.modulo);
+}
+
+/**
+ * Estado de la bandeja: cuánto hay, cuánto lleva ahí lo más viejo y si conviene
+ * pararse a vaciarla.
+ */
+export function estadoBandeja(tareas = [], hoyISO = aISO(hoy())) {
+  const items = enBandeja(tareas);
+  const antiguedades = items.map((t) => diferenciaDias(String(t.creadaEn).slice(0, 10), hoyISO));
+  const masViejo = antiguedades.length ? Math.max(...antiguedades) : 0;
+  return {
+    total: items.length,
+    items,
+    masViejo,
+    rapidas: items.filter((t) => (t.duracion || 0) > 0 && t.duracion <= 2).length,
+    // Dos señales que sí significan algo: mucho acumulado o algo criando polvo.
+    conviéneVaciar: items.length >= 5 || masViejo >= 3,
+  };
+}
+
 /** Carga del día: minutos comprometidos frente a los que tienes. */
 export function cargaDelDia(tareas, minutosDisponibles = 480) {
   const conDuracion = tareas.filter((t) => !t.completada && t.duracion);

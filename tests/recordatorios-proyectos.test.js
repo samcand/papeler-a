@@ -1,8 +1,9 @@
 import assert from 'node:assert/strict';
 import {
-  aTareasDeAgenda, cargaRecursos, desdePlantilla, desviaciones, diasHabiles, fechaDeIndice,
-  indiceDeFecha, numerarEDT, PLANTILLAS_PROYECTO, programar, proyectoVacio, resumenProyecto,
-  tareaProyecto, tomarLineaBase, validar, valorGanado,
+  aTareasDeAgenda, cambiarDuracion, cargaRecursos, desdePlantilla, desviaciones, diasHabiles,
+  fechaDeIndice, indiceDeFecha, moverTarea, numerarEDT, PLANTILLAS_PROYECTO, programar,
+  proyectoVacio, quitarRestriccion, resumenProyecto, tareaProyecto, tomarLineaBase, validar,
+  valorGanado,
 } from '../recordatorios/src/proyectos.js';
 
 let passed = 0;
@@ -206,6 +207,55 @@ t('el plan se convierte en recordatorios de la agenda', () => {
   assert.ok(tareas[0].notas.includes('ruta crítica'));
   assert.ok(tareas.some((t) => t.titulo.startsWith('🏁')));
   assert.equal(tareas[0].prioridad, 1);
+});
+
+t('arrastrar una tarea la fija con "no antes de" y arrastra a las siguientes', () => {
+  const p = proyecto([
+    T('a', { duracion: 5 }),
+    T('b', { duracion: 5, dependencias: [{ de: 'a' }] }),
+  ]);
+  // "b" empieza el día hábil 5 (28 sep); la arrastramos tres días a la derecha
+  const res = moverTarea(p, 'b', 3);
+  assert.equal(res.movida, true);
+  assert.equal(res.fecha, '2026-10-01');
+  const plan = programar(p);
+  assert.equal(plan.tareas.find((x) => x.id === 'b').inicio, '2026-10-01');
+  assert.equal(plan.duracion, 13);           // el proyecto se alarga tres días
+  // "a" ya no es crítica: ahora tiene holgura
+  assert.equal(plan.tareas.find((x) => x.id === 'a').holgura, 3);
+});
+
+t('arrastrar hacia atrás no rompe las dependencias', () => {
+  const p = proyecto([
+    T('a', { duracion: 5 }),
+    T('b', { duracion: 5, dependencias: [{ de: 'a' }] }),
+  ]);
+  moverTarea(p, 'b', -4);                    // imposible: "a" no ha terminado
+  const b = programar(p).tareas.find((x) => x.id === 'b');
+  assert.equal(b.inicio, '2026-09-28');      // se queda donde el plan permite
+  // arrastrarla al principio quita la restricción
+  moverTarea(p, 'b', -99);
+  assert.equal(p.tareas[1].noAntesDe, undefined);
+});
+
+t('arrastrar el borde cambia la duración; las resumen no se tocan', () => {
+  const p = proyecto([
+    T('fase', { nombre: 'Fase' }),
+    T('a', { duracion: 5, padre: 'fase' }),
+  ]);
+  assert.equal(cambiarDuracion(p, 'a', 8).duracion, 8);
+  assert.equal(programar(p).tareas.find((x) => x.id === 'a').fin, '2026-09-30');
+  assert.equal(cambiarDuracion(p, 'a', -3).duracion, 0);   // un hito, no una duración negativa
+  assert.equal(cambiarDuracion(p, 'fase', 4).cambiada, false);
+  assert.equal(moverTarea(p, 'fase', 2).movida, false);
+});
+
+t('soltar la restricción devuelve la tarea a su sitio', () => {
+  const p = proyecto([T('a', { duracion: 5 }), T('b', { duracion: 5, dependencias: [{ de: 'a' }] })]);
+  moverTarea(p, 'b', 3);
+  assert.equal(quitarRestriccion(p, 'b'), true);
+  assert.equal(quitarRestriccion(p, 'b'), false);
+  assert.equal(programar(p).tareas.find((x) => x.id === 'b').inicio, '2026-09-28');
 });
 
 console.log(`\n${passed} pruebas de gestión de proyectos OK`);

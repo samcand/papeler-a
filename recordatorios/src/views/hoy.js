@@ -3,14 +3,58 @@
 import { button, el, render } from '../../../src/ui.js';
 import { aISO, hoy as fechaHoy, sumarDias, textoLargo } from '../fechas.js';
 import { cargaDelDia, estadisticas, paraHoy } from '../modelo.js';
+import { copyText } from '../../../src/ui.js';
 import { rachaHabito } from '../plantillas.js';
 import { barra, dato, entradaRapida, listaTareas, tituloVista, vacio } from '../componentes.js';
+import { resumenDelDia, textoResumen, tocaResumen } from '../resumen.js';
+import { estadoBandeja } from '../modelo.js';
 import { formatoMinutos, resumenTiempo } from '../tiempo.js';
 import { store } from '../store.js';
 
 export function vistaHoy(root, ctx = {}) {
   const host = el('div', {});
   const hoyISO = aISO(fechaHoy());
+
+  let mostrarResumen = tocaResumen(store.estado.ajustes, hoyISO);
+
+  /**
+   * Tarjeta de "buenos días": el resumen que la notificación no siempre puede
+   * dar. Se enseña una vez al día y se cierra al empezar.
+   */
+  function tarjetaResumen() {
+    const r = resumenDelDia(store.estado, hoyISO);
+    return el('section', { class: 'card resumen-dia' },
+      el('div', { class: 'fila entre' },
+        el('h2', { class: 'card-title', style: 'margin:0' }, r.titulo),
+        el('div', { class: 'fila' },
+          button('Copiar', () => copyText(textoResumen(r)), { variant: 'ghost chico' }),
+          button('Empezar', () => {
+            store.ajustar({ resumenVistoEn: hoyISO });
+            mostrarResumen = false;
+            pintar();
+          }, { variant: 'primary chico' }))),
+
+      el('p', { class: 'small' },
+        r.vencidas ? el('b', { class: 'negativo' }, `${r.vencidas} de días anteriores · `) : null,
+        `${r.hoy} para hoy`,
+        r.carga.minutos ? ` · ${formatoMinutos(r.carga.minutos)} comprometidos` : '',
+        r.primera ? ` · lo primero con hora: ${r.primera.hora} ${r.primera.titulo}` : ''),
+
+      r.foco.length ? el('div', {},
+        el('p', { class: 'field-label' }, 'Si solo salen tres cosas, que sean estas'),
+        el('ol', { class: 'foco' }, ...r.foco.map((t) => el('li', {},
+          t.hora ? el('b', {}, `${t.hora} `) : null, t.titulo,
+          t.proyecto ? el('span', { class: 'muted small' }, ` · ${t.proyecto}`) : null)))) : null,
+
+      r.avisos.length ? el('div', {},
+        el('p', { class: 'field-label' }, 'Ojo con'),
+        el('ul', { class: 'small muted' }, ...r.avisos.map((a) => el('li', {}, a)))) : null,
+
+      el('p', { class: 'field-hint' },
+        `Ayer: ${r.completadasAyer} completadas y ${formatoMinutos(r.enfoqueAyer)} de enfoque.`,
+        r.racha ? ` Racha de ${r.racha} días.` : '',
+        r.mañana ? ` Mañana hay ${r.mañana} tareas.` : ''));
+  }
 
   const pintar = () => {
     const todas = store.tareas.filter((t) => !t.padre);
@@ -23,7 +67,10 @@ export function vistaHoy(root, ctx = {}) {
     const tiempo = resumenTiempo(store.estado.tiempo, hoyISO);
 
     render(host,
-      tituloVista('Hoy', textoLargo(hoyISO)),
+      tituloVista('Hoy', textoLargo(hoyISO),
+        el('span', { class: 'grow' }),
+        !mostrarResumen ? el('button', { class: 'chip', onClick: () => { mostrarResumen = true; pintar(); } }, '☀️ resumen del día') : null),
+      mostrarResumen ? tarjetaResumen() : null,
       entradaRapida({ fecha: hoyISO }, pintar),
 
       el('div', { class: 'tarjetas' },
@@ -55,6 +102,8 @@ export function vistaHoy(root, ctx = {}) {
           ? listaTareas(deHoy, { alCambiar: pintar, hoy: hoyISO, conSubtareas: true })
           : vacio(vencidas.length ? 'Nada más para hoy: primero lo atrasado.' : 'Día limpio. Disfrútalo o adelanta lo de mañana.', '✅')),
 
+      avisoBandeja(hoyISO),
+
       habitosDelDia(hoyISO, pintar),
 
       hechasHoy.length ? el('details', { style: 'margin-top:18px' },
@@ -71,6 +120,16 @@ export function vistaHoy(root, ctx = {}) {
 
   pintar();
   render(root, host);
+}
+
+/** Recordar la bandeja solo cuando de verdad pide atención. */
+function avisoBandeja(hoyISO) {
+  const b = estadoBandeja(store.tareas, hoyISO);
+  if (!b.conviéneVaciar) return null;
+  return el('p', { class: 'small muted', style: 'margin-top:14px' },
+    `📥 La bandeja tiene ${b.total} cosas sin clasificar`,
+    b.masViejo >= 3 ? ` (la más antigua, de hace ${b.masViejo} días)` : '',
+    '. ', el('a', { href: '#/bandeja' }, 'Vaciarla'), '.');
 }
 
 /** Los hábitos se marcan aquí mismo: un toque, sin abrir nada. */

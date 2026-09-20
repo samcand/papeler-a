@@ -50,6 +50,23 @@ export function vistaAjustes(root) {
           'Sin servidor no hay notificaciones push: la app avisa mientras esté abierta o instalada en segundo plano. ',
           'Para lo que no se puede olvidar, exporta el calendario .ics y deja que el teléfono ponga la alarma.'),
         el('div', { class: 'fila' },
+          el('label', { class: 'chip', style: 'cursor:pointer' },
+            el('input', {
+              type: 'checkbox', checked: a.resumenMatutino !== false,
+              onChange: (e) => { store.ajustar({ resumenMatutino: e.target.checked }); pintar(); },
+            }), 'Resumen del día al entrar'),
+          el('label', { class: 'field', style: 'width:150px;margin:0' },
+            el('span', { class: 'field-label' }, 'A partir de las'),
+            el('input', {
+              class: 'input', type: 'time', value: a.horaResumen || '07:00',
+              onChange: (e) => store.ajustar({ horaResumen: e.target.value }),
+            })),
+          a.resumenVistoEn ? button('Volver a verlo hoy', () => {
+            store.ajustar({ resumenVistoEn: null });
+            toast('Se verá al abrir Hoy');
+          }, { variant: 'ghost chico' }) : null),
+
+        el('div', { class: 'fila' },
           button(permiso() === 'granted' ? '✓ Avisos permitidos' : 'Permitir avisos del navegador', async () => {
             const res = await pedirPermiso();
             store.ajustar({ notificaciones: res === 'granted' });

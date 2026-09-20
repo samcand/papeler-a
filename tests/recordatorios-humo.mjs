@@ -19,7 +19,7 @@ import { createRequire } from 'node:module';
 
 const PUERTO = 8123;
 const BASE = `http://localhost:${PUERTO}/recordatorios/index.html`;
-const PANTALLAS = ['hoy', 'proximos', 'calendario', 'enfoque', 'planificar', 'revision',
+const PANTALLAS = ['hoy', 'bandeja', 'proximos', 'calendario', 'enfoque', 'planificar', 'revision',
   'inversiones', 'proyectos', 'docencia', 'investigacion', 'alabanza', 'ideas', 'ajustes'];
 
 /** Busca Playwright en el proyecto y, si no, en la instalación global. */
@@ -149,6 +149,61 @@ if (barras < 5) errores.push('el Gantt no dibujó las barras');
 else if (criticas < 5) errores.push('la ruta crítica no se marcó en la tabla');
 else if (!/69 d/.test(textoPlan)) errores.push('la duración del plan no cuadra: ' + textoPlan.slice(0, 160));
 else console.log(`  ok  proyectos: Gantt con ${barras} barras y ${criticas} tareas críticas`);
+
+// Bandeja: capturar sin decidir y procesar de una en una
+await pagina.goto(BASE + '#/bandeja');
+await pagina.waitForTimeout(300);
+await pagina.fill('[data-rapida]', 'Mirar lo del seguro del coche');
+await pagina.press('[data-rapida]', 'Enter');
+await pagina.waitForTimeout(300);
+if (!(await pagina.textContent('#app')).includes('Mirar lo del seguro')) {
+  errores.push('lo capturado sin proyecto no aparece en la bandeja');
+} else {
+  await pagina.getByRole('button', { name: /procesar una por una/ }).click();
+  await pagina.waitForTimeout(250);
+  await pagina.locator('.procesador .chip', { hasText: 'Hoy' }).first().click();
+  await pagina.waitForTimeout(300);
+  await pagina.goto(BASE + '#/hoy');
+  await pagina.waitForTimeout(300);
+  const enHoy = (await pagina.textContent('#app')).includes('Mirar lo del seguro');
+  const sigueEnBandeja = await pagina.locator('[data-nav="bandeja"] .cuenta').count();
+  if (!enHoy) errores.push('procesar a "Hoy" no puso la tarea en el día');
+  else console.log('  ok  bandeja: capturar y procesar');
+}
+
+// Resumen del día
+await pagina.evaluate(async () => {
+  const { store } = await import('./src/store.js');
+  store.ajustar({ resumenVistoEn: null, horaResumen: '00:01' });
+});
+await pagina.goto(BASE + '#/proximos');
+await pagina.goto(BASE + '#/hoy');
+await pagina.waitForTimeout(400);
+const resumen = await pagina.textContent('.resumen-dia').catch(() => '');
+if (!/Si solo salen tres cosas|para hoy/.test(resumen)) errores.push('el resumen del día no se muestra: ' + resumen.slice(0, 120));
+else {
+  await pagina.getByRole('button', { name: 'Empezar' }).click();
+  await pagina.waitForTimeout(250);
+  if (await pagina.locator('.resumen-dia').count()) errores.push('el resumen no se cierra al empezar el día');
+  else console.log('  ok  resumen del día, y se cierra al empezar');
+}
+
+// Arrastrar una tarea en el Gantt
+await pagina.goto(BASE + '#/proyectos');
+await pagina.waitForTimeout(500);
+const antesFin = await pagina.locator('.tabla-plan tbody tr').nth(1).locator('td').nth(4).textContent();
+const barra = pagina.locator('.gantt-barra').nth(1);
+const caja = await barra.boundingBox();
+await pagina.mouse.move(caja.x + 12, caja.y + caja.height / 2);
+await pagina.mouse.down();
+await pagina.mouse.move(caja.x + 12 + 9 * 5, caja.y + caja.height / 2, { steps: 8 });  // ~5 días a escala de semanas
+await pagina.mouse.up();
+await pagina.waitForTimeout(500);
+const despuesFin = await pagina.locator('.tabla-plan tbody tr').nth(1).locator('td').nth(4).textContent();
+const chincheta = await pagina.locator('.tabla-plan tbody tr').nth(1).getByRole('button', { name: '📌' }).count();
+if (antesFin === despuesFin) errores.push(`arrastrar en el Gantt no movió la tarea (seguía en ${antesFin})`);
+else if (!chincheta) errores.push('la tarea movida no quedó marcada como fijada');
+else console.log(`  ok  arrastrar en el Gantt: ${antesFin.trim()} → ${despuesFin.trim()}`);
 
 await pagina.setViewportSize({ width: 390, height: 844 });
 await pagina.goto(BASE + '#/hoy');

@@ -18,7 +18,8 @@ Se instala como app (Chrome/Edge/Android: “Instalar”; iPhone: Compartir →
 
 | Pantalla | Para qué sirve |
 | --- | --- |
-| **Hoy** | Lo de hoy y lo que se quedó atrás, cuántas horas has comprometido y los hábitos del día. |
+| **Bandeja** | Donde se suelta lo capturado sin decidir nada, con un modo de procesarlo de una en una. |
+| **Hoy** | El resumen del día, lo de hoy, lo que se quedó atrás, las horas comprometidas y los hábitos. |
 | **Próximos** | Los siguientes 7, 14 o 30 días agrupados por fecha, más lo que no tiene fecha y hay que decidir. |
 | **Calendario** | Mes, semana y día. El mes marca con puntos de color a qué módulo pertenece cada día. |
 | **Enfoque** | Pomodoro, cronómetro con vueltas y temporizador, con el tiempo registrado por tarea. |
@@ -49,6 +50,27 @@ Revisar tesis de NVDA mañana 9am p1 #Cartera @analisis cada tercer viernes
 
 Una tarea repetida no se “pierde” si te atrasas: al completarla se reprograma
 en la siguiente ocurrencia futura, no en una fecha ya pasada.
+
+### Capturar primero, decidir después
+
+La **bandeja de entrada** recoge lo que escribas sin proyecto ni módulo. Cuando
+toca vaciarla, el modo **procesar una por una** pone cada cosa delante con las
+decisiones a un toque: cuándo (hoy, mañana, esta semana, algún día), de qué es
+(módulo), a qué lista, **hacerla ya** si son dos minutos, o convertirla en un
+proyecto con su plan. Con atajos: `H` hoy, `M` mañana, `S` esta semana, `Enter`
+saltar, `Supr` borrar.
+
+La app solo insiste con la bandeja cuando de verdad toca: cinco cosas
+acumuladas o algo esperando más de tres días.
+
+### El resumen del día
+
+Al entrar por la mañana, una tarjeta con lo que necesitas saber en diez
+segundos: **las tres cosas** que harían que el día valga la pena (lo urgente
+primero, después lo que tiene hora), lo que hay con hora, lo atrasado, si el día
+no cabe en el día, las alertas de la cartera y cómo fue ayer. Se cierra al pulsar
+**Empezar** y no vuelve hasta el día siguiente; la hora se configura en Ajustes y,
+con los avisos permitidos, también llega como notificación.
 
 ### Prioridades y repetición, con botones
 
@@ -115,6 +137,9 @@ dependencias y fechas que se arrastran unas a otras:
   sea evidente.
 - **Plantillas** listas: artículo de investigación, montar un curso y estudio de
   una inversión, con sus dependencias ya puestas.
+- **Arrastrar para reprogramar**: mover una barra fija la tarea a esa fecha (queda
+  marcada con 📌, y la chincheta la suelta) y estirar su borde derecho cambia la
+  duración. Al soltar se recalculan dependencias, holguras y ruta crítica.
 - El plan se **lleva a la agenda** con un botón: cada tarea con su fecha de
   comienzo, prioridad 1 si es crítica y la holgura anotada.
 
@@ -188,20 +213,20 @@ sitio, se van: exporta de vez en cuando.
 ## 100 ideas
 
 La pestaña **100 ideas** es a la vez lista de chequeo y hoja de ruta: 100 cosas
-que vale la pena tener en una app así, agrupadas en diez temas, con las ya
-implementadas marcadas y el resto convertible en tarea con un botón. El mismo
+que vale la pena tener en una app así, agrupadas en diez temas, con las **40 ya
+implementadas** marcadas y el resto convertible en tarea con un botón. El mismo
 contenido está en [`docs/100-ideas-recordatorios.md`](../docs/100-ideas-recordatorios.md),
 que se genera con `npm run docs`.
 
 ## Atajos de teclado
 
 `a` añadir · `/` buscar · `h` Hoy · `p` Próximos · `c` Calendario · `e` Enfoque ·
-`i` Inversiones · `g` Proyectos · `r` Revisión · `Esc` cerrar.
+`b` Bandeja · `i` Inversiones · `g` Proyectos · `r` Revisión · `Esc` cerrar.
 
 ## Pruebas
 
 ```bash
-npm test                  # 144 pruebas de lógica, sin navegador
+npm test                  # 157 pruebas de lógica, sin navegador
 npm run test:navegador    # recorre la app en Chromium (necesita Playwright)
 ```
 
@@ -209,4 +234,4 @@ La lógica que importa está probada aparte de la interfaz: aritmética de fecha
 motor de repeticiones, lenguaje natural, filtros, calendario, pomodoro,
 planificación, cálculo de riesgo y estadísticas de cartera, plantillas de los
 módulos, cronograma de proyectos (CPM, calendario laboral, recursos, valor
-ganado) e importación/exportación.
+ganado), bandeja de entrada, resumen del día e importación/exportación.

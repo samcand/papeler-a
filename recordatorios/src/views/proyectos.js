@@ -9,9 +9,9 @@
 import { button, download, el, input, render, toast } from '../../../src/ui.js';
 import { aISO, deISO, diferenciaDias, hoy as fechaHoy, sumarDias, textoRelativo, MESES_CORTO } from '../fechas.js';
 import {
-  PLANTILLAS_PROYECTO, TIPOS_DEPENDENCIA, aTareasDeAgenda, cargaRecursos, desdePlantilla,
-  desviaciones, numerarEDT, programar, proyectoVacio, resumenProyecto, tareaProyecto,
-  tomarLineaBase, valorGanado,
+  PLANTILLAS_PROYECTO, TIPOS_DEPENDENCIA, aTareasDeAgenda, cambiarDuracion, cargaRecursos,
+  desdePlantilla, desviaciones, diasHabiles, indiceDeFecha, moverTarea, numerarEDT, programar,
+  proyectoVacio, quitarRestriccion, resumenProyecto, tareaProyecto, tomarLineaBase, valorGanado,
 } from '../proyectos.js';
 import { dato, tituloVista, vacio } from '../componentes.js';
 import { store } from '../store.js';
@@ -67,7 +67,12 @@ export function vistaProyectos(root, ctx = {}) {
                     onChange: (e) => { original.nombre = e.target.value; guardar(); },
                   }))),
               el('td', {}, t.resumen ? el('span', { class: 'muted' }, String(t.duracion)) : editable('duracion', 'number', 60, { min: 0 })),
-              el('td', { class: 'small' }, formatoCorto(t.inicio)),
+              el('td', { class: 'small' },
+                formatoCorto(t.inicio),
+                original.noAntesDe ? el('button', {
+                  class: 'btn ghost chico', title: `Fijada al ${original.noAntesDe}. Quitar la fecha fija.`,
+                  onClick: () => { quitarRestriccion(p, original.id); guardar(); },
+                }, '📌') : null),
               el('td', { class: 'small' }, formatoCorto(t.fin)),
               el('td', {}, t.resumen ? el('span', { class: 'muted' }, `${t.avance} %`) : editable('avance', 'number', 60, { min: 0, max: 100, step: 5 })),
               el('td', {}, t.resumen ? '' : editable('recurso', 'text', 110)),
@@ -195,34 +200,59 @@ export function vistaProyectos(root, ctx = {}) {
       lienzo.append(svg('line', { x1: x(hoyISO), y1: 20, x2: x(hoyISO), y2: alto, stroke: 'var(--accent-2)', 'stroke-width': 1.5, 'stroke-dasharray': '4 3' }));
     }
 
-    // Barras
+    // Barras (arrastrables: mover la tarea o estirar su duración)
     const posicion = new Map();
     plan.tareas.forEach((t, i) => {
       const x0 = x(t.inicio);
       const x1 = x(t.fin) + px;
       const centro = y(i) + ALTO_FILA / 2;
       posicion.set(t.id, { x0, x1, centro });
+      const grupo = svg('g', { class: 'gantt-barra' });
 
       if (t.esHito) {
-        lienzo.append(svg('path', {
+        grupo.append(svg('path', {
           d: `M${x0} ${centro - 7} L${x0 + 7} ${centro} L${x0} ${centro + 7} L${x0 - 7} ${centro} Z`,
           fill: t.critica ? 'var(--p1)' : 'var(--accent)',
         }));
       } else if (t.resumen) {
-        lienzo.append(svg('rect', { x: x0, y: centro - 4, width: Math.max(2, x1 - x0), height: 8, fill: 'var(--muted)', rx: 2 }));
+        grupo.append(svg('rect', { x: x0, y: centro - 4, width: Math.max(2, x1 - x0), height: 8, fill: 'var(--muted)', rx: 2 }));
       } else {
         const color = t.critica ? 'var(--p1)' : 'var(--accent)';
-        lienzo.append(svg('rect', { x: x0, y: centro - 8, width: Math.max(2, x1 - x0), height: 16, rx: 4, fill: color, opacity: 0.3 }));
+        grupo.append(svg('rect', { x: x0, y: centro - 8, width: Math.max(2, x1 - x0), height: 16, rx: 4, fill: color, opacity: 0.3 }));
         if (t.avance > 0) {
-          lienzo.append(svg('rect', { x: x0, y: centro - 8, width: Math.max(2, (x1 - x0) * (t.avance / 100)), height: 16, rx: 4, fill: color }));
+          grupo.append(svg('rect', { x: x0, y: centro - 8, width: Math.max(2, (x1 - x0) * (t.avance / 100)), height: 16, rx: 4, fill: color }));
         }
-        lienzo.append(svg('rect', { x: x0, y: centro - 8, width: Math.max(2, x1 - x0), height: 16, rx: 4, fill: 'none', stroke: color, 'stroke-width': 1 }));
+        grupo.append(svg('rect', { x: x0, y: centro - 8, width: Math.max(2, x1 - x0), height: 16, rx: 4, fill: 'none', stroke: color, 'stroke-width': 1 }));
+      }
+      if (t.noAntesDe) {
+        // Chincheta: esta tarea está fijada a una fecha, no solo colgada de sus dependencias.
+        const pin = svg('text', { x: x0 - 13, y: centro + 4, 'font-size': 10 });
+        pin.textContent = '📌';
+        grupo.append(pin);
       }
 
       const texto = svg('text', { x: x1 + 6, y: centro + 4, fill: 'var(--text)', 'font-size': 11 });
       const etiqueta = `${t.nombre}${t.avance ? ` · ${t.avance} %` : ''}`;
       texto.textContent = etiqueta.length > 34 ? etiqueta.slice(0, 33) + '…' : etiqueta;
-      lienzo.append(texto);
+      grupo.append(texto);
+
+      if (!t.resumen) {
+        const tirador = svg('rect', {
+          class: 'gantt-tirador', x: x1 - 5, y: centro - 8, width: 8, height: 16, rx: 2,
+          fill: 'transparent', style: 'cursor:ew-resize',
+        });
+        if (!t.esHito) grupo.append(tirador);
+        grupo.setAttribute('style', 'cursor:grab;touch-action:none');
+        // `append` no devuelve el nodo: el título se crea aparte y luego se cuelga.
+        const pista = svg('title');
+        pista.textContent = `${t.nombre}\n${t.inicio} → ${t.fin}`
+          + `${t.critica ? '\nRuta crítica' : `\nHolgura: ${t.holgura} días`}`
+          + `${t.noAntesDe ? `\nFijada al ${t.noAntesDe}` : ''}`
+          + '\nArrastra para mover; el borde derecho para cambiar la duración.';
+        grupo.append(pista);
+        hacerArrastrable(grupo, tirador, t, px, plan, p);
+      }
+      lienzo.append(grupo);
     });
 
     // Flechas de dependencia
@@ -242,6 +272,89 @@ export function vistaProyectos(root, ctx = {}) {
     });
 
     return el('div', { class: 'gantt-caja' }, lienzo);
+  }
+
+  /**
+   * Arrastre de una barra del Gantt.
+   *
+   * Mientras se arrastra solo se mueve el dibujo (no se recalcula nada, que
+   * sería lento y mareante); al soltar se traduce la posición a una fecha, se
+   * aplica y se vuelve a programar el plan entero.
+   */
+  function hacerArrastrable(grupo, tirador, tarea, px, plan, p) {
+    let inicioX = 0;
+    let modo = null;
+    let movido = false;
+    let anchos = [];          // anchura original de cada barra, para estirarlas en vivo
+
+    const alMover = (e) => {
+      if (!modo) return;
+      const dx = e.clientX - inicioX;
+      movido = movido || Math.abs(dx) > 3;
+      if (modo === 'mover') {
+        grupo.setAttribute('transform', `translate(${dx},0)`);
+        return;
+      }
+      // Redimensionar: la barra se estira con el ratón para ver hasta dónde llega.
+      for (const { nodo, ancho } of anchos) {
+        nodo.setAttribute('width', String(Math.max(2, ancho + dx)));
+      }
+      const etiqueta = grupo.querySelector('text:not([font-size="10"])');
+      if (etiqueta) etiqueta.setAttribute('x', String(Number(etiqueta.dataset.x || etiqueta.getAttribute('x')) + dx));
+    };
+
+    const alSoltar = (e) => {
+      if (!modo) { limpiar(); return; }
+      const dx = e.clientX - inicioX;
+      const dias = Math.round(dx / px);
+      if (movido && dias !== 0) {
+        if (modo === 'mover') {
+          // De píxeles a días naturales, y de ahí a días hábiles del proyecto.
+          const nuevaFecha = aISO(sumarDias(tarea.inicio, dias));
+          const cal = p.calendario;
+          const delta = indiceDeFecha(p.inicio, nuevaFecha, cal) - tarea.indiceInicio;
+          if (delta !== 0) {
+            moverTarea(p, tarea.id, delta, plan);
+            toast(`${tarea.nombre}: fijada al ${nuevaFecha}`);
+          }
+        } else {
+          const nuevoFin = aISO(sumarDias(tarea.fin, dias));
+          if (nuevoFin >= tarea.inicio) {
+            cambiarDuracion(p, tarea.id, diasHabiles(tarea.inicio, nuevoFin, p.calendario));
+          } else {
+            cambiarDuracion(p, tarea.id, 0);
+          }
+        }
+        guardar();
+      } else {
+        limpiar();
+      }
+    };
+
+    const limpiar = () => {
+      modo = null;
+      movido = false;
+      anchos = [];
+      grupo.removeAttribute('transform');
+      window.removeEventListener('pointermove', alMover);
+      window.removeEventListener('pointerup', alSoltar);
+    };
+
+    const empezar = (e, cual) => {
+      e.preventDefault();
+      e.stopPropagation();
+      modo = cual;
+      movido = false;
+      inicioX = e.clientX;
+      anchos = [...grupo.querySelectorAll('rect')]
+        .filter((r) => !r.classList.contains('gantt-tirador'))
+        .map((nodo) => ({ nodo, ancho: Number(nodo.getAttribute('width')) || 0 }));
+      window.addEventListener('pointermove', alMover);
+      window.addEventListener('pointerup', alSoltar, { once: true });
+    };
+
+    grupo.addEventListener('pointerdown', (e) => empezar(e, 'mover'));
+    tirador?.addEventListener('pointerdown', (e) => empezar(e, 'redimensionar'));
   }
 
   /* ---------------------------- pestañas ---------------------------- */

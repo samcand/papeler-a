@@ -1,7 +1,7 @@
 # 100 ideas para una app de recordatorios y productividad
 
 Lista de trabajo para la app de `recordatorios/`: qué está hecho y qué vendría
-bien añadir. Hoy hay **37 de 100** implementadas.
+bien añadir. Hoy hay **40 de 100** implementadas.
 
 En la app, la pestaña **100 ideas** muestra lo mismo como lista de chequeo, y
 cada idea pendiente se puede convertir en tarea con un botón.
@@ -11,15 +11,15 @@ cada idea pendiente se puede convertir en tarea con un botón.
 
 ## Índice
 
-1. [Capturar sin fricción](#capturar-sin-friccion) — ideas 1 a 10 (2 hechas)
+1. [Capturar sin fricción](#capturar-sin-friccion) — ideas 1 a 10 (3 hechas)
 2. [Organizar y encontrar](#organizar-y-encontrar) — ideas 11 a 20 (2 hechas)
 3. [Priorizar y planificar](#priorizar-y-planificar) — ideas 21 a 30 (7 hechas)
 4. [Tiempo y concentración](#tiempo-y-concentracion) — ideas 31 a 40 (4 hechas)
-5. [Recordatorios y avisos](#recordatorios-y-avisos) — ideas 41 a 50 (3 hechas)
+5. [Recordatorios y avisos](#recordatorios-y-avisos) — ideas 41 a 50 (4 hechas)
 6. [Equipo y delegación](#equipo-y-delegacion) — ideas 51 a 60 (1 hecha)
 7. [Inversiones](#inversiones) — ideas 61 a 70 (5 hechas)
 8. [Docencia e investigación](#docencia-e-investigacion) — ideas 71 a 80 (4 hechas)
-9. [Gestión de proyectos](#gestion-de-proyectos) — ideas 81 a 90 (6 hechas)
+9. [Gestión de proyectos](#gestion-de-proyectos) — ideas 81 a 90 (7 hechas)
 10. [Datos, privacidad y automatización](#datos-privacidad-y-automatizacion) — ideas 91 a 100 (3 hechas)
 
 Leyenda: **✅ ya está** en la app · **⭕ pendiente**.
@@ -32,8 +32,8 @@ Entrada en lenguaje natural: "revisar tesis de NVDA mañana 9am p1 #Cartera cada
 **2. Enseñar lo que la app entendió antes de guardar** ✅  
 La vista previa evita el error clásico de descubrir tres días tarde que "el martes" se guardó para el mes que viene.
 
-**3. Bandeja de entrada universal** ⭕  
-Un sitio donde soltar cualquier cosa sin decidir proyecto ni fecha; clasificar es otro trabajo, y mezclarlo con capturar hace que no se capture.
+**3. Bandeja de entrada universal** ✅  
+Un sitio donde soltar cualquier cosa sin decidir proyecto ni fecha, y un modo de procesarla de una en una: clasificar es otro trabajo, y mezclarlo con capturar hace que no se capture.
 
 **4. Atajo global de captura** ⭕  
 Una combinación de teclas que abra la caja de tarea sobre cualquier ventana, y un widget en el móvil para lo mismo.
@@ -163,8 +163,8 @@ Traducir las reglas a RRULE en un .ics para que "cada tercer viernes" siga repit
 **43. Repeticiones que se entienden** ✅  
 Días hábiles, el 15 de cada mes, el último día del mes, el tercer viernes, cada dos semanas y "desde que la completo".
 
-**44. Resumen matutino** ⭕  
-Una notificación a primera hora con el plan del día y lo que quedó de ayer.
+**44. Resumen matutino** ✅  
+Al entrar (y como aviso, si están permitidos) el plan del día: las tres cosas que importan, lo que tiene hora, lo atrasado y lo que hiciste ayer.
 
 **45. Recordatorios por ubicación** ⭕  
 Avisar al llegar a la universidad o al salir de casa, que para ciertas tareas es más fiable que una hora.
@@ -300,8 +300,8 @@ Comparar el plan aprobado con la realidad, sin que un fin de semana convierta tr
 **86. Valor ganado (SPI y CPI)** ✅  
 Si vas tarde o vas caro, en dos números, antes de que sea evidente por otros medios.
 
-**87. Mover tareas arrastrando en el Gantt** ⭕  
-Reprogramar con el ratón y que las dependencias se recalculen al soltar.
+**87. Mover tareas arrastrando en el Gantt** ✅  
+Arrastrar la barra fija la tarea a una fecha y estirar su borde derecho cambia la duración; al soltar se recalculan dependencias y ruta crítica.
 
 **88. Nivelación automática de recursos** ⭕  
 Retrasar sola la tarea con holgura cuando alguien está en dos sitios a la vez, y decir qué se movió.

@@ -268,6 +268,16 @@ a { color: var(--accent); }
 .idea .btn { margin-left: auto; flex: none; opacity: .5; }
 .idea:hover .btn { opacity: 1; }
 
+/* ---------- Resumen del día y bandeja ---------- */
+.resumen-dia { border-left: 3px solid var(--accent-2); }
+.resumen-dia .foco { margin: 4px 0 10px; padding-left: 20px; }
+.resumen-dia .foco li { padding: 2px 0; }
+.procesador { max-width: 620px; }
+.procesador .chip { cursor: pointer; }
+.item-bandeja { border-bottom: 1px solid var(--line); }
+.item-bandeja .tarea { border-bottom: none; }
+.chip.chico { padding: 2px 7px; font-size: .78rem; }
+
 /* ---------- Gantt y plan de proyecto ---------- */
 .gantt-caja { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--bg-soft); }
 .gantt { display: block; min-width: 100%; }

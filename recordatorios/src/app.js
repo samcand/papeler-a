@@ -3,11 +3,13 @@
 import { el, render as pintar, toast } from '../../src/ui.js';
 import { aISO, hoy as fechaHoy } from './fechas.js';
 import { aplicarFiltro } from './filtros.js';
-import { MODULOS, estaVencida } from './modelo.js';
-import { programarDelDia } from './notificaciones.js';
+import { MODULOS, enBandeja, estaVencida } from './modelo.js';
+import { programarDelDia, programarResumen } from './notificaciones.js';
+import { resumenDelDia, textoNotificacion } from './resumen.js';
 import { store } from './store.js';
 
 import { vistaHoy } from './views/hoy.js';
+import { vistaBandeja } from './views/bandeja.js';
 import { vistaProximos } from './views/proximos.js';
 import { vistaCalendario } from './views/calendario.js';
 import { vistaEnfoque } from './views/enfoque.js';
@@ -25,6 +27,7 @@ import { vistaAjustes } from './views/ajustes.js';
 const RUTAS = [
   { ruta: /^\/?$/, vista: vistaHoy, nav: 'hoy' },
   { ruta: /^\/hoy$/, vista: vistaHoy, nav: 'hoy' },
+  { ruta: /^\/bandeja$/, vista: vistaBandeja, nav: 'bandeja' },
   { ruta: /^\/proximos$/, vista: vistaProximos, nav: 'proximos' },
   { ruta: /^\/calendario$/, vista: vistaCalendario, nav: 'calendario' },
   { ruta: /^\/enfoque$/, vista: vistaEnfoque, nav: 'enfoque' },
@@ -103,6 +106,7 @@ function marcarNav(id) {
  * ------------------------------------------------------------------ */
 
 const PRINCIPAL = [
+  { id: 'bandeja', icono: '📥', texto: 'Bandeja', href: '#/bandeja' },
   { id: 'hoy', icono: '📋', texto: 'Hoy', href: '#/hoy' },
   { id: 'proximos', icono: '🗓️', texto: 'Próximos', href: '#/proximos' },
   { id: 'calendario', icono: '📅', texto: 'Calendario', href: '#/calendario' },
@@ -143,7 +147,7 @@ function montarArmazon() {
   const lateral = el('aside', { class: 'lateral' },
     el('div', { class: 'marca' }, el('span', {}, '✓'), 'Recordatorios'),
     buscador(),
-    ...PRINCIPAL.map((i) => enlace(i, i.id === 'hoy' && cuentaHoy ? { n: cuentaHoy, urgente: vencidas > 0 } : null)),
+    ...PRINCIPAL.map((i) => enlace(i, cuentaDeNav(i.id))),
     el('div', { class: 'nav-titulo' }, 'Trabajo'),
     ...TRABAJO.map((i) => enlace(i, cuentaModulo(i.id))),
     el('div', { class: 'nav-titulo' }, 'Filtros'),
@@ -168,6 +172,15 @@ function montarArmazon() {
   const marco = el('div', { class: 'marco' }, lateral, el('main', { class: 'contenido', id: 'app' }));
   document.body.prepend(marco);
   document.body.append(inferior);
+
+  function cuentaDeNav(id) {
+    if (id === 'hoy') return cuentaHoy ? { n: cuentaHoy, urgente: vencidas > 0 } : null;
+    if (id === 'bandeja') {
+      const n = enBandeja(store.tareas).length;
+      return n ? { n } : null;
+    }
+    return null;
+  }
 
   function cuentaModulo(id) {
     const n = pendientes.filter((t) => t.modulo === id && t.fecha && t.fecha <= hoyISO).length;
@@ -214,7 +227,7 @@ function atajos() {
     if (escribiendo) return;
     if (e.key === '/') { e.preventDefault(); document.getElementById('buscador')?.focus(); return; }
     if (e.key === 'a') { e.preventDefault(); document.querySelector('[data-rapida]')?.focus(); return; }
-    const destinos = { h: '/hoy', p: '/proximos', c: '/calendario', e: '/enfoque', i: '/inversiones', g: '/proyectos', r: '/revision' };
+    const destinos = { b: '/bandeja', h: '/hoy', p: '/proximos', c: '/calendario', e: '/enfoque', i: '/inversiones', g: '/proyectos', r: '/revision' };
     if (destinos[e.key]) { e.preventDefault(); navegar(destinos[e.key]); }
   });
 }
@@ -246,5 +259,9 @@ window.addEventListener('DOMContentLoaded', () => {
     window.__refrescoArmazon = setTimeout(refrescarArmazon, 120);
   });
 
-  if (store.estado.ajustes.notificaciones) programarDelDia(store.tareas);
+  if (store.estado.ajustes.notificaciones) {
+    programarDelDia(store.tareas);
+    programarResumen(store.estado.ajustes.horaResumen,
+      () => textoNotificacion(resumenDelDia(store.estado, aISO(fechaHoy()))));
+  }
 });

@@ -71,6 +71,26 @@ export function programarDelDia(tareas, opciones = {}) {
   return programadas;
 }
 
+/**
+ * Programa el aviso del resumen del día a la hora fijada. Solo funciona con la
+ * app abierta (o instalada y viva en segundo plano): sin servidor no hay push,
+ * y por eso el resumen también se enseña dentro de la app al entrar.
+ */
+export function programarResumen(hora, construirTexto) {
+  if (permiso() !== 'granted') return null;
+  const [h, m] = String(hora || '07:00').split(':').map(Number);
+  const cuando = new Date();
+  cuando.setHours(h, m, 0, 0);
+  const espera = cuando.getTime() - Date.now();
+  if (espera <= 0 || espera > 86400000) return null;
+  const id = setTimeout(() => {
+    const texto = typeof construirTexto === 'function' ? construirTexto() : String(construirTexto || '');
+    avisar('Tu día', texto, { tag: 'resumen-dia' });
+  }, espera);
+  temporizadores.push(id);
+  return id;
+}
+
 export function cancelarTodo() {
   temporizadores.forEach(clearTimeout);
   temporizadores = [];
