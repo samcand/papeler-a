@@ -170,7 +170,8 @@ export function vistaObjetivos(root) {
         barra(p.pct, p.alDia === false ? 'var(--danger)' : 'var(--accent-2)'),
         p.conFecha ? el('div', { style: 'margin-top:4px' }, barra(p.pctTiempo, 'var(--muted)')) : null,
         el('p', { class: `small ${p.alDia === false ? 'negativo' : 'muted'}`.trim(), style: 'margin-top:6px' },
-          `${p.actual} de ${p.meta}${o.unidad ? ` ${o.unidad}` : ''} · ${p.frase}`),
+          // Si el avance viene de las hijas, el número propio de la madre solo confunde.
+          p.desdeHijas ? p.frase : `${p.actual} de ${p.meta}${o.unidad ? ` ${o.unidad}` : ''} · ${p.frase}`),
         el('p', { class: 'muted small' }, p.desdeHijas
           ? `Este avance sale de las ${p.hijas} metas que tiene dentro, no de un número a mano.`
           : `La barra de abajo es el tiempo gastado. Progreso sacado de: ${p.fuente}.`)),
