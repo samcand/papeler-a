@@ -24,7 +24,9 @@ Se instala como app (Chrome/Edge/Android: “Instalar”; iPhone: Compartir →
 | **Enfoque** | Pomodoro, cronómetro con vueltas y temporizador, con el tiempo registrado por tarea. |
 | **Planificar** | El día repartido en bloques reales y la matriz urgente/importante. |
 | **Revisión** | La revisión semanal y mensual, hábitos con racha y estadísticas de las dos últimas semanas. |
-| **Proyectos y filtros** | Listas propias y filtros guardados con un lenguaje corto de consultas. |
+| **Proyectos (Gantt)** | Planificación tipo MS Project: EDT, dependencias, ruta crítica, recursos y seguimiento. |
+| **Listas y filtros** | Listas propias y filtros guardados con un lenguaje corto de consultas. |
+| **100 ideas** | Lo que la app ya hace y lo que vendría bien añadir, como lista de chequeo. |
 
 ### Escribir una tarea como se habla
 
@@ -47,6 +49,20 @@ Revisar tesis de NVDA mañana 9am p1 #Cartera @analisis cada tercer viernes
 
 Una tarea repetida no se “pierde” si te atrasas: al completarla se reprograma
 en la siguiente ocurrencia futura, no en una fecha ya pasada.
+
+### Prioridades y repetición, con botones
+
+Todo lo que se puede escribir también se puede pulsar, que es lo que hace falta
+cuando no recuerdas la sintaxis:
+
+- **Prioridad**: cuatro banderas de color (P1 urgente a P4 normal) en el panel de
+  la tarea, o `p1` / `!!1` escribiéndolo. El color se ve en la casilla de cada
+  tarea, así que la lista se lee de un vistazo.
+- **Repetición**: un constructor visual con el tipo (día, semana, mes, año, días
+  hábiles o un día concreto del mes), cada cuántos, qué días de la semana, qué
+  día del mes, si se cuenta **desde que la completas** y hasta cuándo repetir.
+  Debajo, seis atajos de un toque y el campo de texto libre — y siempre la
+  previsualización de las tres próximas fechas antes de guardar.
 
 ### Filtros guardados
 
@@ -74,6 +90,36 @@ y puedes crear los tuyos.
   fijas, mete descansos cada 90 minutos y **dice qué no cabe**. Un día no rinde
   más por meterle más cosas en la lista.
 - **Registro de tiempo** por tarea y por día, con racha y gráfico de 14 días.
+
+## Proyectos (planificación tipo Project)
+
+Cuando una cosa deja de ser una tarea y pasa a ser un proyecto con fases,
+dependencias y fechas que se arrastran unas a otras:
+
+- **EDT** con tareas resumen que se calculan solas (fechas, duración y avance
+  ponderado por duración) e indentación con un botón.
+- **Dependencias de los cuatro tipos** — fin a comienzo, comienzo a comienzo,
+  fin a fin y comienzo a fin — con **desfase** positivo o negativo, para
+  solapar tareas o dejar tiempo de espera entre ellas.
+- **Ruta crítica y holgura** por el método CPM: pasada hacia adelante, pasada
+  hacia atrás, holgura total y holgura libre. En rojo, lo que mueve la fecha
+  final; con número de días, lo que puede esperar.
+- **Diagrama de Gantt** con barras, hitos en rombo, porcentaje de avance,
+  flechas de dependencia, línea de hoy y escala de días, semanas o meses.
+- **Duraciones en días hábiles**, con los festivos que tú pongas: nada se
+  planifica en domingo por accidente.
+- **Recursos**: carga por persona y detección de sobreasignación (más del
+  100 % un mismo día), con las cuatro salidas posibles escritas.
+- **Seguimiento**: línea base, desviación en días hábiles y **valor ganado**
+  (BAC, PV, EV, AC, SPI y CPI) para saber si vas tarde o vas caro antes de que
+  sea evidente.
+- **Plantillas** listas: artículo de investigación, montar un curso y estudio de
+  una inversión, con sus dependencias ya puestas.
+- El plan se **lleva a la agenda** con un botón: cada tarea con su fecha de
+  comienzo, prioridad 1 si es crítica y la holgura anotada.
+
+Validaciones incluidas: dependencias circulares, dependencias a tareas
+borradas, tareas que dependen de sí mismas y duraciones negativas.
 
 ## Inversiones
 
@@ -139,19 +185,28 @@ así que “cada tercer viernes” sigue repitiéndose en tu calendario.
 Los datos viven en el almacenamiento de este navegador. Si borras los datos del
 sitio, se van: exporta de vez en cuando.
 
+## 100 ideas
+
+La pestaña **100 ideas** es a la vez lista de chequeo y hoja de ruta: 100 cosas
+que vale la pena tener en una app así, agrupadas en diez temas, con las ya
+implementadas marcadas y el resto convertible en tarea con un botón. El mismo
+contenido está en [`docs/100-ideas-recordatorios.md`](../docs/100-ideas-recordatorios.md),
+que se genera con `npm run docs`.
+
 ## Atajos de teclado
 
 `a` añadir · `/` buscar · `h` Hoy · `p` Próximos · `c` Calendario · `e` Enfoque ·
-`i` Inversiones · `r` Revisión · `Esc` cerrar.
+`i` Inversiones · `g` Proyectos · `r` Revisión · `Esc` cerrar.
 
 ## Pruebas
 
 ```bash
-npm test                  # 131 pruebas de lógica, sin navegador
+npm test                  # 144 pruebas de lógica, sin navegador
 npm run test:navegador    # recorre la app en Chromium (necesita Playwright)
 ```
 
 La lógica que importa está probada aparte de la interfaz: aritmética de fechas,
 motor de repeticiones, lenguaje natural, filtros, calendario, pomodoro,
 planificación, cálculo de riesgo y estadísticas de cartera, plantillas de los
-módulos e importación/exportación.
+módulos, cronograma de proyectos (CPM, calendario laboral, recursos, valor
+ganado) e importación/exportación.

@@ -14,10 +14,12 @@ import { vistaEnfoque } from './views/enfoque.js';
 import { vistaPlanificar } from './views/planificar.js';
 import { vistaLista, vistaFiltroNuevo } from './views/lista.js';
 import { vistaInversiones } from './views/inversiones.js';
+import { vistaProyectos } from './views/proyectos.js';
 import { vistaDocencia } from './views/docencia.js';
 import { vistaInvestigacion } from './views/investigacion.js';
 import { vistaAlabanza } from './views/alabanza.js';
 import { vistaRevision } from './views/revision.js';
+import { vistaIdeas } from './views/ideas.js';
 import { vistaAjustes } from './views/ajustes.js';
 
 const RUTAS = [
@@ -29,9 +31,11 @@ const RUTAS = [
   { ruta: /^\/planificar$/, vista: vistaPlanificar, nav: 'planificar' },
   { ruta: /^\/revision$/, vista: vistaRevision, nav: 'revision' },
   { ruta: /^\/inversiones$/, vista: vistaInversiones, nav: 'inversiones' },
+  { ruta: /^\/proyectos$/, vista: vistaProyectos, nav: 'proyectos' },
   { ruta: /^\/docencia$/, vista: vistaDocencia, nav: 'docencia' },
   { ruta: /^\/investigacion$/, vista: vistaInvestigacion, nav: 'investigacion' },
   { ruta: /^\/alabanza$/, vista: vistaAlabanza, nav: 'alabanza' },
+  { ruta: /^\/ideas$/, vista: vistaIdeas, nav: 'ideas' },
   { ruta: /^\/ajustes$/, vista: vistaAjustes, nav: 'ajustes' },
   { ruta: /^\/filtro\/nuevo$/, vista: vistaFiltroNuevo },
   { ruta: /^\/(proyecto|filtro|etiqueta|buscar)\/(.+)$/, vista: vistaLista, claves: ['tipo', 'clave'] },
@@ -109,6 +113,7 @@ const PRINCIPAL = [
 
 const TRABAJO = [
   { id: 'inversiones', icono: '📈', texto: 'Inversiones', href: '#/inversiones' },
+  { id: 'proyectos', icono: '📐', texto: 'Proyectos', href: '#/proyectos' },
   { id: 'docencia', icono: '🎓', texto: 'Docencia', href: '#/docencia' },
   { id: 'investigacion', icono: '🔬', texto: 'Investigación', href: '#/investigacion' },
   { id: 'alabanza', icono: '🎵', texto: 'Alabanza', href: '#/alabanza' },
@@ -153,6 +158,7 @@ function montarArmazon() {
     }, el('span', { class: 'punto-modulo', style: `background:${p.color}` }), el('span', { class: 'grow' }, p.nombre),
     el('span', { class: 'cuenta' }, String(pendientes.filter((t) => t.proyecto === p.nombre).length)))),
     el('div', { class: 'nav-titulo' }, ''),
+    enlace({ id: 'ideas', icono: '💡', texto: '100 ideas', href: '#/ideas' }),
     enlace({ id: 'ajustes', icono: '⚙️', texto: 'Ajustes', href: '#/ajustes' }));
 
   const inferior = el('nav', { class: 'barra-inferior' },
@@ -208,7 +214,7 @@ function atajos() {
     if (escribiendo) return;
     if (e.key === '/') { e.preventDefault(); document.getElementById('buscador')?.focus(); return; }
     if (e.key === 'a') { e.preventDefault(); document.querySelector('[data-rapida]')?.focus(); return; }
-    const destinos = { h: '/hoy', p: '/proximos', c: '/calendario', e: '/enfoque', i: '/inversiones', r: '/revision' };
+    const destinos = { h: '/hoy', p: '/proximos', c: '/calendario', e: '/enfoque', i: '/inversiones', g: '/proyectos', r: '/revision' };
     if (destinos[e.key]) { e.preventDefault(); navegar(destinos[e.key]); }
   });
 }

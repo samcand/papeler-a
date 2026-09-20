@@ -18,6 +18,7 @@ export const MODULOS = [
   { id: 'docencia', nombre: 'Docencia', icono: '🎓', color: '#4a9eff' },
   { id: 'investigacion', nombre: 'Investigación', icono: '🔬', color: '#a78bfa' },
   { id: 'alabanza', nombre: 'Alabanza', icono: '🎵', color: '#ff9f43' },
+  { id: 'proyectos', nombre: 'Proyectos', icono: '📐', color: '#f472b6' },
   { id: 'personal', nombre: 'Personal', icono: '🏠', color: '#8b93a7' },
 ];
 

@@ -1,0 +1,463 @@
+/**
+ * proyectos.js (vista) — Gestión de proyectos con diagrama de Gantt.
+ *
+ * Tres pestañas, como en un planificador de escritorio: el plan (tabla EDT +
+ * Gantt con dependencias y ruta crítica), los recursos (quién está
+ * sobrecargado) y el seguimiento (línea base, desviaciones y valor ganado).
+ */
+
+import { button, download, el, input, render, toast } from '../../../src/ui.js';
+import { aISO, deISO, diferenciaDias, hoy as fechaHoy, sumarDias, textoRelativo, MESES_CORTO } from '../fechas.js';
+import {
+  PLANTILLAS_PROYECTO, TIPOS_DEPENDENCIA, aTareasDeAgenda, cargaRecursos, desdePlantilla,
+  desviaciones, numerarEDT, programar, proyectoVacio, resumenProyecto, tareaProyecto,
+  tomarLineaBase, valorGanado,
+} from '../proyectos.js';
+import { dato, tituloVista, vacio } from '../componentes.js';
+import { store } from '../store.js';
+
+const ALTO_FILA = 30;
+const ESCALAS = { dia: 26, semana: 9, mes: 3 };
+
+export function vistaProyectos(root, ctx = {}) {
+  const host = el('div', {});
+  const hoyISO = aISO(fechaHoy());
+  let pestana = ctx.query?.tab || 'plan';
+  let escala = 'semana';
+  let seleccionado = ctx.query?.p || store.estado.planes[0]?.id || null;
+
+  const proyecto = () => store.estado.planes.find((p) => p.id === seleccionado) || null;
+  const guardar = () => { store.guardar(); pintar(); };
+
+  /* ------------------------- tabla del plan ------------------------- */
+
+  function tablaPlan(plan, p) {
+    const nivel = (t) => {
+      let n = 0;
+      let actual = p.tareas.find((x) => x.id === t.id);
+      while (actual?.padre) { n++; actual = p.tareas.find((x) => x.id === actual.padre); }
+      return n;
+    };
+    const nombres = new Map(p.tareas.map((t) => [t.id, t.nombre]));
+    const edt = numerarEDT(p.tareas);
+
+    return el('div', { class: 'tabla-scroll' },
+      el('table', { class: 'tabla tabla-plan' },
+        el('thead', {}, el('tr', {},
+          ...['EDT', 'Tarea', 'Días', 'Comienzo', 'Fin', '%', 'Recurso', 'Coste', 'Depende de', 'Holgura', ''].map((h) => el('th', {}, h)))),
+        el('tbody', {},
+          ...plan.tareas.map((t) => {
+            const original = p.tareas.find((x) => x.id === t.id);
+            const editable = (campo, tipo = 'text', ancho = 70, opciones = {}) => el('input', {
+              class: 'input', style: `width:${ancho}px;padding:4px 6px`, type: tipo,
+              value: original[campo] ?? '', ...opciones,
+              onChange: (e) => {
+                original[campo] = tipo === 'number' ? Number(e.target.value) || 0 : e.target.value;
+                guardar();
+              },
+            });
+            return el('tr', { class: t.critica && !t.resumen ? 'fila-critica' : '' },
+              el('td', { class: 'muted small' }, t.edt),
+              el('td', {},
+                el('div', { style: `padding-left:${nivel(t) * 16}px;display:flex;align-items:center;gap:6px` },
+                  el('span', {}, t.resumen ? '▾' : t.esHito ? '◆' : ''),
+                  el('input', {
+                    class: 'input', style: `width:220px;padding:4px 6px;${t.resumen ? 'font-weight:600' : ''}`,
+                    value: original.nombre,
+                    onChange: (e) => { original.nombre = e.target.value; guardar(); },
+                  }))),
+              el('td', {}, t.resumen ? el('span', { class: 'muted' }, String(t.duracion)) : editable('duracion', 'number', 60, { min: 0 })),
+              el('td', { class: 'small' }, formatoCorto(t.inicio)),
+              el('td', { class: 'small' }, formatoCorto(t.fin)),
+              el('td', {}, t.resumen ? el('span', { class: 'muted' }, `${t.avance} %`) : editable('avance', 'number', 60, { min: 0, max: 100, step: 5 })),
+              el('td', {}, t.resumen ? '' : editable('recurso', 'text', 110)),
+              el('td', {}, t.resumen ? '' : editable('costo', 'number', 90)),
+              el('td', { class: 'dependencias' }, t.resumen ? '' : celdaDependencias(original, p, nombres, edt)),
+              el('td', { class: `small ${t.critica ? 'negativo' : 'muted'}` },
+                t.resumen ? '' : (t.critica ? 'crítica' : `${t.holgura} d`)),
+              el('td', {}, el('div', { class: 'fila', style: 'gap:2px;flex-wrap:nowrap' },
+                button('→', () => indentar(original, p), { variant: 'ghost chico', title: 'Convertir en subtarea de la anterior' }),
+                button('←', () => desindentar(original, p), { variant: 'ghost chico', title: 'Sacar un nivel' }),
+                button('🗑', () => borrarTarea(original, p), { variant: 'ghost chico danger', title: 'Borrar' }))));
+          }))));
+  }
+
+  function celdaDependencias(tarea, p, nombres, edt) {
+    const candidatas = p.tareas.filter((x) => x.id !== tarea.id && !p.tareas.some((h) => h.padre === x.id));
+    return el('div', { class: 'fila dep-controles' },
+      ...(tarea.dependencias || []).map((d, i) => el('span', { class: 'chip' },
+        `${edt.get(d.de) || '?'} ${d.tipo || 'FC'}${d.desfase ? (d.desfase > 0 ? `+${d.desfase}` : d.desfase) : ''}`,
+        el('button', {
+          class: 'btn ghost chico', title: nombres.get(d.de) || 'tarea borrada',
+          onClick: () => { tarea.dependencias.splice(i, 1); guardar(); },
+        }, '✕'))),
+      el('select', {
+        class: 'input', style: 'width:70px;padding:3px 4px',
+        onChange: (e) => {
+          if (!e.target.value) return;
+          tarea.dependencias = [...(tarea.dependencias || []), { de: e.target.value, tipo: 'FC', desfase: 0 }];
+          guardar();
+        },
+      }, el('option', { value: '' }, '+'), ...candidatas.map((c) => el('option', { value: c.id }, `${edt.get(c.id)} ${c.nombre}`.slice(0, 28)))),
+      (tarea.dependencias || []).length ? el('select', {
+        class: 'input', style: 'width:64px;padding:3px 4px',
+        title: 'Tipo de la última dependencia',
+        onChange: (e) => {
+          tarea.dependencias[tarea.dependencias.length - 1].tipo = e.target.value;
+          guardar();
+        },
+      }, ...TIPOS_DEPENDENCIA.map((t) => el('option', {
+        value: t.id, selected: t.id === tarea.dependencias[tarea.dependencias.length - 1].tipo, title: t.descripcion,
+      }, t.id))) : null,
+      (tarea.dependencias || []).length ? el('input', {
+        class: 'input', style: 'width:52px;padding:3px 4px', type: 'number', title: 'Desfase en días (puede ser negativo)',
+        value: tarea.dependencias[tarea.dependencias.length - 1].desfase || 0,
+        onChange: (e) => { tarea.dependencias[tarea.dependencias.length - 1].desfase = Number(e.target.value) || 0; guardar(); },
+      }) : null);
+  }
+
+  function indentar(tarea, p) {
+    const i = p.tareas.indexOf(tarea);
+    if (i <= 0) { toast('La primera tarea no puede ser subtarea', 'warn'); return; }
+    const anterior = p.tareas[i - 1];
+    tarea.padre = anterior.id;
+    // Una tarea resumen no lleva dependencias propias: pasan a la hija.
+    if (anterior.dependencias?.length) {
+      tarea.dependencias = [...(tarea.dependencias || []), ...anterior.dependencias];
+      anterior.dependencias = [];
+    }
+    guardar();
+  }
+
+  function desindentar(tarea, p) {
+    if (!tarea.padre) return;
+    const padre = p.tareas.find((x) => x.id === tarea.padre);
+    tarea.padre = padre?.padre || null;
+    guardar();
+  }
+
+  function borrarTarea(tarea, p) {
+    if (!window.confirm(`¿Borrar “${tarea.nombre}”?`)) return;
+    const fuera = new Set([tarea.id]);
+    let creció = true;
+    while (creció) {
+      creció = false;
+      for (const t of p.tareas) if (t.padre && fuera.has(t.padre) && !fuera.has(t.id)) { fuera.add(t.id); creció = true; }
+    }
+    p.tareas = p.tareas.filter((t) => !fuera.has(t.id));
+    for (const t of p.tareas) t.dependencias = (t.dependencias || []).filter((d) => !fuera.has(d.de));
+    guardar();
+  }
+
+  /* ---------------------------- el Gantt ---------------------------- */
+
+  function gantt(plan, p) {
+    if (!plan.tareas.length) return null;
+    const px = ESCALAS[escala];
+    const inicio = plan.inicio;
+    const finReal = plan.tareas.reduce((max, t) => (t.fin > max ? t.fin : max), plan.fin);
+    const dias = Math.max(7, diferenciaDias(inicio, finReal) + 3);
+    // Margen a la derecha para que quepa el nombre escrito junto a la barra.
+    const margenEtiquetas = 200;
+    const ancho = dias * px + margenEtiquetas;
+    const alto = plan.tareas.length * ALTO_FILA + 30;
+    const x = (fecha) => diferenciaDias(inicio, fecha) * px;
+    const y = (i) => 30 + i * ALTO_FILA;
+
+    const lienzo = svg('svg', { class: 'gantt', width: ancho, height: alto, viewBox: `0 0 ${ancho} ${alto}` });
+    const defs = svg('defs');
+    const marcador = svg('marker', { id: 'flecha', markerWidth: 7, markerHeight: 7, refX: 6, refY: 3, orient: 'auto' });
+    marcador.append(svg('path', { d: 'M0,0 L6,3 L0,6 z', fill: 'var(--muted)' }));
+    defs.append(marcador);
+    lienzo.append(defs);
+
+    // Rejilla y cabecera de fechas
+    for (let d = 0; d <= dias; d++) {
+      const fecha = aISO(sumarDias(inicio, d));
+      const diaSemana = deISO(fecha).getDay();
+      const finde = diaSemana === 0 || diaSemana === 6;
+      if (finde && px > 6) {
+        lienzo.append(svg('rect', { x: d * px, y: 24, width: px, height: alto - 24, fill: 'var(--bg-soft)', opacity: 0.55 }));
+      }
+      const marcaMes = deISO(fecha).getDate() === 1;
+      if (marcaMes || (escala === 'dia' && diaSemana === 1) || (escala !== 'dia' && d % 7 === 0)) {
+        lienzo.append(svg('line', { x1: d * px, y1: 24, x2: d * px, y2: alto, stroke: 'var(--line)', 'stroke-width': marcaMes ? 1.4 : 0.5 }));
+        const etiqueta = svg('text', { x: d * px + 3, y: 16, fill: 'var(--muted)', 'font-size': 10 });
+        etiqueta.textContent = marcaMes
+          ? `${MESES_CORTO[deISO(fecha).getMonth()]}`
+          : (escala === 'mes' ? '' : `${deISO(fecha).getDate()}`);
+        lienzo.append(etiqueta);
+      }
+    }
+
+    // Línea de hoy
+    if (hoyISO >= inicio && hoyISO <= aISO(sumarDias(inicio, dias))) {
+      lienzo.append(svg('line', { x1: x(hoyISO), y1: 20, x2: x(hoyISO), y2: alto, stroke: 'var(--accent-2)', 'stroke-width': 1.5, 'stroke-dasharray': '4 3' }));
+    }
+
+    // Barras
+    const posicion = new Map();
+    plan.tareas.forEach((t, i) => {
+      const x0 = x(t.inicio);
+      const x1 = x(t.fin) + px;
+      const centro = y(i) + ALTO_FILA / 2;
+      posicion.set(t.id, { x0, x1, centro });
+
+      if (t.esHito) {
+        lienzo.append(svg('path', {
+          d: `M${x0} ${centro - 7} L${x0 + 7} ${centro} L${x0} ${centro + 7} L${x0 - 7} ${centro} Z`,
+          fill: t.critica ? 'var(--p1)' : 'var(--accent)',
+        }));
+      } else if (t.resumen) {
+        lienzo.append(svg('rect', { x: x0, y: centro - 4, width: Math.max(2, x1 - x0), height: 8, fill: 'var(--muted)', rx: 2 }));
+      } else {
+        const color = t.critica ? 'var(--p1)' : 'var(--accent)';
+        lienzo.append(svg('rect', { x: x0, y: centro - 8, width: Math.max(2, x1 - x0), height: 16, rx: 4, fill: color, opacity: 0.3 }));
+        if (t.avance > 0) {
+          lienzo.append(svg('rect', { x: x0, y: centro - 8, width: Math.max(2, (x1 - x0) * (t.avance / 100)), height: 16, rx: 4, fill: color }));
+        }
+        lienzo.append(svg('rect', { x: x0, y: centro - 8, width: Math.max(2, x1 - x0), height: 16, rx: 4, fill: 'none', stroke: color, 'stroke-width': 1 }));
+      }
+
+      const texto = svg('text', { x: x1 + 6, y: centro + 4, fill: 'var(--text)', 'font-size': 11 });
+      const etiqueta = `${t.nombre}${t.avance ? ` · ${t.avance} %` : ''}`;
+      texto.textContent = etiqueta.length > 34 ? etiqueta.slice(0, 33) + '…' : etiqueta;
+      lienzo.append(texto);
+    });
+
+    // Flechas de dependencia
+    plan.tareas.forEach((t) => {
+      for (const d of (p.tareas.find((x2) => x2.id === t.id)?.dependencias) || []) {
+        const desde = posicion.get(d.de);
+        const hasta = posicion.get(t.id);
+        if (!desde || !hasta) continue;
+        const salida = (d.tipo === 'CC' || d.tipo === 'CF') ? desde.x0 : desde.x1;
+        const entrada = (d.tipo === 'FF' || d.tipo === 'CF') ? hasta.x1 : hasta.x0;
+        const medio = Math.max(salida + 6, entrada - 8);
+        lienzo.append(svg('polyline', {
+          points: `${salida},${desde.centro} ${medio},${desde.centro} ${medio},${hasta.centro} ${entrada - 3},${hasta.centro}`,
+          fill: 'none', stroke: 'var(--muted)', 'stroke-width': 1, 'marker-end': 'url(#flecha)', opacity: 0.8,
+        }));
+      }
+    });
+
+    return el('div', { class: 'gantt-caja' }, lienzo);
+  }
+
+  /* ---------------------------- pestañas ---------------------------- */
+
+  function panelPlan(p) {
+    const plan = programar(p);
+    const resumen = resumenProyecto(plan);
+
+    return el('div', {},
+      el('div', { class: 'fila', style: 'margin-bottom:10px' },
+        el('label', { class: 'field', style: 'width:220px' },
+          el('span', { class: 'field-label' }, 'Nombre'),
+          el('input', { class: 'input', value: p.nombre, onChange: (e) => { p.nombre = e.target.value; guardar(); } })),
+        el('label', { class: 'field', style: 'width:160px' },
+          el('span', { class: 'field-label' }, 'Comienzo'),
+          el('input', { class: 'input', type: 'date', value: p.inicio, onChange: (e) => { p.inicio = e.target.value; guardar(); } })),
+        el('label', { class: 'field', style: 'width:200px' },
+          el('span', { class: 'field-label' }, 'Festivos (aaaa-mm-dd, separados por coma)'),
+          el('input', {
+            class: 'input', value: (p.calendario?.feriados || []).join(', '),
+            onChange: (e) => {
+              p.calendario = { ...(p.calendario || {}), feriados: e.target.value.split(',').map((s) => s.trim()).filter(Boolean) };
+              guardar();
+            },
+          })),
+        el('label', { class: 'field', style: 'width:150px' },
+          el('span', { class: 'field-label' }, 'Escala'),
+          el('select', { class: 'input', onChange: (e) => { escala = e.target.value; pintar(); } },
+            ...[['dia', 'Días'], ['semana', 'Semanas'], ['mes', 'Meses']].map(([v, txt]) =>
+              el('option', { value: v, selected: escala === v }, txt))))),
+
+      el('div', { class: 'tarjetas' },
+        dato(`${resumen.duracion} d`, 'duración (hábiles)', { pie: `${formatoCorto(resumen.inicio)} → ${formatoCorto(resumen.fin)}` }),
+        dato(`${resumen.avance} %`, 'avance del plan'),
+        dato(resumen.criticas, 'tareas críticas', { pie: `de ${resumen.tareas}`, clase: 'negativo' }),
+        dato(resumen.hitos, 'hitos'),
+        dato(resumen.costo ? resumen.costo.toLocaleString('es') : '—', 'coste previsto')),
+
+      plan.errores.length ? el('section', { class: 'card', style: 'margin-top:12px' },
+        el('h2', { class: 'card-title' }, 'Hay que arreglar esto'),
+        ...plan.errores.map((e) => el('div', { class: 'alerta alto' }, el('div', {}, e.texto)))) : null,
+
+      plan.ciclo ? null : el('section', { class: 'card', style: 'margin-top:12px;padding:10px' },
+        el('h2', { class: 'card-title' }, 'Diagrama de Gantt'),
+        el('p', { class: 'muted small' }, 'En rojo, la ruta crítica: si una de esas tareas se retrasa un día, el proyecto entero se retrasa un día.'),
+        gantt(plan, p)),
+
+      el('section', { class: 'card', style: 'margin-top:12px' },
+        el('h2', { class: 'card-title' }, 'Tareas'),
+        tablaPlan(plan, p),
+        el('div', { class: 'fila', style: 'margin-top:10px' },
+          button('+ Tarea', () => { p.tareas.push(tareaProyecto({ nombre: 'Tarea nueva', duracion: 1 })); guardar(); }),
+          button('+ Hito', () => { p.tareas.push(tareaProyecto({ nombre: 'Hito', duracion: 0 })); guardar(); }),
+          button('+ Fase (resumen)', () => {
+            const fase = tareaProyecto({ nombre: 'Fase nueva' });
+            p.tareas.push(fase);
+            p.tareas.push(tareaProyecto({ nombre: 'Primera tarea de la fase', duracion: 1, padre: fase.id }));
+            guardar();
+          }),
+          button('🔗 Encadenar todas', () => {
+            const hojas = p.tareas.filter((t) => !p.tareas.some((h) => h.padre === t.id));
+            hojas.forEach((t, i) => { t.dependencias = i === 0 ? [] : [{ de: hojas[i - 1].id, tipo: 'FC', desfase: 0 }]; });
+            guardar();
+            toast('Encadenadas una detrás de otra');
+          }, { variant: 'ghost' }),
+          button('📋 Llevar a la agenda', () => {
+            const n = store.sembrarTareas(aTareasDeAgenda(plan, p), `plan-${p.id}`);
+            toast(n ? `${n} tareas añadidas a tu agenda` : 'Ya estaban en la agenda');
+          }, { variant: 'primary' }),
+          button('⬇ CSV', () => {
+            const filas = [['EDT', 'Tarea', 'Duracion', 'Comienzo', 'Fin', 'Avance', 'Recurso', 'Holgura', 'Critica']];
+            for (const t of plan.tareas) filas.push([t.edt, t.nombre, t.duracion, t.inicio, t.fin, t.avance, t.recurso || '', t.holgura ?? '', t.critica ? 'sí' : 'no']);
+            download(`${p.nombre}.csv`, filas.map((f) => f.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n'), 'text/csv');
+          }, { variant: 'ghost' }))));
+  }
+
+  function panelRecursos(p) {
+    const plan = programar(p);
+    const carga = cargaRecursos(plan);
+    const sinRecurso = plan.tareas.filter((t) => !t.resumen && !t.recurso);
+
+    return el('div', {},
+      carga.length ? el('section', { class: 'card' },
+        el('h2', { class: 'card-title' }, 'Carga por recurso'),
+        el('table', { class: 'tabla' },
+          el('thead', {}, el('tr', {}, el('th', {}, 'Recurso'), el('th', { class: 'num' }, 'Tareas'),
+            el('th', { class: 'num' }, 'Días ocupados'), el('th', { class: 'num' }, 'Pico'), el('th', {}, 'Estado'))),
+          el('tbody', {}, ...carga.map((r) => el('tr', {},
+            el('td', {}, r.recurso),
+            el('td', { class: 'num' }, String(r.tareas)),
+            el('td', { class: 'num' }, String(r.diasOcupados)),
+            el('td', { class: `num ${r.sobreasignado ? 'negativo' : ''}` }, `${r.picoCarga} %`),
+            el('td', { class: r.sobreasignado ? 'negativo' : 'positivo' },
+              r.sobreasignado ? `sobreasignado ${r.diasSobreasignados.length} días` : 'bien')))))) : vacio('Pon un recurso en las tareas para ver la carga.', '👥'),
+
+      carga.some((r) => r.sobreasignado) ? el('section', { class: 'card' },
+        el('h2', { class: 'card-title' }, 'Qué hacer con la sobreasignación'),
+        el('ul', { class: 'small muted' },
+          el('li', {}, 'Retrasar la tarea con holgura hasta que el recurso se libere (nivelación manual).'),
+          el('li', {}, 'Bajar el porcentaje de dedicación si de verdad puede repartirse entre dos cosas.'),
+          el('li', {}, 'Alargar la duración en vez de solapar: ocho horas al día no se estiran.'),
+          el('li', {}, 'Aceptar y dejarlo escrito, que también es una decisión.'))) : null,
+
+      sinRecurso.length ? el('section', { class: 'card' },
+        el('h2', { class: 'card-title' }, `Sin recurso asignado (${sinRecurso.length})`),
+        el('div', { class: 'chip-list' }, ...sinRecurso.map((t) => el('span', { class: 'chip' }, t.nombre)))) : null);
+  }
+
+  function panelSeguimiento(p) {
+    const plan = programar(p);
+    const desvios = desviaciones(plan, p.lineaBase, p.calendario);
+    const ev = valorGanado(plan, p.fechaEstado || hoyISO);
+    const retrasadas = plan.tareas.filter((t) => !t.resumen && t.fin < hoyISO && (t.avance || 0) < 100);
+
+    return el('div', {},
+      el('div', { class: 'fila' },
+        el('label', { class: 'field', style: 'width:170px' },
+          el('span', { class: 'field-label' }, 'Fecha de estado'),
+          el('input', {
+            class: 'input', type: 'date', value: p.fechaEstado || hoyISO,
+            onChange: (e) => { p.fechaEstado = e.target.value; guardar(); },
+          })),
+        button(p.lineaBase ? 'Volver a tomar línea base' : 'Tomar línea base', () => {
+          if (p.lineaBase && !window.confirm('Se pierde la comparación con el plan original. ¿Seguir?')) return;
+          p.lineaBase = tomarLineaBase(plan);
+          guardar();
+          toast('Línea base guardada');
+        })),
+
+      p.lineaBase ? el('p', { class: 'muted small' }, `Línea base tomada el ${p.lineaBase.tomadaEn}.`)
+        : el('p', { class: 'muted small' }, 'Sin línea base no hay con qué comparar: tómala cuando el plan esté aprobado.'),
+
+      el('div', { class: 'tarjetas' },
+        dato(ev.bac.toLocaleString('es'), 'presupuesto (BAC)'),
+        dato(ev.ev.toLocaleString('es'), 'valor ganado (EV)'),
+        dato(ev.ac.toLocaleString('es'), 'coste real (AC)'),
+        dato(ev.spi ?? '—', 'SPI', { clase: (ev.spi ?? 1) < 1 ? 'negativo' : 'positivo', pie: (ev.spi ?? 1) < 1 ? 'vas con retraso' : 'en fecha' }),
+        dato(ev.cpi ?? '—', 'CPI', { clase: (ev.cpi ?? 1) < 1 ? 'negativo' : 'positivo', pie: (ev.cpi ?? 1) < 1 ? 'más caro de lo previsto' : 'dentro del coste' })),
+
+      retrasadas.length ? el('section', { class: 'card' },
+        el('h2', { class: 'card-title' }, `Deberían estar terminadas (${retrasadas.length})`),
+        ...retrasadas.map((t) => el('div', { class: 'alerta medio' },
+          el('div', {},
+            el('div', {}, `${t.edt} ${t.nombre}`),
+            el('div', { class: 'accion' }, `Fin previsto ${formatoCorto(t.fin)} (${textoRelativo(t.fin)}), avance ${t.avance || 0} %.`))))) : null,
+
+      desvios.length ? el('section', { class: 'card' },
+        el('h2', { class: 'card-title' }, 'Desviación frente a la línea base'),
+        el('table', { class: 'tabla' },
+          el('thead', {}, el('tr', {}, el('th', {}, 'Tarea'), el('th', {}, 'Base'), el('th', {}, 'Ahora'), el('th', { class: 'num' }, 'Días'))),
+          el('tbody', {}, ...desvios.map((d) => el('tr', {},
+            el('td', {}, `${d.edt || ''} ${d.nombre}`),
+            el('td', { class: 'small muted' }, d.nueva ? 'nueva' : formatoCorto(d.baseFin)),
+            el('td', { class: 'small' }, d.nueva ? '' : formatoCorto(plan.tareas.find((t) => t.id === d.id)?.fin)),
+            el('td', { class: `num ${d.desvioFin > 0 ? 'negativo' : 'positivo'}` },
+              d.nueva ? '—' : `${d.desvioFin > 0 ? '+' : ''}${d.desvioFin}`)))))) : null);
+  }
+
+  /* -------------------------- selector y raíz -------------------------- */
+
+  function selectorProyecto() {
+    return el('div', { class: 'fila', style: 'margin-bottom:12px' },
+      el('select', {
+        class: 'input', style: 'width:auto',
+        onChange: (e) => { seleccionado = e.target.value; pintar(); },
+      }, ...store.estado.planes.map((p) => el('option', { value: p.id, selected: p.id === seleccionado }, p.nombre))),
+      button('+ Proyecto vacío', () => {
+        const p = store.agregarPlan(proyectoVacio('Proyecto nuevo', hoyISO));
+        seleccionado = p.id;
+        pintar();
+      }),
+      el('select', {
+        class: 'input', style: 'width:auto',
+        onChange: (e) => {
+          const plantilla = PLANTILLAS_PROYECTO.find((x) => x.id === e.target.value);
+          if (!plantilla) return;
+          const p = store.agregarPlan(desdePlantilla(plantilla, hoyISO));
+          seleccionado = p.id;
+          pintar();
+        },
+      }, el('option', { value: '' }, '+ Desde plantilla…'),
+      ...PLANTILLAS_PROYECTO.map((p) => el('option', { value: p.id, title: p.descripcion }, p.nombre))),
+      proyecto() ? button('🗑 Borrar', () => {
+        if (!window.confirm(`¿Borrar el proyecto “${proyecto().nombre}”?`)) return;
+        store.borrarPlan(seleccionado);
+        seleccionado = store.estado.planes[0]?.id || null;
+        pintar();
+      }, { variant: 'ghost danger' }) : null);
+  }
+
+  const pintar = () => {
+    const p = proyecto();
+    render(host,
+      tituloVista('Proyectos', 'EDT, dependencias, ruta crítica y seguimiento'),
+      selectorProyecto(),
+      !p ? vacio('Todavía no hay ningún proyecto. Empieza por una plantilla: trae las tareas y las dependencias puestas.', '📐')
+        : el('div', {},
+          el('div', { class: 'pestanas' },
+            ...[['plan', 'Plan y Gantt'], ['recursos', 'Recursos'], ['seguimiento', 'Seguimiento']].map(([id, txt]) =>
+              el('button', { class: `pestana ${pestana === id ? 'activa' : ''}`.trim(), onClick: () => { pestana = id; pintar(); } }, txt))),
+          pestana === 'plan' ? panelPlan(p) : pestana === 'recursos' ? panelRecursos(p) : panelSeguimiento(p)));
+  };
+
+  pintar();
+  render(root, host);
+}
+
+function formatoCorto(iso) {
+  if (!iso) return '';
+  const d = deISO(iso);
+  return `${String(d.getDate()).padStart(2, '0')} ${MESES_CORTO[d.getMonth()]}`;
+}
+
+/** Los nodos SVG necesitan su espacio de nombres; `el()` solo crea HTML. */
+function svg(tag, props = {}) {
+  const nodo = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  for (const [k, v] of Object.entries(props)) nodo.setAttribute(k, String(v));
+  return nodo;
+}

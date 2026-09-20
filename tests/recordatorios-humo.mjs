@@ -20,7 +20,7 @@ import { createRequire } from 'node:module';
 const PUERTO = 8123;
 const BASE = `http://localhost:${PUERTO}/recordatorios/index.html`;
 const PANTALLAS = ['hoy', 'proximos', 'calendario', 'enfoque', 'planificar', 'revision',
-  'inversiones', 'docencia', 'investigacion', 'alabanza', 'ajustes'];
+  'inversiones', 'proyectos', 'docencia', 'investigacion', 'alabanza', 'ideas', 'ajustes'];
 
 /** Busca Playwright en el proyecto y, si no, en la instalación global. */
 async function cargarPlaywright() {
@@ -120,6 +120,35 @@ const [descarga] = await Promise.all([
 const ics = readFileSync(await descarga.path(), 'utf8');
 if (!/BEGIN:VEVENT/.test(ics)) errores.push('el .ics exportado no tiene eventos');
 else console.log('  ok  exportar al calendario');
+
+// Prioridad y repetición con botones, desde el panel de la tarea
+await pagina.goto(BASE + '#/hoy');
+await pagina.waitForTimeout(300);
+await pagina.locator('.tarea-cuerpo').first().click();
+await pagina.waitForTimeout(250);
+await pagina.locator('.chip.prioridad', { hasText: 'P1' }).click();
+await pagina.locator('.repeticion select').first().selectOption('semanal');
+await pagina.waitForTimeout(150);
+await pagina.locator('.repeticion .chip', { hasText: 'mié' }).first().click();
+await pagina.waitForTimeout(150);
+const previaRegla = await pagina.textContent('.repeticion .field-hint');
+if (!/miércoles/.test(previaRegla)) errores.push('el constructor de repetición no refleja el día elegido: ' + previaRegla);
+else console.log('  ok  prioridad y repetición con botones');
+await pagina.getByRole('button', { name: 'Guardar' }).click();
+await pagina.waitForTimeout(300);
+
+// Proyectos: plantilla, ruta crítica y Gantt
+await pagina.goto(BASE + '#/proyectos');
+await pagina.waitForTimeout(300);
+await pagina.locator('select').nth(1).selectOption('articulo');
+await pagina.waitForTimeout(500);
+const barras = await pagina.locator('.gantt rect').count();
+const criticas = await pagina.locator('.fila-critica').count();
+const textoPlan = (await pagina.textContent('#app')).replace(/\s+/g, ' ');
+if (barras < 5) errores.push('el Gantt no dibujó las barras');
+else if (criticas < 5) errores.push('la ruta crítica no se marcó en la tabla');
+else if (!/69 d/.test(textoPlan)) errores.push('la duración del plan no cuadra: ' + textoPlan.slice(0, 160));
+else console.log(`  ok  proyectos: Gantt con ${barras} barras y ${criticas} tareas críticas`);
 
 await pagina.setViewportSize({ width: 390, height: 844 });
 await pagina.goto(BASE + '#/hoy');

@@ -9,12 +9,12 @@ const ARCHIVOS = [
   './assets/estilos.css', './assets/icono.svg',
   './src/app.js', './src/store.js', './src/modelo.js', './src/fechas.js',
   './src/recurrencia.js', './src/naturales.js', './src/filtros.js', './src/calendario.js',
-  './src/tiempo.js', './src/inversiones.js', './src/plantillas.js', './src/exportar.js',
-  './src/notificaciones.js', './src/componentes.js', './src/seed.js',
+  './src/tiempo.js', './src/inversiones.js', './src/proyectos.js', './src/plantillas.js', './src/exportar.js',
+  './src/notificaciones.js', './src/componentes.js', './src/seed.js', './src/ideas.js',
   './src/views/hoy.js', './src/views/proximos.js', './src/views/calendario.js',
   './src/views/enfoque.js', './src/views/planificar.js', './src/views/lista.js',
-  './src/views/inversiones.js', './src/views/docencia.js', './src/views/investigacion.js',
-  './src/views/alabanza.js', './src/views/revision.js', './src/views/ajustes.js',
+  './src/views/inversiones.js', './src/views/proyectos.js', './src/views/docencia.js', './src/views/investigacion.js',
+  './src/views/alabanza.js', './src/views/revision.js', './src/views/ideas.js', './src/views/ajustes.js',
   '../src/ui.js',
 ];
 

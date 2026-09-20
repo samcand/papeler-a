@@ -33,6 +33,9 @@ const ESTADO_INICIAL = {
   docencia: { semestre: { nombre: '', inicio: null, fin: null, cursos: [] } },
   investigacion: { articulos: [], convocatorias: [], tesis: [] },
   alabanza: { servicios: [] },
+  // Ojo: `proyectos` son las listas de tareas; `planes` son los proyectos con
+  // EDT, dependencias y ruta crítica. Son cosas distintas y no deben mezclarse.
+  planes: [],
   pomodoro: { config: { ...CONFIG_POMODORO }, estado: null },
   ajustes: {
     tema: 'dark',
@@ -78,6 +81,7 @@ class Store {
       docencia: { ...base.docencia, ...(guardado.docencia || {}) },
       investigacion: { ...base.investigacion, ...(guardado.investigacion || {}) },
       alabanza: { ...base.alabanza, ...(guardado.alabanza || {}) },
+      planes: guardado.planes || base.planes,
       pomodoro: { ...base.pomodoro, ...(guardado.pomodoro || {}), config: { ...base.pomodoro.config, ...(guardado.pomodoro?.config || {}) } },
       ajustes: { ...base.ajustes, ...(guardado.ajustes || {}), jornada: { ...base.ajustes.jornada, ...(guardado.ajustes?.jornada || {}) } },
     };
@@ -264,6 +268,19 @@ class Store {
     }
     if (nuevas) this.guardar();
     return nuevas;
+  }
+
+  /* ---------------- proyectos ---------------- */
+
+  agregarPlan(plan) {
+    this.estado.planes.push(plan);
+    this.guardar();
+    return plan;
+  }
+
+  borrarPlan(id) {
+    this.estado.planes = this.estado.planes.filter((p) => p.id !== id);
+    this.guardar();
   }
 
   /* ---------------- ajustes y respaldo ---------------- */

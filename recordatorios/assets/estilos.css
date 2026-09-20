@@ -264,6 +264,27 @@ a { color: var(--accent); }
 
 .lista-chequeo label { display: flex; gap: 9px; align-items: flex-start; padding: 6px 0; font-size: .92rem; cursor: pointer; }
 .lista-chequeo input { margin-top: 4px; }
+.idea { align-items: flex-start; }
+.idea .btn { margin-left: auto; flex: none; opacity: .5; }
+.idea:hover .btn { opacity: 1; }
+
+/* ---------- Gantt y plan de proyecto ---------- */
+.gantt-caja { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--bg-soft); }
+.gantt { display: block; min-width: 100%; }
+.tabla-plan th, .tabla-plan td { padding: 4px 6px; vertical-align: middle; }
+.tabla-plan tr.fila-critica td:first-child { border-left: 3px solid var(--p1); }
+.tabla-plan .input { font-size: .84rem; }
+/* Las dependencias caben en una línea: si se apilan, cada fila del plan
+   triplica su altura y la tabla deja de leerse. */
+.tabla-plan td.dependencias { min-width: 260px; }
+.tabla-plan td.dependencias .dep-controles { flex-wrap: nowrap; gap: 4px; }
+.tabla-plan td.dependencias .chip { white-space: nowrap; }
+
+/* ---------- Prioridad y repetición ---------- */
+.chip.prioridad { gap: 4px; border-color: color-mix(in oklab, var(--color-prioridad) 45%, var(--line)); }
+.chip.prioridad .small { opacity: .75; }
+.repeticion { border: 1px dashed var(--line); border-radius: 10px; padding: 10px; }
+.repeticion .field { margin-bottom: 0; }
 
 /* ---------- Barra inferior (móvil) ---------- */
 .barra-inferior { display: none; }
@@ -285,6 +306,7 @@ a { color: var(--accent); }
   .barra-inferior .nav-item span:first-child { font-size: 1.15rem; }
   .barra-inferior .cuenta { display: none; }
   .matriz, .semana-rejilla { grid-template-columns: 1fr; }
+  .repeticion .fila { gap: 6px; }
   .cal-celda { min-height: 62px; }
   .cal-evento { display: none; }
   .cal-punto-fila { display: flex; gap: 3px; flex-wrap: wrap; }

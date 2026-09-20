@@ -13,7 +13,7 @@ Todo se guarda en tu dispositivo.
 | App | Dónde | Para qué |
 | --- | --- | --- |
 | **Alabanza** | `/` (este documento) | Canciones, acordes, instrumentos, atril y equipo. |
-| **Recordatorios** | [`recordatorios/`](recordatorios/README.md) | Tareas y gestión del tiempo: lenguaje natural, calendario, pomodoro y cronómetro, con módulos de inversiones, docencia, investigación, alabanza y personal. |
+| **Recordatorios** | [`recordatorios/`](recordatorios/README.md) | Tareas y gestión del tiempo: lenguaje natural, calendario, pomodoro y cronómetro, gestión de proyectos con Gantt y ruta crítica, y módulos de inversiones, docencia, investigación, alabanza y personal. |
 
 Las dos son estáticas, funcionan sin internet y guardan los datos en tu
 dispositivo. Con `npm start` se sirven las dos: la de alabanza en

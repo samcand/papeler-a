@@ -4,7 +4,7 @@
  */
 
 import { button, el, input, render, textarea, toast } from '../../src/ui.js';
-import { aISO, deISO, finDeMes, hoy, inicioSemana, sumarDias, textoLargo, textoRelativo, DIAS_CORTO } from './fechas.js';
+import { aISO, deISO, finDeMes, hoy, inicioSemana, sumarDias, textoLargo, textoRelativo, DIAS, DIAS_CORTO, MESES } from './fechas.js';
 import { MODULOS, PRIORIDADES, descripcionCorta, ordenarTareas } from './modelo.js';
 import { parseEntrada } from './naturales.js';
 import { parseRegla, proximasFechas, textoRegla } from './recurrencia.js';
@@ -170,19 +170,6 @@ export function panelTarea(tarea, alGuardar = () => {}) {
       pista ? el('span', { class: 'field-hint' }, pista) : null);
   }
 
-  const previaRegla = el('p', { class: 'field-hint' });
-  function pintarPreviaRegla() {
-    if (!borrador.regla) { previaRegla.textContent = 'No se repite.'; return; }
-    const proximas = proximasFechas(borrador.regla, borrador.fecha || aISO(hoy()), 3);
-    previaRegla.textContent = `${textoRegla(borrador.regla)} → ${proximas.map((f) => textoRelativo(f)).join(', ')}`;
-  }
-  pintarPreviaRegla();
-
-  const selPrioridad = el('select', { class: 'input', onChange: (e) => { borrador.prioridad = Number(e.target.value); } });
-  for (const p of PRIORIDADES) {
-    selPrioridad.append(el('option', { value: p.valor, selected: p.valor === borrador.prioridad }, `${p.corto} — ${p.nombre}`));
-  }
-
   const selModulo = el('select', { class: 'input', onChange: (e) => { borrador.modulo = e.target.value || null; } });
   selModulo.append(el('option', { value: '' }, '— sin módulo —'));
   for (const m of MODULOS) selModulo.append(el('option', { value: m.id, selected: m.id === borrador.modulo }, `${m.icono} ${m.nombre}`));
@@ -193,25 +180,18 @@ export function panelTarea(tarea, alGuardar = () => {}) {
     selProyecto.append(el('option', { value: p.nombre, selected: p.nombre === borrador.proyecto }, p.nombre));
   }
 
-  const campoRegla = input(borrador.regla ? textoRegla(borrador.regla) : '', (v) => {
-    borrador.regla = parseRegla(v);
-    pintarPreviaRegla();
-  }, { placeholder: 'cada lunes, el 15 de cada mes, cada tercer viernes…' });
-
   render(cuerpo,
     campo('Título', input(borrador.titulo, (v) => { borrador.titulo = v; })),
     campo('Notas', textarea(borrador.notas, (v) => { borrador.notas = v; }, { rows: 4, placeholder: 'Contexto, enlaces, la tesis en dos líneas…' })),
     el('div', { class: 'fila' },
-      el('div', { class: 'grow' }, campo('Fecha', input(borrador.fecha || '', (v) => { borrador.fecha = v || null; pintarPreviaRegla(); }, { type: 'date' }))),
+      el('div', { class: 'grow' }, campo('Fecha', input(borrador.fecha || '', (v) => { borrador.fecha = v || null; }, { type: 'date' }))),
       el('div', { class: 'grow' }, campo('Hora', input(borrador.hora || '', (v) => { borrador.hora = v || null; }, { type: 'time' })))),
-    el('div', { class: 'fila' },
-      el('div', { class: 'grow' }, campo('Prioridad', selPrioridad)),
-      el('div', { class: 'grow' }, campo('Duración (min)', input(borrador.duracion || '', (v) => { borrador.duracion = Number(v) || null; }, { type: 'number', min: 0, step: 5 })))),
+    campo('Prioridad', selectorPrioridad(borrador.prioridad, (v) => { borrador.prioridad = v; })),
+    campo('Duración (min)', input(borrador.duracion || '', (v) => { borrador.duracion = Number(v) || null; }, { type: 'number', min: 0, step: 5 })),
     el('div', { class: 'fila' },
       el('div', { class: 'grow' }, campo('Módulo', selModulo)),
       el('div', { class: 'grow' }, campo('Proyecto', selProyecto))),
-    campo('Se repite', campoRegla),
-    previaRegla,
+    campo('Se repite', constructorRepeticion(borrador.regla, (r) => { borrador.regla = r; })),
     campo('Etiquetas', input((borrador.etiquetas || []).join(', '), (v) => {
       borrador.etiquetas = v.split(',').map((s) => s.trim().replace(/^@/, '')).filter(Boolean);
     }, { placeholder: 'mercado, espera, tesis' })),
@@ -248,6 +228,161 @@ export function panelTarea(tarea, alGuardar = () => {}) {
   });
   document.body.append(panel);
   return panel;
+}
+
+
+/* ------------------------------------------------------------------ *
+ * Prioridad y repetición, con botones en vez de con memoria
+ * ------------------------------------------------------------------ */
+
+/** Cuatro banderas de prioridad, como en Todoist: se ve el color, no el número. */
+export function selectorPrioridad(valor, alCambiar) {
+  const caja = el('div', { class: 'chip-list' });
+  const pintar = (actual) => {
+    render(caja, ...PRIORIDADES.map((p) => el('button', {
+      class: `chip prioridad ${actual === p.valor ? 'activa' : ''}`.trim(),
+      style: `--color-prioridad:${p.color}${actual === p.valor ? `;background:${p.color};border-color:${p.color};color:#12161d` : `;color:${p.color}`}`,
+      title: `${p.corto} — ${p.nombre}`,
+      onClick: () => { pintar(p.valor); alCambiar(p.valor); },
+    }, `⚑ ${p.corto}`, el('span', { class: 'small' }, p.nombre))));
+  };
+  pintar(valor || 4);
+  return caja;
+}
+
+const ORDINALES_REGLA = [
+  { valor: 1, texto: 'primer' }, { valor: 2, texto: 'segundo' }, { valor: 3, texto: 'tercer' },
+  { valor: 4, texto: 'cuarto' }, { valor: -1, texto: 'último' },
+];
+
+/**
+ * Constructor visual de la repetición: menús y botones para lo que antes solo
+ * se podía escribir. El campo de texto sigue estando, porque escribir
+ * "cada tercer viernes" es más rápido que tocar cuatro menús — pero ya no es
+ * la única forma.
+ */
+export function constructorRepeticion(reglaInicial, alCambiar) {
+  let regla = reglaInicial ? { ...reglaInicial } : null;
+  const caja = el('div', { class: 'repeticion' });
+
+  const emitir = () => { alCambiar(regla); pintar(); };
+
+  function pintar() {
+    const tipo = regla ? (regla.tipo === 'nEsimo' ? 'nEsimo' : regla.tipo) : 'ninguna';
+    const numero = (etiqueta, valor, min, alPoner, ancho = 70) => el('label', { class: 'field', style: `width:${ancho}px` },
+      el('span', { class: 'field-label' }, etiqueta),
+      el('input', { class: 'input', type: 'number', min, value: valor, onChange: (e) => alPoner(Number(e.target.value)) }));
+
+    const selTipo = el('select', { class: 'input', style: 'width:auto', onChange: (e) => { regla = reglaDeTipo(e.target.value, regla); emitir(); } },
+      ...[['ninguna', 'No se repite'], ['diaria', 'Cada día'], ['semanal', 'Cada semana'],
+        ['mensual', 'Cada mes'], ['anual', 'Cada año'], ['habiles', 'Días hábiles'], ['nEsimo', 'Un día concreto del mes']]
+        .map(([v, txt]) => el('option', { value: v, selected: tipo === v }, txt)));
+
+    const detalle = [];
+    if (regla && ['diaria', 'semanal', 'mensual', 'anual'].includes(regla.tipo)) {
+      const unidad = { diaria: 'días', semanal: 'semanas', mensual: 'meses', anual: 'años' }[regla.tipo];
+      detalle.push(numero(`Cada cuántos ${unidad}`, regla.cada || 1, 1, (v) => { regla.cada = Math.max(1, v || 1); emitir(); }, 150));
+    }
+    if (regla?.tipo === 'semanal') {
+      detalle.push(el('div', { class: 'field' },
+        el('span', { class: 'field-label' }, 'Qué días'),
+        el('div', { class: 'chip-list' },
+          ...[1, 2, 3, 4, 5, 6, 0].map((d) => el('button', {
+            class: `chip ${(regla.dias || []).includes(d) ? 'activa' : ''}`.trim(),
+            onClick: () => {
+              const dias = new Set(regla.dias || []);
+              dias.has(d) ? dias.delete(d) : dias.add(d);
+              regla.dias = [...dias].sort((a, b) => a - b);
+              if (!regla.dias.length) delete regla.dias;
+              emitir();
+            },
+          }, DIAS_CORTO[d])))));
+    }
+    if (regla?.tipo === 'mensual') {
+      detalle.push(el('label', { class: 'field', style: 'width:170px' },
+        el('span', { class: 'field-label' }, 'Qué día del mes'),
+        el('select', { class: 'input', onChange: (e) => { regla.diaMes = e.target.value === 'ultimo' ? 'ultimo' : (Number(e.target.value) || null); emitir(); } },
+          el('option', { value: '', selected: !regla.diaMes }, 'el mismo día'),
+          ...Array.from({ length: 28 }, (_, i) => el('option', { value: i + 1, selected: regla.diaMes === i + 1 }, `día ${i + 1}`)),
+          el('option', { value: 'ultimo', selected: regla.diaMes === 'ultimo' }, 'el último día'))));
+    }
+    if (regla?.tipo === 'anual') {
+      detalle.push(el('label', { class: 'field', style: 'width:150px' },
+        el('span', { class: 'field-label' }, 'Mes'),
+        el('select', { class: 'input', onChange: (e) => { regla.mes = e.target.value === '' ? null : Number(e.target.value); emitir(); } },
+          el('option', { value: '', selected: regla.mes == null }, '—'),
+          ...MESES.map((m, i) => el('option', { value: i, selected: regla.mes === i }, m)))));
+      detalle.push(numero('Día', regla.diaMes || 1, 1, (v) => { regla.diaMes = Math.min(31, Math.max(1, v || 1)); emitir(); }));
+    }
+    if (regla?.tipo === 'nEsimo') {
+      detalle.push(el('label', { class: 'field', style: 'width:130px' },
+        el('span', { class: 'field-label' }, 'Cuál'),
+        el('select', { class: 'input', onChange: (e) => { regla.nEsimo = { ...regla.nEsimo, n: Number(e.target.value) }; emitir(); } },
+          ...ORDINALES_REGLA.map((o) => el('option', { value: o.valor, selected: regla.nEsimo?.n === o.valor }, o.texto)))));
+      detalle.push(el('label', { class: 'field', style: 'width:150px' },
+        el('span', { class: 'field-label' }, 'Día'),
+        el('select', { class: 'input', onChange: (e) => { regla.nEsimo = { ...regla.nEsimo, dia: Number(e.target.value) }; emitir(); } },
+          ...[1, 2, 3, 4, 5, 6, 0].map((d) => el('option', { value: d, selected: regla.nEsimo?.dia === d }, DIAS[d])))));
+    }
+
+    const opciones = regla ? el('div', { class: 'fila', style: 'margin-top:4px' },
+      el('label', { class: 'chip', style: 'cursor:pointer' },
+        el('input', {
+          type: 'checkbox', checked: !!regla.desdeCompletada,
+          onChange: (e) => { regla.desdeCompletada = e.target.checked || undefined; emitir(); },
+        }), 'contar desde que la completo'),
+      el('label', { class: 'field', style: 'width:170px;margin:0' },
+        el('span', { class: 'field-label' }, 'Dejar de repetir el'),
+        el('input', {
+          class: 'input', type: 'date', value: regla.hasta || '',
+          onChange: (e) => { regla.hasta = e.target.value || undefined; emitir(); },
+        }))) : null;
+
+    const atajos = el('div', { class: 'chip-list', style: 'margin-top:6px' },
+      ...['cada día hábil', 'cada lunes', 'cada 2 semanas', 'el 15 de cada mes',
+        'el último día del mes', 'cada tercer viernes'].map((txt) => el('button', {
+        class: 'chip', title: 'Atajo',
+        onClick: () => { regla = parseRegla(txt); emitir(); },
+      }, txt)));
+
+    const libre = input(regla ? textoRegla(regla) : '', (v) => {
+      const nueva = parseRegla(v);
+      if (nueva) { regla = nueva; alCambiar(regla); }
+      else if (!v.trim()) { regla = null; alCambiar(null); }
+    }, { placeholder: 'o escríbelo: cada tercer viernes…' });
+
+    const previa = el('p', { class: 'field-hint' }, regla
+      ? `${textoRegla(regla)} → ${proximasFechas(regla, aISO(hoy()), 3).map((f) => textoRelativo(f)).join(', ')}`
+      : 'No se repite.');
+
+    render(caja,
+      el('div', { class: 'fila' }, selTipo, ...detalle),
+      opciones,
+      atajos,
+      el('div', { style: 'margin-top:6px' }, libre),
+      previa);
+  }
+
+  pintar();
+  return caja;
+}
+
+/** Crea una regla del tipo elegido conservando lo que tenga sentido conservar. */
+function reglaDeTipo(tipo, anterior) {
+  if (tipo === 'ninguna') return null;
+  const base = { tipo, cada: anterior?.cada || 1 };
+  if (anterior?.desdeCompletada) base.desdeCompletada = true;
+  if (anterior?.hasta) base.hasta = anterior.hasta;
+  if (tipo === 'semanal') base.dias = anterior?.dias || [diaSemanaDeHoy()];
+  if (tipo === 'mensual') base.diaMes = typeof anterior?.diaMes === 'number' || anterior?.diaMes === 'ultimo' ? anterior.diaMes : null;
+  if (tipo === 'anual') { base.mes = anterior?.mes ?? hoy().getMonth(); base.diaMes = typeof anterior?.diaMes === 'number' ? anterior.diaMes : hoy().getDate(); }
+  if (tipo === 'nEsimo') base.nEsimo = anterior?.nEsimo || { n: 3, dia: 5 };
+  if (tipo === 'habiles') base.cada = 1;
+  return base;
+}
+
+function diaSemanaDeHoy() {
+  return hoy().getDay();
 }
 
 /* ------------------------------------------------------------------ *
