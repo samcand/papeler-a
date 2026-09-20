@@ -11,7 +11,8 @@ Todo se guarda en tu dispositivo.
 Este repositorio también contiene una segunda app, independiente de esta:
 **[Ingreso](examen/README.md)**, una plataforma de preguntas para pruebas de
 admisión a la universidad (matemáticas, trigonometría, razonamiento abstracto,
-comprensión de lectura e inglés). Se abre en `http://localhost:8080/examen/`.
+geografía, comprensión de lectura e inglés). Se abre en
+`http://localhost:8080/examen/`.
 
 ## Cómo abrirla
 
@@ -303,7 +304,7 @@ examen/               App aparte: banco de preguntas para la prueba de ingreso
 
 ```bash
 npm start    # servidor local (Node, sin dependencias)
-npm test     # 92 pruebas: teoría, señal, digitaciones, formato de hoja,
+npm test     # 93 pruebas: teoría, señal, digitaciones, formato de hoja,
              # voz, estiramiento de tiempo, clic, QR, compartir, historial
              # y el banco y el motor de la app de ingreso (examen/)
 npm run docs # regenera docs/100-ideas-alabanza.md desde src/ideas.js

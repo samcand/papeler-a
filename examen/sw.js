@@ -13,7 +13,8 @@ const ARCHIVOS = [
   './src/app.js', './src/ui.js', './src/store.js', './src/motor.js',
   './src/temario.js', './src/figuras.js', './src/componentes.js',
   './src/banco/index.js', './src/banco/matematicas.js', './src/banco/trigonometria.js',
-  './src/banco/abstracto.js', './src/banco/lectura.js', './src/banco/ingles.js',
+  './src/banco/abstracto.js', './src/banco/geografia.js', './src/banco/lectura.js',
+  './src/banco/ingles.js',
   './src/vistas/inicio.js', './src/vistas/temario.js', './src/vistas/practica.js',
   './src/vistas/simulacro.js', './src/vistas/progreso.js',
 ];

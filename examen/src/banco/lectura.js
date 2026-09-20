@@ -487,4 +487,24 @@ export const LECTURA = [
     correcta: 0,
     explicacion: 'El primer párrafo describe el proceso: el cerebro traslada lo aprendido "a redes de almacenamiento más estables".',
   },
+  {
+    id: 'lec-033', tema: 'datos-texto', dificultad: 3, lectura: 'lec-t4',
+    enunciado: 'El texto señala que el consumo eléctrico de una ciudad tiene su pico entre las seis y las diez de la noche. ¿Qué implica ese dato para una red que dependa de energía solar?',
+    opciones: [
+      'Que la demanda máxima ocurre justo cuando los paneles han dejado de producir',
+      'Que conviene instalar más paneles para cubrir esas horas',
+      'Que el consumo nocturno es menor que el del mediodía',
+      'Que las ciudades deberían consumir menos electricidad de noche',
+    ],
+    correcta: 0,
+    explicacion: 'El texto usa ese dato justo para eso: el desfase entre la hora en que se produce y la hora en que se consume. Añadir paneles no resuelve nada a las ocho de la noche, que es la razón por la que el almacenamiento importa.',
+  },
+  {
+    id: 'lec-034', tema: 'datos-texto', dificultad: 2, lectura: 'lec-t6',
+    enunciado: 'Según los precios que da el texto, ¿a cuántas cargas de leña equivalía un conejo?',
+    opciones: ['Seis', 'Cinco', 'Treinta', 'Tres'],
+    correcta: 0,
+    explicacion: 'El conejo costaba unos treinta granos y la carga de leña unos cinco: 30 ÷ 5 = 6 cargas de leña por conejo.',
+    pista: 'Los dos precios están en la misma unidad, así que se pueden dividir.',
+  },
 ];

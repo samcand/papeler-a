@@ -119,4 +119,38 @@ t('cada asignatura mezcla las tres dificultades', () => {
   }
 });
 
+/**
+ * Densidad del banco. El suelo (MINIMO) sí se exige: por debajo de tres
+ * preguntas un tema no da ni para una ronda de práctica. La meta (META) no se
+ * exige, se informa: es el objetivo que sostiene un estudio largo sin que el
+ * estudiante acabe memorizando las respuestas en vez de aprender el tema.
+ */
+const MINIMO = 3;
+const META = 10;
+
+t(`ningún tema baja de ${MINIMO} preguntas`, () => {
+  const pobres = todosLosTemas()
+    .map((tm) => ({ ...tm, n: BANCO.filter((p) => p.asignatura === tm.asignatura && p.tema === tm.id).length }))
+    .filter((tm) => tm.n < MINIMO)
+    .map((tm) => `${tm.asignatura}/${tm.id} (${tm.n})`);
+  assert.deepEqual(pobres, [], 'temas por debajo del mínimo: ' + pobres.join(', '));
+});
+
 console.log(`\n${pasadas} pruebas del banco (${BANCO.length} preguntas revisadas)\n`);
+
+console.log(`Cobertura por asignatura (meta: ${META} preguntas por tema)`);
+let faltan = 0;
+for (const a of ASIGNATURAS) {
+  const total = BANCO.filter((p) => p.asignatura === a.id).length;
+  const deficit = a.temas.reduce((s, tm) => {
+    const n = BANCO.filter((p) => p.asignatura === a.id && p.tema === tm.id).length;
+    return s + Math.max(0, META - n);
+  }, 0);
+  faltan += deficit;
+  const media = (total / a.temas.length).toFixed(1);
+  console.log(
+    '  ' + a.nombre.padEnd(24) + String(total).padStart(4) + ' preguntas · ' +
+    String(a.temas.length).padStart(2) + ' temas · ' + media.padStart(4) + ' por tema' +
+    (deficit ? `  → faltan ${deficit} para la meta` : '  → meta alcanzada'));
+}
+console.log(`  ${'TOTAL'.padEnd(24)}${String(BANCO.length).padStart(4)} preguntas · faltan ${faltan} para la meta de ${META} por tema\n`);

@@ -1,15 +1,16 @@
 # Ingreso — plataforma de preguntas para la prueba de admisión
 
 Banco de preguntas y simulacros para preparar el examen de ingreso a la
-universidad, con **el temario de lo que preguntan** y **235 preguntas** con
-explicación en cinco asignaturas:
+universidad, con **el temario de lo que preguntan** y **347 preguntas** con
+explicación en seis asignaturas:
 
 | Asignatura | Temas | Preguntas | Qué cubre |
 | --- | --- | --- | --- |
 | **Matemáticas** | 18 | 70 | Aritmética, fracciones, razones, porcentajes, potencias, logaritmos, álgebra, ecuaciones, cuadráticas, desigualdades, funciones, sucesiones, geometría plana y del espacio, geometría analítica, estadística, probabilidad y problemas de aplicación. |
 | **Trigonometría** | 10 | 38 | Grados y radianes, triángulo rectángulo, ángulos notables, circunferencia unitaria, identidades, ángulo doble, ecuaciones, gráficas, leyes de senos y cosenos, y aplicaciones. |
 | **Razonamiento abstracto** | 9 | 47 | Series de figuras, matrices, el que no pertenece, rotación y simetría, plegado y cubos, series numéricas y alfanuméricas, lógica y analogías. |
-| **Comprensión de lectura** | 8 | 32 | Ocho textos originales: idea principal, detalles, inferencias, vocabulario en contexto, propósito y tono, estructura, argumentación y datos. |
+| **Geografía** | 12 | 110 | Cartografía y coordenadas, la Tierra en el sistema solar, tectónica, relieve, hidrografía, clima, biomas, población, economía, política y geopolítica, ambiente y riesgos, y geografía de América Latina. |
+| **Comprensión de lectura** | 8 | 34 | Ocho textos originales: idea principal, detalles, inferencias, vocabulario en contexto, propósito y tono, estructura, argumentación y datos. |
 | **Inglés** | 12 | 48 | Tiempos verbales, condicionales, modales, pasiva, reported speech, relativas, preposiciones, cuantificadores, conectores, phrasal verbs, vocabulario y dos lecturas. |
 
 No necesita servidor, ni cuenta, ni internet. Todo se guarda en tu dispositivo.
@@ -63,6 +64,98 @@ y `figuras.js` la convierte en SVG:
 Así el banco sigue siendo texto —se versiona, se revisa y se exporta— y la app
 no depende de ninguna imagen.
 
+## Qué preguntan de geografía en las pruebas de ingreso
+
+El temario de geografía no se inventó: se armó cruzando lo que piden las
+pruebas más usadas de la región.
+
+- El **EXANI-II** del Ceneval (México) evalúa la geografía dentro del módulo de
+  **Ciencias Sociales**, con un bloque de *México: geografía e historia* que
+  abarca geografía física, económica, política y humana.
+- El **examen de admisión de la UNAM** incluye, en el temario oficial de
+  geografía, la ubicación espacial (coordenadas, husos horarios y cambio de
+  fecha), la tectónica global y las zonas de riesgo sísmico y volcánico, la
+  distribución de llanuras, mesetas y montañas y su relación con la población y
+  las actividades económicas, la distribución de minerales y el ciclo
+  hidrológico.
+- El **Saber 11 del ICFES** (Colombia) no pregunta geografía como materia
+  suelta: la evalúa en *Sociales y ciudadanas*, en el componente **"espacio,
+  territorio, ambiente y población"**, y con tres competencias —interpretar
+  (leer un mapa, una tabla o un dato), argumentar (explicar por qué ocurre algo)
+  y proponer (anticipar consecuencias).
+
+De ahí salen los tres tipos de pregunta del banco, en esa proporción:
+**definición y localización** (qué es una cuenca, dónde están los Andes),
+**lectura de datos** (calcular una distancia con la escala, una densidad, un
+saldo migratorio, leer una pirámide de población) y **causa-consecuencia**
+(por qué Quito es fresco estando en el ecuador, por qué dos sismos iguales
+matan a distinta gente). La tercera es la que más aparece en examen y la que
+menos se practica.
+
+## ¿De qué tamaño debería ser el banco?
+
+La pregunta correcta no es "cuántas preguntas quedan bonitas", sino **cuántas
+hacen falta para que estudiar con el banco enseñe la materia en vez de enseñar
+el banco**. Hay tres restricciones que fijan el número, y la mayor manda.
+
+**1. Cubrir el temario, no solo tocarlo.** Son 69 temas y tres niveles de
+dificultad. Con solo dos preguntas por nivel ya hacen falta unas **414**. Por
+debajo de eso hay temas que solo se pueden practicar de una manera.
+
+**2. No memorizar la respuesta.** La investigación sobre práctica de
+recuperación (Karpicke y Roediger) muestra que lo que fija el aprendizaje es
+**recuperar con éxito el material varias veces, espaciado en el tiempo** —de
+ahí las cajas de repaso de esta app—. El efecto tiene un límite: a partir de la
+cuarta o quinta vez que ves la *misma* pregunta ya no recuperas el
+razonamiento, recuerdas que la respuesta era la C. Eso da una regla operativa:
+
+> banco ≥ (preguntas que vas a responder en total) ÷ 4
+
+Tres meses a 20 preguntas diarias son unas 1 800 respuestas: hacen falta
+**~450 preguntas** para que nada se repita más de cuatro veces. Seis meses a 25
+diarias son 4 500 respuestas: **~1 125**.
+
+**3. Simulacros sin repetir.** El dato que hay sobre exámenes de práctica sitúa
+el óptimo alrededor de **seis a nueve simulacros completos**. A 80 preguntas
+cada uno son **480–720 preguntas** que idealmente no deberían haber salido ya
+en la práctica. Como referencia técnica, en los bancos de examen adaptativo la
+regla de oro mínima es que el banco sea **al menos 3 veces la longitud de la
+prueba** —aquí, 240—, pero eso es el suelo para armar formas distintas, no una
+meta de estudio.
+
+Juntando las tres:
+
+| Nivel | Tamaño | Por tema | Para qué alcanza |
+| --- | --- | --- | --- |
+| Suelo usable | ~420 | 6 | Cubrir el temario y un mes de práctica |
+| **Meta recomendada** | **~700** | **10** | 3 meses de estudio serio y 6 simulacros sin repetir |
+| Gran alcance | ~1 200 | 17 | 6 meses, repaso espaciado completo y 9 simulacros |
+
+Por eso la meta del proyecto son **10 preguntas por tema**, y el orden para
+llegar es: primero que ningún tema baje de 3 (eso ya lo verifica una prueba),
+después subir los temas que más pesan en el examen y solo al final los de
+relleno. `npm run test:examen` imprime el estado exacto:
+
+```
+Cobertura por asignatura (meta: 10 preguntas por tema)
+  Matemáticas               70 preguntas · 18 temas ·  3.9 por tema  → faltan 110 para la meta
+  Trigonometría             38 preguntas · 10 temas ·  3.8 por tema  → faltan 62 para la meta
+  Razonamiento abstracto    47 preguntas ·  9 temas ·  5.2 por tema  → faltan 43 para la meta
+  Geografía                110 preguntas · 12 temas ·  9.2 por tema  → faltan 11 para la meta
+  Comprensión de lectura    34 preguntas ·  8 temas ·  4.3 por tema  → faltan 46 para la meta
+  Inglés                    48 preguntas · 12 temas ·  4.0 por tema  → faltan 72 para la meta
+  TOTAL                    347 preguntas · faltan 344 para la meta de 10 por tema
+```
+
+Geografía se escribió ya a esa densidad para que sirva de referencia de cómo
+debe quedar cada asignatura.
+
+Una advertencia que sale de la misma evidencia: el volumen solo ayuda si se
+leen las explicaciones. En los estudios sobre bancos de preguntas, lo que mejor
+correlaciona con el resultado no es el número bruto de preguntas hechas, sino
+el tiempo dedicado a revisarlas. Mil preguntas contestadas a la carrera valen
+menos que trescientas entendidas.
+
 ## Tus propias preguntas
 
 En **Progreso → Tus propias preguntas** se importa un `.json` con las preguntas
@@ -107,6 +200,8 @@ examen/
     componentes.js      cómo se pinta una pregunta (la comparten las vistas)
     ui.js               cuatro ayudas de DOM, sin framework
     banco/              las preguntas, un archivo por asignatura
+                        (matematicas, trigonometria, abstracto, geografia,
+                         lectura, ingles)
     vistas/             inicio, temario, practicar, simulacro y progreso
   tests/                pruebas del banco y del motor (node, sin navegador)
 ```
@@ -123,6 +218,8 @@ node examen/tests/motor.test.js
 escribirlas— pero sí que el banco esté sano: identificadores únicos, cuatro
 opciones distintas, respuesta dentro de rango, explicación de verdad, temas que
 existen en el temario, textos de lectura referenciados, figuras dibujables y
-que **ningún tema del temario se quede sin preguntas**. Es la prueba que evita
-el error silencioso: un tema mal escrito no se ve roto en pantalla, simplemente
-deja de aparecer en su filtro.
+que **ningún tema del temario se quede sin preguntas** ni baje de tres. Es la
+prueba que evita el error silencioso: un tema mal escrito no se ve roto en
+pantalla, simplemente deja de aparecer en su filtro. Al terminar imprime el
+informe de cobertura por asignatura, con lo que falta para la meta de diez
+preguntas por tema.

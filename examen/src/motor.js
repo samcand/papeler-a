@@ -125,16 +125,16 @@ function tasa(dato) {
 /** Cuántas preguntas de cada asignatura y cuánto tiempo, como en el examen real. */
 export const MODELOS_SIMULACRO = {
   completo: {
-    nombre: 'Completo', minutos: 90,
-    reparto: { matematicas: 20, trigonometria: 10, abstracto: 15, lectura: 10, ingles: 15 },
+    nombre: 'Completo', minutos: 100,
+    reparto: { matematicas: 20, trigonometria: 10, abstracto: 15, geografia: 10, lectura: 10, ingles: 15 },
   },
   corto: {
-    nombre: 'Corto', minutos: 35,
-    reparto: { matematicas: 8, trigonometria: 4, abstracto: 6, lectura: 4, ingles: 6 },
+    nombre: 'Corto', minutos: 40,
+    reparto: { matematicas: 8, trigonometria: 4, abstracto: 6, geografia: 4, lectura: 4, ingles: 6 },
   },
   express: {
-    nombre: 'Exprés', minutos: 15,
-    reparto: { matematicas: 4, trigonometria: 2, abstracto: 3, lectura: 2, ingles: 3 },
+    nombre: 'Exprés', minutos: 18,
+    reparto: { matematicas: 4, trigonometria: 2, abstracto: 3, geografia: 2, lectura: 2, ingles: 3 },
   },
 };
 
@@ -153,7 +153,7 @@ export function armarSimulacro(banco, modelo = MODELOS_SIMULACRO.completo, rnd =
 
 /** Agrupa por asignatura (como en el examen real) pero mezcla dentro de cada bloque. */
 function barajarPorAsignatura(preguntas, rnd) {
-  const orden = ['matematicas', 'trigonometria', 'abstracto', 'lectura', 'ingles'];
+  const orden = ['matematicas', 'trigonometria', 'abstracto', 'geografia', 'lectura', 'ingles'];
   return orden.flatMap((a) => barajar(preguntas.filter((p) => p.asignatura === a), rnd));
 }
 

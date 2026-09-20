@@ -8,6 +8,7 @@
 import { MATEMATICAS } from './matematicas.js';
 import { TRIGONOMETRIA } from './trigonometria.js';
 import { ABSTRACTO } from './abstracto.js';
+import { GEOGRAFIA } from './geografia.js';
 import { LECTURA, LECTURAS } from './lectura.js';
 import { INGLES, LECTURAS_EN } from './ingles.js';
 
@@ -15,6 +16,7 @@ const POR_ASIGNATURA = {
   matematicas: MATEMATICAS,
   trigonometria: TRIGONOMETRIA,
   abstracto: ABSTRACTO,
+  geografia: GEOGRAFIA,
   lectura: LECTURA,
   ingles: INGLES,
 };

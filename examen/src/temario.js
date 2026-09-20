@@ -222,6 +222,85 @@ export const ASIGNATURAS = [
   },
 
   {
+    id: 'geografia',
+    nombre: 'Geografía',
+    icono: '🌎',
+    resumen: 'La Tierra y su representación, el medio físico, la población, la economía, la política y el ambiente.',
+    temas: [
+      { id: 'cartografia', nombre: 'La Tierra y su representación', claves: [
+        'Coordenadas: latitud, longitud y hemisferios',
+        'Escala: calcular distancias reales y saber qué mapa da más detalle',
+        'Proyecciones y sus deformaciones',
+        'Curvas de nivel, simbología y sistemas de información geográfica',
+      ] },
+      { id: 'tierra-universo', nombre: 'La Tierra en el sistema solar', claves: [
+        'Rotación y traslación: qué produce cada una',
+        'Inclinación del eje, solsticios, equinoccios y zonas térmicas',
+        'Husos horarios y cambio de fecha',
+      ] },
+      { id: 'geodinamica-interna', nombre: 'Tectónica, sismos y volcanes', claves: [
+        'Capas de la Tierra y movimiento de placas',
+        'Bordes convergentes, divergentes y de desplazamiento',
+        'Magnitud e intensidad; epicentro e hipocentro',
+        'Cinturón de Fuego y formación de los Andes',
+      ] },
+      { id: 'relieve', nombre: 'Relieve y modelado externo', claves: [
+        'Meteorización, erosión, transporte y sedimentación',
+        'Formas del relieve y el agente que las crea',
+        'Tipos de rocas y horizontes del suelo',
+        'Relación entre relieve, población y actividades económicas',
+      ] },
+      { id: 'hidrografia', nombre: 'Aguas continentales y oceánicas', claves: [
+        'Ciclo del agua y distribución del agua dulce',
+        'Cuenca hidrográfica, afluentes y desembocaduras',
+        'Corrientes marinas y su efecto en el clima',
+        'El Niño y La Niña; acuíferos y escasez de agua',
+      ] },
+      { id: 'clima', nombre: 'Tiempo, clima y atmósfera', claves: [
+        'Diferencia entre tiempo y clima',
+        'Elementos y factores del clima',
+        'Capas de la atmósfera, ozono y efecto invernadero',
+        'Tipos de clima, huracanes y sombra de lluvia',
+      ] },
+      { id: 'biogeografia', nombre: 'Regiones naturales y biodiversidad', claves: [
+        'Biomas del mundo y su relación con el clima',
+        'Selva, sabana, desierto, bosque templado, taiga y tundra',
+        'Pisos térmicos y páramos andinos',
+        'Países megadiversos',
+      ] },
+      { id: 'poblacion', nombre: 'Geografía de la población', claves: [
+        'Densidad, natalidad, mortalidad y crecimiento natural',
+        'Transición demográfica y lectura de pirámides de población',
+        'Migraciones: causas, saldo migratorio y éxodo rural',
+        'Urbanización y esperanza de vida',
+      ] },
+      { id: 'economica', nombre: 'Geografía económica', claves: [
+        'Sectores económicos y recursos renovables y no renovables',
+        'PIB per cápita, IDH y qué mide cada uno',
+        'Dependencia de materias primas y balanza comercial',
+        'Globalización y deslocalización industrial',
+      ] },
+      { id: 'politica', nombre: 'Geografía política y geopolítica', claves: [
+        'Elementos del Estado, fronteras y soberanía',
+        'Mar territorial y zona económica exclusiva',
+        'Organismos y bloques: ONU, Mercosur, CAN, UE',
+        'Pasos estratégicos y países sin litoral',
+      ] },
+      { id: 'ambiente', nombre: 'Medio ambiente, riesgos y sostenibilidad', claves: [
+        'Cambio climático: causas y consecuencias',
+        'Deforestación, lluvia ácida y huella ecológica',
+        'Riesgo = amenaza × vulnerabilidad',
+        'Desarrollo sostenible y acuerdos internacionales',
+      ] },
+      { id: 'america-latina', nombre: 'Geografía de América Latina', claves: [
+        'Grandes unidades de relieve: Andes, Amazonia, altiplanos, Patagonia',
+        'Principales cuencas: Amazonas, Plata, Orinoco',
+        'Distribución de la población y grandes ciudades',
+        'Rasgos físicos que explican climas extremos de la región',
+      ] },
+    ],
+  },
+  {
     id: 'lectura',
     nombre: 'Comprensión de lectura',
     icono: '📖',
