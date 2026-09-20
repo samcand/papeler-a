@@ -224,3 +224,27 @@ export function cargaDelDia(tareas, minutosDisponibles = 480) {
 export function estancadas(tareas, dias = 30, hoyISO = aISO(hoy())) {
   return tareas.filter((t) => !t.completada && diferenciaDias(String(t.creadaEn).slice(0, 10), hoyISO) >= dias);
 }
+
+/**
+ * Reparte 100 % entre unos valores **sin que la suma dé 101**.
+ *
+ * Redondear cada parte por su cuenta deja restos sueltos: 55,9 + 24,8 + 13,7…
+ * se convierte en 56 + 25 + 14 y ya sobra uno. Se reparte por el método del
+ * resto mayor, que es el que usan los repartos de escaños: primero la parte
+ * entera y luego los puntos que faltan van a quien tenía el decimal más alto.
+ */
+export function porcentajes(valores = []) {
+  const numeros = valores.map((v) => Math.max(0, Number(v) || 0));
+  const total = numeros.reduce((s, v) => s + v, 0);
+  if (!total) return numeros.map(() => 0);
+
+  const exactos = numeros.map((v) => (v / total) * 100);
+  const enteros = exactos.map((x) => Math.floor(x));
+  let faltan = 100 - enteros.reduce((s, v) => s + v, 0);
+
+  const orden = exactos
+    .map((x, i) => ({ i, resto: x - Math.floor(x) }))
+    .sort((a, b) => b.resto - a.resto);
+  for (let k = 0; k < orden.length && faltan > 0; k++, faltan--) enteros[orden[k].i]++;
+  return enteros;
+}

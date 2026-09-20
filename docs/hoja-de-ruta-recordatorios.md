@@ -1,6 +1,6 @@
 # Hoja de ruta de la app de recordatorios
 
-**98 hechas · 0 pendientes · 12 descartadas.**
+**108 hechas · 0 pendientes · 12 descartadas.**
 
 Esta lista empezó como “100 ideas” y hoy es la lista de trabajo real. Lo
 pendiente va por olas, que son un orden recomendado y no un compromiso. Lo
@@ -9,17 +9,26 @@ discutir cada tres meses.
 
 Las entradas 101-110 salieron de revisar una lista de 200 funcionalidades de
 herramientas profesionales de gestión de proyectos y quedarse solo con lo que
-sirve a una persona que trabaja sola, sin equipo ni PMO.
+sirve a una persona que trabaja sola, sin equipo ni PMO. Las 111-120 salieron
+de una lista de 50 ideas de productividad personal, resumidas en cuatro piezas
+genéricas —notas, colecciones de fichas, objetivos y gastos— en vez de treinta
+módulos parecidos.
 
 En la app, la pestaña **Lo que queda** muestra lo mismo y convierte cualquier
 pendiente en tarea con un botón.
 
 ## No queda nada pendiente
 
-Las 98 ideas de la lista están hechas; las 12 descartadas siguen abajo con su motivo. Lo siguiente saldrá de usarla: cuando
-algo moleste tres veces en una semana, eso es la idea 111.
+Las 108 ideas de la lista están hechas; las 12 descartadas siguen abajo con su motivo. Lo siguiente saldrá de usarla: cuando
+algo moleste tres veces en una semana, eso es la idea 121.
 
 ## Ya está hecho
+
+**La vida fuera del trabajo**  
+112. Colecciones: fichas con los campos que tú quieras · 113. Objetivos con progreso y revisión · 114. Mantenimiento por uso, no por fecha · 115. Gastos y presupuesto por categoría · 116. Agenda de personas: cumpleaños, fechas y regalos · 117. Rutinas encadenadas de mañana y noche · 118. El viaje como ficha: itinerario, papeles y presupuesto · 120. Panel de vida
+
+**Notas y diario**  
+111. Notas sueltas, el segundo cerebro · 119. Diario del día
 
 **Capturar sin fricción**  
 1. Escribir la tarea en una sola línea · 2. Enseñar lo que la app entendió antes de guardar · 3. Bandeja de entrada universal · 4. Atajo global de captura · 5. Compartir desde otra app · 6. Dictar la tarea · 8. Plantillas de listas reutilizables · 9. Autocompletar proyectos y etiquetas al escribir · 10. Adjuntar archivos y fotos a la tarea

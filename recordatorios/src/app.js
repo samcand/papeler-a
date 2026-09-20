@@ -9,6 +9,10 @@ import { programarDelDia, programarResumen } from './notificaciones.js';
 import { resumenDelDia, textoNotificacion } from './resumen.js';
 import { store } from './store.js';
 import { entradaRapida } from './componentes.js';
+import { panelDeVida } from './panel.js';
+import { resumenRutinas } from './rutinas.js';
+import { tocaPreparar } from './personas.js';
+import { aRevisar } from './objetivos.js';
 
 import { vistaHoy } from './views/hoy.js';
 import { vistaBandeja } from './views/bandeja.js';
@@ -30,6 +34,14 @@ import { vistaPlantillas } from './views/plantillas.js';
 import { vistaIdeas } from './views/ideas.js';
 import { vistaCopiloto } from './views/copiloto.js';
 import { vistaInformes } from './views/informes.js';
+import { vistaPanel } from './views/panel.js';
+import { vistaNotas } from './views/notas.js';
+import { vistaColecciones } from './views/colecciones.js';
+import { vistaObjetivos } from './views/objetivos.js';
+import { vistaGastos } from './views/gastos.js';
+import { vistaPersonas } from './views/personas.js';
+import { vistaRutinas } from './views/rutinas.js';
+import { vistaViajes } from './views/viajes.js';
 import { vistaAjustes } from './views/ajustes.js';
 
 const RUTAS = [
@@ -52,6 +64,14 @@ const RUTAS = [
   { ruta: /^\/importar-lista$/, vista: vistaImportarLista },
   { ruta: /^\/copiloto$/, vista: vistaCopiloto, nav: 'copiloto' },
   { ruta: /^\/informes$/, vista: vistaInformes, nav: 'informes' },
+  { ruta: /^\/panel$/, vista: vistaPanel, nav: 'panel' },
+  { ruta: /^\/notas$/, vista: vistaNotas, nav: 'notas' },
+  { ruta: /^\/colecciones$/, vista: vistaColecciones, nav: 'colecciones' },
+  { ruta: /^\/objetivos$/, vista: vistaObjetivos, nav: 'objetivos' },
+  { ruta: /^\/gastos$/, vista: vistaGastos, nav: 'gastos' },
+  { ruta: /^\/personas$/, vista: vistaPersonas, nav: 'personas' },
+  { ruta: /^\/rutinas$/, vista: vistaRutinas, nav: 'rutinas' },
+  { ruta: /^\/viajes$/, vista: vistaViajes, nav: 'viajes' },
   { ruta: /^\/ideas$/, vista: vistaIdeas, nav: 'ideas' },
   { ruta: /^\/ajustes$/, vista: vistaAjustes, nav: 'ajustes' },
   { ruta: /^\/filtro\/nuevo$/, vista: vistaFiltroNuevo },
@@ -141,6 +161,17 @@ const PRINCIPAL = [
   { id: 'copiloto', icono: '🧮', texto: 'Copiloto', href: '#/copiloto' },
 ];
 
+const VIDA = [
+  { id: 'panel', icono: '🧭', texto: 'Panel de vida', href: '#/panel' },
+  { id: 'rutinas', icono: '🌅', texto: 'Rutinas', href: '#/rutinas' },
+  { id: 'notas', icono: '📔', texto: 'Notas y diario', href: '#/notas' },
+  { id: 'objetivos', icono: '🎯', texto: 'Objetivos', href: '#/objetivos' },
+  { id: 'gastos', icono: '💳', texto: 'Gastos', href: '#/gastos' },
+  { id: 'personas', icono: '🎂', texto: 'Personas', href: '#/personas' },
+  { id: 'colecciones', icono: '🗃️', texto: 'Colecciones', href: '#/colecciones' },
+  { id: 'viajes', icono: '✈️', texto: 'Viajes', href: '#/viajes' },
+];
+
 const TRABAJO = [
   { id: 'inversiones', icono: '📈', texto: 'Inversiones', href: '#/inversiones' },
   { id: 'proyectos', icono: '📐', texto: 'Proyectos', href: '#/proyectos' },
@@ -154,7 +185,7 @@ const MOVIL = [
   { id: 'tablero', icono: '🗂️', texto: 'Tablero', href: '#/tablero' },
   { id: 'calendario', icono: '📅', texto: 'Calendario', href: '#/calendario' },
   { id: 'enfoque', icono: '⏱️', texto: 'Enfoque', href: '#/enfoque' },
-  { id: 'inversiones', icono: '📈', texto: 'Cartera', href: '#/inversiones' },
+  { id: 'panel', icono: '🧭', texto: 'Vida', href: '#/panel' },
   { id: 'ajustes', icono: '⋯', texto: 'Más', href: '#/ajustes' },
 ];
 
@@ -177,6 +208,8 @@ function montarArmazon() {
     ...PRINCIPAL.map((i) => enlace(i, cuentaDeNav(i.id))),
     el('div', { class: 'nav-titulo' }, 'Trabajo'),
     ...TRABAJO.map((i) => enlace(i, cuentaModulo(i.id))),
+    el('div', { class: 'nav-titulo' }, 'Vida'),
+    ...VIDA.map((i) => enlace(i, cuentaVida(i.id))),
     ...panelFavoritos(),
     el('div', { class: 'nav-titulo' }, 'Filtros'),
     ...store.estado.filtros.map((f) => el('a', {
@@ -216,6 +249,38 @@ function montarArmazon() {
       return n ? { n, urgente: true } : null;
     }
     return null;
+  }
+
+  /**
+   * Las cuentas de la sección Vida: solo lo que pide algo hoy. Un número al
+   * lado de cada cosa todo el rato deja de significar nada.
+   */
+  function cuentaVida(id) {
+    if (id === 'panel') {
+      const n = avisosDelPanel();
+      return n ? { n, urgente: true } : null;
+    }
+    if (id === 'rutinas') {
+      const n = resumenRutinas(store.estado.rutinas, store.estado.rutinasHechas, hoyISO).pendientes;
+      return n ? { n } : null;
+    }
+    if (id === 'personas') {
+      const n = tocaPreparar(store.estado.personas, hoyISO).length;
+      return n ? { n } : null;
+    }
+    if (id === 'objetivos') {
+      const n = aRevisar(store.estado.objetivos, hoyISO).length;
+      return n ? { n } : null;
+    }
+    return null;
+  }
+
+  function avisosDelPanel() {
+    try {
+      return panelDeVida(store.estado, hoyISO).avisos.filter((a) => a.nivel === 'alto').length;
+    } catch {
+      return 0;   // el panel nunca debe tumbar la barra lateral
+    }
   }
 
   function cuentaModulo(id) {
@@ -331,7 +396,7 @@ function atajos() {
     if (e.key === '/') { e.preventDefault(); document.getElementById('buscador')?.focus(); return; }
     if (e.key === 'a') { e.preventDefault(); document.querySelector('[data-rapida]')?.focus(); return; }
     if (e.key === 'n') { e.preventDefault(); abrirCaptura(); return; }
-    const destinos = { b: '/bandeja', h: '/hoy', p: '/proximos', t: '/tablero', c: '/calendario', e: '/enfoque', i: '/inversiones', g: '/proyectos', r: '/revision', k: '/copiloto', f: '/informes' };
+    const destinos = { b: '/bandeja', h: '/hoy', p: '/proximos', t: '/tablero', c: '/calendario', e: '/enfoque', i: '/inversiones', g: '/proyectos', r: '/revision', k: '/copiloto', f: '/informes', v: '/panel', d: '/notas' };
     if (e.key === 'z' && store.puedeDeshacer) { e.preventDefault(); const etq = store.deshacer(); toast(`Deshecho: ${etq}`); dibujar(); return; }
     if (destinos[e.key]) { e.preventDefault(); navegar(destinos[e.key]); }
   });

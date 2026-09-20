@@ -21,7 +21,8 @@ const PUERTO = 8123;
 const BASE = `http://localhost:${PUERTO}/recordatorios/index.html`;
 const PANTALLAS = ['hoy', 'bandeja', 'proximos', 'calendario', 'enfoque', 'planificar', 'revision',
   'inversiones', 'proyectos', 'docencia', 'investigacion', 'alabanza', 'plantillas', 'tablero',
-  'informes', 'copiloto', 'ideas', 'ajustes'];
+  'informes', 'copiloto', 'panel', 'notas', 'colecciones', 'objetivos', 'gastos', 'personas',
+  'rutinas', 'viajes', 'ideas', 'ajustes'];
 
 /** Busca Playwright en el proyecto y, si no, en la instalación global. */
 async function cargarPlaywright() {
@@ -601,6 +602,198 @@ if (apuntadas !== 1) errores.push('la interrupción no se apuntó: ' + apuntadas
 else console.log('  ok  registro de interrupciones');
 await pagina.keyboard.press('Escape');
 await pagina.waitForTimeout(300);
+
+
+// Notas: enlaces [[así]] y quién apunta a quién
+await pagina.goto(BASE + '#/notas');
+await pagina.waitForTimeout(400);
+await pagina.getByRole('button', { name: 'Nota nueva' }).click();
+await pagina.waitForTimeout(400);
+await pagina.locator('.card.nota.abierta input').first().fill('Cartera');
+await pagina.locator('.card.nota.abierta textarea').first().fill('La tesis está en [[Tesis de NVDA]].');
+await pagina.getByRole('button', { name: 'Guardar' }).click();
+await pagina.waitForTimeout(400);
+const rotos = (await pagina.textContent('#app')).replace(/\s+/g, ' ');
+if (!/Cartera/.test(rotos)) errores.push('la nota no se guardó');
+else {
+  await pagina.getByRole('button', { name: 'Editar' }).first().click();
+  await pagina.waitForTimeout(300);
+  await pagina.locator('.chip', { hasText: 'crear “Tesis de NVDA”' }).click();
+  await pagina.waitForTimeout(400);
+  await pagina.getByRole('button', { name: 'Guardar' }).click();
+  await pagina.waitForTimeout(400);
+  const conEnlace = (await pagina.textContent('#app')).replace(/\s+/g, ' ');
+  if (!/Apuntan aquí/.test(conEnlace)) errores.push('los enlaces entre notas no salieron: ' + conEnlace.slice(0, 200));
+  else console.log('  ok  notas: enlaces [[dobles]] y quién apunta a quién');
+}
+
+// Diario: se escribe el día y cuenta la racha
+await pagina.locator('.pestana', { hasText: 'Diario' }).click();
+await pagina.waitForTimeout(400);
+await pagina.locator('#app textarea').first().fill('Hoy salió la ola 4.');
+await pagina.getByRole('button', { name: 'Guardar el día' }).click();
+await pagina.waitForTimeout(400);
+const entradas = await pagina.evaluate(async () => {
+  const { store } = await import('./src/store.js');
+  const hoyISO = new Date().toISOString().slice(0, 10);
+  const del = store.estado.notas.find((n) => n.tipo === 'diario' && n.fecha === hoyISO);
+  return { total: store.estado.notas.filter((n) => n.tipo === 'diario').length, texto: del?.texto || '' };
+});
+if (entradas.total !== 1 || !/ola 4/.test(entradas.texto)) {
+  errores.push('el diario no registró el día: ' + JSON.stringify(entradas));
+} else console.log('  ok  diario del día');
+
+// Colecciones: plantilla del carro, ficha y aviso de vencimiento
+await pagina.goto(BASE + '#/colecciones');
+await pagina.waitForTimeout(400);
+await pagina.locator('#app select').first().selectOption('vehiculo');
+await pagina.waitForTimeout(500);
+await pagina.getByRole('button', { name: '+ Ficha' }).click();
+await pagina.waitForTimeout(400);
+const celdasFicha = pagina.locator('.tabla tbody tr').first().locator('input');
+await celdasFicha.nth(0).fill('Mazda 3');
+await celdasFicha.nth(0).press('Tab');
+await pagina.waitForTimeout(300);
+const fechaSeguro = pagina.locator('.tabla tbody tr').first().locator('input[type="date"]').first();
+await fechaSeguro.fill('2026-10-05');
+await fechaSeguro.press('Tab');
+await pagina.waitForTimeout(500);
+const conAviso = (await pagina.textContent('#app')).replace(/\s+/g, ' ');
+if (!/Vence pronto/.test(conAviso) || !/Mazda 3/.test(conAviso)) {
+  errores.push('la colección no avisó del vencimiento: ' + conAviso.slice(0, 250));
+} else console.log('  ok  colecciones: ficha con campo que avisa');
+
+// Mantenimiento por uso: dos lecturas y el servicio que vence por kilómetros
+const manten = await pagina.evaluate(async () => {
+  const { store } = await import('./src/store.js');
+  const { contadorNuevo, servicioNuevo, estadoServicio } = await import('./src/mantenimiento.js');
+  const c = store.agregarEn('contadores', contadorNuevo({ nombre: 'Mazda 3', unidad: 'km' }));
+  store.registrarLectura(c.id, 40000, '2026-06-25');
+  store.registrarLectura(c.id, 45000, '2026-09-23');
+  const malo = store.registrarLectura(c.id, 100, '2026-09-24');
+  const s = store.agregarEn('mantenimientos', servicioNuevo({
+    contador: c.id, nombre: 'Aceite', cadaUso: 5000, cadaDias: 180, ultimoUso: 42000, ultimaFecha: '2026-08-01',
+  }));
+  const e = estadoServicio(s, store.estado.contadores.find((x) => x.id === c.id), '2026-09-23');
+  return { rechazado: !malo.ok, restanUso: e.restanUso, estimada: !!e.fechaPorUso };
+});
+if (!manten.rechazado || manten.restanUso !== 2000 || !manten.estimada) {
+  errores.push('el mantenimiento por uso no cuadra: ' + JSON.stringify(manten));
+} else console.log('  ok  mantenimiento por kilómetros (y el contador no retrocede)');
+
+await pagina.goto(BASE + '#/hoy');
+await pagina.goto(BASE + '#/colecciones');
+await pagina.waitForTimeout(700);
+if (!/faltan 2000 km/.test((await pagina.textContent('#app')).replace(/\s+/g, ' '))) {
+  errores.push('el servicio por uso no se pintó en la colección del vehículo');
+} else console.log('  ok  el vehículo enseña lo que le falta al aceite');
+
+// Objetivos: el progreso se compara con el tiempo gastado
+await pagina.goto(BASE + '#/objetivos');
+await pagina.waitForTimeout(400);
+await pagina.getByRole('button', { name: '+ Objetivo' }).click();
+await pagina.waitForTimeout(400);
+const campoObjetivo = pagina.locator('.card.objetivo');
+await campoObjetivo.locator('input[type="number"]').nth(0).fill('4');
+await campoObjetivo.locator('input[type="number"]').nth(0).press('Tab');
+await pagina.waitForTimeout(200);
+await campoObjetivo.locator('input[type="number"]').nth(1).fill('24');
+await campoObjetivo.locator('input[type="number"]').nth(1).press('Tab');
+await pagina.waitForTimeout(200);
+await campoObjetivo.locator('input[type="date"]').nth(0).fill('2026-01-01');
+await pagina.waitForTimeout(200);
+await campoObjetivo.locator('input[type="date"]').nth(1).fill('2026-12-31');
+await pagina.waitForTimeout(500);
+const obj = (await pagina.textContent('#app')).replace(/\s+/g, ' ');
+if (!/atrasado/.test(obj) || !/por semana/.test(obj)) {
+  errores.push('el objetivo no comparó progreso y tiempo: ' + obj.slice(0, 250));
+} else console.log('  ok  objetivos: 4 de 24 en septiembre es ir tarde');
+
+// Gastos: presupuesto y ritmo del mes
+await pagina.evaluate(async () => {
+  const { store } = await import('./src/store.js');
+  const { gastoNuevo } = await import('./src/gastos.js');
+  for (const g of [
+    { que: 'Arriendo', importe: 900, categoria: 'casa', fijo: true },
+    { que: 'Mercado', importe: 220, categoria: 'comida' },
+    { que: 'Gasolina', importe: 60, categoria: 'transporte' },
+  ]) store.agregarEn('gastos', gastoNuevo({ ...g, fecha: new Date().toISOString().slice(0, 10) }));
+  store.ponerPresupuesto('casa', 500);
+});
+await pagina.goto(BASE + '#/hoy');
+await pagina.goto(BASE + '#/gastos');
+await pagina.waitForTimeout(600);
+const gastos = (await pagina.textContent('#app')).replace(/\s+/g, ' ');
+if (!/1180|1\.180/.test(gastos) || !/% del mes/.test(gastos)) {
+  errores.push('los gastos no sumaron o no compararon con el mes: ' + gastos.slice(0, 250));
+} else console.log('  ok  gastos: total del mes y ritmo contra el presupuesto');
+
+// Personas: el cumpleaños entra en la ventana de aviso
+await pagina.evaluate(async () => {
+  const { store } = await import('./src/store.js');
+  const { personaNueva } = await import('./src/personas.js');
+  const dentro = new Date();
+  dentro.setDate(dentro.getDate() + 9);
+  const mm = String(dentro.getMonth() + 1).padStart(2, '0');
+  const dd = String(dentro.getDate()).padStart(2, '0');
+  store.agregarEn('personas', personaNueva({
+    nombre: 'Ana', cumple: `1990-${mm}-${dd}`,
+    regalos: [{ id: 'r1', que: 'Libro de cocina', comprado: false }],
+  }));
+});
+await pagina.goto(BASE + '#/hoy');
+await pagina.goto(BASE + '#/personas');
+await pagina.waitForTimeout(600);
+const personas = (await pagina.textContent('#app')).replace(/\s+/g, ' ');
+if (!/Toca preparar/.test(personas) || !/Ana cumple/.test(personas) || !/Libro de cocina/.test(personas)) {
+  errores.push('la agenda de personas no avisó: ' + personas.slice(0, 250));
+} else console.log('  ok  personas: cumpleaños con tiempo y el regalo pensado');
+
+// Rutinas: los pasos se marcan y la rutina se completa
+await pagina.goto(BASE + '#/rutinas');
+await pagina.waitForTimeout(400);
+await pagina.getByRole('button', { name: 'Traer las de ejemplo' }).click();
+await pagina.waitForTimeout(600);
+const casillas = pagina.locator('.card.rutina').first().locator('input[type="checkbox"]');
+const cuantas = await casillas.count();
+for (let i = 0; i < cuantas; i++) {
+  await casillas.nth(i).click();
+  await pagina.waitForTimeout(150);
+}
+await pagina.waitForTimeout(400);
+if (!(await pagina.locator('.card.rutina.completa').count())) {
+  errores.push('marcar todos los pasos no completó la rutina');
+} else console.log(`  ok  rutinas: ${cuantas} pasos marcados y rutina completa`);
+
+// Viajes: itinerario desde las tareas y presupuesto desde los gastos
+const viaje = await pagina.evaluate(async () => {
+  const { store } = await import('./src/store.js');
+  const { viajeNuevo } = await import('./src/viajes.js');
+  const desde = new Date(); desde.setDate(desde.getDate() + 17);
+  const hasta = new Date(); hasta.setDate(hasta.getDate() + 21);
+  const iso = (d) => d.toISOString().slice(0, 10);
+  const v = store.agregarEn('viajes', viajeNuevo({ nombre: 'Madrid', destino: 'Madrid', desde: iso(desde), hasta: iso(hasta), presupuesto: 1500, personas: 2 }));
+  store.agregar({ titulo: 'Museo del Prado', fecha: iso(new Date(desde.getTime() + 86400000)), hora: '10:00' });
+  const { gastoNuevo } = await import('./src/gastos.js');
+  store.agregarEn('gastos', gastoNuevo({ que: 'Hotel', importe: 400, categoria: 'viaje', viaje: v.id }));
+  return v.id;
+});
+await pagina.goto(BASE + '#/hoy');
+await pagina.goto(BASE + '#/viajes');
+await pagina.waitForTimeout(700);
+const textoViaje = (await pagina.textContent('#app')).replace(/\s+/g, ' ');
+if (!/Museo del Prado/.test(textoViaje) || !/400 de 1500/.test(textoViaje)) {
+  errores.push('el viaje no juntó itinerario y dinero: ' + textoViaje.slice(0, 300));
+} else console.log('  ok  viajes: itinerario de las tareas y gasto de los gastos');
+
+// Panel de vida: junta todo y ordena los avisos
+await pagina.goto(BASE + '#/panel');
+await pagina.waitForTimeout(700);
+const panel = (await pagina.textContent('#app')).replace(/\s+/g, ' ');
+const tarjetasPanel = await pagina.locator('.tarjeta-panel').count();
+if (tarjetasPanel !== 8) errores.push(`el panel debería tener 8 tarjetas, tiene ${tarjetasPanel}`);
+else if (!/Pide atención/.test(panel)) errores.push('el panel no listó los avisos: ' + panel.slice(0, 250));
+else console.log('  ok  panel de vida: 8 tarjetas y los avisos arriba');
 
 // Accesibilidad básica
 const a11y = await pagina.evaluate(() => {

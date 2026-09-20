@@ -48,7 +48,7 @@ t('los estados no se solapan', () => {
 });
 
 t('lo que salió de la revisión de herramientas profesionales está dentro', () => {
-  const nuevas = IDEAS.filter((i) => i.n >= 101);
+  const nuevas = IDEAS.filter((i) => i.n >= 101 && i.n <= 110);
   assert.equal(nuevas.length, 10);
   assert.ok(nuevas.every((i) => ['hecho', 'pendiente', 'descartado'].includes(i.estado)));
   const titulos = nuevas.map((i) => i.t).join(' | ');
@@ -56,6 +56,18 @@ t('lo que salió de la revisión de herramientas profesionales está dentro', ()
   assert.match(titulos, /capacidad real/i);
   assert.match(titulos, /Salud explicada/);
   assert.match(titulos, /Copiloto local/);
+});
+
+t('lo que salió de la lista de productividad personal también', () => {
+  const vida = IDEAS.filter((i) => i.n >= 111 && i.n <= 120);
+  assert.equal(vida.length, 10);
+  const titulos = vida.map((i) => i.t).join(' | ');
+  // Las cuatro piezas genéricas, en vez de treinta módulos parecidos.
+  assert.match(titulos, /Notas sueltas/);
+  assert.match(titulos, /Colecciones/);
+  assert.match(titulos, /Objetivos/);
+  assert.match(titulos, /Gastos/);
+  assert.match(titulos, /Mantenimiento por uso/);
 });
 
 console.log(`\n${passed} pruebas de la hoja de ruta OK`);

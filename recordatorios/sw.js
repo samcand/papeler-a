@@ -16,12 +16,16 @@ const ARCHIVOS = [
   './src/notificaciones.js', './src/componentes.js', './src/resumen.js', './src/seed.js', './src/ideas.js',
   './src/captura.js', './src/automatizacion.js', './src/energia.js', './src/ambiente.js',
   './src/trabajo.js', './src/riesgos.js', './src/informes.js', './src/copiloto.js',
+  './src/notas.js', './src/colecciones.js', './src/objetivos.js', './src/mantenimiento.js',
+  './src/gastos.js', './src/personas.js', './src/rutinas.js', './src/viajes.js', './src/panel.js',
   './src/views/hoy.js', './src/views/bandeja.js', './src/views/proximos.js',
   './src/views/tablero.js', './src/views/concentracion.js', './src/views/importar-lista.js', './src/views/calendario.js',
   './src/views/enfoque.js', './src/views/planificar.js', './src/views/lista.js',
   './src/views/inversiones.js', './src/views/proyectos.js', './src/views/docencia.js', './src/views/investigacion.js',
   './src/views/alabanza.js', './src/views/revision.js', './src/views/plantillas.js', './src/views/ideas.js', './src/views/ajustes.js',
   './src/views/copiloto.js', './src/views/informes.js',
+  './src/views/panel.js', './src/views/notas.js', './src/views/colecciones.js', './src/views/objetivos.js',
+  './src/views/gastos.js', './src/views/personas.js', './src/views/rutinas.js', './src/views/viajes.js',
   '../src/ui.js',
 ];
 

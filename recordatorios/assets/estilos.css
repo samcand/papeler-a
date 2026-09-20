@@ -457,6 +457,26 @@ body.concentrado .contenido { max-width: none; display: grid; place-items: cente
   display: inline-block;
 }
 
+
+/* ---- Panel de vida ---- */
+.panel-vida .tarjeta-panel {
+  display: block; text-decoration: none; color: inherit;
+  border-left: 3px solid var(--line); transition: border-color .15s ease;
+}
+.panel-vida .tarjeta-panel:hover { border-color: var(--accent-2, #4a9eff); }
+.panel-vida .tarjeta-panel.mal { border-left-color: var(--danger); }
+.panel-vida .tarjeta-panel.ojo { border-left-color: var(--warn, #e0a33e); }
+.panel-vida .tarjeta-panel.bien { border-left-color: var(--ok, #35c48b); }
+.panel-vida .tarjeta-panel.vacio { opacity: .72; }
+
+/* ---- Notas ---- */
+.card.nota.fijada { border-left: 3px solid var(--warn, #e0a33e); }
+.card.nota.abierta { border-left: 3px solid var(--accent-2, #4a9eff); }
+
+/* ---- Objetivos y rutinas ---- */
+.card.objetivo.atrasado { border-left: 3px solid var(--danger); }
+.card.rutina.completa { border-left: 3px solid var(--ok, #35c48b); }
+
 /* ---- Hoja imprimible del plan ---- */
 .hoja-impresion { display: none; }
 

@@ -8,7 +8,7 @@
  */
 
 import { aISO, diferenciaDias, hoy, inicioSemana, sumarDias } from './fechas.js';
-import { MODULOS } from './modelo.js';
+import { MODULOS, porcentajes } from './modelo.js';
 
 export const METRICAS = [
   { id: 'completadas', nombre: 'Tareas completadas', unidad: 'tareas' },
@@ -88,9 +88,10 @@ export function informe(estado = {}, { metrica = 'completadas', agrupacion = 'mo
 
   const total = [...mapa.values()].reduce((s, v) => s + v, 0);
   const cronologico = agrupacion === 'semana' || agrupacion === 'mes';
-  const filas = [...mapa.entries()]
-    .map(([clave, valor]) => ({ clave, valor, pct: total ? Math.round((valor / total) * 100) : 0 }))
-    .sort((a, b) => (cronologico ? a.clave.localeCompare(b.clave) : b.valor - a.valor));
+  const entradas = [...mapa.entries()]
+    .sort((a, b) => (cronologico ? String(a[0]).localeCompare(String(b[0])) : b[1] - a[1]));
+  const pcts = porcentajes(entradas.map(([, valor]) => valor));
+  const filas = entradas.map(([clave, valor], i) => ({ clave, valor, pct: pcts[i] }));
 
   const meta = METRICAS.find((m) => m.id === metrica);
   return {

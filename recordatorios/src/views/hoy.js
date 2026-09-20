@@ -12,6 +12,7 @@ import { trabajoEnCurso } from '../tablero.js';
 import { estadoBandeja } from '../modelo.js';
 import { formatoMinutos, resumenTiempo } from '../tiempo.js';
 import { NIVELES as NIVELES_ENERGIA, quePuedoHacer, repartoEnergia } from '../energia.js';
+import { MOMENTOS, duracionRutina, rutinasDeHoy } from '../rutinas.js';
 import { store } from '../store.js';
 
 export function vistaHoy(root, ctx = {}) {
@@ -60,6 +61,32 @@ export function vistaHoy(root, ctx = {}) {
         r.mañana ? ` Mañana hay ${r.mañana} tareas.` : ''));
   }
 
+
+  /**
+   * Las rutinas de hoy, con sus pasos. Aquí van en pequeño: montarlas y verlas
+   * enteras es la pantalla Rutinas.
+   */
+  function panelRutinas() {
+    const deHoy = rutinasDeHoy(store.estado.rutinas, store.estado.rutinasHechas, hoyISO);
+    if (!deHoy.length) return null;
+    return el('section', { class: 'card' },
+      el('div', { class: 'fila entre' },
+        el('h2', { class: 'card-title', style: 'margin:0' }, 'Rutinas de hoy'),
+        el('a', { class: 'btn ghost chico', href: '#/rutinas' }, 'ver todas')),
+      ...deHoy.map(({ rutina, progreso, racha }) => el('div', { style: 'margin-bottom:10px' },
+        el('div', { class: 'fila entre' },
+          el('span', {},
+            `${MOMENTOS.find((m) => m.id === rutina.momento)?.icono || '🕐'} ${rutina.nombre}`,
+            el('span', { class: 'muted small' }, ` · ${progreso.hechos}/${progreso.total}`
+              + (progreso.completa ? '' : ` · quedan ${progreso.minutosRestantes} de ${duracionRutina(rutina)} min`))),
+          racha ? el('span', { class: 'muted small' }, `${racha} días seguidos`) : null),
+        el('div', { class: 'chip-list' },
+          ...progreso.pasos.map((p) => el('button', {
+            class: `chip ${p.hecho ? 'activa' : ''}`.trim(), type: 'button',
+            title: `${p.minutos} min`,
+            onClick: () => { store.alternarPasoRutina(rutina.id, p.id, hoyISO); pintar(); },
+          }, `${p.hecho ? '✓ ' : ''}${p.texto}`))))));
+  }
 
   /**
    * "Tengo veinte minutos y la cabeza a medias": cruzar el hueco que tienes con
@@ -115,6 +142,7 @@ export function vistaHoy(root, ctx = {}) {
         dato(carga.excedido ? `${carga.horas} h` : `${carga.horas} h`, 'comprometidas',
           { clase: carga.excedido ? 'negativo' : '', pie: carga.excedido ? 'el día no da para tanto' : `de ${Math.round(carga.disponibles / 60)} h` })),
 
+      panelRutinas(),
       panelEnergia(),
 
       carga.minutos ? el('div', { style: 'margin:12px 0 18px' },

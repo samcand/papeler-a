@@ -13,6 +13,8 @@ import { CONFIG_POMODORO } from './tiempo.js';
 import { completar, crearTarea, uid } from './modelo.js';
 import { FILTROS_PREDEFINIDOS } from './filtros.js';
 import { aplicarReglas } from './automatizacion.js';
+import { marcarHecho, registrarLectura } from './mantenimiento.js';
+import { alternarPaso } from './rutinas.js';
 import { PLANTILLAS_INICIALES } from './plantillasLista.js';
 import { TAREAS_EJEMPLO, PROYECTOS_EJEMPLO } from './seed.js';
 
@@ -48,6 +50,19 @@ const ESTADO_INICIAL = {
   interrupciones: [],   // { motivo, tareaId, fecha, hora }
   asesorias: [],        // horas de asesoría: { estudiante, fecha, minutos, tema }
   informes: [],         // informes a medida guardados
+  // La vida fuera del trabajo (ideas 111-120)
+  notas: [],            // notas sueltas y diario: { tipo, titulo, texto, etiquetas }
+  colecciones: [],      // definiciones: { nombre, icono, campos: [] }
+  fichas: [],           // los registros de esas colecciones
+  objetivos: [],        // metas con progreso y revisión
+  contadores: [],       // { nombre, unidad, lecturas: [] } para el mantenimiento por uso
+  mantenimientos: [],   // servicios que vencen por uso o por tiempo
+  gastos: [],           // lo que sale, escrito a mano como los precios
+  presupuestos: {},     // límite mensual por categoría
+  personas: [],         // cumpleaños, fechas y regalos
+  rutinas: [],          // rutinas de mañana y noche, con pasos
+  rutinasHechas: [],    // { rutina, fecha, pasos: [] }
+  viajes: [],           // fechas, presupuesto y destino
   papelera: [],         // lo borrado espera 30 días antes de irse de verdad
   pomodoro: { config: { ...CONFIG_POMODORO }, estado: null },
   ajustes: {
@@ -133,6 +148,18 @@ class Store {
       interrupciones: guardado.interrupciones || base.interrupciones,
       asesorias: guardado.asesorias || base.asesorias,
       informes: guardado.informes || base.informes,
+      notas: guardado.notas || base.notas,
+      colecciones: guardado.colecciones || base.colecciones,
+      fichas: guardado.fichas || base.fichas,
+      objetivos: guardado.objetivos || base.objetivos,
+      contadores: guardado.contadores || base.contadores,
+      mantenimientos: guardado.mantenimientos || base.mantenimientos,
+      gastos: guardado.gastos || base.gastos,
+      presupuestos: { ...base.presupuestos, ...(guardado.presupuestos || {}) },
+      personas: guardado.personas || base.personas,
+      rutinas: guardado.rutinas || base.rutinas,
+      rutinasHechas: guardado.rutinasHechas || base.rutinasHechas,
+      viajes: guardado.viajes || base.viajes,
       papelera: purgar(guardado.papelera || [], aISO(hoy())),
       pomodoro: { ...base.pomodoro, ...(guardado.pomodoro || {}), config: { ...base.pomodoro.config, ...(guardado.pomodoro?.config || {}) } },
       ajustes: {
@@ -472,6 +499,69 @@ class Store {
     p.secciones = (p.secciones || []).filter((s) => s !== nombre);
     // Las tareas de la sección no se borran: vuelven al cuerpo del proyecto.
     for (const t of this.estado.tareas) if (t.proyecto === nombreProyecto && t.seccion === nombre) t.seccion = null;
+    this.guardar();
+  }
+
+  /* ---------------- ola 4: la vida fuera del trabajo ---------------- */
+
+  /** Guarda una nota nueva o los cambios de una que ya existe. */
+  guardarNota(nota) {
+    const i = this.estado.notas.findIndex((n) => n.id === nota.id);
+    const conFecha = { ...nota, actualizadaEn: new Date().toISOString() };
+    if (i === -1) this.estado.notas.push(conFecha);
+    else this.estado.notas[i] = conFecha;
+    this.guardar();
+    return conFecha;
+  }
+
+  /** Borrar una colección se lleva sus fichas: no dejamos fichas huérfanas. */
+  borrarColeccion(id) {
+    this.instantanea('Borrar colección');
+    this.estado.colecciones = this.estado.colecciones.filter((c) => c.id !== id);
+    this.estado.fichas = this.estado.fichas.filter((f) => f.coleccion !== id);
+    this.guardar();
+  }
+
+  /** Cambia un valor de una ficha sin tocar los demás. */
+  actualizarFicha(id, campoId, valor) {
+    const ficha = this.estado.fichas.find((f) => f.id === id);
+    if (!ficha) return null;
+    ficha.valores = { ...ficha.valores, [campoId]: valor };
+    this.guardar();
+    return ficha;
+  }
+
+  /** Apunta una lectura del contador; devuelve el error si el número no cuadra. */
+  registrarLectura(contadorId, valor, fechaISO) {
+    const i = this.estado.contadores.findIndex((c) => c.id === contadorId);
+    if (i === -1) return { ok: false, error: 'Ese contador ya no existe.' };
+    const r = registrarLectura(this.estado.contadores[i], valor, fechaISO);
+    if (!r.ok) return r;
+    this.estado.contadores[i] = r.contador;
+    this.guardar();
+    return r;
+  }
+
+  marcarServicioHecho(servicioId, hoyISO) {
+    const i = this.estado.mantenimientos.findIndex((s) => s.id === servicioId);
+    if (i === -1) return null;
+    const contador = this.estado.contadores.find((c) => c.id === this.estado.mantenimientos[i].contador);
+    this.estado.mantenimientos[i] = marcarHecho(this.estado.mantenimientos[i], contador, hoyISO);
+    this.guardar();
+    return this.estado.mantenimientos[i];
+  }
+
+  /** Marca o desmarca un paso de una rutina en un día. */
+  alternarPasoRutina(rutinaId, pasoId, diaISO) {
+    this.estado.rutinasHechas = alternarPaso(this.estado.rutinasHechas, rutinaId, pasoId, diaISO);
+    this.guardar();
+  }
+
+  ponerPresupuesto(categoria, importe) {
+    const limites = { ...this.estado.presupuestos };
+    if (importe) limites[categoria] = Number(importe);
+    else delete limites[categoria];
+    this.estado.presupuestos = limites;
     this.guardar();
   }
 

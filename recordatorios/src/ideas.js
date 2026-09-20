@@ -11,10 +11,21 @@
  * Lo descartado se queda escrito a propósito: una decisión sin motivo vuelve a
  * discutirse cada tres meses. Las entradas 101-110 salieron de revisar una lista
  * de 200 funcionalidades de herramientas de gestión de proyectos profesionales y
- * quedarse solo con lo que sirve a una persona que trabaja sola.
+ * quedarse solo con lo que sirve a una persona que trabaja sola. Las 111-120
+ * salieron de una lista de 50 ideas de productividad personal, y son cuatro
+ * piezas genéricas en vez de treinta módulos: notas, colecciones de fichas,
+ * objetivos y gastos.
  */
 
 export const CATEGORIAS = [
+  {
+    id: 'vida',
+    nombre: 'La vida fuera del trabajo'
+  },
+  {
+    id: 'notas',
+    nombre: 'Notas y diario'
+  },
   {
     id: 'captura',
     nombre: 'Capturar sin fricción'
@@ -168,6 +179,16 @@ export const IDEAS = [
   { n: 108, c: 'proyectos', estado: 'hecho', t: 'Riesgos ligeros por proyecto', d: 'Cinco líneas por proyecto: qué puede romperlo, probabilidad por impacto, el disparador y cuándo revisarlo. Un riesgo que se cumple deja de ser riesgo: se convierte en tarea. Sin registro formal ni reservas de contingencia.' },
   { n: 109, c: 'proyectos', estado: 'hecho', t: 'Detector de alcance que crece', d: 'Cuánto ha engordado el plan desde la línea base, en días y en tareas añadidas, con la lista de lo nuevo y de lo que se alargó. El alcance no crece de golpe: crece a base de “y ya que estamos”.' },
   { n: 110, c: 'datos', estado: 'hecho', t: 'Copiloto local, sin mandar nada fuera', d: 'Seis preguntas respondidas con cálculo: qué se va a retrasar, qué puedo mover sin tocar la entrega, quién está sobrecargado, qué cambió esta semana, qué me va a explotar y cómo viene la semana. Empareja por palabras clave, no comprende; cuando no reconoce la pregunta lo dice y enseña las que sí sabe responder. Determinista y offline.' },
+  { n: 111, c: 'notas', estado: 'hecho', t: 'Notas sueltas, el segundo cerebro', d: 'Notas que no son tareas, con etiquetas y enlaces [[así]]. Debajo de cada una aparece quién apunta a ella, que es donde salen las relaciones que no recordabas; un enlace a una nota que no existe se convierte en esa nota de un clic.' },
+  { n: 112, c: 'vida', estado: 'hecho', t: 'Colecciones: fichas con los campos que tú quieras', d: 'Una colección es una lista de fichas con sus campos (texto, número, dinero, fecha, sí/no, elección, enlace). Seis vienen puestas —vehículos, biblioteca, cursos, regalos, lugares, inventario— y las fechas marcadas con “avisa” se convierten en recordatorios. Seis módulos parecidos en una sola pantalla.' },
+  { n: 113, c: 'vida', estado: 'hecho', t: 'Objetivos con progreso y revisión', d: 'Metas por número, por tareas cerradas de un proyecto o por sí/no, con fecha de revisión. Lo que se enseña no es solo el porcentaje: es el progreso comparado con el tiempo gastado y cuánto haría falta por semana. Abandonar uno pide el motivo, que se queda escrito.' },
+  { n: 114, c: 'vida', estado: 'hecho', t: 'Mantenimiento por uso, no por fecha', d: 'Un contador de kilómetros (u horas) que no retrocede, el uso diario sacado de dos lecturas separadas al menos una semana, y servicios que vencen por uso, por tiempo o por lo que llegue antes. Con el ritmo medido dice en qué fecha caerían esos kilómetros, y sin datos suficientes lo dice en vez de estimar.' },
+  { n: 115, c: 'vida', estado: 'hecho', t: 'Gastos y presupuesto por categoría', d: 'Gasto escrito a mano, como los precios de la cartera. Presupuesto por categoría y el aviso que de verdad sirve: “vas por el 77 % del mes y el 78 % del presupuesto”. Los recibos fijos se copian al mes siguiente sin duplicarse.' },
+  { n: 116, c: 'vida', estado: 'hecho', t: 'Agenda de personas: cumpleaños, fechas y regalos', d: 'Cumpleaños con la edad, otras fechas anuales o de una vez, y las ideas de regalo de cada uno. El aviso sale con la antelación que pongas, porque el mismo día sirve para un mensaje pero no para un regalo.' },
+  { n: 117, c: 'vida', estado: 'hecho', t: 'Rutinas encadenadas de mañana y noche', d: 'Una rutina es una sola cosa con pasos dentro, cada uno con sus minutos. Se marcan de un toque desde Hoy o desde su pantalla, dice cuánto queda de lo que dura, y la racha salta los días en que no tocaba: el sábado no la rompe.' },
+  { n: 118, c: 'vida', estado: 'hecho', t: 'El viaje como ficha: itinerario, papeles y presupuesto', d: 'Cuenta atrás, itinerario día a día sacado de las tareas que caen entre las fechas, la preparación pendiente y lo gastado frente al presupuesto, por día y por persona. No guarda nada por duplicado: un gasto del viaje es un gasto.' },
+  { n: 119, c: 'notas', estado: 'hecho', t: 'Diario del día', d: 'Una entrada por día con su ánimo, escrita donde ya viven las notas, con la racha de días seguidos y el “hace un año, un día como hoy” que es media gracia de llevar un diario.' },
+  { n: 120, c: 'vida', estado: 'hecho', t: 'Panel de vida', d: 'Ocho tarjetas —día, rutinas, dinero, objetivos, personas, mantenimiento, viajes y notas— y arriba lo que pide atención, ordenado por urgencia. Ningún dato nuevo: los que ya hay, juntos. Lo que todavía está vacío lo dice en vez de enseñar un cero con pinta de dato.' },
 ];
 
 export const HECHAS = IDEAS.filter((i) => i.estado === 'hecho').map((i) => i.n);

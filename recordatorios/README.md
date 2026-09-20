@@ -1,8 +1,9 @@
 # Recordatorios
 
 App de tareas y gestión del tiempo al estilo de Todoist o TickTick, pero hecha
-alrededor de **tu** trabajo: inversiones, docencia, investigación, el equipo de
-alabanza y lo personal.
+alrededor de **tu** trabajo —inversiones, docencia, investigación y el equipo de
+alabanza— y de la vida que hay alrededor: notas, objetivos, gastos, rutinas,
+personas, el carro y los viajes.
 
 Sin servidor, sin cuenta y sin internet. Todo se guarda en tu dispositivo.
 
@@ -33,6 +34,7 @@ Se instala como app (Chrome/Edge/Android: “Instalar”; iPhone: Compartir →
 | **Listas y filtros** | Listas propias y filtros guardados con un lenguaje corto de consultas. |
 | **Informes** | Eliges qué medir, cómo agruparlo y en qué periodo; la gráfica sale sola y se descarga en CSV. |
 | **Copiloto** | Preguntas sobre el plan respondidas con cálculo: qué se va a retrasar, quién está sobrecargado, qué cambió. |
+| **Panel de vida** | Ocho tarjetas con el día, el dinero, los objetivos, las fechas, lo que vence y el viaje que viene. |
 | **Lo que queda** | La hoja de ruta: lo hecho, lo pendiente por olas y lo descartado con su motivo. |
 
 ### Escribir una tarea como se habla
@@ -388,6 +390,81 @@ así que “cada tercer viernes” sigue repitiéndose en tu calendario.
 Los datos viven en el almacenamiento de este navegador (y los archivos adjuntos
 en IndexedDB). Si borras los datos del sitio, se van: exporta de vez en cuando.
 
+## La vida fuera del trabajo
+
+La app nació alrededor del trabajo. Esta parte es lo demás, y está montada sobre
+**cuatro piezas genéricas** en vez de treinta módulos parecidos: notas,
+colecciones de fichas, objetivos y gastos.
+
+### Notas y diario
+
+Una tarea es algo que hacer; una nota es algo que recordar. Las notas van
+aparte, con etiquetas y enlaces `[[entre corchetes dobles]]`. Debajo de cada una
+aparece **quién apunta a ella**, que es donde salen las relaciones que no
+recordabas, y un enlace a una nota que todavía no existe se convierte en esa
+nota de un clic.
+
+El **diario** es una nota con fecha: la misma pieza, sin módulo aparte. Tiene la
+racha de días seguidos, el ánimo del día y el *«hace un año, un día como hoy»*,
+que es media gracia de llevar un diario.
+
+### Colecciones
+
+Una colección es una lista de fichas con **los campos que tú pongas**: texto,
+número, dinero, fecha, sí/no, elección o enlace. El carro, la biblioteca, los
+cursos, los regalos, los lugares y el inventario de casa son la misma pantalla
+con otros campos, y las seis vienen ya montadas.
+
+Las fechas marcadas con **«avisa»** son las que convierten una ficha en
+recordatorio: el seguro que vence, la garantía que caduca, el libro que hay que
+devolver. Cada aviso se convierte en tarea con un botón.
+
+### Mantenimiento por uso
+
+Es el único mecanismo de repetición que no va por calendario. Apuntas la lectura
+del tablero de vez en cuando —el contador **no retrocede**— y con dos lecturas
+separadas al menos una semana la app saca tu ritmo diario. A partir de ahí, el
+aceite vence *a los 5.000 km o a los seis meses, lo que llegue antes*, y dice en
+qué fecha caerían esos kilómetros al ritmo que llevas. Sin datos suficientes lo
+dice, en vez de estimar mal.
+
+### Objetivos
+
+Metas por número, por tareas cerradas de un proyecto o por sí/no, con fecha de
+revisión. Lo que se enseña grande no es el porcentaje: es el progreso **comparado
+con el tiempo gastado** y cuánto haría falta por semana. Llevar el 25 % en
+septiembre de un objetivo anual suena bien y va tarde. Abandonar uno pide el
+motivo, y se queda escrito. Cubre también el plan de aprendizaje, las habilidades
+por aprender y la lista de cosas para hacer alguna vez.
+
+### Gastos
+
+El eje que faltaba: había cartera, no había gasto. Se escribe a mano, igual que
+los precios —sin conexión al banco, sin credenciales y sin que nada salga del
+dispositivo— con presupuesto por categoría, reparto de a dónde se fue y los
+recibos fijos que se copian al mes siguiente sin duplicarse. El aviso útil no es
+el total: es *«vas por el 77 % del mes y el 78 % del presupuesto»*.
+
+### Rutinas, personas y viajes
+
+- **Rutinas** de mañana y de noche: una sola cosa con pasos dentro, cada uno con
+  sus minutos, en vez de cinco tareas sueltas que se aplazan de una en una. Se
+  marcan desde Hoy, dicen cuánto queda de lo que duran y la racha salta los días
+  en que no tocaba: el sábado no la rompe.
+- **Personas**: cumpleaños con la edad, otras fechas y las ideas de regalo de
+  cada uno. El aviso sale con la antelación que pongas, porque el mismo día
+  sirve para un mensaje pero no para un regalo.
+- **Viajes**: cuenta atrás, itinerario día a día sacado de las tareas que caen
+  entre las fechas, la preparación pendiente y lo gastado frente al presupuesto,
+  por día y por persona. Nada por duplicado: un gasto del viaje es un gasto.
+
+### Panel de vida
+
+Ocho tarjetas —día, rutinas, dinero, objetivos, personas, mantenimiento, viajes
+y notas— y arriba lo que pide atención, ordenado por urgencia. Ningún dato
+nuevo: los que ya hay, juntos. Lo que todavía está vacío lo dice, en vez de
+enseñar un cero con pinta de dato.
+
 ## Informes y copiloto
 
 **Informes a medida**: tres menús —qué medir, cómo agruparlo y en qué periodo— y
@@ -411,10 +488,13 @@ descargar. Si la semana fue floja se nota, que es justo para lo que sirve.
 
 ## Lo que queda
 
-La pestaña **Lo que queda** es la hoja de ruta real de la app: **98 hechas y 12
-descartadas**. Las tres olas están terminadas, así que hoy no queda nada
-pendiente. Lo siguiente saldrá de usarla: cuando algo moleste tres veces en una
-semana, eso es la idea 111.
+La pestaña **Lo que queda** es la hoja de ruta real de la app: **108 hechas y 12
+descartadas**, y hoy no queda nada pendiente. Las diez últimas (111-120) salieron
+de revisar una lista de 50 ideas de productividad personal y resumirlas en cuatro
+piezas genéricas —notas, colecciones, objetivos y gastos— en vez de treinta
+módulos parecidos. De esa lista se quedaron fuera a propósito las tarjetas de
+repetición espaciada (eso es otra app), los gastos compartidos entre varios (no
+hay servidor ni cuentas) y cualquier cosa que dependa de la ubicación.
 
 Lo descartado se queda escrito **con su motivo** (notificaciones push, correo a
 tarea, asignar responsable, sincronización con Google Calendar…): casi todo cae
@@ -437,6 +517,7 @@ que se genera con `npm run docs`.
 `a` añadir · `/` buscar · `h` Hoy · `p` Próximos · `c` Calendario · `e` Enfoque ·
 `b` Bandeja · `t` Tablero · `i` Inversiones · `g` Proyectos · `r` Revisión ·
 `n` capturar sobre cualquier pantalla · `f` Informes · `k` Copiloto ·
+`v` Panel de vida · `d` Notas y diario ·
 `Ctrl+Z` deshacer · `Alt+↑/↓` reordenar en orden manual · `Esc` salir o cerrar.
 
 La app es navegable entera con el teclado: hay enlace para saltar los menús, el
@@ -447,7 +528,7 @@ Alt y las flechas.
 ## Pruebas
 
 ```bash
-npm test                  # 288 pruebas de lógica, sin navegador
+npm test                  # 330 pruebas de lógica, sin navegador
 npm run test:navegador    # recorre la app en Chromium (necesita Playwright)
 ```
 
@@ -459,4 +540,7 @@ ganado, nivelación de recursos), bandeja de entrada, resumen del día,
 calibración de estimaciones, plantillas de listas e importación/exportación,
 detección de duplicados, reglas de automatización, energía, interrupciones,
 franjas de silencio y horario de clase, cola de lectura, riesgos, alcance que
-crece, informes a medida y las respuestas del copiloto.
+crece, informes a medida, las respuestas del copiloto, enlaces entre notas y
+racha del diario, colecciones con sus vencimientos, objetivos contra el tiempo
+gastado, mantenimiento por kilómetros, presupuesto mensual, agenda de personas,
+rutinas con racha, itinerario y presupuesto de viaje, y el panel de vida.
