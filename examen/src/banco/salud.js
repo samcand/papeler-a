@@ -1,10 +1,11 @@
 /**
- * salud.js — Banco de salud y biología humana.
+ * salud.js — Banco de biología y salud.
  *
- * Aparece en dos sitios del examen: como ciencias experimentales (célula,
- * genética, sistemas del cuerpo) y como educación para la salud, que es lo que
- * preguntan con más frecuencia las carreras del área y lo que además sirve
- * fuera del examen: prevención, primeros auxilios, nutrición y salud mental.
+ * Cubre el componente biológico de la prueba de ciencias naturales —célula,
+ * genética, ecología, evolución, biodiversidad e indagación científica— y la
+ * educación para la salud, que es lo que preguntan con más frecuencia las
+ * carreras del área y lo que además sirve fuera del examen: prevención,
+ * primeros auxilios, nutrición y salud mental.
  *
  * Aquí se explican conceptos, no se receta nada: ante un síntoma real, el
  * destino es un profesional de salud, no un banco de preguntas.
@@ -1159,5 +1160,492 @@ export const SALUD = [
     ],
     correcta: 0,
     explicacion: 'La adaptación ocurre durante el descanso, no durante el esfuerzo. Subir la carga demasiado rápido produce lesiones y abandono, que es la causa número uno de fracaso.',
+  },
+
+  // ----- Ecología y ecosistemas -----
+  {
+    id: 'sal-101', tema: 'ecologia', dificultad: 1,
+    enunciado: 'Un ecosistema está formado por:',
+    opciones: [
+      'Los seres vivos de un lugar y el medio físico con el que interactúan',
+      'Únicamente los animales de una región',
+      'El conjunto de plantas de un territorio',
+      'El clima y el relieve de una zona',
+    ],
+    correcta: 0,
+    explicacion: 'Incluye los factores bióticos (los organismos) y los abióticos (agua, suelo, luz, temperatura). Lo que define al ecosistema son las relaciones entre unos y otros.',
+  },
+  {
+    id: 'sal-102', tema: 'ecologia', dificultad: 1,
+    enunciado: 'En una cadena trófica, los organismos que fabrican su propio alimento se llaman:',
+    opciones: ['Productores', 'Consumidores primarios', 'Descomponedores', 'Depredadores'],
+    correcta: 0,
+    explicacion: 'Las plantas y las algas capturan energía solar por fotosíntesis. Los descomponedores, como hongos y bacterias, devuelven la materia al suelo.',
+  },
+  {
+    id: 'sal-103', tema: 'ecologia', dificultad: 2,
+    enunciado: 'En un ecosistema, la energía:',
+    opciones: [
+      'Fluye en un solo sentido y se va perdiendo como calor en cada nivel',
+      'Circula en ciclo cerrado, igual que la materia',
+      'Se conserva íntegra al pasar de un nivel a otro',
+      'Solo la aprovechan los depredadores',
+    ],
+    correcta: 0,
+    explicacion: 'La materia sí se recicla en ciclos; la energía no. Por eso el ecosistema necesita una entrada permanente de energía solar.',
+  },
+  {
+    id: 'sal-104', tema: 'ecologia', dificultad: 3,
+    enunciado: 'Al pasar de un nivel trófico al siguiente, la energía disponible es aproximadamente:',
+    opciones: [
+      'El 10 % de la del nivel anterior',
+      'El 90 % de la del nivel anterior',
+      'La misma que en el nivel anterior',
+      'El doble que en el nivel anterior',
+    ],
+    correcta: 0,
+    explicacion: 'El resto se disipa en respiración, movimiento y calor. Esa regla explica por qué las cadenas tróficas rara vez pasan de cuatro o cinco eslabones y por qué hay pocos grandes depredadores.',
+    pista: 'Piensa cuánta energía usa un animal solo en mantenerse vivo.',
+  },
+  {
+    id: 'sal-105', tema: 'ecologia', dificultad: 2,
+    enunciado: 'La fotosíntesis y la respiración celular se relacionan porque:',
+    opciones: [
+      'Una consume CO₂ y libera O₂, y la otra hace lo contrario',
+      'Las dos liberan oxígeno',
+      'Las dos ocurren solo de día',
+      'Ninguna interviene en el ciclo del carbono',
+    ],
+    correcta: 0,
+    explicacion: 'Juntas mantienen el ciclo del carbono y del oxígeno. Las plantas también respiran: la fotosíntesis es adicional, no un reemplazo.',
+  },
+  {
+    id: 'sal-106', tema: 'ecologia', dificultad: 2,
+    enunciado: 'Ordena de menor a mayor: comunidad, población, ecosistema.',
+    opciones: [
+      'Población, comunidad, ecosistema',
+      'Comunidad, población, ecosistema',
+      'Ecosistema, comunidad, población',
+      'Población, ecosistema, comunidad',
+    ],
+    correcta: 0,
+    explicacion: 'Población es un conjunto de individuos de la misma especie; comunidad reúne a todas las poblaciones del lugar; el ecosistema añade el medio físico.',
+  },
+  {
+    id: 'sal-107', tema: 'ecologia', dificultad: 2,
+    enunciado: 'La relación entre una garrapata y un perro es un ejemplo de:',
+    opciones: ['Parasitismo', 'Mutualismo', 'Comensalismo', 'Competencia'],
+    correcta: 0,
+    explicacion: 'Uno se beneficia y el otro resulta perjudicado. En el mutualismo ganan los dos y en el comensalismo uno gana y el otro ni gana ni pierde.',
+  },
+  {
+    id: 'sal-108', tema: 'ecologia', dificultad: 3,
+    enunciado: 'Si en un ecosistema se eliminan los depredadores de una especie herbívora, lo más probable a corto plazo es que:',
+    opciones: [
+      'La población de herbívoros crezca y la vegetación disminuya',
+      'La población de herbívoros se mantenga igual',
+      'La vegetación aumente sin límite',
+      'Los herbívoros se extingan por falta de competencia',
+    ],
+    correcta: 0,
+    explicacion: 'Al quitar el control, los herbívoros se multiplican hasta agotar su alimento, y entonces la población colapsa. Es un efecto en cascada típico de las cadenas tróficas.',
+  },
+  {
+    id: 'sal-109', tema: 'ecologia', dificultad: 2,
+    enunciado: 'La capacidad de carga de un ecosistema es:',
+    opciones: [
+      'El número máximo de individuos de una especie que puede sostener de forma indefinida',
+      'El peso total de la vegetación que contiene',
+      'La cantidad de energía solar que recibe al año',
+      'El número de especies distintas que alberga',
+    ],
+    correcta: 0,
+    explicacion: 'La fijan los recursos disponibles: alimento, agua y espacio. Superarla conduce a un deterioro del ambiente y a una caída de la población.',
+  },
+  {
+    id: 'sal-110', tema: 'ecologia', dificultad: 3,
+    enunciado: 'Un contaminante persistente se encuentra en mayor concentración en los peces grandes que en los pequeños. El fenómeno se llama:',
+    opciones: [
+      'Bioacumulación a lo largo de la cadena trófica',
+      'Fotosíntesis acelerada',
+      'Eutrofización del agua',
+      'Deriva génica',
+    ],
+    correcta: 0,
+    explicacion: 'Cada depredador acumula lo que traían todas sus presas, así que la concentración sube nivel a nivel. Por eso se recomienda moderar el consumo de peces grandes con mercurio.',
+  },
+
+  // ----- Evolución -----
+  {
+    id: 'sal-111', tema: 'evolucion', dificultad: 1,
+    enunciado: 'La selección natural propuesta por Darwin sostiene que:',
+    opciones: [
+      'Los individuos mejor adaptados a su ambiente dejan en promedio más descendencia',
+      'Los organismos desarrollan las características que necesitan',
+      'Todas las especies evolucionan hacia formas más complejas',
+      'Los cambios del ambiente modifican directamente el ADN',
+    ],
+    correcta: 0,
+    explicacion: 'La variación ya existe en la población y el ambiente filtra cuál se reproduce más. La idea de que el uso genera el órgano es la hipótesis de Lamarck, hoy descartada.',
+  },
+  {
+    id: 'sal-112', tema: 'evolucion', dificultad: 3,
+    enunciado: 'Una jirafa no tiene el cuello largo porque sus ancestros lo estiraran. La explicación evolutiva correcta es que:',
+    opciones: [
+      'Ya existían variaciones en la longitud del cuello y las de cuello más largo sobrevivieron y se reprodujeron más',
+      'El esfuerzo de estirarse modificó los genes que heredaron',
+      'El ambiente ordenó a la especie alargar el cuello',
+      'Todas las jirafas cambiaron a la vez',
+    ],
+    correcta: 0,
+    explicacion: 'La mutación y la recombinación producen variación al azar; la selección actúa después. Es la diferencia central entre Darwin y Lamarck, y una de las preguntas más frecuentes del examen.',
+    pista: 'Pregúntate si la variación aparece antes o después de la necesidad.',
+  },
+  {
+    id: 'sal-113', tema: 'evolucion', dificultad: 2,
+    enunciado: '¿Cuál de estas NO es una evidencia de la evolución?',
+    opciones: [
+      'La existencia de individuos más fuertes dentro de una especie',
+      'El registro fósil',
+      'Las semejanzas en el ADN entre especies emparentadas',
+      'Las estructuras homólogas en distintos vertebrados',
+    ],
+    correcta: 0,
+    explicacion: 'Que haya diferencias entre individuos es variación, no evidencia de descendencia con modificación. Las otras tres sí muestran el parentesco entre especies.',
+  },
+  {
+    id: 'sal-114', tema: 'evolucion', dificultad: 2,
+    enunciado: 'La aparición de bacterias resistentes a los antibióticos es un ejemplo de:',
+    opciones: [
+      'Selección natural observable en tiempo real',
+      'Mutación provocada intencionalmente por la bacteria',
+      'Adaptación aprendida y transmitida por contacto',
+      'Un fenómeno sin relación con la evolución',
+    ],
+    correcta: 0,
+    explicacion: 'El antibiótico elimina a las sensibles y deja que se multipliquen las que ya eran resistentes por azar. Por eso completar los tratamientos y no automedicarse es una medida evolutiva, además de médica.',
+  },
+  {
+    id: 'sal-115', tema: 'evolucion', dificultad: 3,
+    enunciado: 'Dos poblaciones de una misma especie quedan separadas por una cordillera durante miles de años. Lo más probable es que:',
+    opciones: [
+      'Acumulen diferencias y con el tiempo puedan convertirse en especies distintas',
+      'Permanezcan idénticas indefinidamente',
+      'Se extingan las dos por falta de contacto',
+      'Se fusionen en una sola población mayor',
+    ],
+    correcta: 0,
+    explicacion: 'Es la especiación por aislamiento geográfico: sin intercambio de genes, las mutaciones y la selección actúan por separado en cada población.',
+  },
+  {
+    id: 'sal-116', tema: 'evolucion', dificultad: 3,
+    enunciado: 'El ala de un murciélago y el brazo humano son estructuras homólogas porque:',
+    opciones: [
+      'Comparten el mismo origen y plan estructural aunque cumplan funciones distintas',
+      'Cumplen la misma función aunque tengan orígenes distintos',
+      'Tienen exactamente el mismo tamaño',
+      'Evolucionaron de forma independiente',
+    ],
+    correcta: 0,
+    explicacion: 'Las estructuras análogas son lo contrario: el ala de un insecto y la de un ave cumplen la misma función pero no comparten origen. Las homologías apuntan a un ancestro común.',
+  },
+  {
+    id: 'sal-117', tema: 'evolucion', dificultad: 2,
+    enunciado: 'Los pinzones de las islas Galápagos fueron importantes para Darwin porque:',
+    opciones: [
+      'Mostraban picos distintos según el alimento disponible en cada isla',
+      'Eran idénticos entre sí en todas las islas',
+      'No se reproducían en cautiverio',
+      'Eran la única especie de ave del archipiélago',
+    ],
+    correcta: 0,
+    explicacion: 'La variación de los picos sugería que una población original se había diversificado al ocupar ambientes distintos: es un caso de radiación adaptativa.',
+  },
+  {
+    id: 'sal-118', tema: 'evolucion', dificultad: 2,
+    enunciado: 'En términos evolutivos, una adaptación es:',
+    opciones: [
+      'Una característica heredable que mejora la supervivencia o la reproducción en un ambiente dado',
+      'Un cambio que el individuo decide hacer para sobrevivir',
+      'Una costumbre que se aprende y se transmite',
+      'Una característica que aparece cuando el organismo la necesita',
+    ],
+    correcta: 0,
+    explicacion: 'Tiene que ser heredable: lo que un individuo aprende o desarrolla durante su vida no se transmite en los genes.',
+  },
+  {
+    id: 'sal-119', tema: 'evolucion', dificultad: 3,
+    enunciado: 'Una población pequeña queda aislada tras una catástrofe y sus frecuencias genéticas cambian solo por azar. Eso se llama:',
+    opciones: [
+      'Deriva génica',
+      'Selección natural',
+      'Mutación dirigida',
+      'Flujo génico',
+    ],
+    correcta: 0,
+    explicacion: 'En poblaciones pequeñas el azar pesa más que la selección. El flujo génico, en cambio, es el intercambio de genes entre poblaciones distintas.',
+  },
+  {
+    id: 'sal-120', tema: 'evolucion', dificultad: 2,
+    enunciado: 'La evolución actúa sobre:',
+    opciones: [
+      'Las poblaciones a lo largo de generaciones, no sobre los individuos durante su vida',
+      'Cada individuo, que evoluciona mientras vive',
+      'Las especies completas de forma simultánea',
+      'Solo los organismos de reproducción sexual',
+    ],
+    correcta: 0,
+    explicacion: 'Un individuo nace, vive y muere con el genoma que le tocó. Lo que cambia con el tiempo es la frecuencia de las variantes dentro de la población.',
+  },
+
+  // ----- Biodiversidad y clasificación -----
+  {
+    id: 'sal-121', tema: 'biodiversidad', dificultad: 2,
+    enunciado: 'La biodiversidad se mide en tres niveles:',
+    opciones: [
+      'Genética, de especies y de ecosistemas',
+      'Vegetal, animal y mineral',
+      'Terrestre, acuática y aérea',
+      'Local, nacional e internacional',
+    ],
+    correcta: 0,
+    explicacion: 'Perder variabilidad genética dentro de una especie también es perder biodiversidad, aunque la especie siga existiendo: la deja más vulnerable ante enfermedades.',
+  },
+  {
+    id: 'sal-122', tema: 'biodiversidad', dificultad: 2,
+    enunciado: '¿Cuál es el orden correcto de las categorías taxonómicas, de la más amplia a la más específica?',
+    opciones: [
+      'Reino, filo, clase, orden, familia, género, especie',
+      'Especie, género, familia, orden, clase, filo, reino',
+      'Reino, clase, filo, familia, orden, especie, género',
+      'Filo, reino, orden, clase, género, familia, especie',
+    ],
+    correcta: 0,
+    explicacion: 'Cada categoría agrupa a las inferiores. La especie es la unidad básica de la clasificación.',
+  },
+  {
+    id: 'sal-123', tema: 'biodiversidad', dificultad: 2,
+    enunciado: 'El nombre científico de una especie, como Homo sapiens, está formado por:',
+    opciones: [
+      'El género, con inicial mayúscula, y el epíteto específico, en minúscula',
+      'El reino y la familia',
+      'El país de origen y el descubridor',
+      'Dos nombres comunes traducidos al latín',
+    ],
+    correcta: 0,
+    explicacion: 'Es la nomenclatura binomial de Linneo. Se escribe en cursiva o subrayada, y evita la confusión que producen los nombres comunes de cada región.',
+  },
+  {
+    id: 'sal-124', tema: 'biodiversidad', dificultad: 3,
+    enunciado: 'El criterio biológico más usado para definir una especie es que sus individuos:',
+    opciones: [
+      'Pueden cruzarse entre sí y dejar descendencia fértil',
+      'Tienen el mismo aspecto externo',
+      'Viven en la misma región geográfica',
+      'Se alimentan de lo mismo',
+    ],
+    correcta: 0,
+    explicacion: 'Por eso el caballo y el burro son especies distintas: su cruce produce mulas, que son estériles. El aspecto externo puede engañar en los dos sentidos.',
+  },
+  {
+    id: 'sal-125', tema: 'biodiversidad', dificultad: 2,
+    enunciado: '¿Cuál es la diferencia fundamental entre una célula procariota y una eucariota?',
+    opciones: [
+      'La eucariota tiene núcleo definido y organelos membranosos; la procariota no',
+      'La procariota es más grande',
+      'La eucariota no tiene ADN',
+      'La procariota solo existe en los virus',
+    ],
+    correcta: 0,
+    explicacion: 'Las bacterias son procariotas y su ADN está libre en el citoplasma. Animales, plantas, hongos y protistas son eucariotas.',
+  },
+  {
+    id: 'sal-126', tema: 'biodiversidad', dificultad: 3,
+    enunciado: '¿Por qué los virus no se consideran seres vivos en el sentido estricto?',
+    opciones: [
+      'Porque no tienen metabolismo propio y solo se reproducen dentro de una célula huésped',
+      'Porque no contienen material genético',
+      'Porque son demasiado pequeños',
+      'Porque no causan enfermedades en todos los organismos',
+    ],
+    correcta: 0,
+    explicacion: 'Sí tienen material genético, pero fuera de una célula son partículas inertes. Es un caso donde la frontera de la definición de vida se vuelve borrosa.',
+  },
+  {
+    id: 'sal-127', tema: 'biodiversidad', dificultad: 1,
+    enunciado: 'En la fotosíntesis, las plantas transforman:',
+    opciones: [
+      'Dióxido de carbono y agua en glucosa y oxígeno, usando energía luminosa',
+      'Oxígeno y glucosa en dióxido de carbono y agua',
+      'Nitrógeno del aire en proteínas',
+      'Minerales del suelo en energía luminosa',
+    ],
+    correcta: 0,
+    explicacion: 'Ocurre en los cloroplastos, gracias a la clorofila. Es la puerta de entrada de la energía a casi todos los ecosistemas.',
+  },
+  {
+    id: 'sal-128', tema: 'biodiversidad', dificultad: 2,
+    enunciado: '¿Cuál es hoy la principal causa de pérdida de biodiversidad en el mundo?',
+    opciones: [
+      'La destrucción y fragmentación de los hábitats',
+      'Las erupciones volcánicas',
+      'La competencia natural entre especies',
+      'Los cambios en la órbita terrestre',
+    ],
+    correcta: 0,
+    explicacion: 'Le siguen las especies invasoras, la sobreexplotación, la contaminación y el cambio climático. Casi todas tienen origen humano.',
+  },
+  {
+    id: 'sal-129', tema: 'biodiversidad', dificultad: 2,
+    enunciado: 'La polinización realizada por abejas y otros insectos es un ejemplo de:',
+    opciones: [
+      'Servicio ecosistémico del que depende buena parte de la producción de alimentos',
+      'Una relación de parasitismo',
+      'Un proceso exclusivo de las plantas ornamentales',
+      'Un fenómeno sin valor económico',
+    ],
+    correcta: 0,
+    explicacion: 'Una fracción muy alta de los cultivos que consumimos depende de polinizadores. Es la razón por la que su declive se considera un problema económico y no solo ambiental.',
+  },
+  {
+    id: 'sal-130', tema: 'biodiversidad', dificultad: 2,
+    enunciado: 'Una especie endémica de un territorio es aquella que:',
+    opciones: [
+      'Solo existe de forma natural en ese lugar',
+      'Fue introducida desde otro continente',
+      'Está presente en todos los continentes',
+      'Se encuentra en peligro de extinción',
+    ],
+    correcta: 0,
+    explicacion: 'El endemismo eleva el valor de conservación: si desaparece allí, desaparece del planeta. No es lo mismo que estar amenazada, aunque muchas endémicas lo estén.',
+  },
+
+  // ----- Indagación y método científico -----
+  {
+    id: 'sal-131', tema: 'indagacion', dificultad: 2,
+    enunciado: '¿Cuál de estas es una pregunta investigable científicamente?',
+    opciones: [
+      '¿Influye la cantidad de luz en el crecimiento de una planta de frijol?',
+      '¿Cuál es la planta más bonita del jardín?',
+      '¿Deberían las personas tener plantas en casa?',
+      '¿Qué significa para mí cuidar una planta?',
+    ],
+    correcta: 0,
+    explicacion: 'Una pregunta investigable se puede poner a prueba con observaciones o experimentos y tiene variables medibles. Las demás son de gusto, de valor o de significado personal.',
+  },
+  {
+    id: 'sal-132', tema: 'indagacion', dificultad: 2,
+    enunciado: 'Una hipótesis científica es:',
+    opciones: [
+      'Una explicación provisional que se puede poner a prueba y resultar falsa',
+      'Una conclusión ya demostrada',
+      'Una opinión personal sobre el tema',
+      'El resultado final del experimento',
+    ],
+    correcta: 0,
+    explicacion: 'Si no hay manera de que los datos la contradigan, no es una hipótesis científica. Poder ser falsada es justamente lo que la hace útil.',
+  },
+  {
+    id: 'sal-133', tema: 'indagacion', dificultad: 2,
+    enunciado: 'En un experimento sobre el efecto del fertilizante en el crecimiento de unas plantas, la variable independiente es:',
+    opciones: [
+      'La cantidad de fertilizante aplicada',
+      'La altura alcanzada por las plantas',
+      'La cantidad de agua recibida',
+      'El tipo de maceta utilizada',
+    ],
+    correcta: 0,
+    explicacion: 'La independiente es la que el investigador manipula; la dependiente es la que se mide como resultado, en este caso la altura. Las demás deben mantenerse constantes.',
+  },
+  {
+    id: 'sal-134', tema: 'indagacion', dificultad: 2,
+    enunciado: '¿Para qué sirve el grupo control en un experimento?',
+    opciones: [
+      'Para comparar: es igual al grupo experimental salvo en la variable que se estudia',
+      'Para repetir el experimento una segunda vez',
+      'Para aumentar el número de participantes',
+      'Para confirmar la hipótesis del investigador',
+    ],
+    correcta: 0,
+    explicacion: 'Sin un punto de comparación no se sabe si el cambio se debe al tratamiento o habría ocurrido de todos modos.',
+  },
+  {
+    id: 'sal-135', tema: 'indagacion', dificultad: 3,
+    enunciado: 'Un estudiante cambia a la vez el tipo de suelo y la cantidad de agua entre sus dos grupos de plantas. El problema de ese diseño es que:',
+    opciones: [
+      'No podrá saber cuál de las dos variables causó la diferencia',
+      'Necesita más plantas en cada grupo',
+      'El experimento dura demasiado tiempo',
+      'No hay ninguno: cambiar dos variables acelera el estudio',
+    ],
+    correcta: 0,
+    explicacion: 'Es el principio de la variable única: para atribuir un efecto hay que cambiar una sola cosa y dejar el resto igual. Con dos cambios simultáneos el resultado es ininterpretable.',
+    pista: 'Si dos cosas cambian a la vez, ¿cuál explica el resultado?',
+  },
+  {
+    id: 'sal-136', tema: 'indagacion', dificultad: 2,
+    enunciado: '¿Por qué un experimento debe repetirse varias veces?',
+    opciones: [
+      'Para reducir el efecto del azar y comprobar que el resultado es consistente',
+      'Para que dure más y parezca más serio',
+      'Porque la primera medición siempre está mal',
+      'Para poder cambiar la hipótesis si hace falta',
+    ],
+    correcta: 0,
+    explicacion: 'Un solo dato puede ser una casualidad. La repetición, propia y de otros equipos, es lo que convierte un resultado en un hallazgo confiable.',
+  },
+  {
+    id: 'sal-137', tema: 'indagacion', dificultad: 3,
+    enunciado: 'La tabla muestra el resultado de un experimento con tres grupos de plantas regadas con distintas cantidades de agua. ¿Qué conclusión se puede sostener con estos datos?',
+    codigo: [
+      'Grupo   Agua por día   Altura a los 30 días',
+      '  A         50 mL            12 cm',
+      '  B        100 mL            21 cm',
+      '  C        200 mL            11 cm',
+    ].join('\n'),
+    opciones: [
+      'Existe una cantidad intermedia de agua que favorece más el crecimiento',
+      'A más agua, mayor crecimiento siempre',
+      'El agua no influye en el crecimiento',
+      'El grupo C recibió una planta defectuosa',
+    ],
+    correcta: 0,
+    explicacion: 'La relación no es lineal: sube hasta 100 mL y vuelve a bajar con 200 mL, probablemente por exceso de agua. Conviene no extrapolar más allá de lo medido ni inventar causas que los datos no muestran.',
+  },
+  {
+    id: 'sal-138', tema: 'indagacion', dificultad: 2,
+    enunciado: 'Si los resultados de un experimento contradicen la hipótesis inicial, lo correcto es:',
+    opciones: [
+      'Reportarlos tal como son y revisar la hipótesis',
+      'Repetir el experimento hasta obtener el resultado esperado',
+      'Descartar los datos que no encajan',
+      'Cambiar la hipótesis y presentarla como si hubiera sido la original',
+    ],
+    correcta: 0,
+    explicacion: 'Una hipótesis refutada es un resultado legítimo y a veces el más valioso. Seleccionar solo los datos que confirman lo esperado es una de las formas más comunes de mala ciencia.',
+  },
+  {
+    id: 'sal-139', tema: 'indagacion', dificultad: 3,
+    enunciado: 'Un estudio observa que los niños que desayunan tienen mejores notas. Antes de concluir que el desayuno mejora el rendimiento, hay que considerar que:',
+    opciones: [
+      'Podría haber un tercer factor, como el entorno familiar, que explique las dos cosas',
+      'La muestra siempre es demasiado pequeña en este tipo de estudios',
+      'Las notas no son un dato medible',
+      'El desayuno no tiene ninguna relación con el aprendizaje',
+    ],
+    correcta: 0,
+    explicacion: 'Es un estudio observacional, no un experimento: muestra asociación, no causa. Para afirmar causalidad haría falta asignar el desayuno al azar y comparar grupos.',
+  },
+  {
+    id: 'sal-140', tema: 'indagacion', dificultad: 2,
+    enunciado: 'En ciencia, una teoría es:',
+    opciones: [
+      'Una explicación amplia y bien respaldada por evidencia acumulada',
+      'Una suposición sin comprobar',
+      'Una idea menos segura que una hipótesis',
+      'Una opinión de un científico reconocido',
+    ],
+    correcta: 0,
+    explicacion: 'En el lenguaje cotidiano "teoría" sugiere una conjetura; en ciencia es lo contrario. La teoría de la evolución o la teoría celular están entre los conocimientos mejor sustentados que existen.',
   },
 ];

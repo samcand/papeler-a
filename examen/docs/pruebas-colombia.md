@@ -145,28 +145,38 @@ que al álgebra.
 | Sociales: espacio, territorio, ambiente y población | Geografía (121) | Cubierto |
 | Competencias ciudadanas (Saber Pro) | Política y ciudadanía | Cubierto |
 | Inglés A1–B1 | Inglés (120) | Cubierto en contenido; faltan los formatos propios del Saber 11 |
-| Ciencias naturales: componente biológico | Salud y biología humana (100) | Parcial: falta ecología y evolución |
-| **Ciencias naturales: componente físico** | — | **Sin cubrir** |
-| **Ciencias naturales: componente químico** | — | **Sin cubrir** |
-| **Ciencias naturales: CTS e indagación** | — | **Sin cubrir** |
+| Ciencias naturales: componente biológico | Biología y salud (140) | Cubierto, con ecología, evolución y biodiversidad |
+| Ciencias naturales: componente físico | Física (100) | Cubierto |
+| Ciencias naturales: componente químico | Química (100) | Cubierto |
+| Ciencias naturales: competencia de indagación | Biología y salud, tema de indagación (10) | Cubierto; CTS se trabaja desde geografía y vida cotidiana |
 | **Historia de Colombia (siglos XIX y XX)** | — | **Sin cubrir** |
 | **Análisis de la imagen (UNAL)** | Razonamiento abstracto (90) cubre series y matrices | **Sin cubrir** el análisis de imágenes reales |
 | **Comunicación escrita (Saber Pro)** | — | **Sin cubrir**: es pregunta abierta, no opción múltiple |
 
-### El hueco más grande
+### Lo que ya quedó cubierto
 
-**Ciencias naturales es la prueba con más preguntas del Saber 11 (58) y la
-plataforma solo cubre una parte de su componente biológico.** Física y química
-no tienen ninguna pregunta. En orden de impacto, lo que falta se prioriza así:
+Ciencias naturales era el hueco más grande: es la prueba con más preguntas del
+Saber 11 (58) y no tenía nada de física ni de química. Ahora están las tres
+áreas del componente, con 10 preguntas por tema como el resto del banco:
 
-1. **Física** (cinemática, dinámica, energía, ondas, electricidad) — 10 temas.
-2. **Química** (átomo, tabla periódica, enlace, reacciones, soluciones, pH) — 10 temas.
-3. **Biología general** (ecología, evolución, ecosistemas), que complementa lo
-   que ya hay de biología humana.
-4. **Historia de Colombia**, dentro de sociales.
-5. **Análisis de la imagen** al estilo UNAL.
-6. **Comunicación escrita**: no son preguntas, hace falta otra pantalla —
-   escribir un texto argumentativo contra reloj y evaluarlo con una rúbrica.
+- **Física** (100): magnitudes y vectores, cinemática, leyes de Newton, trabajo
+  y energía, fluidos, ondas, calor, electricidad, magnetismo y gravitación.
+- **Química** (100): materia, átomo, tabla periódica, enlace, nomenclatura,
+  reacciones, estequiometría, soluciones, ácidos y bases y orgánica.
+- **Biología** (dentro de Biología y salud, 140): se añadieron ecología,
+  evolución, biodiversidad e **indagación científica**, que es la competencia
+  de leer un experimento, distinguir variables y evaluar una conclusión.
+
+### Lo que sigue faltando
+
+1. **Historia de Colombia** (siglos XIX y XX), dentro de sociales.
+2. **Análisis de la imagen** al estilo UNAL: leer fotografías, mapas, obras y
+   publicidad, no series de figuras abstractas.
+3. **Comunicación escrita** (Saber Pro): no son preguntas de opción múltiple,
+   hace falta otra pantalla — escribir un texto argumentativo contra reloj y
+   evaluarlo con una rúbrica.
+4. **Textos discontinuos** en lectura crítica: gráficas, infografías y
+   caricaturas, que hoy solo se trabajan con tablas.
 
 ## Fuentes
 

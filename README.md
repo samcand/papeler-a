@@ -10,9 +10,10 @@ Todo se guarda en tu dispositivo.
 
 Este repositorio también contiene una segunda app, independiente de esta:
 **[Ingreso](examen/README.md)**, una plataforma de preguntas para pruebas de
-admisión a la universidad: 993 preguntas con explicación en nueve asignaturas
-—matemáticas, trigonometría, razonamiento abstracto, geografía, política y
-ciudadanía, salud, vida cotidiana, comprensión de lectura e inglés—. Se abre en
+admisión a la universidad: 1 233 preguntas con explicación en once asignaturas
+—matemáticas, física, química, biología y salud, trigonometría, razonamiento
+abstracto, geografía, política y ciudadanía, vida cotidiana, comprensión de
+lectura e inglés—. Se abre en
 `http://localhost:8080/examen/`. Incluye un mapa de
 [qué evalúan las pruebas colombianas](examen/docs/pruebas-colombia.md)
 —Saber 11, admisión UNAL y Saber Pro— y qué de eso cubre el banco.

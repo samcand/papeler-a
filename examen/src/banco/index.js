@@ -11,6 +11,8 @@ import { ABSTRACTO } from './abstracto.js';
 import { GEOGRAFIA } from './geografia.js';
 import { CIUDADANIA } from './ciudadania.js';
 import { SALUD } from './salud.js';
+import { FISICA } from './fisica.js';
+import { QUIMICA } from './quimica.js';
 import { COTIDIANA } from './cotidiana.js';
 import { LECTURA, LECTURAS } from './lectura.js';
 import { INGLES, LECTURAS_EN } from './ingles.js';
@@ -22,6 +24,8 @@ const POR_ASIGNATURA = {
   geografia: GEOGRAFIA,
   ciudadania: CIUDADANIA,
   salud: SALUD,
+  fisica: FISICA,
+  quimica: QUIMICA,
   cotidiana: COTIDIANA,
   lectura: LECTURA,
   ingles: INGLES,

@@ -125,24 +125,24 @@ function tasa(dato) {
 /** Cuántas preguntas de cada asignatura y cuánto tiempo, como en el examen real. */
 export const MODELOS_SIMULACRO = {
   completo: {
-    nombre: 'Completo', minutos: 110,
+    nombre: 'Completo', minutos: 120,
     reparto: {
-      matematicas: 18, trigonometria: 8, abstracto: 12, geografia: 8, ciudadania: 8,
-      salud: 8, cotidiana: 8, lectura: 10, ingles: 12,
+      matematicas: 16, trigonometria: 6, abstracto: 10, fisica: 8, quimica: 8, salud: 8,
+      geografia: 6, ciudadania: 6, cotidiana: 6, lectura: 10, ingles: 12,
     },
   },
   corto: {
-    nombre: 'Corto', minutos: 45,
+    nombre: 'Corto', minutos: 50,
     reparto: {
-      matematicas: 8, trigonometria: 4, abstracto: 5, geografia: 4, ciudadania: 4,
-      salud: 4, cotidiana: 4, lectura: 4, ingles: 5,
+      matematicas: 8, trigonometria: 3, abstracto: 5, fisica: 4, quimica: 4, salud: 4,
+      geografia: 3, ciudadania: 3, cotidiana: 3, lectura: 5, ingles: 6,
     },
   },
   express: {
-    nombre: 'Exprés', minutos: 20,
+    nombre: 'Exprés', minutos: 24,
     reparto: {
-      matematicas: 4, trigonometria: 2, abstracto: 2, geografia: 2, ciudadania: 2,
-      salud: 2, cotidiana: 2, lectura: 2, ingles: 2,
+      matematicas: 4, trigonometria: 2, abstracto: 2, fisica: 2, quimica: 2, salud: 2,
+      geografia: 2, ciudadania: 2, cotidiana: 2, lectura: 2, ingles: 2,
     },
   },
 };
@@ -162,8 +162,8 @@ export function armarSimulacro(banco, modelo = MODELOS_SIMULACRO.completo, rnd =
 
 /** Agrupa por asignatura (como en el examen real) pero mezcla dentro de cada bloque. */
 function barajarPorAsignatura(preguntas, rnd) {
-  const orden = ['matematicas', 'trigonometria', 'abstracto', 'geografia', 'ciudadania',
-    'salud', 'cotidiana', 'lectura', 'ingles'];
+  const orden = ['matematicas', 'trigonometria', 'abstracto', 'fisica', 'quimica', 'salud',
+    'geografia', 'ciudadania', 'cotidiana', 'lectura', 'ingles'];
   return orden.flatMap((a) => barajar(preguntas.filter((p) => p.asignatura === a), rnd));
 }
 
