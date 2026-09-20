@@ -108,7 +108,7 @@ export function entradaRapida(porDefecto = {}, alAgregar = () => {}) {
 
   function actualizarPrevia() {
     const txt = campo.value.trim();
-    if (!txt) { previa.textContent = ''; actualizarDuplicados(''); return; }
+    if (!txt) { previa.textContent = ''; actualizarCuenta(); actualizarDuplicados(''); return; }
     // Lo que se va a guardar de verdad: lo escrito ya mezclado con los botones.
     const p = combinarEntrada(parseEntrada(txt), controles, porDefecto);
     const trozos = [];
@@ -121,6 +121,7 @@ export function entradaRapida(porDefecto = {}, alAgregar = () => {}) {
     if (p.duracion) trozos.push(`<b>${p.duracion} min</b>`);
     if (p.modulo) trozos.push(`módulo <b>${MODULOS.find((m) => m.id === p.modulo)?.nombre || p.modulo}</b>`);
     previa.innerHTML = trozos.length ? `“${p.titulo}” · ${trozos.join(' · ')}` : `“${p.titulo}” · sin fecha`;
+    actualizarCuenta();
     actualizarDuplicados(p.titulo);
   }
 
@@ -162,10 +163,21 @@ export function entradaRapida(porDefecto = {}, alAgregar = () => {}) {
    * energía y a dónde va. Escribir sigue siendo más rápido, así que esto va
    * plegado y lo escrito manda sobre lo elegido.
    */
+  // El contador se actualiza solo, sin repintar el panel: repintarlo mientras
+  // escribes la repetición te quitaría el foco del campo.
+  const cuenta = el('span', { class: 'muted small grow' });
+  function actualizarCuenta() {
+    const n = Object.values(controles).filter((v) => v !== null && v !== '' && v !== undefined).length;
+    cuenta.textContent = n
+      ? `${n} ${n === 1 ? 'cosa puesta' : 'cosas puestas'} con botones. Lo que escribas manda sobre esto.`
+      : 'Escribir es más rápido; esto es para lo que no te acuerdes de cómo se dice.';
+    const limpiar = panel.querySelector('[data-limpiar]');
+    if (limpiar) limpiar.hidden = !n;
+  }
+
   function pintarPanel() {
     panel.hidden = !abierto;
     if (!abierto) return;
-    const puestos = Object.entries(controles).filter(([, v]) => v !== null && v !== '' && v !== undefined);
 
     const menu = (valor, opciones, alCambiar, vacio) => {
       const sel = el('select', { class: 'input', onChange: (e) => { alCambiar(e.target.value || null); pintarPanel(); actualizarPrevia(); } });
@@ -206,13 +218,17 @@ export function entradaRapida(porDefecto = {}, alAgregar = () => {}) {
         constructorRepeticion(controles.regla, (r) => { controles.regla = r; actualizarPrevia(); })),
 
       el('div', { class: 'fila' },
-        el('span', { class: 'muted small grow' },
-          puestos.length ? `${puestos.length} cosa(s) puestas con botones. Lo que escribas manda sobre esto.` : 'Escribir es más rápido; esto es para lo que no te acuerdes de cómo se dice.'),
-        puestos.length ? button('Limpiar', () => {
-          for (const k of Object.keys(controles)) controles[k] = null;
-          pintarPanel();
-          actualizarPrevia();
-        }, { variant: 'ghost chico' }) : null));
+        cuenta,
+        (() => {
+          const b = button('Limpiar', () => {
+            for (const k of Object.keys(controles)) controles[k] = null;
+            pintarPanel();
+            actualizarPrevia();
+          }, { variant: 'ghost chico' });
+          b.dataset.limpiar = '1';
+          return b;
+        })()));
+    actualizarCuenta();
   }
 
   const botonOpciones = button('⋯', () => { abierto = !abierto; pintarPanel(); }, { title: 'Más opciones' });
