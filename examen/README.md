@@ -1,9 +1,10 @@
 # Ingreso — plataforma de preguntas para la prueba de admisión
 
 Banco de preguntas y simulacros para preparar el examen de ingreso a la
-universidad, con **el temario de lo que preguntan** y **2 233 preguntas** con
-explicación en trece asignaturas, clasificadas en cuatro niveles de dificultad
-y con **al menos tres preguntas de cada nivel en cada uno de los 147 temas**:
+universidad, con **el temario de lo que preguntan** y **2 803 preguntas** con
+explicación en diecisiete asignaturas, clasificadas en cuatro niveles de
+dificultad y con **al menos tres preguntas de cada nivel en cada uno de los
+185 temas**:
 
 | Asignatura | Temas | Preguntas | Qué cubre |
 | --- | --- | --- | --- |
@@ -20,6 +21,10 @@ y con **al menos tres preguntas de cada nivel en cada uno de los 147 temas**:
 | **Física** | 10 | 150 | Magnitudes y vectores, cinemática, leyes de Newton, trabajo y energía, fluidos, ondas, calor, electricidad, magnetismo y gravitación. |
 | **Trigonometría** | 10 | 147 | Grados y radianes, triángulo rectángulo, ángulos notables, circunferencia unitaria, identidades, ángulo doble, ecuaciones, gráficas, leyes de senos y cosenos y aplicaciones. |
 | **Razonamiento abstracto** | 9 | 135 | Series de figuras, matrices, el que no pertenece, rotación, plegado y cubos, series numéricas y alfanuméricas, lógica y analogías. |
+| **Literatura** | 10 | 150 | Géneros, figuras literarias, verso y métrica, narrador y punto de vista, literatura universal, española, latinoamericana y colombiana, análisis del texto y contexto. |
+| **Ética y filosofía** | 10 | 150 | Ética y valores, corrientes éticas, dilemas morales, bioética, ética ambiental, ética digital, filosofía antigua, moderna y contemporánea, y lógica y argumentación. |
+| **Historia universal** | 10 | 150 | Civilizaciones antiguas, Grecia y Roma, Edad Media, Renacimiento, revoluciones burguesas, revolución industrial, imperialismo, guerras mundiales, Guerra Fría y mundo contemporáneo. |
+| **Economía** | 8 | 120 | Escasez y costo de oportunidad, oferta y demanda, mercados y fallas, indicadores macro, dinero y banca, comercio internacional, desigualdad y economía colombiana. |
 
 No necesita servidor, ni cuenta, ni internet. Todo se guarda en tu dispositivo.
 
@@ -43,7 +48,7 @@ conexión. También se publica tal cual en GitHub Pages: son archivos estáticos
 | **Inicio** | Cuántas preguntas llevas hoy, racha, promedio, cuenta regresiva al examen y qué toca repasar. |
 | **Temario** | El mapa del examen: cada tema dice qué hay que saber hacer, cuántas preguntas hay y cómo vas. Desde ahí se practica un tema suelto. |
 | **Practicar** | Preguntas de a una con la explicación al instante. Se filtra por asignatura, tema y dificultad; las teclas 1–4 responden y Enter avanza. |
-| **Simulacro** | El examen completo con cronómetro (108 preguntas en 138 minutos, o versiones corta y exprés), mapa de preguntas, marcas para volver y nada de ayudas. Al entregar: nota, desglose por asignatura y revisión pregunta por pregunta. |
+| **Simulacro** | El examen completo con cronómetro (128 preguntas en 162 minutos, o versiones corta y exprés), mapa de preguntas, marcas para volver y nada de ayudas. Al entregar: nota, desglose por asignatura y revisión pregunta por pregunta. |
 | **Escribir** | El módulo de comunicación escrita del Saber Pro, que no es de opción múltiple: una consigna, un cronómetro, contador de palabras y párrafos, autoguardado, y al terminar una rúbrica de cuatro criterios y una lista de relectura. Los textos quedan guardados y se pueden descargar. |
 | **Progreso** | Actividad de los últimos 14 días, aciertos por asignatura, temas más flojos, historial de simulacros, ajustes y respaldo de tus datos. |
 
@@ -135,9 +140,9 @@ La pregunta correcta no es "cuántas preguntas quedan bonitas", sino **cuántas
 hacen falta para que estudiar con el banco enseñe la materia en vez de enseñar
 el banco**. Hay tres restricciones que fijan el número, y la mayor manda.
 
-**1. Cubrir el temario, no solo tocarlo.** Son 147 temas y cuatro niveles de
+**1. Cubrir el temario, no solo tocarlo.** Son 185 temas y cuatro niveles de
 dificultad (básico, intermedio, avanzado y experto). Con solo tres preguntas
-por nivel ya hacen falta **1 764**. Por debajo de eso hay temas que solo se
+por nivel ya hacen falta **2 220**. Por debajo de eso hay temas que solo se
 pueden practicar de una manera, y el filtro por nivel devuelve listas vacías.
 
 **2. No memorizar la respuesta.** La investigación sobre práctica de
@@ -167,7 +172,7 @@ Juntando las tres:
 | --- | --- | --- | --- |
 | Suelo usable | ~600 | 6 | Cubrir el temario y un mes de práctica |
 | Meta inicial | ~1 000 | 10 | 3 meses de estudio serio y 6 simulacros sin repetir |
-| **Gran alcance** | **~2 000** | **15** | 6 meses, repaso espaciado completo, 9 simulacros y los cuatro niveles practicables en todos los temas |
+| **Gran alcance** | **~2 800** | **15** | Dos años de estudio, repaso espaciado completo, simulacros sin repetir y los cuatro niveles practicables en todos los temas |
 
 La meta original del proyecto eran **10 preguntas por tema**. Al clasificar
 cada pregunta en cuatro niveles apareció una exigencia nueva: que el filtro por
@@ -191,11 +196,15 @@ Cobertura por asignatura (meta: 10 preguntas por tema)
   Lectura crítica          168 preguntas · 10 temas · 16.8 por tema  → meta alcanzada
   Inglés                   183 preguntas · 12 temas · 15.3 por tema  → meta alcanzada
   Lengua y escritura       180 preguntas · 12 temas · 15.0 por tema  → meta alcanzada
-  TOTAL                   2233 preguntas · faltan 0 para la meta de 10 por tema
+  Literatura               150 preguntas · 10 temas · 15.0 por tema  → meta alcanzada
+  Ética y filosofía        150 preguntas · 10 temas · 15.0 por tema  → meta alcanzada
+  Historia universal       150 preguntas · 10 temas · 15.0 por tema  → meta alcanzada
+  Economía                 120 preguntas ·  8 temas · 15.0 por tema  → meta alcanzada
+  TOTAL                   2803 preguntas · faltan 0 para la meta de 10 por tema
 ```
 
-Con 147 temas, exigir tres preguntas de cada uno de los cuatro niveles son
-1 764 como piso; el banco tiene 2 233 y una media de 15,2 por tema. Está en el
+Con 185 temas, exigir tres preguntas de cada uno de los cuatro niveles son
+2 220 como piso; el banco tiene 2 803 y una media de 15,2 por tema. Está en el
 rango de "gran alcance" de la tabla anterior: alcanza para seis meses de
 estudio con repaso espaciado y nueve simulacros sin repetir preguntas.
 

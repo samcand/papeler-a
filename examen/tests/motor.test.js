@@ -145,7 +145,7 @@ t('el simulacro agrupa por asignatura en el orden del examen', () => {
   const orden = examen.map((p) => p.asignatura);
   const bloques = orden.filter((a, i) => a !== orden[i - 1]);
   assert.deepEqual(bloques, ['matematicas', 'trigonometria', 'abstracto', 'fisica', 'quimica',
-    'salud', 'geografia', 'historia', 'universal', 'ciudadania', 'cotidiana', 'lectura', 'lengua', 'literatura', 'filosofia', 'ingles']);
+    'salud', 'geografia', 'historia', 'universal', 'ciudadania', 'economia', 'cotidiana', 'lectura', 'lengua', 'literatura', 'filosofia', 'ingles']);
 });
 
 t('puntaje y agrupaciones', () => {

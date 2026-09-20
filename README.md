@@ -10,10 +10,11 @@ Todo se guarda en tu dispositivo.
 
 Este repositorio también contiene una segunda app, independiente de esta:
 **[Ingreso](examen/README.md)**, una plataforma de preguntas para pruebas de
-admisión a la universidad: 2 233 preguntas con explicación en trece asignaturas
-—matemáticas, física, química, biología y salud, trigonometría, razonamiento
-abstracto, geografía, historia de Colombia, política y ciudadanía, vida
-cotidiana, lectura crítica, lengua y escritura e inglés—, más una pantalla de
+admisión a la universidad: 2 803 preguntas con explicación en diecisiete
+asignaturas —matemáticas, física, química, biología y salud, trigonometría,
+razonamiento abstracto, geografía, historia de Colombia, historia universal,
+política y ciudadanía, economía, ética y filosofía, vida cotidiana, lectura
+crítica, lengua y escritura, literatura e inglés—, más una pantalla de
 comunicación escrita
 con cronómetro y rúbrica. Se abre en
 `http://localhost:8080/examen/`. Incluye un mapa de

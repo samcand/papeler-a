@@ -151,6 +151,10 @@ que al álgebra.
 | Ciencias naturales: componente químico | Química (153) | Cubierto |
 | Ciencias naturales: competencia de indagación | Biología y salud, tema de indagación (16) | Cubierto; CTS se trabaja desde geografía y vida cotidiana |
 | Historia de Colombia | Historia de Colombia (161) | Cubierto, del periodo prehispánico al presente |
+| Historia universal (sociales Saber 11) | Historia universal (150) | Cubierto, de las civilizaciones antiguas al mundo actual |
+| Economía y razonamiento económico | Economía (120) | Cubierto: micro, macro, comercio, desigualdad y economía colombiana |
+| Filosofía y ética (privadas y UNAL) | Ética y filosofía (150) | Cubierto, con bioética, ética digital y lógica |
+| Literatura (privadas y UNAL) | Literatura (150) | Cubierto, con literatura colombiana y latinoamericana |
 | Análisis de la imagen (UNAL) | Lectura crítica, tema de imagen (15) | Cubierto con planos, mapas y gráficos; sin fotografías ni obras |
 | Comunicación escrita (Saber Pro) | Pantalla propia con consignas y rúbrica | Cubierto como ejercicio; la rúbrica es de autoevaluación |
 

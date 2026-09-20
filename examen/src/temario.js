@@ -1,7 +1,7 @@
 /**
  * temario.js — Qué se pregunta en cada asignatura.
  *
- * Es el mapa del examen: dieciséis asignaturas, y dentro de cada una los temas que
+ * Es el mapa del examen: diecisiete asignaturas, y dentro de cada una los temas que
  * aparecen una y otra vez en las pruebas de ingreso, con lo que hay que saber
  * hacer en cada uno. Todas las preguntas del banco apuntan a un `tema` de aquí
  * (hay una prueba que lo verifica), así que el temario y el banco no se separan.
@@ -1103,6 +1103,54 @@ export const ASIGNATURAS = [
         'Globalización y organismos multilaterales',
         'Migraciones, terrorismo y crisis financieras',
         'Cambio climático como problema histórico',
+      ] },
+    ],
+  },
+  {
+    id: 'economia',
+    nombre: 'Economía',
+    icono: '📈',
+    resumen: 'Cómo se decide con recursos escasos y cómo se leen los indicadores.',
+    temas: [
+      { id: 'escasez', nombre: 'Escasez y decisiones', claves: [
+        'Necesidades, bienes y recursos',
+        'Costo de oportunidad',
+        'Frontera de posibilidades de producción',
+      ] },
+      { id: 'oferta-demanda', nombre: 'Oferta, demanda y precios', claves: [
+        'Ley de la oferta y de la demanda',
+        'Equilibrio, escasez y excedente',
+        'Qué desplaza una curva y qué la recorre',
+      ] },
+      { id: 'mercados', nombre: 'Mercados y competencia', claves: [
+        'Competencia perfecta, monopolio y oligopolio',
+        'Fallas de mercado y externalidades',
+        'Papel del Estado: regulación y bienes públicos',
+      ] },
+      { id: 'indicadores', nombre: 'Indicadores macroeconómicos', claves: [
+        'PIB, PIB per cápita y sus límites',
+        'Inflación, IPC y poder adquisitivo',
+        'Desempleo, informalidad y población económicamente activa',
+      ] },
+      { id: 'dinero', nombre: 'Dinero, banca y política monetaria', claves: [
+        'Funciones del dinero y del sistema financiero',
+        'Tasa de interés y banco central',
+        'Crédito, ahorro e inversión',
+      ] },
+      { id: 'internacional', nombre: 'Comercio internacional', claves: [
+        'Ventaja comparativa y especialización',
+        'Aranceles, tratados y balanza comercial',
+        'Tasa de cambio, devaluación y revaluación',
+      ] },
+      { id: 'desigualdad', nombre: 'Desigualdad, pobreza y desarrollo', claves: [
+        'Medición de la pobreza y coeficiente de Gini',
+        'Desarrollo humano frente a crecimiento',
+        'Política social y redistribución',
+      ] },
+      { id: 'colombiana', nombre: 'Economía colombiana', claves: [
+        'Estructura productiva y dependencia de materias primas',
+        'Informalidad laboral y sistema pensional',
+        'Historia económica reciente y apertura',
       ] },
     ],
   },
