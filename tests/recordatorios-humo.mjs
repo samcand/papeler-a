@@ -688,26 +688,22 @@ if (!/faltan 2000 km/.test((await pagina.textContent('#app')).replace(/\s+/g, ' 
   errores.push('el servicio por uso no se pintó en la colección del vehículo');
 } else console.log('  ok  el vehículo enseña lo que le falta al aceite');
 
-// Objetivos: el progreso se compara con el tiempo gastado
+// Metas: el progreso se compara con el tiempo gastado, no solo el porcentaje
 await pagina.goto(BASE + '#/objetivos');
-await pagina.waitForTimeout(400);
-await pagina.getByRole('button', { name: '+ Objetivo' }).click();
-await pagina.waitForTimeout(400);
-const campoObjetivo = pagina.locator('.card.objetivo');
-await campoObjetivo.locator('input[type="number"]').nth(0).fill('4');
-await campoObjetivo.locator('input[type="number"]').nth(0).press('Tab');
-await pagina.waitForTimeout(200);
-await campoObjetivo.locator('input[type="number"]').nth(1).fill('24');
-await campoObjetivo.locator('input[type="number"]').nth(1).press('Tab');
-await pagina.waitForTimeout(200);
-await campoObjetivo.locator('input[type="date"]').nth(0).fill('2026-01-01');
-await pagina.waitForTimeout(200);
-await campoObjetivo.locator('input[type="date"]').nth(1).fill('2026-12-31');
+await pagina.waitForTimeout(500);
+await pagina.locator('#app .rapida input').first().fill('Correr 500 km este año');
+await pagina.getByRole('button', { name: 'Añadir meta' }).click();
+await pagina.waitForTimeout(500);
+const panelMeta = pagina.locator('.drawer').first();
+await panelMeta.locator('input[type="number"]').first().fill('120');
+await panelMeta.locator('input[type="number"]').first().press('Tab');
+await pagina.waitForTimeout(300);
+await panelMeta.getByRole('button', { name: 'Listo' }).click();
 await pagina.waitForTimeout(500);
 const obj = (await pagina.textContent('#app')).replace(/\s+/g, ' ');
 if (!/atrasado/.test(obj) || !/por semana/.test(obj)) {
-  errores.push('el objetivo no comparó progreso y tiempo: ' + obj.slice(0, 250));
-} else console.log('  ok  objetivos: 4 de 24 en septiembre es ir tarde');
+  errores.push('la meta no comparó progreso y tiempo: ' + obj.slice(0, 250));
+} else console.log('  ok  metas: 120 de 500 km en septiembre es ir tarde');
 
 // Gastos: presupuesto y ritmo del mes
 await pagina.evaluate(async () => {
@@ -948,26 +944,61 @@ if (!estrellas.de || conEstrellas !== estrellas.estrellas) {
 } else console.log(`  ok  estrellas del día: ${estrellas.estrellas} de ${estrellas.de} en Hoy`);
 
 
-// Metas de largo plazo: una de vida con los años dentro
+// Metas: se escriben en una línea, se suman con +1 y se agrupan por horizonte
+await pagina.goto(BASE + '#/objetivos');
+await pagina.waitForTimeout(500);
+await pagina.locator('#app .rapida input').first().fill('Leer 24 libros este año');
+await pagina.waitForTimeout(300);
+const pistaMeta = await pagina.textContent('#app .vista-previa');
+if (!/meta 24 libros/.test(pistaMeta) || !/de este año/.test(pistaMeta)) {
+  errores.push('la pista de la meta no interpretó la línea: ' + pistaMeta);
+} else {
+  await pagina.getByRole('button', { name: 'Añadir meta' }).click();
+  await pagina.waitForTimeout(500);
+  await pagina.locator('.drawer').first().getByRole('button', { name: 'Listo' }).click();
+  await pagina.waitForTimeout(400);
+  const creada = await pagina.evaluate(async () => {
+    const { store } = await import('./src/store.js');
+    const o = store.estado.objetivos.find((x) => x.que === 'Leer 24 libros');
+    return o ? { meta: o.meta, unidad: o.unidad, horizonte: o.horizonte, actual: o.actual } : null;
+  });
+  if (!creada || creada.meta !== 24 || creada.horizonte !== 'anio') {
+    errores.push('la meta no se creó bien desde la línea: ' + JSON.stringify(creada));
+  } else {
+    // El +1 es lo que se usa todos los días. Se busca por su nombre: para
+    // entonces ya hay más de una meta en la lista.
+    const fila = () => pagina.locator('.meta', { hasText: 'Leer 24 libros' }).first();
+    await fila().getByTitle('Sumar uno').click();
+    await pagina.waitForTimeout(300);
+    await fila().getByTitle('Sumar uno').click();
+    await pagina.waitForTimeout(400);
+    const cifra = await fila().locator('.meta-cifra').textContent();
+    if (!/2\/24/.test(cifra)) errores.push(`el +1 no sumó: "${cifra}"`);
+    else console.log('  ok  metas: se escriben en una línea y se suman con +1');
+  }
+}
+
+// Una meta de vida con sus años dentro, y el avance que sale de ellas
 const metas = await pagina.evaluate(async () => {
   const { store } = await import('./src/store.js');
   const { objetivoNuevo, progresoConHijos } = await import('./src/objetivos.js');
   const vida = store.agregarEn('objetivos', objetivoNuevo({ que: 'Publicar un libro', horizonte: 'vida', hasta: null, tipo: 'siNo' }));
-  const a26 = store.agregarEn('objetivos', objetivoNuevo({ que: 'Terminar el borrador', horizonte: 'anio', padre: vida.id, meta: 10, actual: 10, desde: '2026-01-01', hasta: '2026-12-31' }));
+  store.agregarEn('objetivos', objetivoNuevo({ que: 'Terminar el borrador', horizonte: 'anio', padre: vida.id, meta: 10, actual: 10, desde: '2026-01-01', hasta: '2026-12-31' }));
   store.agregarEn('objetivos', objetivoNuevo({ que: 'Buscar editorial', horizonte: 'anio', padre: vida.id, tipo: 'siNo', desde: '2027-01-01', hasta: '2027-12-31' }));
   const p = progresoConHijos(vida, store.estado.objetivos, {}, new Date().toISOString().slice(0, 10));
-  return { pct: p.pct, desdeHijas: p.desdeHijas, vida: vida.id, a26: a26.id };
+  return { pct: p.pct, desdeHijas: p.desdeHijas };
 });
 if (metas.pct !== 50 || !metas.desdeHijas) errores.push('el avance de la meta de vida no sale de sus hijas: ' + JSON.stringify(metas));
 else {
   await pagina.goto(BASE + '#/hoy');
   await pagina.goto(BASE + '#/objetivos');
   await pagina.waitForTimeout(700);
-  const dentro = await pagina.locator('.card.objetivo.dentro').count();
   const texto = (await pagina.textContent('#app')).replace(/\s+/g, ' ');
-  if (dentro !== 2) errores.push(`las metas de dentro deberían salir sangradas, salieron ${dentro}`);
-  else if (!/sale de las 2 metas que tiene dentro/.test(texto)) errores.push('no explica de dónde sale el avance: ' + texto.slice(0, 200));
-  else console.log('  ok  metas de largo plazo: la de vida contiene sus años');
+  const grupos = await pagina.locator('#app .card-title').allTextContents();
+  if (!/2 metas dentro/.test(texto)) errores.push('no dice que el avance viene de dentro: ' + texto.slice(0, 200));
+  else if (!grupos.some((g) => /De vida/.test(g)) || !grupos.some((g) => /De este año/.test(g))) {
+    errores.push('las metas no salen agrupadas por horizonte: ' + grupos.join(' | '));
+  } else console.log('  ok  metas: la de vida contiene sus años y se ven agrupadas');
 }
 
 // El año en una página
@@ -1113,16 +1144,12 @@ if (await campoFichas.count()) {
 }
 
 
-// Escribir en un objetivo: ni se cambia de pantalla ni se pierden letras.
+// Escribir en una meta: ni se cambia de pantalla ni se pierden letras.
 // Las teclas sueltas son atajos (p = Próximos, g = Proyectos…), así que
 // perder el foco a media palabra hace que la app salte sola.
 await pagina.goto(BASE + '#/objetivos');
 await pagina.waitForTimeout(500);
-await pagina.getByRole('button', { name: '+ Objetivo' }).click();
-await pagina.waitForTimeout(400);
-const campoMeta = pagina.locator('.card.objetivo input[type="text"]').first();
-await campoMeta.click();
-await pagina.keyboard.press('Control+a');
+await pagina.locator('#app .rapida input').first().click();
 let saltó = null;
 for (const c of 'programar') {
   await pagina.keyboard.type(c);
@@ -1131,10 +1158,10 @@ for (const c of 'programar') {
   if (hash !== '/objetivos' && !saltó) saltó = `${hash} al escribir "${c}"`;
 }
 await pagina.waitForTimeout(400);
-const meta = await campoMeta.inputValue().catch(() => '');
-if (saltó) errores.push(`escribir en un objetivo cambió de pantalla: ${saltó}`);
-else if (meta !== 'programar') errores.push(`se perdieron letras al escribir un objetivo: "${meta}"`);
-else console.log('  ok  escribir en un objetivo sin que la app salte de pantalla');
+const meta = await pagina.locator('#app .rapida input').first().inputValue().catch(() => '');
+if (saltó) errores.push(`escribir una meta cambió de pantalla: ${saltó}`);
+else if (meta !== 'programar') errores.push(`se perdieron letras al escribir una meta: "${meta}"`);
+else console.log('  ok  escribir una meta sin que la app salte de pantalla');
 
 // Accesibilidad básica
 const a11y = await pagina.evaluate(() => {

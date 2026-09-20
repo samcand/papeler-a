@@ -566,6 +566,17 @@ body.concentrado .contenido { max-width: none; display: grid; place-items: cente
 .card.nota.fijada { border-left: 3px solid var(--warn, #e0a33e); }
 .card.nota.abierta { border-left: 3px solid var(--accent-2, #4a9eff); }
 
+/* ---- Metas ---- */
+.meta {
+  border-top: 1px solid var(--line); padding: 12px 0 10px;
+}
+.meta:first-of-type { border-top: 0; }
+.meta.tarde .meta-cifra { color: var(--danger); }
+.meta.lograda { opacity: .75; }
+.meta-cifra { font-variant-numeric: tabular-nums; font-weight: 600; white-space: nowrap; }
+.meta .barra { margin: 8px 0 4px; }
+.meta .barra.tiempo { height: 3px; opacity: .55; margin-top: 0; }
+
 /* ---- Objetivos y rutinas ---- */
 .card.objetivo.atrasado { border-left: 3px solid var(--danger); }
 .card.rutina.completa { border-left: 3px solid var(--ok, #35c48b); }

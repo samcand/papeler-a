@@ -202,6 +202,94 @@ export function aplanar(ramas = []) {
   return ramas.flatMap((r) => [r, ...aplanar(r.hijas)]);
 }
 
+
+/* ------------------------------------------------------------------ *
+ * Escribir una meta en una línea
+ * ------------------------------------------------------------------ */
+
+const UNIDADES_CONOCIDAS = 'libros|km|kil[óo]metros|horas|d[íi]as|clases|art[íi]culos|papers|kilos|veces|sesiones|capítulos|cap[íi]tulos|euros|d[óo]lares';
+
+/**
+ * "Leer 24 libros este año" ya lo dice todo: cuánto, de qué y para cuándo.
+ * Obligar a rellenar cuatro menús para eso es la razón por la que las metas se
+ * escriben una vez y no se vuelven a tocar.
+ *
+ * Lo que no se entienda se queda como está: sin número, la meta es de sí o no,
+ * que también es una meta honesta ("sacar el pasaporte").
+ */
+export function parseMeta(texto, hoyISO = aISO(hoy())) {
+  let resto = String(texto || '').trim();
+  const anio = Number(hoyISO.slice(0, 4));
+  let horizonte = null;
+  let desde = null;
+  let hasta = null;
+
+  const quitar = (re) => {
+    const m = re.exec(resto);
+    if (m) resto = (resto.slice(0, m.index) + resto.slice(m.index + m[0].length)).replace(/\s+/g, ' ').trim();
+    return m;
+  };
+
+  if (quitar(/\b(este|en\s+el|para\s+el)\s+a[ñn]o\b/i)) {
+    horizonte = 'anio';
+    desde = `${anio}-01-01`;
+    hasta = `${anio}-12-31`;
+  } else if (quitar(/\b(este|en\s+este|para\s+este)\s+trimestre\b/i)) {
+    horizonte = 'trimestre';
+    const t = Math.floor(Number(hoyISO.slice(5, 7) - 1) / 3);
+    desde = `${anio}-${String(t * 3 + 1).padStart(2, '0')}-01`;
+    const finMes = t * 3 + 3;
+    hasta = `${anio}-${String(finMes).padStart(2, '0')}-${finMes === 3 || finMes === 12 ? '31' : '30'}`;
+  } else if (quitar(/\b(en\s+la\s+vida|alg[úu]n\s+d[íi]a|de\s+vida)\b/i)) {
+    horizonte = 'vida';
+  } else {
+    const anioSuelto = quitar(/\b(?:en|para|antes\s+de)\s+(20\d{2})\b/i);
+    if (anioSuelto) {
+      horizonte = 'anio';
+      desde = `${anioSuelto[1]}-01-01`;
+      hasta = `${anioSuelto[1]}-12-31`;
+    }
+  }
+
+  // El número y su unidad: "24 libros", "500 km", "3 veces".
+  const num = new RegExp(`\\b(\\d+(?:[.,]\\d+)?)\\s*(${UNIDADES_CONOCIDAS})?\\b`, 'i').exec(resto);
+  let meta = null;
+  let unidad = '';
+  if (num) {
+    meta = Number(String(num[1]).replace(',', '.'));
+    unidad = (num[2] || '').toLowerCase();
+    // El número se queda en el título ("Leer 24 libros" se lee mejor así),
+    // pero la unidad suelta sí se limpia si quedó colgando al final.
+  }
+
+  return {
+    que: resto.replace(/\s+/g, ' ').trim(),
+    horizonte: horizonte || 'anio',
+    desde: desde || aISO(hoy()),
+    hasta,
+    tipo: meta ? 'numero' : 'siNo',
+    meta: meta || 1,
+    unidad,
+  };
+}
+
+/** Sumar (o restar) avance es lo que se hace todos los días; que cueste un botón. */
+export function sumarAvance(objetivo, n = 1) {
+  if (objetivo.tipo === 'siNo') return { ...objetivo, hecho: n > 0 };
+  const actual = Math.max(0, (Number(objetivo.actual) || 0) + n);
+  const tope = Math.max(1, Number(objetivo.meta) || 1);
+  return { ...objetivo, actual: Math.min(actual, tope * 10) };   // por si alguien se pasa de clics
+}
+
+/** Las metas agrupadas por horizonte, que es como se miran de verdad. */
+export function porHorizonte(objetivos = [], datos = {}, hoyISO = aISO(hoy())) {
+  const ramas = arbol(objetivos.filter((o) => !o.logradoEn && !o.abandonadoEn), datos, hoyISO);
+  return HORIZONTES.map((h) => ({
+    ...h,
+    metas: aplanar(ramas).filter((r) => (r.objetivo.horizonte || 'anio') === h.id),
+  }));
+}
+
 /** Los que tocaba mirar y nadie miró. */
 export function aRevisar(objetivos = [], hoyISO = aISO(hoy())) {
   return objetivos

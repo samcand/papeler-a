@@ -490,14 +490,23 @@ aceite vence *a los 5.000 km o a los seis meses, lo que llegue antes*, y dice en
 qué fecha caerían esos kilómetros al ritmo que llevas. Sin datos suficientes lo
 dice, en vez de estimar mal.
 
-### Objetivos
+### Metas
 
-Metas por número, por tareas cerradas de un proyecto o por sí/no, con fecha de
-revisión. Lo que se enseña grande no es el porcentaje: es el progreso **comparado
-con el tiempo gastado** y cuánto haría falta por semana. Llevar el 25 % en
-septiembre de un objetivo anual suena bien y va tarde. Abandonar uno pide el
-motivo, y se queda escrito. Cubre también el plan de aprendizaje, las habilidades
-por aprender y la lista de cosas para hacer alguna vez.
+Una meta se escribe **en una línea**: «Leer 24 libros este año» ya dice cuánto,
+de qué y para cuándo. Sin número, es de sí o no («sacar el pasaporte»), que
+también es una meta honesta.
+
+La lista es compacta —nombre, barra y cifra— y lo que se hace todos los días
+está ahí mismo: **+1**. El formulario completo vive en un panel que se abre solo
+si hace falta afinar algo.
+
+Lo que se enseña no es el porcentaje: es el progreso **comparado con el tiempo
+gastado** (la segunda barra, más fina) y cuánto haría falta por semana. Llevar el
+25 % en septiembre de una meta anual suena bien y va tarde.
+
+Las metas salen **agrupadas por horizonte** —de vida, de este año, de este
+trimestre—, no escondidas detrás de un filtro. Dejar una pide el motivo y se
+queda escrito, que es lo que enseña al mirarlo en diciembre.
 
 ### Metas de largo plazo
 
@@ -594,7 +603,7 @@ descargar. Si la semana fue floja se nota, que es justo para lo que sirve.
 
 ## Lo que queda
 
-La pestaña **Lo que queda** es la hoja de ruta real de la app: **117 hechas y 12
+La pestaña **Lo que queda** es la hoja de ruta real de la app: **118 hechas y 12
 descartadas**, y hoy no queda nada pendiente. Las diez últimas (111-120) salieron
 de revisar una lista de 50 ideas de productividad personal y resumirlas en cuatro
 piezas genéricas —notas, colecciones, objetivos y gastos— en vez de treinta

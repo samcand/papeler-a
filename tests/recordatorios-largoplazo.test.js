@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import {
-  HORIZONTES, aplanar, arbol, haríaCiclo, hijosDe, objetivoNuevo, progreso, progresoConHijos,
+  HORIZONTES, aplanar, arbol, haríaCiclo, hijosDe, objetivoNuevo, parseMeta,
+  porHorizonte, progreso, progresoConHijos, sumarAvance,
 } from '../recordatorios/src/objetivos.js';
 import { aniosConDatos, resumenDelAnio, textoDelAnio } from '../recordatorios/src/anio.js';
 import { crearTarea } from '../recordatorios/src/modelo.js';
@@ -79,6 +80,57 @@ t('una meta no puede colgar de su propia hija', () => {
 t('una meta huérfana no desaparece del árbol', () => {
   const lista = [objetivoNuevo({ id: 'x', que: 'Con padre borrado', padre: 'ya-no-existe' })];
   assert.equal(arbol(lista, {}, HOY).length, 1);
+});
+
+/* ---------------- escribir una meta en una línea ---------------- */
+
+t('"Leer 24 libros este año" ya lo dice todo', () => {
+  const r = parseMeta('Leer 24 libros este año', HOY);
+  assert.equal(r.que, 'Leer 24 libros');
+  assert.equal(r.tipo, 'numero');
+  assert.equal(r.meta, 24);
+  assert.equal(r.unidad, 'libros');
+  assert.equal(r.horizonte, 'anio');
+  assert.equal(r.desde, '2026-01-01');
+  assert.equal(r.hasta, '2026-12-31');
+});
+
+t('sin número es de sí o no, que también es una meta honesta', () => {
+  const r = parseMeta('Sacar el pasaporte', HOY);
+  assert.equal(r.tipo, 'siNo');
+  assert.equal(r.que, 'Sacar el pasaporte');
+  assert.equal(r.hasta, null);
+});
+
+t('el plazo se entiende de varias formas y "algún día" no pone fecha', () => {
+  assert.equal(parseMeta('Escribir 3 artículos este trimestre', HOY).horizonte, 'trimestre');
+  assert.equal(parseMeta('Escribir 3 artículos este trimestre', HOY).hasta, '2026-09-30');
+  assert.equal(parseMeta('Aprender a navegar algún día', HOY).horizonte, 'vida');
+  assert.equal(parseMeta('Aprender a navegar algún día', HOY).hasta, null);
+  assert.equal(parseMeta('Aprender a navegar algún día', HOY).que, 'Aprender a navegar');
+  const futuro = parseMeta('Ahorrar 3000 en 2028', HOY);
+  assert.equal(futuro.hasta, '2028-12-31');
+});
+
+t('sumar y quitar avance es la acción de todos los días', () => {
+  const o = objetivoNuevo({ tipo: 'numero', meta: 10, actual: 3 });
+  assert.equal(sumarAvance(o, 1).actual, 4);
+  assert.equal(sumarAvance(o, -1).actual, 2);
+  assert.equal(sumarAvance({ ...o, actual: 0 }, -1).actual, 0);   // no baja de cero
+  assert.equal(sumarAvance(objetivoNuevo({ tipo: 'siNo' }), 1).hecho, true);
+});
+
+t('las metas se agrupan por horizonte, y un grupo vacío se queda vacío', () => {
+  const lista = [
+    objetivoNuevo({ id: 'a', que: 'De vida', horizonte: 'vida' }),
+    objetivoNuevo({ id: 'b', que: 'De este año', horizonte: 'anio' }),
+    objetivoNuevo({ id: 'c', que: 'Cerrada', horizonte: 'anio', logradoEn: '2026-01-01' }),
+  ];
+  const grupos = porHorizonte(lista, {}, HOY);
+  assert.deepEqual(grupos.map((g) => g.id), ['vida', 'anio', 'trimestre']);
+  assert.equal(grupos[0].metas.length, 1);
+  assert.equal(grupos[1].metas.length, 1);      // la lograda no cuenta como en curso
+  assert.equal(grupos[2].metas.length, 0);
 });
 
 /* ---------------- el año en una página ---------------- */
