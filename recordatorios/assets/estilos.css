@@ -105,7 +105,7 @@ a { color: var(--accent); }
 .nav-item .cuenta.rojo { color: var(--p1); font-weight: 600; }
 .nav-titulo { padding: 14px 12px 4px; font-size: .74rem; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
 
-.contenido { padding: 18px 22px 120px; max-width: 980px; width: 100%; }
+.contenido { min-width: 0; padding: 18px 22px 120px; max-width: 980px; width: 100%; }
 .cabecera-vista { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 4px; }
 .cabecera-vista h1 { margin: 0; }
 
@@ -162,7 +162,8 @@ a { color: var(--accent); }
 
 /* ---------- Entrada rápida ---------- */
 .rapida { display: flex; gap: 8px; margin-bottom: 14px; }
-.rapida .input { font-size: 1rem; padding: 12px 14px; }
+/* El campo cede antes que los botones; si no, la fila empuja la página. */
+.rapida .input { font-size: 1rem; padding: 12px 14px; flex: 1; min-width: 0; }
 .vista-previa { font-size: .82rem; color: var(--muted); margin: -8px 0 12px; min-height: 1.2em; }
 .vista-previa b { color: var(--accent); font-weight: 600; }
 
@@ -420,9 +421,12 @@ body.concentrado .contenido { max-width: none; display: grid; place-items: cente
   }
   .barra-inferior .nav-item span:first-child { font-size: 1.15rem; }
   .barra-inferior .cuenta { display: none; }
+  .barra-crono { bottom: 78px; }   /* encima de la barra de navegación del móvil */
   .matriz, .semana-rejilla { grid-template-columns: 1fr; }
   .tablero { grid-template-columns: 1fr; }
   .repeticion .fila { gap: 6px; }
+  .rapida { flex-wrap: wrap; }
+  .rapida .input { flex: 1 1 100%; }
   .cal-celda { min-height: 62px; }
   .cal-evento { display: none; }
   .cal-punto-fila { display: flex; gap: 3px; flex-wrap: wrap; }
@@ -457,6 +461,25 @@ body.concentrado .contenido { max-width: none; display: grid; place-items: cente
   display: inline-block;
 }
 
+
+/* ---- Cronómetro por tarea ---- */
+.barra-crono {
+  position: fixed; left: 50%; transform: translateX(-50%); bottom: 16px; z-index: 90;
+  display: flex; gap: 10px; align-items: center; max-width: min(560px, calc(100vw - 24px));
+  background: var(--bg-soft); border: 1px solid var(--accent-2, #4a9eff); border-radius: 999px;
+  padding: 8px 14px; box-shadow: 0 10px 30px rgba(0, 0, 0, .45);
+}
+.barra-crono[hidden] { display: none; }   /* si no, display:flex le gana al atributo */
+.barra-crono .crono-tiempo { font-variant-numeric: tabular-nums; font-weight: 700; }
+.barra-crono .grow { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tarea-meta .crono-vivo { color: var(--accent-2, #4a9eff); font-variant-numeric: tabular-nums; }
+.btn.midiendo { color: var(--accent-2, #4a9eff); border-color: var(--accent-2, #4a9eff); }
+
+/* Los controles de la caja de añadir, plegados hasta que hacen falta. */
+.opciones-rapida {
+  border: 1px solid var(--line); border-radius: 10px; padding: 12px; margin-top: 8px;
+  background: color-mix(in oklab, var(--bg-soft) 70%, transparent);
+}
 
 /* ---- Medallas y estrellas ---- */
 .estrellas-hoy { display: inline-flex; gap: 2px; font-size: 1.1rem; }

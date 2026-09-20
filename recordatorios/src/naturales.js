@@ -255,3 +255,35 @@ export function aTextoEntrada(tarea) {
   for (const e of tarea.etiquetas || []) partes.push('@' + e);
   return partes.join(' ');
 }
+
+/**
+ * Junta lo escrito con lo que se eligió en los controles de la caja.
+ *
+ * El orden importa y es el que menos sorprende: **lo escrito manda** —lo
+ * acabas de teclear, sería raro que un menú lo pisara—, después lo que
+ * marcaste en los controles, y al final lo que la pantalla da por defecto
+ * (la fecha del día que estás mirando, el proyecto de la lista en la que
+ * estás).
+ */
+export function combinarEntrada(parseado = {}, controles = {}, porDefecto = {}) {
+  const primero = (...valores) => valores.find((v) => v !== null && v !== undefined && v !== '');
+
+  const etiquetas = [...new Set([...(parseado.etiquetas || []), ...(controles.etiquetas || [])])];
+  const proyecto = primero(parseado.proyecto, controles.proyecto, porDefecto.proyecto) ?? null;
+
+  return {
+    titulo: parseado.titulo || '',
+    fecha: primero(parseado.fecha, controles.fecha, porDefecto.fecha) ?? null,
+    hora: primero(parseado.hora, controles.hora) ?? null,
+    limite: primero(parseado.limite, controles.limite) ?? null,
+    prioridad: primero(parseado.prioridad, controles.prioridad, porDefecto.prioridad) ?? 4,
+    etiquetas,
+    proyecto,
+    regla: parseado.regla || controles.regla || null,
+    duracion: primero(parseado.duracion, controles.duracion) ?? null,
+    energia: controles.energia || null,
+    modulo: primero(controles.modulo, porDefecto.modulo) ?? null,
+    padre: porDefecto.padre ?? null,
+    seccion: primero(controles.seccion, porDefecto.seccion) ?? null,
+  };
+}

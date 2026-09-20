@@ -85,6 +85,17 @@ puede hacer. La app no admite círculos, dice por dónde empezar a desatascar un
 cadena y, al cerrar la de antes, avisa de lo que acaba de quedar libre. Filtros
 `bloqueadas` y `libres`.
 
+### Y si no te acuerdas de cómo se dice, con botones
+
+El botón **⋯** de la caja abre lo mismo en controles: fecha, hora, fecha
+límite, duración, prioridad, repetición, energía y **a dónde va** (proyecto y
+módulo). Lo elegido se queda puesto para la siguiente, porque casi nunca se
+añade una sola cosa al mismo sitio.
+
+El orden es el que menos sorprende: **lo escrito manda sobre los botones**, y
+los botones sobre lo que la pantalla da por defecto. La vista previa enseña el
+resultado ya mezclado, así que no hay sorpresas al guardar.
+
 ### Capturar sin fricción, y sin duplicar
 
 La tecla `n` abre la caja de captura **sobre cualquier pantalla**, y al instalar
@@ -218,6 +229,12 @@ la barra lateral: cuatro o cinco caben en la cabeza, el resto se busca.
 - **Registro de tiempo** por tarea y por día, con racha y gráfico de 14 días.
 - **Informe de 28 días**: a dónde se fue el tiempo por módulo, por proyecto y por
   semana, y cuánto se desvía de lo que habías planificado.
+- **Cronómetro en cada tarea**: un ▶ en la propia lista empieza a medir sin ir
+  a ninguna parte, y una barra abajo dice qué se está midiendo (un reloj
+  corriendo que no se ve acaba contando una noche entera). Solo uno a la vez
+  —empezar en otra tarea guarda lo de la anterior—, mide con marcas de reloj
+  (cerrar la app no le quita tiempo) y menos de un minuto no se apunta. Al
+  parar te dice lo medido frente a lo que habías estimado.
 - **Modo concentración**: pantalla completa con una tarea, su reloj y sus
   subtareas; se sale con Esc. Dentro hay **sonido ambiente** (blanco, rosa,
   marrón o lluvia) generado en el navegador —sin archivos ni descargas— y cinco
@@ -577,7 +594,7 @@ descargar. Si la semana fue floja se nota, que es justo para lo que sirve.
 
 ## Lo que queda
 
-La pestaña **Lo que queda** es la hoja de ruta real de la app: **115 hechas y 12
+La pestaña **Lo que queda** es la hoja de ruta real de la app: **117 hechas y 12
 descartadas**, y hoy no queda nada pendiente. Las diez últimas (111-120) salieron
 de revisar una lista de 50 ideas de productividad personal y resumirlas en cuatro
 piezas genéricas —notas, colecciones, objetivos y gastos— en vez de treinta
@@ -617,7 +634,7 @@ Alt y las flechas.
 ## Pruebas
 
 ```bash
-npm test                  # 383 pruebas de lógica, sin navegador
+npm test                  # 394 pruebas de lógica, sin navegador
 npm run test:navegador    # recorre la app en Chromium (necesita Playwright)
 ```
 

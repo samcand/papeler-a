@@ -1,6 +1,6 @@
 # Hoja de ruta de la app de recordatorios
 
-**115 hechas · 0 pendientes · 12 descartadas.**
+**117 hechas · 0 pendientes · 12 descartadas.**
 
 Esta lista empezó como “100 ideas” y hoy es la lista de trabajo real. Lo
 pendiente va por olas, que son un orden recomendado y no un compromiso. Lo
@@ -19,8 +19,8 @@ pendiente en tarea con un botón.
 
 ## No queda nada pendiente
 
-Las 115 ideas de la lista están hechas; las 12 descartadas siguen abajo con su motivo. Lo siguiente saldrá de usarla: cuando
-algo moleste tres veces en una semana, eso es la idea 128.
+Las 117 ideas de la lista están hechas; las 12 descartadas siguen abajo con su motivo. Lo siguiente saldrá de usarla: cuando
+algo moleste tres veces en una semana, eso es la idea 130.
 
 ## Ya está hecho
 
@@ -31,7 +31,7 @@ algo moleste tres veces en una semana, eso es la idea 128.
 111. Notas sueltas, el segundo cerebro · 119. Diario del día
 
 **Capturar sin fricción**  
-1. Escribir la tarea en una sola línea · 2. Enseñar lo que la app entendió antes de guardar · 3. Bandeja de entrada universal · 4. Atajo global de captura · 5. Compartir desde otra app · 6. Dictar la tarea · 8. Plantillas de listas reutilizables · 9. Autocompletar proyectos y etiquetas al escribir · 10. Adjuntar archivos y fotos a la tarea
+1. Escribir la tarea en una sola línea · 2. Enseñar lo que la app entendió antes de guardar · 3. Bandeja de entrada universal · 4. Atajo global de captura · 5. Compartir desde otra app · 6. Dictar la tarea · 8. Plantillas de listas reutilizables · 9. Autocompletar proyectos y etiquetas al escribir · 10. Adjuntar archivos y fotos a la tarea · 128. Añadir con botones, no solo escribiendo
 
 **Organizar y encontrar**  
 11. Proyectos, subtareas y etiquetas · 12. Filtros guardados con lenguaje de consulta · 13. Secciones dentro de un proyecto · 14. Vista de tablero Kanban · 15. Reordenar arrastrando · 16. Archivar en vez de borrar · 17. Papelera con recuperación · 18. Búsqueda con operadores y resultados agrupados · 19. Favoritos y accesos rápidos · 20. Detección de duplicados · 121. Buscador universal con paleta · 123. Tareas que esperan a otras
@@ -40,7 +40,7 @@ algo moleste tres veces en una semana, eso es la idea 128.
 21. Cuatro niveles de prioridad con color · 22. Matriz urgente / importante · 23. Estimar duración y ver la carga del día · 24. Planificador que dice qué no cabe · 25. Las tres cosas del día · 26. Aplazar con un toque · 27. Nivel de energía por tarea · 28. Límite de tareas en curso · 29. Revisión semanal guiada · 30. Avisar de lo que lleva demasiado abierto · 102. Tu capacidad real entre los cinco módulos · 122. Fecha límite distinta de la fecha en que lo haces
 
 **Tiempo y concentración**  
-31. Pomodoro configurable · 32. Cronómetro con vueltas · 33. Temporizadores rápidos · 34. Medir el tiempo con marcas de reloj, no contando ticks · 35. Estimado frente a real · 36. Modo concentración a pantalla completa · 37. Sonido ambiente · 38. Registro de interrupciones · 39. Informe de dónde se fue el tiempo · 40. Calendario del tiempo real trabajado
+31. Pomodoro configurable · 32. Cronómetro con vueltas · 33. Temporizadores rápidos · 34. Medir el tiempo con marcas de reloj, no contando ticks · 35. Estimado frente a real · 36. Modo concentración a pantalla completa · 37. Sonido ambiente · 38. Registro de interrupciones · 39. Informe de dónde se fue el tiempo · 40. Calendario del tiempo real trabajado · 129. Cronómetro en cada tarea
 
 **Recordatorios y avisos**  
 41. Aviso con antelación configurable · 42. Exportar al calendario con las repeticiones intactas · 43. Repeticiones que se entienden · 44. Resumen matutino · 46. Escalado de las aplazadas · 47. Franjas de silencio · 50. Avisos por contexto de agenda

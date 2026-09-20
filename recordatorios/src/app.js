@@ -1,6 +1,6 @@
 /** app.js — Router y armazón de la app de recordatorios. */
 
-import { button, el, render as pintar, toast } from '../../src/ui.js';
+import { button, el, render as pintar, render as pintarBarra, toast } from '../../src/ui.js';
 import { aISO, hoy as fechaHoy } from './fechas.js';
 import { aplicarFiltro } from './filtros.js';
 import { MODULOS, enBandeja, estaVencida } from './modelo.js';
@@ -14,6 +14,7 @@ import { resumenRutinas } from './rutinas.js';
 import { tocaPreparar } from './personas.js';
 import { aRevisar } from './objetivos.js';
 import { buscarTodo } from './buscador.js';
+import { contraEstimado, formatoCrono, transcurrido } from './cronometro.js';
 
 import { vistaHoy } from './views/hoy.js';
 import { vistaBandeja } from './views/bandeja.js';
@@ -469,6 +470,55 @@ function refrescarArmazon() {
   marcarNav(rutaActual().split('/')[1] || 'hoy');
 }
 
+
+/* ------------------------------------------------------------------ *
+ * La barra del cronómetro
+ * ------------------------------------------------------------------ */
+
+/**
+ * Mientras algo se está midiendo, una barra abajo dice qué. Un reloj corriendo
+ * que no se ve por ninguna parte acaba contando una noche entera.
+ */
+function montarBarraCrono() {
+  const barra = el('div', { class: 'barra-crono', hidden: true });
+  document.body.append(barra);
+
+  const pintar = () => {
+    const cron = store.estado.cronometro;
+    const tarea = cron?.tareaId ? store.tarea(cron.tareaId) : null;
+    if (!tarea) { barra.hidden = true; pintarBarra(barra); return; }
+    barra.hidden = false;
+    pintarBarra(barra,
+      el('span', { class: 'punto' }, cron.corriendo ? '⏱' : '⏸'),
+      el('span', { class: 'crono-tiempo', dataset: { crono: tarea.id } }, formatoCrono(transcurrido(cron))),
+      el('span', { class: 'grow' }, tarea.titulo),
+      button(cron.corriendo ? 'Pausa' : 'Seguir', () => {
+        if (cron.corriendo) store.pausarCronometro(); else store.reanudarCronometro();
+        pintar();
+      }, { variant: 'ghost chico' }),
+      button('Parar y apuntar', () => {
+        const r = store.pararCronometro();
+        if (r?.minutos) toast(contraEstimado(tarea, r.minutos).texto);
+        else toast('Menos de un minuto: no se apunta.');
+        pintar();
+        dibujar();
+      }, { variant: 'primary chico' }));
+  };
+
+  // Un solo tic para toda la app: actualiza los relojes que haya en pantalla.
+  setInterval(() => {
+    const cron = store.estado.cronometro;
+    if (!cron?.tareaId || !cron.corriendo) return;
+    const texto = formatoCrono(transcurrido(cron));
+    document.querySelectorAll('[data-crono]').forEach((n) => {
+      n.textContent = n.classList.contains('crono-vivo') ? `⏱ ${texto}` : texto;
+    });
+  }, 1000);
+
+  store.suscribir(pintar);
+  pintar();
+}
+
 /* ------------------------------------------------------------------ *
  * Atajos de teclado
  * ------------------------------------------------------------------ */
@@ -537,6 +587,7 @@ function recogerCompartido() {
 window.addEventListener('hashchange', dibujar);
 window.addEventListener('DOMContentLoaded', () => {
   montarArmazon();
+  montarBarraCrono();
   atajos();
   recogerCompartido();
   if (new URLSearchParams(location.search).get('capturar') === '1') {

@@ -1001,6 +1001,87 @@ if (!/cosas cerradas/.test(anioTexto) || !/Mes a mes/.test(anioTexto)) {
   else console.log('  ok  el año en una página, y se lo lleva en .txt');
 }
 
+
+// La caja de añadir con botones: fecha, prioridad y a dónde va
+await pagina.goto(BASE + '#/bandeja');
+await pagina.waitForTimeout(500);
+await pagina.getByRole('button', { name: 'Más opciones' }).first().click();
+await pagina.waitForTimeout(400);
+const opciones = pagina.locator('.opciones-rapida').first();
+if (!(await opciones.count())) errores.push('el botón de más opciones no abrió el panel');
+else {
+  await opciones.locator('input[type="date"]').first().fill('2026-10-05');
+  await opciones.locator('select').first().selectOption({ label: 'Cartera' });
+  await opciones.locator('.chip.prioridad', { hasText: 'P2' }).click();
+  await pagina.waitForTimeout(300);
+  await pagina.fill('[data-rapida]', 'Revisar el informe trimestral');
+  await pagina.waitForTimeout(400);
+  const previaOpciones = await pagina.textContent('.vista-previa');
+  if (!/P2/.test(previaOpciones) || !/Cartera/.test(previaOpciones)) {
+    errores.push('la vista previa no refleja lo elegido con botones: ' + previaOpciones);
+  } else {
+    await pagina.press('[data-rapida]', 'Enter');
+    await pagina.waitForTimeout(400);
+    const creada = await pagina.evaluate(async () => {
+      const { store } = await import('./src/store.js');
+      const t = store.tareas.find((x) => x.titulo === 'Revisar el informe trimestral');
+      return t ? { fecha: t.fecha, prioridad: t.prioridad, proyecto: t.proyecto } : null;
+    });
+    if (!creada || creada.fecha !== '2026-10-05' || creada.prioridad !== 2 || creada.proyecto !== 'Cartera') {
+      errores.push('la tarea no se creó con lo elegido: ' + JSON.stringify(creada));
+    } else console.log('  ok  añadir con botones: fecha, prioridad y a dónde va');
+  }
+}
+
+// Y lo escrito sigue mandando sobre lo elegido
+const manana = await pagina.evaluate(() => {
+  const d = new Date(); d.setDate(d.getDate() + 1);
+  return d.toISOString().slice(0, 10);
+});
+// Ojo: nada de "llamar" en el título, que hay una regla de automatización
+// creada más arriba que le pone prioridad 2 a todo lo que lo diga.
+await pagina.fill('[data-rapida]', 'Pasar por el banco mañana p1');
+await pagina.waitForTimeout(400);
+await pagina.press('[data-rapida]', 'Enter');
+await pagina.waitForTimeout(400);
+const mandaLoEscrito = await pagina.evaluate(async () => {
+  const { store } = await import('./src/store.js');
+  const t = store.tareas.find((x) => x.titulo === 'Pasar por el banco');
+  return t ? { prioridad: t.prioridad, fecha: t.fecha } : null;
+});
+if (!mandaLoEscrito || mandaLoEscrito.prioridad !== 1 || mandaLoEscrito.fecha !== manana) {
+  errores.push('lo escrito no ganó a los controles: ' + JSON.stringify(mandaLoEscrito));
+} else console.log('  ok  lo escrito manda sobre lo elegido con botones');
+
+// Cronómetro por tarea: arranca, se ve la barra, para y apunta
+await pagina.goto(BASE + '#/hoy');
+await pagina.waitForTimeout(500);
+await pagina.locator('.tarea').first().getByTitle('Medir el tiempo de esta tarea').click();
+await pagina.waitForTimeout(1200);
+if (!(await pagina.locator('.barra-crono').isVisible())) errores.push('la barra del cronómetro no apareció');
+else {
+  const corriendo = await pagina.evaluate(async () => {
+    const { store } = await import('./src/store.js');
+    const c = store.estado.cronometro;
+    return { tareaId: c.tareaId, corriendo: c.corriendo };
+  });
+  // Se adelanta el reloj: medir de verdad un minuto en una prueba no tiene sentido.
+  const guardado = await pagina.evaluate(async (id) => {
+    const { store } = await import('./src/store.js');
+    store.estado.cronometro.desde -= 32 * 60000;      // como si llevara media hora
+    const antes = store.tarea(id)?.tiempoDedicado || 0;
+    const r = store.pararCronometro();
+    return { minutos: r?.minutos, antes, despues: store.tarea(id)?.tiempoDedicado || 0, registros: store.estado.tiempo.length };
+  }, corriendo.tareaId);
+  if (!corriendo.corriendo) errores.push('el cronómetro no quedó corriendo');
+  else if (guardado.minutos !== 32 || guardado.despues !== guardado.antes + 32) {
+    errores.push('el tiempo no se apuntó en la tarea: ' + JSON.stringify(guardado));
+  } else console.log('  ok  cronómetro por tarea: cuenta, para y apunta los minutos');
+  await pagina.goto(BASE + '#/hoy');
+  await pagina.waitForTimeout(400);
+  if (await pagina.locator('.barra-crono').isVisible()) errores.push('la barra sigue visible después de parar');
+}
+
 // Accesibilidad básica
 const a11y = await pagina.evaluate(() => {
   const saltar = document.querySelector('.saltar');
@@ -1020,8 +1101,20 @@ await pagina.setViewportSize({ width: 390, height: 844 });
 await pagina.goto(BASE + '#/hoy');
 await pagina.waitForTimeout(300);
 if (!(await pagina.locator('.barra-inferior').isVisible())) errores.push('la barra inferior no aparece en móvil');
-else if (await pagina.evaluate(() => document.documentElement.scrollWidth) > 400) errores.push('hay scroll horizontal en móvil');
-else console.log('  ok  vista de móvil');
+else {
+  // Si algo se sale, decir qué: "hay scroll horizontal" no se arregla solo.
+  const ancho = await pagina.evaluate(() => {
+    const ancho = document.documentElement.clientWidth;
+    const seSale = (n) => n.getBoundingClientRect().right > ancho + 2;
+    const culpables = [...document.querySelectorAll('*')]
+      .filter(seSale)
+      .filter((n) => ![...n.children].some(seSale))     // solo el más hondo de cada rama
+      .map((n) => `${n.tagName}.${(n.className || '').toString().split(' ')[0]} (${Math.round(n.getBoundingClientRect().right)}px, "${(n.textContent || '').trim().slice(0, 25)}")`);
+    return { scroll: document.documentElement.scrollWidth, culpables: culpables.slice(0, 5) };
+  });
+  if (ancho.scroll > 400) errores.push(`hay scroll horizontal en móvil (${ancho.scroll}px): ${ancho.culpables.join(', ') || 'sin culpable claro'}`);
+  else console.log('  ok  vista de móvil');
+}
 
 await navegador.close();
 cerrar();

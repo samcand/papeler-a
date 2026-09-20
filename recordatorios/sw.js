@@ -3,7 +3,7 @@
  * Un recordatorio que solo aparece con cobertura no sirve de mucho.
  */
 
-const VERSION = 'recordatorios-v5';
+const VERSION = 'recordatorios-v6';
 const ARCHIVOS = [
   './', './index.html', './manifest.webmanifest',
   './assets/estilos.css', './assets/icono.svg',
@@ -16,7 +16,7 @@ const ARCHIVOS = [
   './src/notificaciones.js', './src/componentes.js', './src/resumen.js', './src/seed.js', './src/ideas.js',
   './src/captura.js', './src/automatizacion.js', './src/energia.js', './src/ambiente.js',
   './src/trabajo.js', './src/riesgos.js', './src/informes.js', './src/copiloto.js',
-  './src/buscador.js', './src/logros.js', './src/anio.js', './src/limites.js', './src/dependencias.js', './src/cartera.js', './src/notas.js', './src/colecciones.js', './src/objetivos.js', './src/mantenimiento.js',
+  './src/buscador.js', './src/logros.js', './src/anio.js', './src/cronometro.js', './src/limites.js', './src/dependencias.js', './src/cartera.js', './src/notas.js', './src/colecciones.js', './src/objetivos.js', './src/mantenimiento.js',
   './src/gastos.js', './src/personas.js', './src/rutinas.js', './src/viajes.js', './src/panel.js',
   './src/views/hoy.js', './src/views/bandeja.js', './src/views/proximos.js',
   './src/views/tablero.js', './src/views/concentracion.js', './src/views/importar-lista.js', './src/views/calendario.js',

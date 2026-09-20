@@ -16,6 +16,10 @@ import { aplicarReglas } from './automatizacion.js';
 import { marcarHecho, registrarLectura } from './mantenimiento.js';
 import { alternarPaso } from './rutinas.js';
 import { haríaCiclo } from './dependencias.js';
+import {
+  detener as detenerCrono, iniciar as iniciarCrono,
+  pausar as pausarCrono, reanudar as reanudarCrono,
+} from './cronometro.js';
 import { PLANTILLAS_INICIALES } from './plantillasLista.js';
 import { TAREAS_EJEMPLO, PROYECTOS_EJEMPLO } from './seed.js';
 
@@ -66,6 +70,7 @@ const ESTADO_INICIAL = {
   viajes: [],           // fechas, presupuesto y destino
   papelera: [],         // lo borrado espera 30 días antes de irse de verdad
   pomodoro: { config: { ...CONFIG_POMODORO }, estado: null },
+  cronometro: { tareaId: null, desde: null, acumulado: 0, corriendo: false },
   ajustes: {
     tema: 'dark',
     vistaInicio: 'hoy',
@@ -163,6 +168,8 @@ class Store {
       viajes: guardado.viajes || base.viajes,
       papelera: purgar(guardado.papelera || [], aISO(hoy())),
       pomodoro: { ...base.pomodoro, ...(guardado.pomodoro || {}), config: { ...base.pomodoro.config, ...(guardado.pomodoro?.config || {}) } },
+      // El cronómetro sobrevive a cerrar la app: al volver sigue contando.
+      cronometro: { ...base.cronometro, ...(guardado.cronometro || {}) },
       ajustes: {
         ...base.ajustes,
         ...(guardado.ajustes || {}),
@@ -401,6 +408,47 @@ class Store {
       if (t) t.tiempoDedicado = (t.tiempoDedicado || 0) + (registro.minutos || 0);
     }
     this.guardar();
+  }
+
+  /* ---------------- cronómetro por tarea ---------------- */
+
+  /**
+   * Empieza a medir una tarea. Si había otra corriendo, se guarda lo suyo
+   * primero: no se puede trabajar en dos cosas a la vez, y dos relojes a la vez
+   * solo sirven para inflar los números.
+   */
+  iniciarCronometro(tareaId, ahora = Date.now(), hoyISO = aISO(hoy())) {
+    let anterior = null;
+    if (this.estado.cronometro?.tareaId && this.estado.cronometro.tareaId !== tareaId) {
+      anterior = this.pararCronometro(ahora, hoyISO);
+    }
+    this.estado.cronometro = iniciarCrono(this.estado.cronometro, tareaId, ahora);
+    this.guardar();
+    return { anterior };
+  }
+
+  pausarCronometro(ahora = Date.now()) {
+    this.estado.cronometro = pausarCrono(this.estado.cronometro, ahora);
+    this.guardar();
+    return this.estado.cronometro;
+  }
+
+  reanudarCronometro(ahora = Date.now()) {
+    this.estado.cronometro = reanudarCrono(this.estado.cronometro, ahora);
+    this.guardar();
+    return this.estado.cronometro;
+  }
+
+  /** Para el reloj y apunta lo medido en la tarea. Devuelve qué se guardó. */
+  pararCronometro(ahora = Date.now(), hoyISO = aISO(hoy())) {
+    const cron = this.estado.cronometro;
+    if (!cron?.tareaId) return null;
+    const tarea = this.tarea(cron.tareaId);
+    const r = detenerCrono(cron, ahora, hoyISO);
+    this.estado.cronometro = r.cron;
+    if (r.registro) this.registrarTiempo(r.registro);
+    else this.guardar();
+    return { ...r, tarea };
   }
 
   guardarConfigPomodoro(config) {

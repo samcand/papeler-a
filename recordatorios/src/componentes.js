@@ -13,8 +13,11 @@ import { aplicar, fuentesDe, sugerencias } from './autocompletar.js';
 import { alternarTres, tresDelDia } from './dia.js';
 import { dictadoDisponible, dictar, posiblesDuplicados } from './captura.js';
 import { estadoLimite } from './limites.js';
+import { contraEstimado, enCurso, formatoCrono, totalDeTarea, transcurrido } from './cronometro.js';
+import { combinarEntrada } from './naturales.js';
+import { NIVELES as NIVELES_ENERGIA } from './energia.js';
 import { bloqueantes, estaBloqueada, primerPaso } from './dependencias.js';
-import { NIVELES as NIVELES_ENERGIA, energiaDe } from './energia.js';
+import { energiaDe } from './energia.js';
 import { crearEspera, estadoEspera, tareaDePerseguir } from './esperas.js';
 import * as adjuntos from './adjuntos.js';
 import { store } from './store.js';
@@ -36,6 +39,11 @@ export function entradaRapida(porDefecto = {}, alAgregar = () => {}) {
   });
   const previa = el('p', { class: 'vista-previa' });
   const aviso = el('div', { class: 'aviso-duplicado', hidden: true });
+  // Lo que se elige con botones. Se queda puesto entre una tarea y la
+  // siguiente: casi nunca se añade una sola cosa al mismo sitio.
+  const controles = { fecha: null, hora: null, limite: null, prioridad: null, proyecto: null, modulo: null, regla: null, duracion: null, energia: null };
+  const panel = el('div', { class: 'opciones-rapida', hidden: true });
+  let abierto = false;
   const listaSugerencias = el('div', { class: 'sugerencias' });
   let dictando = null;
   let sugerenciaActual = null;
@@ -101,7 +109,8 @@ export function entradaRapida(porDefecto = {}, alAgregar = () => {}) {
   function actualizarPrevia() {
     const txt = campo.value.trim();
     if (!txt) { previa.textContent = ''; actualizarDuplicados(''); return; }
-    const p = parseEntrada(txt);
+    // Lo que se va a guardar de verdad: lo escrito ya mezclado con los botones.
+    const p = combinarEntrada(parseEntrada(txt), controles, porDefecto);
     const trozos = [];
     if (p.fecha) trozos.push(`<b>${textoRelativo(p.fecha)}</b>${p.hora ? ` a las <b>${p.hora}</b>` : ''}`);
     if (p.limite) trozos.push(`⏳ vence el <b>${textoRelativo(p.limite)}</b>`);
@@ -110,6 +119,7 @@ export function entradaRapida(porDefecto = {}, alAgregar = () => {}) {
     if (p.proyecto) trozos.push(`proyecto <b>${p.proyecto}</b>`);
     if (p.etiquetas.length) trozos.push(p.etiquetas.map((e) => `<b>@${e}</b>`).join(' '));
     if (p.duracion) trozos.push(`<b>${p.duracion} min</b>`);
+    if (p.modulo) trozos.push(`módulo <b>${MODULOS.find((m) => m.id === p.modulo)?.nombre || p.modulo}</b>`);
     previa.innerHTML = trozos.length ? `“${p.titulo}” · ${trozos.join(' · ')}` : `“${p.titulo}” · sin fecha`;
     actualizarDuplicados(p.titulo);
   }
@@ -135,24 +145,77 @@ export function entradaRapida(porDefecto = {}, alAgregar = () => {}) {
     const txt = campo.value.trim();
     if (!txt) return;
     const p = parseEntrada(txt);
+    const campos = combinarEntrada(p, controles, porDefecto);
     const tarea = store.agregar({
-      titulo: p.titulo,
-      fecha: p.fecha ?? porDefecto.fecha ?? null,
-      limite: p.limite ?? null,
-      hora: p.hora,
-      prioridad: p.prioridad ?? porDefecto.prioridad ?? 4,
-      etiquetas: p.etiquetas,
-      proyecto: p.proyecto ?? porDefecto.proyecto ?? null,
-      regla: p.regla,
-      duracion: p.duracion,
-      modulo: porDefecto.modulo ?? moduloDeProyecto(p.proyecto) ?? null,
-      padre: porDefecto.padre ?? null,
+      ...campos,
+      modulo: campos.modulo ?? moduloDeProyecto(campos.proyecto) ?? null,
     });
     campo.value = '';
     previa.textContent = '';
+    actualizarDuplicados('');
     campo.focus();
     alAgregar(tarea);
   }
+
+  /**
+   * Los controles: fecha, hora, plazo, prioridad, repetición, duración,
+   * energía y a dónde va. Escribir sigue siendo más rápido, así que esto va
+   * plegado y lo escrito manda sobre lo elegido.
+   */
+  function pintarPanel() {
+    panel.hidden = !abierto;
+    if (!abierto) return;
+    const puestos = Object.entries(controles).filter(([, v]) => v !== null && v !== '' && v !== undefined);
+
+    const menu = (valor, opciones, alCambiar, vacio) => {
+      const sel = el('select', { class: 'input', onChange: (e) => { alCambiar(e.target.value || null); pintarPanel(); actualizarPrevia(); } });
+      sel.append(el('option', { value: '' }, vacio));
+      for (const o of opciones) sel.append(el('option', { value: o.valor, selected: o.valor === valor }, o.texto));
+      return sel;
+    };
+
+    render(panel,
+      el('div', { class: 'fila' },
+        el('label', { class: 'field', style: 'width:165px' }, el('span', { class: 'field-label' }, 'Fecha'),
+          el('input', { class: 'input', type: 'date', value: controles.fecha || '', onChange: (e) => { controles.fecha = e.target.value || null; actualizarPrevia(); } })),
+        el('label', { class: 'field', style: 'width:120px' }, el('span', { class: 'field-label' }, 'Hora'),
+          el('input', { class: 'input', type: 'time', value: controles.hora || '', onChange: (e) => { controles.hora = e.target.value || null; actualizarPrevia(); } })),
+        el('label', { class: 'field', style: 'width:165px' }, el('span', { class: 'field-label' }, 'Fecha límite'),
+          el('input', { class: 'input', type: 'date', value: controles.limite || '', onChange: (e) => { controles.limite = e.target.value || null; actualizarPrevia(); } })),
+        el('label', { class: 'field', style: 'width:120px' }, el('span', { class: 'field-label' }, 'Duración (min)'),
+          el('input', {
+            class: 'input', type: 'number', min: 0, step: 5, value: controles.duracion ?? '',
+            onChange: (e) => { controles.duracion = Number(e.target.value) || null; actualizarPrevia(); },
+          }))),
+
+      el('div', { class: 'fila' },
+        el('label', { class: 'field grow' }, el('span', { class: 'field-label' }, 'A dónde va'),
+          menu(controles.proyecto, store.estado.proyectos.map((x) => ({ valor: x.nombre, texto: x.nombre })),
+            (v) => { controles.proyecto = v; }, '— sin proyecto —')),
+        el('label', { class: 'field grow' }, el('span', { class: 'field-label' }, 'Módulo'),
+          menu(controles.modulo, MODULOS.map((m) => ({ valor: m.id, texto: `${m.icono} ${m.nombre}` })),
+            (v) => { controles.modulo = v; }, '— se deduce del proyecto —')),
+        el('label', { class: 'field', style: 'width:190px' }, el('span', { class: 'field-label' }, 'Energía que pide'),
+          menu(controles.energia, NIVELES_ENERGIA.map((n) => ({ valor: n.id, texto: `${n.icono} ${n.nombre}` })),
+            (v) => { controles.energia = v; }, '— se deduce del título —'))),
+
+      el('div', { class: 'field' }, el('span', { class: 'field-label' }, 'Prioridad'),
+        selectorPrioridad(controles.prioridad || 4, (v) => { controles.prioridad = v; actualizarPrevia(); })),
+
+      el('div', { class: 'field' }, el('span', { class: 'field-label' }, 'Se repite'),
+        constructorRepeticion(controles.regla, (r) => { controles.regla = r; actualizarPrevia(); })),
+
+      el('div', { class: 'fila' },
+        el('span', { class: 'muted small grow' },
+          puestos.length ? `${puestos.length} cosa(s) puestas con botones. Lo que escribas manda sobre esto.` : 'Escribir es más rápido; esto es para lo que no te acuerdes de cómo se dice.'),
+        puestos.length ? button('Limpiar', () => {
+          for (const k of Object.keys(controles)) controles[k] = null;
+          pintarPanel();
+          actualizarPrevia();
+        }, { variant: 'ghost chico' }) : null));
+  }
+
+  const botonOpciones = button('⋯', () => { abierto = !abierto; pintarPanel(); }, { title: 'Más opciones' });
 
   campo.addEventListener('keydown', (e) => {
     const abierta = sugerenciaActual && sugerenciaActual.opciones.length;
@@ -181,8 +244,10 @@ export function entradaRapida(porDefecto = {}, alAgregar = () => {}) {
   return el('div', { class: 'caja-rapida' },
     el('div', { class: 'rapida' }, campo,
       dictadoDisponible() ? botonMicro : null,
+      botonOpciones,
       button('Añadir', agregar, { variant: 'primary' })),
     listaSugerencias,
+    panel,
     aviso,
     previa);
 }
@@ -234,7 +299,15 @@ export function itemTarea(tarea, opciones = {}) {
   }
   if (tarea.regla) meta.push(el('span', {}, '🔁 ' + textoRegla(tarea.regla)));
   if (tarea.duracion) meta.push(el('span', {}, `⏱ ${tarea.duracion} min`));
-  if (tarea.tiempoDedicado) meta.push(el('span', {}, `🍅 ${tarea.tiempoDedicado} min`));
+  const midiendo = enCurso(store.estado.cronometro, tarea.id);
+  const tiempos = totalDeTarea(tarea, store.estado.cronometro);
+  if (tiempos.guardado) meta.push(el('span', { title: 'Tiempo medido en esta tarea' }, `🍅 ${tiempos.guardado} min`));
+  if (midiendo) {
+    meta.push(el('span', {
+      class: 'crono-vivo', dataset: { crono: tarea.id },
+      title: 'Contando ahora mismo',
+    }, `⏱ ${formatoCrono(transcurrido(store.estado.cronometro))}`));
+  }
   if (tarea.proyecto) meta.push(el('span', {}, `# ${tarea.proyecto}`));
   for (const et of tarea.etiquetas || []) meta.push(el('span', { class: 'etiqueta' }, '@' + et));
   if (tarea.notas) meta.push(el('span', { title: tarea.notas }, '📝'));
@@ -258,6 +331,18 @@ export function itemTarea(tarea, opciones = {}) {
     }, { variant: `ghost chico${enLasTres ? ' estrella' : ''}`, title: 'Una de las tres de hoy' }) : null,
     tarea.completada ? button('📦', () => { store.archivar(tarea.id); toast('Archivada'); refrescar(); },
       { variant: 'ghost chico', title: 'Archivar' }) : null,
+    !tarea.completada ? button(midiendo ? '⏹' : '▶', (e) => {
+      e?.stopPropagation?.();
+      if (midiendo) {
+        const r = store.pararCronometro();
+        if (r?.minutos) toast(contraEstimado(tarea, r.minutos).texto);
+        else toast('Menos de un minuto: no se apunta.');
+      } else {
+        const { anterior } = store.iniciarCronometro(tarea.id);
+        if (anterior?.minutos) toast(`Guardados ${anterior.minutos} min en “${anterior.tarea?.titulo || 'la anterior'}”`);
+      }
+      refrescar();
+    }, { variant: `ghost chico${midiendo ? ' midiendo' : ''}`, title: midiendo ? 'Parar y apuntar el tiempo' : 'Medir el tiempo de esta tarea' }) : null,
     !tarea.completada ? el('a', {
       class: 'btn ghost chico', href: `#/concentracion/${tarea.id}`, title: 'Trabajar en esto y nada más',
       onClick: (e) => e.stopPropagation(),
@@ -374,6 +459,17 @@ export function panelTarea(tarea, alGuardar = () => {}) {
       pista ? el('span', { class: 'field-hint' }, pista) : null);
   }
 
+  /**
+   * Igual, pero en un div. Un grupo de botones **no puede ir dentro de un
+   * `<label>`**: el navegador reenvía el clic al primer control de dentro, así
+   * que pulsar P2 acababa marcando P1.
+   */
+  function grupo(etiqueta, control, pista) {
+    return el('div', { class: 'field' },
+      el('span', { class: 'field-label' }, etiqueta), control,
+      pista ? el('span', { class: 'field-hint' }, pista) : null);
+  }
+
   const selModulo = el('select', { class: 'input', onChange: (e) => { borrador.modulo = e.target.value || null; } });
   selModulo.append(el('option', { value: '' }, '— sin módulo —'));
   for (const m of MODULOS) selModulo.append(el('option', { value: m.id, selected: m.id === borrador.modulo }, `${m.icono} ${m.nombre}`));
@@ -417,7 +513,7 @@ export function panelTarea(tarea, alGuardar = () => {}) {
       return el('label', { class: 'field' }, el('span', { class: 'field-label' }, 'Fecha límite'), control, aviso);
     })(),
     campoDependencias(borrador, alGuardar, cerrar),
-    campo('Prioridad', selectorPrioridad(borrador.prioridad, (v) => { borrador.prioridad = v; })),
+    grupo('Prioridad', selectorPrioridad(borrador.prioridad, (v) => { borrador.prioridad = v; })),
     (() => {
       // La pista sale del historial real: si sueles tardar más, que se vea al estimar.
       const cal = calibracion(store.tareas, store.estado.tiempo);
@@ -435,7 +531,7 @@ export function panelTarea(tarea, alGuardar = () => {}) {
     el('div', { class: 'fila' },
       el('div', { class: 'grow' }, campo('Energía que pide', selEnergia, 'Para elegir según el momento del día, no según el orden de la lista.')),
       el('div', { class: 'grow' }, campo('Sección', selSeccion, 'Las secciones se crean dentro del proyecto.'))),
-    campo('Se repite', constructorRepeticion(borrador.regla, (r) => { borrador.regla = r; })),
+    grupo('Se repite', constructorRepeticion(borrador.regla, (r) => { borrador.regla = r; })),
     campo('Etiquetas', input((borrador.etiquetas || []).join(', '), (v) => {
       borrador.etiquetas = v.split(',').map((s) => s.trim().replace(/^@/, '')).filter(Boolean);
     }, { placeholder: 'mercado, espera, tesis' })),
