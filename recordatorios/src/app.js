@@ -165,7 +165,7 @@ function montarArmazon() {
     }, el('span', { class: 'punto-modulo', style: `background:${p.color}` }), el('span', { class: 'grow' }, p.nombre),
     el('span', { class: 'cuenta' }, String(pendientes.filter((t) => t.proyecto === p.nombre).length)))),
     el('div', { class: 'nav-titulo' }, ''),
-    enlace({ id: 'ideas', icono: '💡', texto: '100 ideas', href: '#/ideas' }),
+    enlace({ id: 'ideas', icono: '💡', texto: 'Lo que queda', href: '#/ideas' }),
     enlace({ id: 'ajustes', icono: '⚙️', texto: 'Ajustes', href: '#/ajustes' }));
 
   const inferior = el('nav', { class: 'barra-inferior' },

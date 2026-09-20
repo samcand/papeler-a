@@ -1,41 +1,50 @@
-/** Genera docs/100-ideas-recordatorios.md desde recordatorios/src/ideas.js. */
+/** Genera docs/hoja-de-ruta-recordatorios.md desde recordatorios/src/ideas.js. */
 import { writeFileSync } from 'node:fs';
-import { CATEGORIAS, IDEAS } from '../recordatorios/src/ideas.js';
+import { CATEGORIAS, DESCARTADAS, HECHAS, IDEAS, OLAS, PENDIENTES, porOla } from '../recordatorios/src/ideas.js';
 
-const ancla = (txt) => txt.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-');
-const hechas = IDEAS.filter((i) => i.hecho);
+const nombreCat = (id) => CATEGORIAS.find((c) => c.id === id)?.nombre || id;
 
 const lineas = [
-  '# 100 ideas para una app de recordatorios y productividad',
+  '# Hoja de ruta de la app de recordatorios',
   '',
-  'Lista de trabajo para la app de `recordatorios/`: qué está hecho y qué vendría',
-  `bien añadir. Hoy hay **${hechas.length} de ${IDEAS.length}** implementadas.`,
+  `**${HECHAS.length} hechas · ${PENDIENTES.length} pendientes · ${DESCARTADAS.length} descartadas.**`,
   '',
-  'En la app, la pestaña **100 ideas** muestra lo mismo como lista de chequeo, y',
-  'cada idea pendiente se puede convertir en tarea con un botón.',
+  'Esta lista empezó como “100 ideas” y hoy es la lista de trabajo real. Lo',
+  'pendiente va por olas, que son un orden recomendado y no un compromiso. Lo',
+  'descartado se queda escrito con su motivo: una decisión sin motivo se vuelve a',
+  'discutir cada tres meses.',
   '',
-  '> Sugerencia de uso: no intentes implementarlas todas. Elige **dos por mes** y',
-  '> quédate con las que quitan fricción a lo que ya haces.',
+  'Las entradas 101-110 salieron de revisar una lista de 200 funcionalidades de',
+  'herramientas profesionales de gestión de proyectos y quedarse solo con lo que',
+  'sirve a una persona que trabaja sola, sin equipo ni PMO.',
   '',
-  '## Índice',
-  '',
-  ...CATEGORIAS.map((c, i) => {
-    const nums = IDEAS.filter((x) => x.c === c.id).map((x) => x.n);
-    const listas = IDEAS.filter((x) => x.c === c.id && x.hecho).length;
-    return `${i + 1}. [${c.nombre}](#${ancla(c.nombre)}) — ideas ${nums[0]} a ${nums[nums.length - 1]} (${listas} hecha${listas === 1 ? '' : 's'})`;
-  }),
-  '',
-  'Leyenda: **✅ ya está** en la app · **⭕ pendiente**.',
+  'En la app, la pestaña **Lo que queda** muestra lo mismo y convierte cualquier',
+  'pendiente en tarea con un botón.',
   '',
 ];
 
-for (const cat of CATEGORIAS) {
-  lineas.push(`## ${cat.nombre}`, '');
-  for (const idea of IDEAS.filter((i) => i.c === cat.id)) {
-    lineas.push(`**${idea.n}. ${idea.t}** ${idea.hecho ? '✅' : '⭕'}  `);
-    lineas.push(idea.d, '');
+for (const ola of OLAS) {
+  const items = porOla(ola.n);
+  lineas.push(`## ${ola.nombre} (${items.length})`, '', `_${ola.descripcion}_`, '');
+  for (const i of items) {
+    lineas.push(`**${i.n}. ${i.t}** · ${nombreCat(i.c)}  `);
+    lineas.push(i.d, '');
   }
 }
 
-writeFileSync(new URL('../docs/100-ideas-recordatorios.md', import.meta.url), lineas.join('\n'));
-console.log(`docs/100-ideas-recordatorios.md generado (${IDEAS.length} ideas, ${hechas.length} hechas).`);
+lineas.push('## Ya está hecho', '');
+for (const cat of CATEGORIAS) {
+  const items = IDEAS.filter((i) => i.c === cat.id && i.estado === 'hecho');
+  if (!items.length) continue;
+  lineas.push(`**${cat.nombre}**  `);
+  lineas.push(items.map((i) => `${i.n}. ${i.t}`).join(' · '), '');
+}
+
+lineas.push('## Descartado, y por qué', '');
+for (const i of DESCARTADAS) {
+  lineas.push(`**${i.n}. ${i.t}**  `);
+  lineas.push(i.motivo, '');
+}
+
+writeFileSync(new URL('../docs/hoja-de-ruta-recordatorios.md', import.meta.url), lineas.join('\n'));
+console.log(`docs/hoja-de-ruta-recordatorios.md generado (${HECHAS.length} hechas, ${PENDIENTES.length} pendientes, ${DESCARTADAS.length} descartadas).`);

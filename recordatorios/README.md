@@ -28,7 +28,7 @@ Se instala como app (Chrome/Edge/Android: “Instalar”; iPhone: Compartir →
 | **Proyectos (Gantt)** | Planificación tipo MS Project: EDT, dependencias, ruta crítica, recursos, nivelación y seguimiento. |
 | **Plantillas** | Listas que se repiten enteras: eliges el día señalado y las fechas se calculan solas. |
 | **Listas y filtros** | Listas propias y filtros guardados con un lenguaje corto de consultas. |
-| **100 ideas** | Lo que la app ya hace y lo que vendría bien añadir, como lista de chequeo. |
+| **Lo que queda** | La hoja de ruta: lo hecho, lo pendiente por olas y lo descartado con su motivo. |
 
 ### Escribir una tarea como se habla
 
@@ -235,12 +235,26 @@ así que “cada tercer viernes” sigue repitiéndose en tu calendario.
 Los datos viven en el almacenamiento de este navegador. Si borras los datos del
 sitio, se van: exporta de vez en cuando.
 
-## 100 ideas
+## Lo que queda
 
-La pestaña **100 ideas** es a la vez lista de chequeo y hoja de ruta: 100 cosas
-que vale la pena tener en una app así, agrupadas en diez temas, con las **43 ya
-implementadas** marcadas y el resto convertible en tarea con un botón. El mismo
-contenido está en [`docs/100-ideas-recordatorios.md`](../docs/100-ideas-recordatorios.md),
+La pestaña **Lo que queda** es la hoja de ruta real de la app: **43 hechas, 55
+pendientes y 12 descartadas**. Lo pendiente va en tres olas —lo próximo, después
+y algún día— y cualquier entrada se convierte en tarea con un botón.
+
+Lo descartado se queda escrito **con su motivo** (notificaciones push, correo a
+tarea, asignar responsable, sincronización con Google Calendar…): casi todo cae
+por una de dos razones, que necesita un servidor o que necesita un equipo, y la
+app no tiene ni lo uno ni lo otro. Dejarlo anotado evita volver a discutirlo
+cada tres meses.
+
+Las entradas 101-110 salieron de revisar una lista de 200 funcionalidades de
+herramientas profesionales de gestión de proyectos (Jira, Asana, Project, PMI) y
+quedarse solo con lo que sirve a una persona que trabaja sola: simulación de
+impacto, capacidad real entre módulos, fecha probabilística, salud explicada,
+valor ganado en horas y un copiloto local que calcula en vez de inventar.
+
+El mismo contenido está en
+[`docs/hoja-de-ruta-recordatorios.md`](../docs/hoja-de-ruta-recordatorios.md),
 que se genera con `npm run docs`.
 
 ## Atajos de teclado
@@ -251,7 +265,7 @@ que se genera con `npm run docs`.
 ## Pruebas
 
 ```bash
-npm test                  # 177 pruebas de lógica, sin navegador
+npm test                  # 182 pruebas de lógica, sin navegador
 npm run test:navegador    # recorre la app en Chromium (necesita Playwright)
 ```
 
