@@ -40,6 +40,7 @@ Se instala como app (Chrome/Edge/Android: “Instalar”; iPhone: Compartir →
 | **Informes** | Eliges qué medir, cómo agruparlo y en qué periodo; la gráfica sale sola y se descarga en CSV. |
 | **Copiloto** | Preguntas sobre el plan respondidas con cálculo: qué se va a retrasar, quién está sobrecargado, qué cambió. |
 | **Panel de vida** | Ocho tarjetas con el día, el dinero, los objetivos, las fechas, lo que vence y el viaje que viene. |
+| **Logros** | Medallas de bronce, plata y oro sacadas de lo que ya está medido, y las estrellas del día. |
 | **Lo que queda** | La hoja de ruta: lo hecho, lo pendiente por olas y lo descartado con su motivo. |
 
 ### Escribir una tarea como se habla
@@ -501,6 +502,28 @@ el total: es *«vas por el 77 % del mes y el 78 % del presupuesto»*.
   entre las fechas, la preparación pendiente y lo gastado frente al presupuesto,
   por día y por persona. Nada por duplicado: un gasto del viaje es un gasto.
 
+### Medallas y estrellas
+
+Once medallas con **bronce, plata y oro**: constancia (días seguidos cerrando
+algo), trabajo hecho, palabra cumplida (entregas antes del plazo), enfoque
+medido, domingos de revisión, metas logradas, rutina, diario, lecturas, meses
+dentro del presupuesto e hitos de proyecto.
+
+Dos reglas, que son lo que hace que esto no sea un juego tonto:
+
+- **Salen de lo que ya está medido.** No hay ninguna que se consiga marcando una
+  casilla, y no se guardan en ningún sitio: se recalculan de tus datos cada vez,
+  así que no hay contador que inflar. Si quieres la de enfoque, hay que medir
+  enfoque de verdad.
+- **Nada castiga.** Perder una racha no quita medallas ni saca caras tristes: el
+  día malo ya fue bastante. Las **estrellas del día** son tres como mucho —la
+  meta diaria, las tres del día, las rutinas, los plazos de hoy o 25 minutos
+  medidos— y mañana vuelven a cero sin deber nada. Un criterio que hoy no aplica
+  (no tienes rutinas montadas) no resta: deja sitio al siguiente.
+
+Bronce es «lo has empezado de verdad», plata es «ya es un hábito» y oro es «esto
+ya te define».
+
 ### Panel de vida
 
 Ocho tarjetas —día, rutinas, dinero, objetivos, personas, mantenimiento, viajes
@@ -531,7 +554,7 @@ descargar. Si la semana fue floja se nota, que es justo para lo que sirve.
 
 ## Lo que queda
 
-La pestaña **Lo que queda** es la hoja de ruta real de la app: **112 hechas y 12
+La pestaña **Lo que queda** es la hoja de ruta real de la app: **113 hechas y 12
 descartadas**, y hoy no queda nada pendiente. Las diez últimas (111-120) salieron
 de revisar una lista de 50 ideas de productividad personal y resumirlas en cuatro
 piezas genéricas —notas, colecciones, objetivos y gastos— en vez de treinta
@@ -571,7 +594,7 @@ Alt y las flechas.
 ## Pruebas
 
 ```bash
-npm test                  # 357 pruebas de lógica, sin navegador
+npm test                  # 370 pruebas de lógica, sin navegador
 npm run test:navegador    # recorre la app en Chromium (necesita Playwright)
 ```
 

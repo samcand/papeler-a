@@ -458,6 +458,31 @@ body.concentrado .contenido { max-width: none; display: grid; place-items: cente
 }
 
 
+/* ---- Medallas y estrellas ---- */
+.estrellas-hoy { display: inline-flex; gap: 2px; font-size: 1.1rem; }
+.estrellas-hoy .estrella { color: var(--line); }
+.estrellas-hoy .estrella.ganada { color: #e8b923; }
+.tira-estrellas { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 12px; }
+.dia-estrellas {
+  min-width: 34px; text-align: center; font-size: .7rem; color: #e8b923;
+  border: 1px solid var(--line); border-radius: 6px; padding: 4px 2px;
+}
+.dia-estrellas.hoy { border-color: var(--accent-2, #4a9eff); }
+
+.rejilla-medallas { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); }
+.medalla {
+  display: flex; gap: 12px; align-items: flex-start;
+  border: 1px solid var(--line); border-radius: 12px; padding: 12px;
+}
+.medalla.sin { opacity: .68; }
+.medalla.bronce { border-color: #b07d4a; }
+.medalla.plata { border-color: #a8b0bb; }
+.medalla.oro { border-color: #e8b923; }
+.medalla-cara { position: relative; font-size: 1.8rem; line-height: 1; }
+.medalla-cara .metal { position: absolute; right: -8px; bottom: -6px; font-size: 1rem; }
+.medalla .barra { margin: 6px 0; }
+.card.nuevo-logro { border-left: 3px solid #e8b923; }
+
 /* ---- Plazos y dependencias ---- */
 .tarea-meta .bloqueada { color: var(--warn, #e0a33e); }
 

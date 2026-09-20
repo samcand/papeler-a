@@ -1,6 +1,6 @@
 # Hoja de ruta de la app de recordatorios
 
-**112 hechas · 0 pendientes · 12 descartadas.**
+**113 hechas · 0 pendientes · 12 descartadas.**
 
 Esta lista empezó como “100 ideas” y hoy es la lista de trabajo real. Lo
 pendiente va por olas, que son un orden recomendado y no un compromiso. Lo
@@ -19,13 +19,13 @@ pendiente en tarea con un botón.
 
 ## No queda nada pendiente
 
-Las 112 ideas de la lista están hechas; las 12 descartadas siguen abajo con su motivo. Lo siguiente saldrá de usarla: cuando
-algo moleste tres veces en una semana, eso es la idea 125.
+Las 113 ideas de la lista están hechas; las 12 descartadas siguen abajo con su motivo. Lo siguiente saldrá de usarla: cuando
+algo moleste tres veces en una semana, eso es la idea 126.
 
 ## Ya está hecho
 
 **La vida fuera del trabajo**  
-112. Colecciones: fichas con los campos que tú quieras · 113. Objetivos con progreso y revisión · 114. Mantenimiento por uso, no por fecha · 115. Gastos y presupuesto por categoría · 116. Agenda de personas: cumpleaños, fechas y regalos · 117. Rutinas encadenadas de mañana y noche · 118. El viaje como ficha: itinerario, papeles y presupuesto · 120. Panel de vida
+112. Colecciones: fichas con los campos que tú quieras · 113. Objetivos con progreso y revisión · 114. Mantenimiento por uso, no por fecha · 115. Gastos y presupuesto por categoría · 116. Agenda de personas: cumpleaños, fechas y regalos · 117. Rutinas encadenadas de mañana y noche · 118. El viaje como ficha: itinerario, papeles y presupuesto · 120. Panel de vida · 125. Medallas y estrellas, sin trampas
 
 **Notas y diario**  
 111. Notas sueltas, el segundo cerebro · 119. Diario del día

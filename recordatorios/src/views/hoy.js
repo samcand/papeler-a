@@ -13,6 +13,7 @@ import { estadoBandeja } from '../modelo.js';
 import { formatoMinutos, resumenTiempo } from '../tiempo.js';
 import { NIVELES as NIVELES_ENERGIA, quePuedoHacer, repartoEnergia } from '../energia.js';
 import { resumenLimites } from '../limites.js';
+import { estrellasDelDia } from '../logros.js';
 import { desbloqueadasHoy, resumenDependencias } from '../dependencias.js';
 import { MOMENTOS, duracionRutina, rutinasDeHoy } from '../rutinas.js';
 import { store } from '../store.js';
@@ -63,6 +64,23 @@ export function vistaHoy(root, ctx = {}) {
         r.mañana ? ` Mañana hay ${r.mañana} tareas.` : ''));
   }
 
+
+  /**
+   * Las estrellas del día, en una línea. Sin dramatismo: si hoy no salen, no
+   * pasa nada y mañana vuelven a cero.
+   */
+  function panelEstrellasHoy() {
+    const e = estrellasDelDia(store.estado, hoyISO);
+    if (!e.de) return null;
+    return el('div', { class: 'fila', style: 'margin:6px 0 2px' },
+      el('span', { class: 'estrellas-hoy' },
+        ...Array.from({ length: e.de }, (_, i) => el('span', {
+          class: `estrella ${i < e.estrellas ? 'ganada' : ''}`.trim(),
+          title: e.criterios[i] ? `${e.criterios[i].texto} · ${e.criterios[i].detalle}` : '',
+        }, i < e.estrellas ? '★' : '☆'))),
+      el('span', { class: 'muted small grow' }, e.frase),
+      el('a', { class: 'btn ghost chico', href: '#/logros' }, 'medallas'));
+  }
 
   /**
    * Los plazos que aprietan. Lo primero de la lista no es lo más cercano: es lo
@@ -177,6 +195,8 @@ export function vistaHoy(root, ctx = {}) {
         !mostrarResumen ? el('button', { class: 'chip', onClick: () => { mostrarResumen = true; pintar(); } }, '☀️ resumen del día') : null),
       mostrarResumen ? tarjetaResumen() : null,
       entradaRapida({ fecha: hoyISO }, pintar),
+
+      panelEstrellasHoy(),
 
       el('div', { class: 'tarjetas' },
         dato(deHoy.length + vencidas.length, 'por hacer', { pie: vencidas.length ? `${vencidas.length} atrasadas` : 'al día' }),

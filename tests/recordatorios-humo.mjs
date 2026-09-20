@@ -22,7 +22,7 @@ const BASE = `http://localhost:${PUERTO}/recordatorios/index.html`;
 const PANTALLAS = ['hoy', 'bandeja', 'proximos', 'calendario', 'enfoque', 'planificar', 'revision',
   'inversiones', 'proyectos', 'docencia', 'investigacion', 'alabanza', 'plantillas', 'tablero',
   'informes', 'copiloto', 'panel', 'notas', 'colecciones', 'objetivos', 'gastos', 'personas',
-  'rutinas', 'viajes', 'ideas', 'ajustes'];
+  'rutinas', 'viajes', 'logros', 'ideas', 'ajustes'];
 
 /** Busca Playwright en el proyecto y, si no, en la instalación global. */
 async function cargarPlaywright() {
@@ -906,6 +906,46 @@ if (!/Paper de redes/.test(cartera) || !/Curso nuevo/.test(cartera)) {
 } else if (!/En dos sitios a la vez/.test(cartera) || !/Yo está en/.test(cartera)) {
   errores.push('la cartera no detectó el choque entre planes: ' + cartera.slice(0, 300));
 } else console.log('  ok  cartera: todos los proyectos y el choque de recurso entre ellos');
+
+
+// Logros: las medallas salen de lo medido y se felicitan una sola vez
+await pagina.evaluate(async () => {
+  const { store } = await import('./src/store.js');
+  const hoyISO = new Date().toISOString().slice(0, 10);
+  // 120 tareas cerradas: bronce de "trabajo hecho". Nada de contadores a mano.
+  store.estado.historial.push(...Array.from({ length: 120 }, (_, i) => ({ id: 'h' + i, tareaId: 'x', titulo: 'Vieja', fecha: hoyISO })));
+  store.estado.tiempo.push({ id: 'r-logro', tipo: 'pomodoro', minutos: 700, fecha: hoyISO });
+  store.ajustar({ medallasVistas: {} });
+});
+await pagina.goto(BASE + '#/hoy');
+await pagina.goto(BASE + '#/logros');
+await pagina.waitForTimeout(700);
+const logros = (await pagina.textContent('#app')).replace(/\s+/g, ' ');
+const medallas = await pagina.locator('.medalla').count();
+if (medallas < 10) errores.push(`deberían pintarse todas las medallas, salieron ${medallas}`);
+else if (!/Medalla nueva|medallas nuevas/.test(logros)) errores.push('no felicitó por la medalla nueva: ' + logros.slice(0, 200));
+else {
+  await pagina.getByRole('button', { name: 'Visto' }).click();
+  await pagina.waitForTimeout(500);
+  if (/Medalla nueva|medallas nuevas/.test((await pagina.textContent('#app')))) {
+    errores.push('la felicitación vuelve a salir después de darle a Visto');
+  } else console.log(`  ok  logros: ${medallas} medallas, y se felicita una sola vez`);
+}
+
+// Las estrellas del día salen en Hoy y cuentan lo que de verdad pasó
+const estrellas = await pagina.evaluate(async () => {
+  const { estrellasDelDia } = await import('./src/logros.js');
+  const { store } = await import('./src/store.js');
+  const hoyISO = new Date().toISOString().slice(0, 10);
+  const e = estrellasDelDia(store.estado, hoyISO);
+  return { de: e.de, estrellas: e.estrellas, ids: e.criterios.map((c) => c.id) };
+});
+await pagina.goto(BASE + '#/hoy');
+await pagina.waitForTimeout(500);
+const conEstrellas = await pagina.locator('.estrellas-hoy .estrella.ganada').count();
+if (!estrellas.de || conEstrellas !== estrellas.estrellas) {
+  errores.push(`las estrellas de Hoy no cuadran: ${JSON.stringify(estrellas)} frente a ${conEstrellas} pintadas`);
+} else console.log(`  ok  estrellas del día: ${estrellas.estrellas} de ${estrellas.de} en Hoy`);
 
 // Accesibilidad básica
 const a11y = await pagina.evaluate(() => {

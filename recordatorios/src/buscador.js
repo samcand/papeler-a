@@ -58,6 +58,7 @@ export const VISTAS = [
   { ruta: '/personas', nombre: 'Personas', alias: 'cumpleaños regalos fechas' },
   { ruta: '/colecciones', nombre: 'Colecciones', alias: 'fichas carro libros cursos mantenimiento' },
   { ruta: '/viajes', nombre: 'Viajes', alias: 'viaje itinerario maleta' },
+  { ruta: '/logros', nombre: 'Logros', alias: 'medallas estrellas oro plata bronce rachas' },
   { ruta: '/ideas', nombre: 'Lo que queda', alias: 'hoja de ruta ideas' },
   { ruta: '/ajustes', nombre: 'Ajustes', alias: 'preferencias respaldo reglas silencio' },
 ];
