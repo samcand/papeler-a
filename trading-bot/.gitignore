@@ -1,0 +1,10 @@
+config.yaml
+estado.json
+estado.json.tmp
+operaciones.csv
+FRENO_DE_EMERGENCIA
+*.csv
+!tests/**/*.csv
+__pycache__/
+*.pyc
+.venv/

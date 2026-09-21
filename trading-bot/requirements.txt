@@ -1,0 +1,6 @@
+# Imprescindibles
+requests>=2.28      # datos de mercado y ordenes en Binance
+PyYAML>=6.0         # configuracion
+
+# Opcional: solo si activas el asesor IA (estrategia.llm.habilitado: true)
+# anthropic>=1.0

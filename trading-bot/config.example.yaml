@@ -1,0 +1,137 @@
+# Configuracion del bot. Copia este archivo a config.yaml y edita lo que necesites:
+#
+#     cp config.example.yaml config.yaml
+#
+# config.yaml esta en .gitignore. Aqui NO van claves de API: esas van en
+# variables de entorno (BINANCE_API_KEY, BINANCE_API_SECRET, ANTHROPIC_API_KEY).
+
+# paper = simulado con dinero ficticio y precios reales. live = ordenes reales.
+# Empieza siempre en paper, y no cambies esto hasta tener semanas de registro.
+modo: paper
+
+exchange:
+  nombre: binance
+  # true = testnet de Binance (claves distintas, dinero de mentira).
+  # Pon false solo cuando vayas a operar de verdad.
+  testnet: true
+  recv_window_ms: 5000
+
+mercado:
+  simbolos:
+    - BTCUSDT
+    - ETHUSDT
+  # 1m 3m 5m 15m 30m 1h 2h 4h 6h 8h 12h 1d 3d 1w
+  # Con velas cortas pagas mas comisiones y el ruido manda. 1h o 4h es razonable.
+  intervalo: 1h
+  # Velas que se descargan en cada ciclo para decidir.
+  velas: 500
+
+estrategia:
+  # clasica | reglas | llm | ensemble
+  tipo: ensemble
+  # El puntaje va de -1 a +1. Subir estos umbrales = menos operaciones, mas selectivas.
+  umbral_compra: 0.35
+  umbral_venta: -0.35
+  pesos:
+    clasica: 1.0
+    reglas: 1.0
+    llm: 1.0
+  # Con la IA como filtro, ninguna compra sale sin su visto bueno.
+  requiere_confirmacion_llm: true
+
+  clasica:
+    ema_rapida: 20
+    ema_lenta: 50
+    ema_tendencia: 200
+    rsi_periodo: 14
+    rsi_sobreventa: 30
+    rsi_sobrecompra: 70
+    macd: {rapida: 12, lenta: 26, senal: 9}
+    bollinger: {periodo: 20, multiplicador: 2.0}
+    volumen_periodo: 20
+    pesos:
+      tendencia: 0.30
+      cruce: 0.20
+      rsi: 0.20
+      macd: 0.20
+      bollinger: 0.10
+    # Cuanto se recorta la conviccion si el volumen esta por debajo de su media.
+    factor_volumen: 0.85
+
+  # Tus propias reglas. Dos formas equivalentes de escribirlas:
+  #   - "rsi:14 < 30"
+  #   - {izquierda: "cierre", op: "cruza_arriba", derecha: "ema:200"}
+  #
+  # Series disponibles: cierre, apertura, maximo, minimo, volumen,
+  #   sma:N, ema:N, rsi:N, atr:N, vol_sma:N,
+  #   macd:R:L:S, macd_senal:R:L:S, macd_hist:R:L:S,
+  #   bb_sup:N:M, bb_med:N, bb_inf:N:M, bb_pct:N:M  (bb_pct: 0 = banda baja, 1 = alta)
+  # Operadores: <  <=  >  >=  ==  !=  cruza_arriba  cruza_abajo
+  # modo: "todas" (se exigen todas) o "alguna" (puntua la fraccion que se cumple).
+  reglas:
+    modo: todas
+    compra: []
+    venta: []
+    # Ejemplo de rebote en tendencia alcista:
+    # compra:
+    #   - "cierre > ema:200"
+    #   - "rsi:14 < 40"
+    #   - {izquierda: "macd_hist:12:26:9", op: "cruza_arriba", derecha: 0}
+    # venta:
+    #   - "rsi:14 > 75"
+
+  llm:
+    # Requiere el paquete anthropic y la variable ANTHROPIC_API_KEY.
+    habilitado: false
+    modelo: claude-opus-5
+    esfuerzo: medium        # low | medium | high | xhigh | max
+    # filtro = solo puede vetar compras. voto = su opinion suma como una mas.
+    papel: filtro
+    max_tokens: 4000
+    velas_contexto: 60
+
+riesgo:
+  capital_inicial: 1000.0
+  # Cuanto se pierde si salta el stop, en % del capital. 1% es agresivo ya.
+  riesgo_por_operacion_pct: 1.0
+  # Techo de tamano por posicion, en % del capital.
+  max_posicion_pct: 20.0
+  max_posiciones: 3
+  # Stop y objetivo medidos en ATR: se adaptan solos a la volatilidad del momento.
+  stop_atr: 2.0
+  objetivo_atr: 3.0
+  atr_periodo: 14
+  # Cortacircuitos: al tocarlos, el bot deja de abrir posiciones.
+  perdida_diaria_max_pct: 5.0
+  max_perdidas_consecutivas: 3
+  min_notional: 10.0
+  # Crear este archivo detiene las compras sin matar el proceso:
+  #   python -m bot freno on
+  archivo_freno: FRENO_DE_EMERGENCIA
+
+costos:
+  # Comision por operacion (Binance spot esta en 0.1% sin descuentos).
+  comision_pct: 0.1
+  # Deslizamiento estimado: lo que se pierde entre el precio que ves y el que te dan.
+  deslizamiento_pct: 0.05
+
+backtest:
+  # Velas de historico con las que se valida la estrategia.
+  velas: 1500
+
+# La puerta: sin un backtest reciente que cumpla estos minimos, no se abren
+# posiciones con ese simbolo. Las ventas nunca se bloquean.
+puerta:
+  habilitada: true
+  min_operaciones: 20
+  min_factor_beneficio: 1.2
+  max_drawdown_pct: 25.0
+  min_tasa_acierto_pct: 40.0
+  # Cada cuantas horas hay que repetir el backtest.
+  vigencia_horas: 24
+
+ejecucion:
+  # Conviene que coincida con el intervalo de las velas (1h = 3600).
+  intervalo_segundos: 3600
+  archivo_estado: estado.json
+  archivo_registro: operaciones.csv
