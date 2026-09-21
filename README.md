@@ -57,6 +57,7 @@ También se puede publicar tal cual en GitHub Pages: son archivos estáticos.
 | **Afinador** | Afinador cromático por micrófono para guitarra, ukelele, bajo (4 y 5 cuerdas), cuatro y afinaciones alternativas (Drop D, DADGAD). Aguja en cents, notas de referencia y guía de cómo afinar. |
 | **Estudio de audio** | Sube una canción y la app saca el tempo, la tonalidad y **los acordes con sus tiempos**; se estudia lento, en bucle A-B y con el modo karaoke. También transcribe una melodía nota por nota. |
 | **100 ideas** | Lista de chequeo para mejorar la ejecución del equipo ([documento](docs/100-ideas-alabanza.md)). |
+| **Mercados** | Pantalla aparte (`mercados.html`): gráficas de velas de criptomonedas y acciones de EE.UU. con indicadores y dibujos. No tiene que ver con el repertorio; comparte el proyecto porque comparte el enfoque: sin servidor y sin cuenta. |
 
 Además, desde una lista de servicio: **compartir el set por enlace o QR**, **una hoja distinta
 para cada músico** y **pistas de clic y pads** para los in-ears.
@@ -249,6 +250,54 @@ maneras, y ambas funcionan:
    se analiza con Web Audio y se estiman tempo, curva de energía y los puntos
    donde cambian las secciones; con un clic se convierten en marcas.
 
+## Mercados: gráficas de cripto y acciones
+
+`mercados.html` es una pantalla aparte, sin relación con el repertorio: un
+gráfico de velas propio, al estilo de las plataformas de trading, hecho con el
+mismo criterio que el resto del proyecto (canvas puro, sin librerías, sin
+servidor y sin cuenta).
+
+```bash
+npm start   # y abre http://localhost:8080/mercados.html
+```
+
+| Qué tiene | Detalle |
+| --- | --- |
+| **Tipos de gráfico** | Velas, Heikin-Ashi, barras, línea y área. Escala lineal o logarítmica. |
+| **Temporalidades** | 1m, 5m, 15m, 1H, 4H, 1D y 1 semana (teclas `1` a `7`). |
+| **Indicadores** | SMA 20/50/200, EMA 9/21, Bollinger, VWAP, volumen, RSI, MACD, estocástico y ATR. Los que no van sobre el precio bajan a su propio panel. |
+| **Dibujos** | Línea de precio, línea de tendencia y retroceso de Fibonacci. Se guardan por símbolo y temporalidad. |
+| **Navegación** | Rueda para acercar, arrastrar para mover, pellizco en pantalla táctil, doble clic para volver al presente. |
+| **En vivo** | WebSocket en cripto; en acciones relee cada minuto. |
+| **Lista de seguimiento** | Con el precio y la variación del día. |
+
+### Cuánto cuesta tener esto
+
+El dibujo es gratis: el código está aquí. Lo que se paga son **los datos**.
+
+| Qué quieres ver | Proveedor | Coste |
+| --- | --- | --- |
+| Cripto, en tiempo real | Binance | **0 €**, sin registro ni clave |
+| Acciones de EE.UU., diferido 15 min | Twelve Data (plan gratuito) | **0 €**, 800 peticiones al día |
+| Acciones de EE.UU., cierre del día | Polygon.io (plan gratuito) | **0 €**, 5 peticiones por minuto |
+| Acciones de EE.UU., IEX en vivo | Alpaca (cuenta gratuita) | **0 €** |
+| Acciones de EE.UU., consolidado en vivo | Polygon.io Advanced o Databento | desde **199 $/mes** |
+
+Para uso personal, con Binance y cualquiera de las tres cuentas gratuitas de
+acciones, esto sale en **0 €/mes**. Los planes de pago solo hacen falta si
+necesitas el precio consolidado al instante (no el de una sola bolsa) o si vas
+a **redistribuir** los datos a otras personas: eso ya son licencias de las
+bolsas, con cuotas de redistribución de miles de dólares al mes, y es la razón
+por la que se paga una plataforma en vez de montarla.
+
+### Las claves de API
+
+Cripto no necesita ninguna. Para acciones, se pegan una vez en **Ajustes** y se
+guardan en `localStorage` de ese navegador: no hay servidor al que mandarlas y
+solo viajan al proveedor que elijas. Si no hay clave o el proveedor falla, la
+pantalla lo dice y cae en datos de demostración marcados como tales, para que
+nunca se confunda una simulación con un precio real.
+
 ## Estructura del proyecto
 
 ```
@@ -286,8 +335,13 @@ src/youtube.js        Reproductor sincronizado y motor de "qué tocar ahora"
 src/store.js          Guardado en el navegador, importar/exportar
 src/ideas.js          Las 100 ideas (fuente única)
 src/views/            Pantallas
+mercados.html         Gráficas de cripto y acciones (pantalla independiente)
+src/mercados/grafico.js     El gráfico: canvas, ejes, velas, cruz, dibujos
+src/mercados/indicadores.js SMA, EMA, RSI, MACD, Bollinger, ATR, VWAP, Heikin-Ashi
+src/mercados/datos.js       Proveedores de velas (Binance, Twelve Data, Polygon, Alpaca)
+src/mercados/app.js         Barra de herramientas, lista de seguimiento y ajustes
 tests/                Pruebas: teoría musical, señal (acordes y afinación),
-                      digitaciones y formato de hoja
+                      digitaciones, formato de hoja e indicadores de mercado
 tools/gen-docs.mjs    Genera el documento de las 100 ideas
 tools/servidor.mjs    Servidor estático para desarrollo (sin dependencias)
 ```
@@ -296,8 +350,9 @@ tools/servidor.mjs    Servidor estático para desarrollo (sin dependencias)
 
 ```bash
 npm start    # servidor local (Node, sin dependencias)
-npm test     # 64 pruebas: teoría, señal, digitaciones, formato de hoja,
-             # voz, estiramiento de tiempo, clic, QR, compartir e historial
+npm test     # 86 pruebas: teoría, señal, digitaciones, formato de hoja,
+             # voz, estiramiento de tiempo, clic, QR, compartir, historial
+             # e indicadores de mercado
 npm run docs # regenera docs/100-ideas-alabanza.md desde src/ideas.js
 ```
 

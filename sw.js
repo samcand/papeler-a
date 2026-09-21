@@ -4,10 +4,10 @@
  * Lo único que necesita red es el video de YouTube.
  */
 
-const VERSION = 'alabanza-v4';
+const VERSION = 'alabanza-v5';
 const ARCHIVOS = [
-  './', './index.html', './proyeccion.html', './manifest.webmanifest',
-  './assets/styles.css', './assets/icono.svg',
+  './', './index.html', './proyeccion.html', './mercados.html', './manifest.webmanifest',
+  './assets/styles.css', './assets/mercados.css', './assets/icono.svg',
   './src/app.js', './src/ui.js', './src/store.js', './src/seed.js', './src/ideas.js',
   './src/music.js', './src/chordpro.js', './src/guitar.js', './src/piano.js', './src/drums.js',
   './src/academy.js', './src/metronome.js', './src/analysis.js', './src/youtube.js',
@@ -22,6 +22,8 @@ const ARCHIVOS = [
   './src/views/academy.js', './src/views/setlists.js', './src/views/ideas.js',
   './src/views/afinador.js', './src/views/estudio.js', './src/views/atril.js',
   './src/views/canto.js', './src/views/importar.js', './src/views/historial.js',
+  './src/mercados/app.js', './src/mercados/grafico.js',
+  './src/mercados/indicadores.js', './src/mercados/datos.js',
   './src/views/calentamiento.js', './src/views/lienzo.js', './src/views/importador.js',
 ];
 
