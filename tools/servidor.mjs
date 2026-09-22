@@ -67,6 +67,7 @@ const servidor = createServer(async (peticion, respuesta) => {
 });
 
 servidor.listen(PUERTO, () => {
-  console.log(`\n  Alabanza corriendo en  http://localhost:${PUERTO}\n`);
+  console.log(`\n  Alabanza corriendo en        http://localhost:${PUERTO}`);
+  console.log(`  Estudio Bíblico corriendo en http://localhost:${PUERTO}/biblia/\n`);
   console.log('  Ctrl+C para detenerlo.\n');
 });

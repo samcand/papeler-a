@@ -47,6 +47,8 @@ self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET') return;
   // YouTube y cualquier cosa de fuera: directo a la red, sin cachear.
   if (url.origin !== location.origin) return;
+  // La app de estudio bíblico (biblia/) tiene su propio service worker.
+  if (url.pathname.includes('/biblia/')) return;
 
   e.respondWith((async () => {
     const cacheado = await caches.match(e.request, { ignoreSearch: true });

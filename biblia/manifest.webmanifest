@@ -1,0 +1,14 @@
+{
+  "name": "Estudio Bíblico",
+  "short_name": "Biblia",
+  "description": "Biblia de estudio con referencias cruzadas, notas, resaltados, búsqueda y planes de lectura.",
+  "lang": "es",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#14161b",
+  "theme_color": "#14161b",
+  "icons": [
+    { "src": "assets/icono.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

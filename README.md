@@ -8,6 +8,12 @@ video de YouTube** para saber qué tocar en cada instante, **academia de música
 No necesita servidor, ni cuenta, ni internet (salvo para el video de YouTube).
 Todo se guarda en tu dispositivo.
 
+> **Nuevo: Estudio Bíblico** — en la carpeta [`biblia/`](biblia/README.md) hay una
+> segunda app, independiente: Biblia de estudio con versiones en paralelo (RV1909,
+> KJV, hebreo y griego), referencias cruzadas, notas, resaltados, búsqueda, estudio
+> de palabras y planes de lectura. Con `npm start` se abre en
+> http://localhost:8080/biblia/.
+
 ## Cómo abrirla
 
 ```bash
