@@ -16,6 +16,8 @@ const INICIAL = {
   marcadores: [],  // { id, desde, hasta, carpeta, creado }
   claves: [],      // palabras clave marcadas en automático, ver claves.js
   diario: [],      // diario devocional: { id, devocional, fecha, respuestas, oracion }
+  sermones: [],    // taller de sermones, ver sermones.js
+  ilustraciones: [], // banco de ilustraciones: { id, titulo, texto, etiquetas, pasajes, usada: [] }
   leidos: [],      // capítulos leídos: "b.c"
   historial: [],   // últimos pasajes abiertos: claves "b.c.v"
   plan: null,      // { id, inicio, hechos: [dias] }
@@ -110,6 +112,24 @@ class Almacen {
     this.ajustar({ juegosOcultos: ocultos.includes(juego) ? ocultos.filter((j) => j !== juego) : [...ocultos, juego] });
   }
 
+  // ---------- Sermones ----------
+  guardarSermon(sermon) {
+    const i = this.estado.sermones.findIndex((x) => x.id === sermon.id);
+    const copia = { ...sermon, editado: Date.now() };
+    if (i >= 0) this.estado.sermones[i] = copia; else this.estado.sermones.push(copia);
+    this.guardar();
+    return copia;
+  }
+  borrarSermon(id) { this.punto(); this.estado.sermones = this.estado.sermones.filter((x) => x.id !== id); this.guardar(); }
+
+  // ---------- Ilustraciones ----------
+  guardarIlustracion(il) {
+    const i = this.estado.ilustraciones.findIndex((x) => x.id === il.id);
+    if (i >= 0) this.estado.ilustraciones[i] = il; else this.estado.ilustraciones.push({ id: nuevoId('il'), usada: [], creada: Date.now(), ...il });
+    this.guardar();
+  }
+  borrarIlustracion(id) { this.estado.ilustraciones = this.estado.ilustraciones.filter((x) => x.id !== id); this.guardar(); }
+
   // ---------- Diario devocional ----------
   guardarDiario(entrada) {
     const i = this.estado.diario.findIndex((d) => d.devocional === entrada.devocional && d.fecha === entrada.fecha);
@@ -200,6 +220,8 @@ class Almacen {
       this.estado.marcadores = unir(this.estado.marcadores, datos.marcadores);
       this.estado.claves = unir(this.estado.claves, datos.claves);
       this.estado.diario = unir(this.estado.diario, datos.diario);
+      this.estado.sermones = unir(this.estado.sermones, datos.sermones);
+      this.estado.ilustraciones = unir(this.estado.ilustraciones, datos.ilustraciones);
       this.estado.leidos = [...new Set([...this.estado.leidos, ...(datos.leidos || [])])];
     }
     this.guardar();

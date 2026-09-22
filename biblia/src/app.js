@@ -8,6 +8,7 @@
  *   #/plan              planes de lectura y avance
  *   #/familia/esposa    devocionales para la familia
  *   #/biblioteca        tus libros, con sus citas bíblicas indexadas
+ *   #/sermones          taller de sermones y modo púlpito
  *   #/ajustes           apariencia, versiones y respaldo
  */
 
@@ -23,6 +24,7 @@ import { vistaPlan } from './vistas/plan.js';
 import { vistaAjustes } from './vistas/ajustes.js';
 import { vistaFamilia } from './vistas/familia.js';
 import { vistaBiblioteca } from './vistas/biblioteca.js';
+import { vistaSermones } from './vistas/sermones.js';
 import { instalarVistazo } from './vistas/vistazo.js';
 
 const RUTAS = {
@@ -33,6 +35,7 @@ const RUTAS = {
   plan: vistaPlan,
   familia: vistaFamilia,
   biblioteca: vistaBiblioteca,
+  sermones: vistaSermones,
   ajustes: vistaAjustes,
 };
 

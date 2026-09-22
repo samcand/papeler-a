@@ -85,35 +85,35 @@ homilética). Fuentes al final.
 
 ## 6. Preparación del sermón
 
-51. 🔜 **Flujo de preparación expositiva** en pasos (texto → exégesis → idea exegética → propósito → idea homilética → bosquejo → ilustraciones → aplicación → introducción y conclusión), con lista de verificación.
-52. 🔜 **Gran idea** (Robinson): campos de *sujeto* y *complemento* con validación de que responden al texto.
-53. 🔜 **Las tres preguntas funcionales**: ¿qué significa?, ¿es verdad?, ¿qué diferencia hace?
-54. 🔜 **Constructor de bosquejo** con puntos arrastrables, cada uno anclado a sus versículos.
-55. 🔜 **Manuscrito** con citas bíblicas que se insertan con el texto completo de la versión elegida.
-56. 🔜 **Banco de ilustraciones propio** etiquetado por tema, texto y fecha de uso (para no repetir).
+51. 🆕 **Flujo de preparación expositiva** en pasos (texto → exégesis → idea exegética → propósito → idea homilética → bosquejo → ilustraciones → aplicación → introducción y conclusión), con lista de verificación.
+52. 🆕 **Gran idea** (Robinson): campos de *sujeto* y *complemento* con validación de que responden al texto.
+53. 🆕 **Las tres preguntas funcionales**: ¿qué significa?, ¿es verdad?, ¿qué diferencia hace?
+54. 🆕 **Constructor de bosquejo** con puntos arrastrables, cada uno anclado a sus versículos.
+55. 🆕 **Manuscrito**: introducción, puntos (explicación, ilustración, aplicación) y conclusión, exportable con el texto bíblico completo. 🔜 insertar citas dentro del texto.
+56. 🆕 **Banco de ilustraciones propio** etiquetado por tema, texto y fecha de uso (para no repetir).
 57. 🔜 **Aplicaciones por audiencia**: jóvenes, matrimonios, líderes, no creyentes.
-58. 🔜 **Cristocentricidad**: recordatorio de rutas hacia Cristo (tipología, promesa-cumplimiento, tema, contraste).
-59. 🔜 **Estimación de duración** del manuscrito según tu velocidad de lectura.
+58. 🆕 **Cristocentricidad**: recordatorio de rutas hacia Cristo (tipología, promesa-cumplimiento, tema, contraste).
+59. 🆕 **Estimación de duración** del manuscrito según tu velocidad de lectura.
 60. 🔜 **Hoja para la congregación** y **preguntas para grupos pequeños** generadas desde el bosquejo.
 
 ## 7. Púlpito y entrega
 
-61. 🔜 **Modo púlpito**: letra grande, bosquejo plegable, cronómetro y avance con pedal o teclado.
+61. 🆕 **Modo púlpito**: letra grande, bosquejo plegable, cronómetro y avance con pedal o teclado.
 62. 🔜 **Proyección** de los textos y puntos del sermón en una segunda pantalla.
-63. 🔜 **Temporizador por sección** con aviso discreto.
+63. 🆕 **Temporizador por sección** con aviso discreto.
 64. 🔜 **Lectura pública**: texto preparado con pausas y énfasis marcados.
 65. 🔜 **Pronunciación de nombres propios** difíciles del pasaje.
 66. 🔜 **Notas del orador** que solo ve el predicador.
 67. 🔜 **Grabación y transcripción** del sermón predicado para el archivo.
-68. 🔜 **Autoevaluación posterior**: claridad de la idea, fidelidad al texto, aplicación, duración real.
-69. 🔜 **Exportar** a Word/PDF y a diapositivas.
+68. 🆕 **Autoevaluación posterior**: claridad de la idea, fidelidad al texto, aplicación, duración real.
+69. 🆕 **Exportar** a Word/PDF y a diapositivas.
 70. 🔜 **Modo sin conexión garantizado** el domingo (ya existe para el lector ✅; falta para sermones).
 
 ## 8. Planificación pastoral
 
 71. 🔜 **Calendario de predicación** anual con series, fechas litúrgicas y predicadores invitados.
-72. 🔜 **Archivo de sermones** buscable por texto, tema, serie y fecha.
-73. 🔜 **Mapa de cobertura del canon**: qué libros y géneros has predicado y cuáles faltan (dieta equilibrada).
+72. 🆕 **Archivo de sermones** buscable por texto, tema, serie y fecha.
+73. 🆕 **Mapa de cobertura del canon**: qué libros y géneros has predicado y cuáles faltan (dieta equilibrada).
 74. 🔜 **Series expositivas**: dividir un libro en perícopas predicables con una semana cada una.
 75. 🔜 **Leccionario** (Revised Common Lectionary) opcional.
 76. ✅ **Planes de lectura** y mapa de capítulos leídos.

@@ -24,6 +24,7 @@ import { editarClave } from './editor-clave.js';
 import { citasEn, fragmento } from '../biblioteca.js';
 import { enLinea } from '../notas.js';
 import * as estante from '../estante.js';
+import { nuevoSermon } from './sermones.js';
 import { notasEn, notaAHtml } from '../notas.js';
 import { editarNota } from './editor-nota.js';
 import { elegirPasaje, listaLibros, cuadriculaCapitulos } from './selector.js';
@@ -580,7 +581,8 @@ async function pintarPanel() {
     el('div', { class: 'panel-acciones' },
       el('button', { class: 'btn chico primario', onClick: nuevaNota }, '✎ Nota'),
       el('button', { class: `btn chico ${almacen.tieneMarcador(desde) ? 'activo' : ''}`, onClick: alternarMarcador }, almacen.tieneMarcador(desde) ? '🔖 Quitar' : '🔖 Marcador'),
-      el('button', { class: 'btn chico', onClick: () => { est.modo = 'versos'; copiar(); } }, '⧉ Copiar')),
+      el('button', { class: 'btn chico', onClick: () => { est.modo = 'versos'; copiar(); } }, '⧉ Copiar'),
+      el('button', { class: 'btn chico', title: 'Preparar un sermón sobre este pasaje', onClick: () => nuevoSermon({ pasaje: titulo }) }, '🎤 Sermón')),
     bloque('Referencias cruzadas', refs, 'OpenBible.info · ordenadas por votos'),
     bloque(`Mis notas${notas.length ? ` (${notas.length})` : ''}`, notas.length
       ? notas.map(tarjetaNota)

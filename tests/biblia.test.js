@@ -12,6 +12,7 @@ import { repartir, generarPlan, PLANES, describirDia, racha, avanceBiblia, diaDe
 import { limpiarTexto, leerOsis } from '../tools/biblia-datos.mjs';
 import { partirTexto, parrafosDeHtml, parrafosDeDocx, rutasEpub, indexar, citasEn, fragmento, tituloDeArchivo, buscarEnLibros } from '../biblia/src/biblioteca.js';
 import { normalizar } from '../biblia/src/referencias.js';
+import { crearSermon, nuevoPunto, moverPunto, ideaExegetica, progreso, duracionEstimada, palabrasPredicadas, avisos, pasajesDe, sermonAMarkdown, romano, cobertura } from '../biblia/src/sermones.js';
 import { DEVOCIONALES, DESTINATARIOS, devocionalesPara, delDia, rachaDevocional } from '../biblia/src/devocionales.js';
 
 let passed = 0;
@@ -336,6 +337,40 @@ t('indexa las citas y encuentra qué dicen los libros de un pasaje', () => {
   assert.ok(f.includes('Romanos 5:8') && f.startsWith('…') && f.endsWith('…'));
   const hallados = buscarEnLibros([{ id: 'a', titulo: 'C', parrafos: ps }], 'gracia amor', normalizar);
   assert.deepEqual(hallados.map((h) => h.parrafo), [1]);
+});
+
+// ---------- Sermones ----------
+t('sermón: idea exegética, progreso, duración y avisos', () => {
+  const s = crearSermon({ pasaje: 'Ro 5:1-11', titulo: 'Paz con Dios' });
+  assert.equal(progreso(s).porcentaje, 11, 'solo el texto');
+  s.sujeto = '¿Qué resultado tiene la justificación por la fe?';
+  s.complemento = 'Paz con Dios, acceso a la gracia y esperanza firme.';
+  assert.equal(ideaExegetica(s), '¿Qué resultado tiene la justificación por la fe: paz con Dios, acceso a la gracia y esperanza firme.');
+  s.bosquejo = [nuevoPunto({ titulo: 'Paz', pasaje: 'Ro 5:1', explicacion: 'uno dos tres cuatro' }), nuevoPunto({ titulo: 'Esperanza', explicacion: 'cinco' })];
+  assert.ok(progreso(s).hechos.bosquejo && progreso(s).hechos.idea);
+  assert.equal(palabrasPredicadas(s), 7);
+  s.introduccion = Array(1300).fill('palabra').join(' ');
+  assert.equal(duracionEstimada(s, 130), 10);
+  const a = avisos(s);
+  assert.ok(a.some((x) => x.includes('sin versículos')));
+  assert.ok(a.some((x) => x.includes('idea homilética')));
+  assert.deepEqual(pasajesDe(s).map((x) => x.desde), [45005001, 45005001]);
+  const movido = moverPunto(s.bosquejo, s.bosquejo[1].id, -1);
+  assert.equal(movido[0].titulo, 'Esperanza');
+  assert.equal(s.bosquejo[0].titulo, 'Paz', 'no muta el original');
+  const md = sermonAMarkdown(s);
+  assert.ok(md.includes('# Paz con Dios') && md.includes('## I. Paz (Ro 5:1)') && md.includes('## II. Esperanza'));
+  assert.equal(romano(4), 'IV');
+  assert.equal(romano(9), 'IX');
+});
+
+t('cobertura del canon predicado', () => {
+  const c = cobertura([{ pasaje: 'Ro 5:1-11' }, { pasaje: 'Ro 8' }, { pasaje: 'Sal 23' }, { pasaje: '' }]);
+  assert.equal(c.porLibro[44], 2);
+  assert.equal(c.at, 1);
+  assert.equal(c.nt, 2);
+  assert.equal(c.porSeccion.find((x) => x.nombre === 'Cartas de Pablo').n, 2);
+  assert.ok(c.sinPredicar.includes('Génesis') && !c.sinPredicar.includes('Romanos'));
 });
 
 // ---------- Planes ----------

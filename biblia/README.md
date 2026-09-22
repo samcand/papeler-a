@@ -29,6 +29,11 @@ conexión. También se puede publicar tal cual en GitHub Pages: son archivos est
 | **Palabras** | Estudio de una palabra: apariciones, libros y secciones donde se concentra, primera y última mención, y con qué palabras suele aparecer. |
 | **Cuaderno** | Todas tus notas (con buscador y filtro por etiqueta y libro), tus resaltados por color y tus marcadores. Exporta tus notas a Markdown. |
 | **Plan** | Planes de lectura (Biblia en un año, NT en 90 días, evangelios, Salmos, cartas de Pablo…), lectura de hoy, racha, y un mapa de los 1189 capítulos con lo que ya leíste. |
+| **Marcado** | Además del resaltado: color de letra, subrayado doble u ondulado, tachado, recuadro, círculo, negrita, cursiva y 25 símbolos del estudio inductivo (△ Dios, ✝ Cristo, ☁ Espíritu, ▣ pacto…). Se combinan sobre el mismo texto. |
+| **Palabras clave** | Marca una palabra una vez ("pacto" en rojo con ▣) y aparece marcada en todo el libro o toda la Biblia. Se agrupan en juegos que se encienden y apagan. |
+| **Biblioteca** | Importa tus libros (EPUB, Word, HTML, Markdown, texto). La app indexa cada cita bíblica y la Guía del pasaje muestra "En tu biblioteca": qué dice cada libro del versículo que estudias. |
+| **Sermones** | Taller en 9 pasos (texto, exégesis, idea exegética, tres preguntas, propósito, idea homilética, bosquejo, introducción y conclusión, revisión) con avisos de revisión, duración estimada, banco de ilustraciones, cobertura del canon, exportación y **modo púlpito** con cronómetro. |
+| **Familia** | Devocionales para hijos (con versión para pequeños y adolescentes), esposa, esposo y pareja; diario de respuestas y peticiones, racha, lectura en voz alta e impresión. |
 | **Ajustes** | Tema oscuro, claro o sepia; tamaño y tipo de letra; versiones; umbral de votos de las referencias; exportar e importar un respaldo. |
 
 La caja de arriba entiende citas en español: `Jn 3:16`, `1 Co 13`,
@@ -62,6 +67,8 @@ node tools/biblia-datos.mjs ./mis-fuentes   # o usa copias locales
 biblia/
   index.html, sw.js, manifest.webmanifest, assets/
   datos/            texto por versión y libro, referencias cruzadas, índice
+  biblioteca/       libros incluidos con la app (ver su README)
+  docs/             100 ideas profesionales para las próximas versiones
   src/
     libros.js       los 66 libros, ids de versículo (Juan 3:16 = 43003016)
     referencias.js  leer y escribir citas en español, detectarlas en un texto
@@ -69,6 +76,11 @@ biblia/
     notas.js        Markdown seguro, etiquetas, filtros, exportar
     busqueda.js     consultas, concordancia y estudio de palabras
     plan.js         planes de lectura repartidos por versículos
+    claves.js       palabras clave marcadas en automático
+    biblioteca.js   lectura de EPUB/Word/HTML e índice de citas de tus libros
+    estante.js      los libros en IndexedDB
+    sermones.js     flujo homilético, duración, avisos, exportación
+    devocionales.js devocionales para la familia
     texto.js        carga de datos y referencias cruzadas
     almacen.js      tus datos en localStorage, deshacer, respaldo
     vistas/         pantallas (lector, buscar, palabra, cuaderno, plan, ajustes)
