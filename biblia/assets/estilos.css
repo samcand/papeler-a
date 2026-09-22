@@ -24,8 +24,17 @@
   --m-rosa: rgba(244, 114, 182, .36);
   --m-naranja: rgba(251, 146, 60, .38);
   --m-morado: rgba(167, 139, 250, .38);
+  --m-rojo: rgba(239, 68, 68, .36);
+  --m-cafe: rgba(161, 98, 7, .42);
+  --m-gris: rgba(148, 163, 184, .34);
+  /* trazos (subrayado, recuadro, símbolo) */
   --u-amarillo: #eab308; --u-verde: #22c55e; --u-azul: #3b82f6;
   --u-rosa: #ec4899; --u-naranja: #f97316; --u-morado: #8b5cf6;
+  --u-rojo: #ef4444; --u-cafe: #b45309; --u-gris: #94a3b8;
+  /* color de letra: legible sobre el fondo del tema */
+  --t-amarillo: #facc15; --t-verde: #4ade80; --t-azul: #60a5fa;
+  --t-rosa: #f472b6; --t-naranja: #fb923c; --t-morado: #a78bfa;
+  --t-rojo: #f87171; --t-cafe: #d6a45c; --t-gris: #9ca3af;
   color-scheme: dark;
 }
 
@@ -46,6 +55,12 @@
   --m-rosa: rgba(244, 114, 182, .35);
   --m-naranja: rgba(251, 146, 60, .4);
   --m-morado: rgba(167, 139, 250, .38);
+  --m-rojo: rgba(239, 68, 68, .3);
+  --m-cafe: rgba(180, 83, 9, .3);
+  --m-gris: rgba(100, 116, 139, .28);
+  --t-amarillo: #a16207; --t-verde: #15803d; --t-azul: #1d4ed8;
+  --t-rosa: #be185d; --t-naranja: #c2410c; --t-morado: #6d28d9;
+  --t-rojo: #b91c1c; --t-cafe: #78350f; --t-gris: #475569;
   color-scheme: light;
 }
 
@@ -60,6 +75,9 @@
   --acento-2: #7a4b1f;
   --sel: rgba(138, 90, 18, .13);
   --sombra: 0 10px 28px rgba(80, 50, 10, .15);
+  --t-amarillo: #a16207; --t-verde: #166534; --t-azul: #1e40af;
+  --t-rosa: #9d174d; --t-naranja: #9a3412; --t-morado: #5b21b6;
+  --t-rojo: #991b1b; --t-cafe: #713f12; --t-gris: #475569;
   color-scheme: light;
 }
 
@@ -248,47 +266,75 @@ textarea.input { width: 100%; resize: vertical; line-height: 1.5; }
 }
 .nota-versificacion { margin-top: 20px; }
 
-/* Resaltados */
-.m { border-radius: 3px; padding: .05em 0; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
-.m-resaltar.m-amarillo, .muestra.m-amarillo { background: var(--m-amarillo); }
-.m-resaltar.m-verde, .muestra.m-verde { background: var(--m-verde); }
-.m-resaltar.m-azul, .muestra.m-azul { background: var(--m-azul); }
-.m-resaltar.m-rosa, .muestra.m-rosa { background: var(--m-rosa); }
-.m-resaltar.m-naranja, .muestra.m-naranja { background: var(--m-naranja); }
-.m-resaltar.m-morado, .muestra.m-morado { background: var(--m-morado); }
-.m-subrayar { text-decoration: underline 2px; text-underline-offset: .2em; }
-.m-subrayar.m-amarillo { text-decoration-color: var(--u-amarillo); }
-.m-subrayar.m-verde { text-decoration-color: var(--u-verde); }
-.m-subrayar.m-azul { text-decoration-color: var(--u-azul); }
-.m-subrayar.m-rosa { text-decoration-color: var(--u-rosa); }
-.m-subrayar.m-naranja { text-decoration-color: var(--u-naranja); }
-.m-subrayar.m-morado { text-decoration-color: var(--u-morado); }
+/* Marcas: cada propiedad por separado, así se combinan */
+.m { border-radius: 3px; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+.m-f { background: var(--f); padding: .05em 0; }
+.m-l { color: var(--l); }
+.m-u { text-decoration-line: underline; text-decoration-color: var(--u); text-decoration-thickness: 2px; text-underline-offset: .22em; }
+.m-u.m-doble { text-decoration-style: double; text-decoration-thickness: 3px; }
+.m-u.m-ondulado { text-decoration-style: wavy; text-decoration-thickness: 1.5px; }
+.m-u.m-tachado { text-decoration-line: line-through; text-decoration-thickness: 2px; }
+.m-c { box-shadow: inset 0 0 0 1.6px var(--c); padding: 0 .12em; }
+.m-c.m-circulo { border-radius: 1em; padding: 0 .3em; }
 .m-negrita { font-weight: 700; }
+.m-cursiva { font-style: italic; }
+.m-sim::before {
+  content: attr(data-sim); color: var(--s); font: 700 .78em var(--ui);
+  vertical-align: .35em; margin-right: .08em; user-select: none; -webkit-user-select: none;
+}
 .muestra { display: inline-block; width: 14px; height: 14px; border-radius: 4px; border: 1px solid var(--linea); flex: none; }
+.muestra.m-amarillo { background: var(--m-amarillo); } .muestra.m-verde { background: var(--m-verde); }
+.muestra.m-azul { background: var(--m-azul); } .muestra.m-rosa { background: var(--m-rosa); }
+.muestra.m-naranja { background: var(--m-naranja); } .muestra.m-morado { background: var(--m-morado); }
+.muestra.m-rojo { background: var(--m-rojo); } .muestra.m-cafe { background: var(--m-cafe); }
+.muestra.m-gris { background: var(--m-gris); }
+.muestra.grande { width: 30px; height: 30px; border-radius: 50%; cursor: pointer; }
+.muestra.activa { outline: 2px solid var(--texto); outline-offset: 2px; }
+.muestra-marca { font: 600 .8rem var(--ui); padding: 0 4px; flex: none; }
+.nota-html mark, mark.hallado { background: var(--m-amarillo); }
 
 .lector-pie { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin: 36px auto 0; max-width: 44em; flex-wrap: wrap; }
 
-/* Barra flotante para resaltar */
+/* Barra flotante para marcar */
 .barra-marcas {
   position: absolute; z-index: 60; display: none;
-  align-items: center; gap: 4px; flex-wrap: wrap;
-  padding: 6px; border-radius: 12px;
+  flex-direction: column; gap: 6px; max-width: min(560px, calc(100vw - 20px));
+  padding: 8px; border-radius: 14px;
   background: var(--tarjeta); border: 1px solid var(--linea); box-shadow: var(--sombra);
   font-family: var(--ui);
 }
 .barra-marcas.visible { display: flex; }
 .barra-marcas.abajo {
   position: fixed; left: 8px; right: 8px; bottom: calc(8px + env(safe-area-inset-bottom)); top: auto !important;
-  justify-content: center;
+  max-width: none;
 }
-.barra-marcas .colores { display: flex; gap: 4px; padding-right: 4px; }
-.barra-marcas .muestra { width: 26px; height: 26px; border-radius: 50%; cursor: pointer; border: 2px solid var(--tarjeta); box-shadow: 0 0 0 1px var(--linea); }
-.barra-marcas .muestra:hover { transform: scale(1.12); }
+.fila-barra { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+.herr {
+  min-width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--linea);
+  background: var(--fondo-2); color: var(--texto); cursor: pointer; font: 600 .95rem var(--lectura);
+}
+.herr:hover { border-color: var(--tenue); }
+.herr.activa { border-color: var(--acento); color: var(--acento); background: color-mix(in oklab, var(--acento) 14%, var(--fondo-2)); }
+.herr-negrita { font-weight: 800; } .herr-cursiva { font-style: italic; }
+.barra-marcas .colores .muestra { width: 28px; height: 28px; border-radius: 50%; cursor: pointer; border: 2px solid var(--tarjeta); box-shadow: 0 0 0 1px var(--linea); }
+.barra-marcas .colores .muestra:hover { transform: scale(1.12); }
+.barra-marcas .colores .muestra.activa { box-shadow: 0 0 0 2px var(--texto); }
 .barra-marcas .separador { width: 1px; align-self: stretch; background: var(--linea); margin: 0 2px; }
+.simbolos, .simbolos-dialogo { display: flex; flex-wrap: wrap; gap: 3px; }
+.simbolo-btn {
+  width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--linea); background: var(--fondo-2);
+  color: var(--s, var(--texto)); font: 700 1.05rem var(--ui); cursor: pointer;
+}
+.simbolo-btn.activa { border-color: var(--acento); box-shadow: 0 0 0 1px var(--acento); }
+.colores-dialogo { display: flex; gap: 8px; flex-wrap: wrap; }
 .barra-marcas .solo-texto, .barra-marcas .solo-palabra { display: none; }
 .barra-marcas.modo-texto .solo-texto { display: inline-flex; }
 .barra-marcas.con-palabra .solo-palabra { display: inline-flex; }
 .barra-marcas.modo-texto .solo-versos { display: none; }
+.lista-claves { list-style: none; padding: 0; margin: 6px 0; }
+.lista-claves li { display: flex; align-items: center; gap: 4px; padding: 3px 0; font-family: var(--lectura); }
+.lista-claves li.apagada { opacity: .45; }
+.lista-claves .btn { margin-left: auto; }
 
 /* Navegador de libros */
 .nav-cap { margin-bottom: 14px; }
@@ -467,6 +513,32 @@ mark.hallado { background: var(--m-amarillo); color: inherit; border-radius: 3px
 .lista-versiones, .atajos { padding-left: 1.2em; }
 .atajos li { margin: 4px 0; }
 
+/* Devocional familiar */
+.devo-hoy.hecho { border-color: color-mix(in oklab, var(--ok) 50%, var(--linea)); }
+.lista-devos { list-style: none; padding: 0; margin: 0; }
+.lista-devos li { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--linea); }
+.lista-devos a { color: var(--texto); }
+.hecho-marca { color: var(--ok); font-weight: 700; margin-left: auto; }
+.devo-barra { margin-bottom: 12px; }
+.devocional h1 { font-family: var(--lectura); font-size: 2rem; margin: 4px 0 16px; }
+.devocional h2 { font-size: .78rem; text-transform: uppercase; letter-spacing: .08em; color: var(--tenue); margin: 0 0 6px; }
+.devo-seccion { margin: 20px 0; }
+.devo-seccion p, .devo-seccion li p { font-family: var(--lectura); font-size: 1.08rem; line-height: 1.65; }
+.devo-pasaje { background: var(--tarjeta); border: 1px solid var(--linea); border-radius: var(--radio); padding: 14px 16px; }
+.devo-pasaje sup { font: 700 .65em var(--ui); color: var(--tenue); }
+.devo-idea { border-left: 4px solid var(--acento); padding: 8px 14px; margin: 20px 0; background: color-mix(in oklab, var(--acento) 8%, transparent); border-radius: 0 10px 10px 0; }
+.devo-idea p { font: 600 1.2rem/1.45 var(--lectura); margin: 4px 0 0; }
+.contexto p { color: var(--tenue); font-size: 1rem !important; }
+.pequenos, .adolescentes { background: var(--tarjeta); border: 1px dashed var(--linea); border-radius: var(--radio); padding: 12px 14px; }
+.devo-preguntas { padding-left: 1.2em; }
+.devo-preguntas li { margin-bottom: 12px; }
+.devo-preguntas p { margin-bottom: 4px; }
+.devo-preguntas textarea { width: 100%; }
+.devo-oracion { font-style: italic; }
+.devo-memoria { font: 1.25rem/1.55 var(--lectura); margin: 0; padding: 14px 18px; border-radius: var(--radio); background: var(--tarjeta); border: 1px solid var(--linea); }
+.devo-memoria cite { display: block; font: 600 .9rem var(--ui); color: var(--acento); margin-top: 6px; font-style: normal; }
+.aplicacion { background: color-mix(in oklab, var(--ok) 8%, transparent); border-radius: var(--radio); padding: 12px 14px; }
+
 /* Avisos */
 #toasts { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); z-index: 100; display: flex; flex-direction: column; gap: 6px; align-items: center; pointer-events: none; }
 .toast { background: var(--texto); color: var(--fondo); padding: 9px 16px; border-radius: 999px; font-size: .9rem; box-shadow: var(--sombra); transition: opacity .3s, transform .3s; }
@@ -523,7 +595,8 @@ mark.hallado { background: var(--m-amarillo); color: inherit; border-radius: 3px
 }
 
 @media print {
-  .barra, .navegador, .panel, .lector-cab, .lector-pie, .barra-marcas, .ind-nota { display: none !important; }
+  .barra, .navegador, .panel, .lector-cab, .lector-pie, .barra-marcas, .ind-nota, .no-imprimir, #toasts { display: none !important; }
+  :root { --fondo: #fff; --tarjeta: #fff; --texto: #000; --tenue: #444; --linea: #ccc; }
   .lector { display: block; }
   body { background: #fff; color: #000; }
 }

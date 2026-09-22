@@ -16,7 +16,11 @@ import { deClave, formatearRango, aClave, refDesdeRango, normalizar } from '../r
 import {
   capitulo, precargar, referenciasDe, textoRango, version, versiones, tieneLibro, versiculosEn, textoSiCargado,
 } from '../texto.js';
-import { COLORES, crearMarca, segmentos, marcasEnRango, textoDeMarca } from '../marcas.js';
+import {
+  COLORES, ESTILOS, SIMBOLOS, crearMarca, segmentos, estiloSegmento, segmentoDeMarca, estiloDe, marcasEnRango, textoDeMarca,
+} from '../marcas.js';
+import { compilarClaves, marcasDeClaves, juegos } from '../claves.js';
+import { editarClave } from './editor-clave.js';
 import { notasEn, notaAHtml } from '../notas.js';
 import { editarNota } from './editor-nota.js';
 import { elegirPasaje, listaLibros, cuadriculaCapitulos } from './selector.js';
@@ -179,6 +183,9 @@ async function pintarCapitulo() {
   const desde = idVerso(b, c, 1), hasta = idVerso(b, c, 999);
   const notas = notasEn(almacen.estado.notas, desde, hasta);
   const marcas = cols.map((v) => marcasEnRango(almacen.estado.marcas, v, desde, hasta));
+  const claves = cols.map((v) => (a.clavesVisibles
+    ? compilarClaves(almacen.estado.claves, { version: v, b, juegosOcultos: a.juegosOcultos })
+    : []));
   const total = Math.max(...datos.map((d) => d.length));
   const meta = cols.map((v) => version(v));
   const atributos = (m) => ({ lang: m.idioma, dir: m.dir || 'ltr' });
@@ -187,7 +194,7 @@ async function pintarCapitulo() {
     const texto = datos[i][v - 1];
     if (!texto) return null;
     const id = idVerso(b, c, v);
-    const segs = segmentos(texto, id, marcas[i]);
+    const segs = segmentos(texto, id, claves[i].length ? [...marcasDeClaves(texto, id, claves[i]), ...marcas[i]] : marcas[i]);
     const principal = i === 0;
     const notasV = principal ? notas.filter((n) => n.desde <= id && (n.hasta || n.desde) >= id) : [];
     return el('span', {
@@ -195,9 +202,7 @@ async function pintarCapitulo() {
       dataset: { id },
     },
     el('sup', { class: 'num', 'aria-hidden': 'true' }, v),
-    el('span', { class: 't' }, segs.map((s) => (s.marcas.length
-      ? el('span', { class: claseMarca(s), dataset: { marcas: s.marcas.join(' ') } }, s.texto)
-      : s.texto))),
+    el('span', { class: 't' }, segs.map(trozo)),
     notasV.length ? el('button', {
       class: 'ind-nota', type: 'button', dataset: { nota: notasV[0].id },
       title: notasV.map((n) => n.titulo || n.cuerpo.slice(0, 60)).join('\n'),
@@ -226,10 +231,13 @@ async function pintarCapitulo() {
   marcarSeleccion();
 }
 
-function claseMarca(s) {
-  const clases = ['m', `m-${s.color || 'amarillo'}`];
-  for (const e of s.estilos) clases.push(`m-${e}`);
-  return clases.join(' ');
+/** Un trozo de versículo con sus marcas. El símbolo va en ::before para no alterar el texto seleccionable. */
+function trozo(s) {
+  if (!s.marcas.length) return s.texto;
+  const { clase, vars, simbolo } = estiloSegmento(s);
+  const dataset = { marcas: s.marcas.join(' ') };
+  if (simbolo) dataset.sim = simbolo;
+  return el('span', { class: clase, style: vars, dataset }, s.texto);
 }
 
 function desplazarA(id, destello) {
@@ -266,6 +274,7 @@ function alHacerClic(e) {
     est.sel = { version: ver, desde: id, hasta: id };
   }
   est.textoSel = null;
+  est.fijo = false;
   marcarSeleccion();
   mostrarBarra('versos', vs.getBoundingClientRect());
   pintarPanel();
@@ -284,6 +293,7 @@ function marcarSeleccion() {
 function limpiarSeleccion() {
   est.sel = null;
   est.textoSel = null;
+  est.fijo = false;
   getSelection()?.removeAllRanges();
   marcarSeleccion();
   ocultarBarra();
@@ -301,7 +311,7 @@ function revisarSeleccion() {
   if (!est) return;
   const s = getSelection();
   if (!s || !s.rangeCount || s.isCollapsed) {
-    if (est.modo === 'texto') ocultarBarra();
+    if (est.modo === 'texto' && !est.fijo) ocultarBarra();
     return;
   }
   const r = s.getRangeAt(0);
@@ -315,6 +325,7 @@ function revisarSeleccion() {
     hasta: { id: z.id, o: z.version === a.version ? z.o : null },
     texto: s.toString().replace(/\d+/g, ' ').replace(/\s+/g, ' ').trim(),
   };
+  est.fijo = false;
   mostrarBarra('texto', r.getBoundingClientRect());
 }
 
@@ -371,31 +382,58 @@ function alTeclear(e) {
   }
   // Atajos de color: 1-6 resaltan lo seleccionado
   const n = Number(e.key);
-  if (est.modo && n >= 1 && n <= COLORES.length) aplicarMarca(COLORES[n - 1].id, 'resaltar');
+  if (est.modo && n >= 1 && n <= COLORES.length) aplicarMarca(COLORES[n - 1].id, almacen.ajustes.estilo);
   if (est.modo && e.key.toLowerCase() === 'n') { e.preventDefault(); nuevaNota(); }
 }
 
 // ---------------------------------------------------------------- Barra de marcas
 
 function construirBarra() {
+  const sinFoco = (e) => e.preventDefault(); // no perder la selección al pulsar
   const accion = (texto, titulo, alPulsar, clase = '') =>
-    el('button', { type: 'button', class: `btn chico ${clase}`, title: titulo, onMousedown: (e) => e.preventDefault(), onClick: alPulsar }, texto);
+    el('button', { type: 'button', class: `btn chico ${clase}`, title: titulo, onMousedown: sinFoco, onClick: alPulsar }, texto);
+  const a = almacen.ajustes;
+  const herramienta = (e) => el('button', {
+    type: 'button', class: `herr ${a.estilo === e.id ? 'activa' : ''} herr-${e.id}`, title: e.nombre, 'aria-pressed': a.estilo === e.id,
+    onMousedown: sinFoco,
+    onClick: () => {
+      // negrita y cursiva no llevan color: se aplican de una vez
+      if (e.id === 'negrita' || e.id === 'cursiva') { aplicarMarca(a.color, e.id); return; }
+      almacen.ajustar({ estilo: e.id });
+      construirBarra();
+    },
+  }, e.icono);
+
   render(est.barra,
-    el('div', { class: 'colores' }, COLORES.map((c, i) => el('button', {
-      type: 'button', class: `muestra m-${c.id}`, title: `Resaltar en ${c.nombre.toLowerCase()} (${i + 1})`,
-      'aria-label': `Resaltar en ${c.nombre.toLowerCase()}`,
-      onMousedown: (e) => e.preventDefault(), onClick: () => aplicarMarca(c.id, 'resaltar'),
+    el('div', { class: 'fila-barra herramientas' }, ESTILOS.map(herramienta),
+      el('span', { class: 'separador' }),
+      accion('⌫', 'Borrar las marcas de lo seleccionado', borrarMarcas)),
+    el('div', { class: 'fila-barra colores' }, COLORES.map((c, i) => el('button', {
+      type: 'button', class: `muestra m-${c.id} ${a.color === c.id ? 'activa' : ''}`,
+      title: `${estiloDe(a.estilo).nombre} en ${c.nombre.toLowerCase()}${i < 9 ? ` (${i + 1})` : ''}`,
+      'aria-label': `${estiloDe(a.estilo).nombre} en ${c.nombre.toLowerCase()}`,
+      onMousedown: sinFoco, onClick: () => aplicarMarca(c.id, a.estilo),
     }))),
-    accion(el('u', {}, 'S'), 'Subrayar', () => aplicarMarca(almacen.ajustes.color, 'subrayar')),
-    accion(el('b', {}, 'N'), 'Negrita', () => aplicarMarca(almacen.ajustes.color, 'negrita')),
-    accion('⌫', 'Quitar resaltado de lo seleccionado', borrarMarcas),
-    el('span', { class: 'separador' }),
-    accion('✎ Nota', 'Escribir una nota sobre el pasaje (N)', nuevaNota),
-    accion('🔖', 'Marcador', alternarMarcador, 'solo-versos'),
-    accion('⧉', 'Copiar con la cita', copiar),
-    accion('🔤', 'Estudiar esta palabra', estudiarPalabra, 'solo-palabra'),
-    accion('🔎', 'Buscar lo seleccionado en toda la Biblia', buscarSeleccion, 'solo-texto'),
-    accion('✕', 'Cerrar (Esc)', limpiarSeleccion, 'icono'));
+    a.estilo === 'simbolo' ? el('div', { class: 'fila-barra simbolos' }, SIMBOLOS.map((x) => el('button', {
+      type: 'button', class: `simbolo-btn ${a.simbolo === x.s ? 'activa' : ''}`, title: `${x.nombre} (color sugerido: ${x.color})`,
+      style: { '--s': `var(--u-${x.color})` }, onMousedown: sinFoco,
+      onClick: () => { almacen.ajustar({ simbolo: x.s }); aplicarMarca(x.color, 'simbolo'); },
+    }, x.s))) : null,
+    el('div', { class: 'fila-barra acciones-barra' },
+      accion('✎ Nota', 'Escribir una nota sobre el pasaje (N)', nuevaNota),
+      accion('★ Clave', 'Marcar esta palabra en todo el libro o toda la Biblia', nuevaClave, 'solo-texto'),
+      accion('🔖', 'Marcador', alternarMarcador, 'solo-versos'),
+      accion('⧉', 'Copiar con la cita', copiar),
+      accion('🔤', 'Estudiar esta palabra', estudiarPalabra, 'solo-palabra'),
+      accion('🔎', 'Buscar lo seleccionado en toda la Biblia', buscarSeleccion, 'solo-texto'),
+      accion('✕', 'Cerrar (Esc)', limpiarSeleccion, 'icono')));
+}
+
+function nuevaClave() {
+  const t = est.textoSel;
+  if (!t?.texto) return;
+  editarClave({ palabra: t.texto.toLowerCase(), version: t.version, alcance: 0, color: almacen.ajustes.color, estilo: almacen.ajustes.estilo === 'simbolo' ? 'resaltar' : almacen.ajustes.estilo }, est.b)
+    .then((guardada) => { if (guardada) { est.fijo = false; ocultarBarra(); repintar(); } });
 }
 
 function mostrarBarra(modo, caja) {
@@ -434,8 +472,8 @@ function objetivo() {
 function aplicarMarca(color, estilo) {
   const o = objetivo();
   if (!o) return;
-  almacen.agregarMarca(crearMarca({ ...o, color, estilo }));
-  if (color !== almacen.ajustes.color) almacen.ajustar({ color });
+  almacen.agregarMarca(crearMarca({ ...o, color, estilo, simbolo: almacen.ajustes.simbolo }));
+  if (color !== almacen.ajustes.color && estilo !== 'simbolo') almacen.ajustar({ color });
   terminarAccion();
 }
 
@@ -446,12 +484,14 @@ function borrarMarcas() {
   terminarAccion();
 }
 
+/**
+ * Tras marcar, la barra queda abierta sobre el mismo tramo: así se puede
+ * combinar fondo, color de letra, recuadro y símbolo sin volver a seleccionar.
+ */
 function terminarAccion() {
-  const conservarVersos = est.modo === 'versos';
+  est.fijo = true;
   getSelection()?.removeAllRanges();
-  est.textoSel = null;
-  ocultarBarra();
-  if (!conservarVersos) est.sel = null;
+  construirBarra();
   repintar();
 }
 
@@ -649,18 +689,50 @@ function pintarPanelCapitulo() {
     bloque(`Notas del capítulo${notas.length ? ` (${notas.length})` : ''}`, notas.length ? notas.map(tarjetaNota) : el('p', { class: 'tenue small' }, 'Sin notas todavía.')),
     bloque(`Resaltados${marcas.length ? ` (${marcas.length})` : ''}`, marcas.length
       ? el('ul', { class: 'lista-marcas' }, marcas.map((m) => el('li', {},
-        el('span', { class: `muestra m-${m.color}` }),
+        muestraDe(m),
         el('a', { href: `#/leer/${aClave(refDesdeRango(m.desde.id, m.hasta.id))}` }, formatearRango(m.desde.id, m.hasta.id, { abreviado: true })),
         ' ',
         el('span', { class: 'tenue' }, recortar(textoDeMarca(m, (id) => textoSiCargado(m.version, id)) || '', 90)),
         m.version !== principal ? el('span', { class: 'etiqueta-version' }, version(m.version)?.abrev) : null,
         el('button', { class: 'btn icono chico', title: 'Quitar', onClick: () => { almacen.quitarMarca(m.id); repintar(); } }, '✕'))))
       : el('p', { class: 'tenue small' }, 'Selecciona texto para resaltarlo.')),
+    bloquePalabrasClave(b),
     bloque('Este libro', el('div', { class: 'datos-libro' },
       el('div', {}, el('strong', {}, L.capitulos), ' capítulos'),
       el('div', {}, el('strong', {}, versiculosEn(b, c)), ' versículos en este capítulo'),
       el('div', {}, el('strong', {}, `${leidos}/${L.capitulos}`), ' capítulos leídos'),
       el('div', { class: 'barra-avance' }, el('span', { style: { width: `${(leidos / L.capitulos) * 100}%` } })))));
+}
+
+/** Palabras clave que aplican a este libro, con interruptores por juego. */
+function bloquePalabrasClave(b) {
+  const a = almacen.ajustes;
+  const reglas = almacen.estado.claves.filter((k) => !k.alcance || k.alcance === b);
+  const lista = juegos(reglas);
+  const refrescar = () => { pintarCapitulo(); pintarPanel(); };
+  return bloque(`Palabras clave${reglas.length ? ` (${reglas.length})` : ''}`,
+    el('div', {},
+      reglas.length ? el('label', { class: 'check small' },
+        el('input', { type: 'checkbox', checked: a.clavesVisibles, onChange: (e) => { almacen.ajustar({ clavesVisibles: e.target.checked }); refrescar(); } }),
+        ' Mostrar palabras clave en el texto') : null,
+      lista.length ? el('div', { class: 'chips' }, lista.map((j) => el('button', {
+        class: `chip ${a.juegosOcultos.includes(j) ? '' : 'activo'}`, title: 'Encender o apagar este juego de marcado',
+        onClick: () => { almacen.alternarJuego(j); refrescar(); },
+      }, j))) : null,
+      reglas.length ? el('ul', { class: 'lista-claves' }, reglas.map((k) => {
+        const { clase, vars, simbolo } = estiloSegmento(segmentoDeMarca(k));
+        return el('li', { class: a.juegosOcultos.includes(k.juego) || !k.activa ? 'apagada' : '' },
+          el('span', { class: clase, style: vars, dataset: simbolo ? { sim: simbolo } : {} }, k.palabra),
+          el('span', { class: 'tenue small' }, k.alcance ? ` · ${libro(k.alcance).abrev}` : ' · toda la Biblia', k.juego ? ` · ${k.juego}` : ''),
+          el('button', { class: 'btn icono chico', title: 'Editar', onClick: () => editarClave(k, b).then(refrescar) }, '✎'));
+      })) : el('p', { class: 'tenue small' }, 'Selecciona una palabra y pulsa ★ Clave para marcarla en todo el texto (p. ej. cada “pacto” en rojo con ▣).'),
+      el('button', { class: 'btn chico', onClick: () => editarClave({ version: a.principal }, b).then(refrescar) }, '+ Palabra clave')));
+}
+
+/** Pequeña muestra de cómo se ve una marca ("Ab" con su estilo). */
+export function muestraDe(m) {
+  const { clase, vars, simbolo } = estiloSegmento(segmentoDeMarca(m));
+  return el('span', { class: `${clase} muestra-marca`, style: vars, dataset: simbolo ? { sim: simbolo } : {}, title: estiloDe(m.estilo).nombre }, 'Ab');
 }
 
 const recortar = (t, n) => (t.length > n ? t.slice(0, n - 1) + '…' : t);

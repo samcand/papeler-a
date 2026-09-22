@@ -84,19 +84,23 @@ function valida(r) {
   return r;
 }
 
-/** "Jn 3:16, 18; Ro 5:8" → varias referencias. */
+/** "Jn 3:16, 18; Ro 5:8; 6:23" → varias referencias (lo que no nombra libro sigue el anterior). */
 export function parsearLista(texto) {
   const salida = [];
-  for (const parte of String(texto).split(';')) {
-    let anterior = null;
-    for (const trozo of parte.split(',')) {
+  let anterior = null;
+  for (const [i, parte] of String(texto).split(';').entries()) {
+    for (const [j, trozo] of parte.split(',').entries()) {
       const t = trozo.trim();
       if (!t) continue;
       let r = parsear(t);
-      if (!r && anterior && /^\d+(\s*[-–]\s*\d+)?$/.test(t)) {
-        // "18" o "18-20" después de "Jn 3:16": mismo capítulo
+      if (!r && anterior && /^\d+[:.]\d+/.test(t)) {
+        // "24:3-4" después de "Pr 14:1": mismo libro, otro capítulo
+        r = parsear(`${libro(anterior.b).nombre} ${t}`);
+      } else if (!r && anterior && /^\d+(\s*[-–]\s*\d+)?$/.test(t)) {
+        // "18" o "18-20": tras coma, versículos del mismo capítulo; tras punto y coma, capítulos
         const [a, z] = t.split(/[-–]/).map((n) => Number(n.trim()));
-        r = anterior.v == null
+        const nuevoCapitulo = anterior.v == null || (j === 0 && i > 0);
+        r = nuevoCapitulo
           ? valida({ b: anterior.b, c: a, v: null, c2: z || a, v2: null })
           : valida({ b: anterior.b, c: anterior.c2, v: a, c2: anterior.c2, v2: z || a });
       }

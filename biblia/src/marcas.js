@@ -15,12 +15,60 @@ export const COLORES = [
   { id: 'rosa', nombre: 'Rosa' },
   { id: 'naranja', nombre: 'Naranja' },
   { id: 'morado', nombre: 'Morado' },
+  { id: 'rojo', nombre: 'Rojo' },
+  { id: 'cafe', nombre: 'Café' },
+  { id: 'gris', nombre: 'Gris' },
 ];
 
+/**
+ * Herramientas de marcado. Cada una pinta una "propiedad" distinta del texto,
+ * así se combinan: fondo amarillo + letra roja + recuadro azul + símbolo.
+ */
 export const ESTILOS = [
-  { id: 'resaltar', nombre: 'Resaltar' },
-  { id: 'subrayar', nombre: 'Subrayar' },
-  { id: 'negrita', nombre: 'Negrita' },
+  { id: 'resaltar', nombre: 'Resaltar', prop: 'fondo', icono: '▮' },
+  { id: 'letra', nombre: 'Color de letra', prop: 'letra', icono: 'A' },
+  { id: 'subrayar', nombre: 'Subrayar', prop: 'linea', icono: 'S̲' },
+  { id: 'doble', nombre: 'Subrayado doble', prop: 'linea', icono: 'S̳' },
+  { id: 'ondulado', nombre: 'Subrayado ondulado', prop: 'linea', icono: '〰' },
+  { id: 'tachado', nombre: 'Tachado', prop: 'linea', icono: 'S̶' },
+  { id: 'recuadro', nombre: 'Encerrar en recuadro', prop: 'caja', icono: '▢' },
+  { id: 'circulo', nombre: 'Encerrar en círculo', prop: 'caja', icono: '◯' },
+  { id: 'negrita', nombre: 'Negrita', prop: 'negrita', icono: 'N' },
+  { id: 'cursiva', nombre: 'Cursiva', prop: 'cursiva', icono: 'I' },
+  { id: 'simbolo', nombre: 'Símbolo', prop: 'simbolo', icono: '△' },
+];
+export const estiloDe = (id) => ESTILOS.find((e) => e.id === id) || ESTILOS[0];
+
+/**
+ * Símbolos del método inductivo (Precept) y otros de uso pastoral. El color
+ * lo pone la marca; el color sugerido es el tradicional.
+ */
+export const SIMBOLOS = [
+  { s: '△', nombre: 'Dios, el Padre', color: 'amarillo' },
+  { s: '✝', nombre: 'Jesucristo', color: 'morado' },
+  { s: '☁', nombre: 'Espíritu Santo', color: 'azul' },
+  { s: 'Ψ', nombre: 'Satanás, demonios', color: 'rojo' },
+  { s: '✖', nombre: 'Pecado', color: 'cafe' },
+  { s: '◆', nombre: 'Sangre, sacrificio, expiación', color: 'rojo' },
+  { s: '▣', nombre: 'Pacto', color: 'rojo' },
+  { s: '♥', nombre: 'Amor', color: 'rosa' },
+  { s: '✦', nombre: 'Gracia, misericordia', color: 'azul' },
+  { s: '✓', nombre: 'Fe, creer', color: 'verde' },
+  { s: '↺', nombre: 'Arrepentimiento', color: 'naranja' },
+  { s: '♔', nombre: 'Reino, rey', color: 'morado' },
+  { s: '⚖', nombre: 'Justicia, juicio', color: 'cafe' },
+  { s: '☆', nombre: 'Promesa', color: 'amarillo' },
+  { s: '!', nombre: 'Mandato, advertencia', color: 'rojo' },
+  { s: '?', nombre: 'Pregunta, duda por resolver', color: 'gris' },
+  { s: '◷', nombre: 'Tiempo, cuándo', color: 'verde' },
+  { s: '⌂', nombre: 'Lugar, dónde', color: 'verde' },
+  { s: '✋', nombre: 'Oración', color: 'morado' },
+  { s: '▤', nombre: 'Palabra, ley, Escritura', color: 'cafe' },
+  { s: '☀', nombre: 'Luz, gloria', color: 'amarillo' },
+  { s: '∞', nombre: 'Eternidad, vida eterna', color: 'azul' },
+  { s: '⚔', nombre: 'Guerra espiritual', color: 'gris' },
+  { s: '→', nombre: 'Conclusión, "por tanto"', color: 'gris' },
+  { s: '★', nombre: 'Clave, importante', color: 'naranja' },
 ];
 
 export function nuevoId(prefijo = 'm') {
@@ -28,10 +76,12 @@ export function nuevoId(prefijo = 'm') {
 }
 
 /** Crea una marca ordenando los extremos (se puede seleccionar de abajo hacia arriba). */
-export function crearMarca({ version, desde, hasta, color = 'amarillo', estilo = 'resaltar' }) {
+export function crearMarca({ version, desde, hasta, color = 'amarillo', estilo = 'resaltar', simbolo }) {
   let a = { ...desde }, z = { ...hasta };
   if (comparar(a, z) > 0) [a, z] = [z, a];
-  return { id: nuevoId('m'), version, desde: a, hasta: z, color, estilo, creada: Date.now() };
+  const m = { id: nuevoId('m'), version, desde: a, hasta: z, color, estilo, creada: Date.now() };
+  if (estilo === 'simbolo') m.simbolo = simbolo || '★';
+  return m;
 }
 
 /** Orden entre dos puntos del texto. hasta.o nulo cuenta como el final. */
@@ -55,8 +105,10 @@ export function tramoEn(marca, id, largo) {
 
 /**
  * Parte el texto de un versículo en trozos según las marcas que lo cubren.
- * Devuelve [{ texto, inicio, color, estilos:Set, marcas:[ids] }]. Si dos
- * resaltados se pisan, gana el más reciente; subrayado y negrita se suman.
+ * Devuelve [{ texto, inicio, fondo, letra, linea, caja, estilos:Set, simbolos, marcas:[ids] }].
+ * Cada propiedad la decide la marca más reciente que la toca, así se combinan
+ * fondo, color de letra, subrayado y recuadro. `color` es el del fondo (o el
+ * primero que haya) para quien solo necesita uno.
  */
 export function segmentos(texto, id, marcas) {
   const largo = texto.length;
@@ -65,7 +117,7 @@ export function segmentos(texto, id, marcas) {
     const t = tramoEn(m, id, largo);
     if (t) tramos.push({ m, inicio: t[0], fin: t[1] });
   }
-  if (!tramos.length) return [{ texto, inicio: 0, color: null, estilos: new Set(), marcas: [] }];
+  if (!tramos.length) return [{ texto, inicio: 0, color: null, estilos: new Set(), simbolos: [], marcas: [] }];
 
   const cortes = new Set([0, largo]);
   for (const t of tramos) { cortes.add(t.inicio); cortes.add(t.fin); }
@@ -77,21 +129,50 @@ export function segmentos(texto, id, marcas) {
     const [a, z] = [puntos[i], puntos[i + 1]];
     if (z <= a) continue;
     const encima = tramos.filter((t) => t.inicio <= a && t.fin >= z);
-    let color = null;
-    const estilos = new Set();
+    const seg = { texto: texto.slice(a, z), inicio: a, estilos: new Set(), simbolos: [], marcas: encima.map((t) => t.m.id) };
     for (const t of encima) {
-      estilos.add(t.m.estilo || 'resaltar');
-      if ((t.m.estilo || 'resaltar') === 'resaltar' || !color) color = t.m.color;
+      const estilo = estiloDe(t.m.estilo);
+      if (estilo.id === 'simbolo') {
+        // el símbolo va una sola vez, delante de la primera palabra marcada
+        if (t.inicio === a && t.m.desde.id === id) seg.simbolos.push({ s: t.m.simbolo, color: t.m.color });
+        continue;
+      }
+      seg.estilos.add(estilo.id);
+      if (estilo.prop === 'linea') seg.linea = t.m.color;
+      else if (['fondo', 'letra', 'caja'].includes(estilo.prop)) seg[estilo.prop] = t.m.color;
     }
+    seg.color = seg.fondo || seg.letra || seg.linea || seg.caja || null;
     const previo = salida[salida.length - 1];
-    const mismas = encima.map((t) => t.m.id);
-    if (previo && previo.color === color && igual(previo.marcas, mismas)) {
-      previo.texto += texto.slice(a, z);
-    } else {
-      salida.push({ texto: texto.slice(a, z), inicio: a, color, estilos, marcas: mismas });
-    }
+    if (previo && !seg.simbolos.length && igual(previo.marcas, seg.marcas)) previo.texto += seg.texto;
+    else salida.push(seg);
   }
   return salida;
+}
+
+/** Clases y variables CSS para pintar un trozo. Sin DOM: la vista decide cómo aplicarlas. */
+export function estiloSegmento(seg) {
+  const clases = ['m'];
+  const vars = {};
+  if (seg.fondo) { clases.push('m-f'); vars['--f'] = `var(--m-${seg.fondo})`; }
+  if (seg.letra) { clases.push('m-l'); vars['--l'] = `var(--t-${seg.letra})`; }
+  if (seg.linea) { clases.push('m-u'); vars['--u'] = `var(--u-${seg.linea})`; }
+  if (seg.caja) { clases.push('m-c'); vars['--c'] = `var(--u-${seg.caja})`; }
+  for (const e of seg.estilos) if (!['resaltar', 'letra', 'subrayar'].includes(e)) clases.push(`m-${e}`);
+  if (seg.simbolos.length) {
+    clases.push('m-sim');
+    vars['--s'] = `var(--u-${seg.simbolos[0].color})`;
+  }
+  return { clase: clases.join(' '), vars, simbolo: seg.simbolos.map((x) => x.s).join('') };
+}
+
+/** Trozo "de muestra" que pinta una sola marca (o regla de palabra clave) en listas y leyendas. */
+export function segmentoDeMarca(m) {
+  const e = estiloDe(m.estilo);
+  const seg = { estilos: new Set([e.id]), simbolos: [], marcas: [m.id] };
+  if (e.id === 'simbolo' || m.simbolo) seg.simbolos.push({ s: m.simbolo || '★', color: m.color });
+  if (e.prop === 'linea') seg.linea = m.color;
+  else if (['fondo', 'letra', 'caja'].includes(e.prop)) seg[e.prop] = m.color;
+  return seg;
 }
 
 const igual = (x, y) => x.length === y.length && x.every((v, i) => v === y[i]);

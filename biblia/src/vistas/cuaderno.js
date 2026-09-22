@@ -9,13 +9,18 @@ import { LIBROS, partesId } from '../libros.js';
 import { formatearRango, aClave, refDesdeRango } from '../referencias.js';
 import { precargar, textoSiCargado, version } from '../texto.js';
 import { filtrarNotas, todasLasEtiquetas, notaAHtml, exportarMarkdown } from '../notas.js';
-import { COLORES, textoDeMarca } from '../marcas.js';
+import { COLORES, textoDeMarca, estiloSegmento, segmentoDeMarca } from '../marcas.js';
+import { muestraDe } from './lector.js';
 import { editarNota } from './editor-nota.js';
+import { editarClave } from './editor-clave.js';
+import { juegos, contarClave } from '../claves.js';
+import { bibliaCompleta } from '../texto.js';
 
 const PESTANAS = [
   { id: 'notas', nombre: 'Notas' },
   { id: 'resaltados', nombre: 'Resaltados' },
   { id: 'marcadores', nombre: 'Marcadores' },
+  { id: 'claves', nombre: 'Palabras clave' },
 ];
 
 export async function vistaCuaderno(app, ruta) {
@@ -30,12 +35,13 @@ export async function vistaCuaderno(app, ruta) {
         el('button', { class: 'btn', title: 'Descargar todas las notas en un archivo Markdown', onClick: exportarNotas }, '⬇ Exportar notas'))),
     el('nav', { class: 'subpestanas' }, PESTANAS.map((p) => el('a', {
       href: `#/cuaderno/${p.id}`, class: p.id === pestana ? 'activa' : '',
-    }, p.nombre, el('span', { class: 'cuenta' }, { notas: e.notas.length, resaltados: e.marcas.length, marcadores: e.marcadores.length }[p.id])))),
+    }, p.nombre, el('span', { class: 'cuenta' }, { notas: e.notas.length, resaltados: e.marcas.length, marcadores: e.marcadores.length, claves: e.claves.length }[p.id])))),
     contenido));
 
   if (pestana === 'notas') pintarNotas(contenido, ruta, () => vistaCuaderno(app, ruta));
   if (pestana === 'resaltados') await pintarResaltados(contenido, ruta, () => vistaCuaderno(app, ruta));
   if (pestana === 'marcadores') await pintarMarcadores(contenido, () => vistaCuaderno(app, ruta));
+  if (pestana === 'claves') await pintarClaves(contenido, () => vistaCuaderno(app, ruta));
 }
 
 function exportarNotas() {
@@ -121,9 +127,9 @@ async function pintarResaltados(contenedor, ruta, refrescar) {
     render(lista, [...porLibro.entries()].map(([b, grupo]) => el('section', { class: 'grupo-marcas' },
       el('h3', {}, LIBROS[b - 1].nombre, el('span', { class: 'cuenta' }, grupo.length)),
       el('ul', { class: 'lista-marcas grande' }, grupo.map((m) => el('li', {},
-        el('span', { class: `muestra m-${m.color}`, title: m.estilo }),
+        muestraDe(m),
         el('a', { class: 'ref', href: `#/leer/${aClave(refDesdeRango(m.desde.id, m.hasta.id))}`, dataset: { ref: aClave(refDesdeRango(m.desde.id, m.hasta.id)) } }, formatearRango(m.desde.id, m.hasta.id, { abreviado: true })),
-        el('span', { class: `texto-marca m m-${m.color} m-${m.estilo}` }, textoDeMarca(m, (id) => textoSiCargado(m.version, id))),
+        (() => { const { clase, vars, simbolo } = estiloSegmento(segmentoDeMarca(m)); return el('span', { class: `texto-marca ${clase}`, style: vars, dataset: simbolo ? { sim: simbolo } : {} }, textoDeMarca(m, (id) => textoSiCargado(m.version, id))); })(),
         m.version !== almacen.ajustes.principal ? el('span', { class: 'etiqueta-version' }, version(m.version)?.abrev) : null,
         el('select', {
           class: 'input chico', title: 'Cambiar color',
@@ -168,4 +174,40 @@ async function pintarMarcadores(contenedor, refrescar) {
           el('button', { class: 'btn icono chico', title: 'Quitar marcador', onClick: () => { almacen.alternarMarcador(m.desde, m.hasta); refrescar(); } }, '✕'))),
       el('p', { class: 'texto-biblico' }, textos.join(' ')));
   })));
+}
+
+/** Todas las palabras clave, agrupadas por juego, con cuántas veces aparecen. */
+async function pintarClaves(contenedor, refrescar) {
+  const reglas = almacen.estado.claves;
+  const nueva = el('button', { class: 'btn primario', onClick: () => editarClave({ version: almacen.ajustes.principal }).then(refrescar) }, '+ Palabra clave');
+  if (!reglas.length) {
+    render(contenedor, el('div', { class: 'vacio' },
+      el('h2', {}, 'Sin palabras clave'),
+      el('p', {}, 'Marca una palabra una sola vez y la app la marcará en todo el libro o toda la Biblia: cada “pacto” en rojo con ▣, cada “Espíritu” con ☁, cada “por tanto” con →. Es el marcado del estudio inductivo, sin lápices.'),
+      nueva));
+    return;
+  }
+  render(contenedor, el('p', { class: 'tenue' }, 'Contando apariciones…'));
+  const porVersion = {};
+  for (const v of new Set(reglas.map((r) => r.version))) porVersion[v] = await bibliaCompleta(v);
+  const grupos = ['', ...juegos(reglas)];
+  const ocultos = almacen.ajustes.juegosOcultos;
+  render(contenedor,
+    el('div', { class: 'acciones' }, nueva,
+      el('label', { class: 'check' }, el('input', { type: 'checkbox', checked: almacen.ajustes.clavesVisibles, onChange: (e) => almacen.ajustar({ clavesVisibles: e.target.checked }) }), ' Mostrar palabras clave al leer')),
+    grupos.map((g) => {
+      const del = reglas.filter((r) => (r.juego || '') === g);
+      if (!del.length) return null;
+      return el('section', { class: 'grupo-marcas' },
+        el('h3', {}, g || 'Sin juego',
+          g ? el('button', { class: `chip ${ocultos.includes(g) ? '' : 'activo'}`, style: { marginLeft: '10px' }, onClick: () => { almacen.alternarJuego(g); refrescar(); } }, ocultos.includes(g) ? 'Apagado' : 'Encendido') : null),
+        el('ul', { class: 'lista-marcas grande' }, del.map((r) => el('li', {},
+          muestraDe(r),
+          el('strong', {}, r.palabra),
+          el('span', { class: 'tenue' }, `${r.raiz ? 'y derivadas · ' : ''}${r.alcance ? LIBROS[r.alcance - 1].nombre : 'toda la Biblia'} · ${contarClave(porVersion[r.version], r)} veces`),
+          el('span', { class: 'grow' }),
+          el('label', { class: 'check small' }, el('input', { type: 'checkbox', checked: r.activa, onChange: (e) => almacen.cambiarClave(r.id, { activa: e.target.checked }) }), ' activa'),
+          el('a', { class: 'btn chico', href: `#/buscar?q=${encodeURIComponent(r.raiz ? `${r.palabra}*` : r.palabra)}&en=${r.alcance ? `l${r.alcance}` : 'todo'}&v=${r.version}` }, 'Ver pasajes'),
+          el('button', { class: 'btn chico', onClick: () => editarClave(r).then(refrescar) }, 'Editar')))));
+    }));
 }

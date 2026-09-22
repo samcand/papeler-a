@@ -4,11 +4,13 @@ import { LIBROS, idVerso, partesId, capituloVecino, TOTAL_CAPITULOS, libroPorOsi
 import {
   parsear, parsearLista, buscarLibro, formatear, formatearRango, rango, aClave, deClave, detectar,
 } from '../biblia/src/referencias.js';
-import { crearMarca, segmentos, borrarTramo, tramoEn, textoDeMarca } from '../biblia/src/marcas.js';
+import { crearMarca, segmentos, borrarTramo, tramoEn, textoDeMarca, estiloSegmento, segmentoDeMarca } from '../biblia/src/marcas.js';
+import { crearClave, compilarClaves, marcasDeClaves, contarClave, juegos } from '../biblia/src/claves.js';
 import { analizarConsulta, coincide, buscar, estudiarPalabra } from '../biblia/src/busqueda.js';
 import { notaAHtml, enLinea, leerEtiquetas, filtrarNotas, notasEn, exportarMarkdown, todasLasEtiquetas } from '../biblia/src/notas.js';
 import { repartir, generarPlan, PLANES, describirDia, racha, avanceBiblia, diaDeHoy } from '../biblia/src/plan.js';
 import { limpiarTexto, leerOsis } from '../tools/biblia-datos.mjs';
+import { DEVOCIONALES, DESTINATARIOS, devocionalesPara, delDia, rachaDevocional } from '../biblia/src/devocionales.js';
 
 let passed = 0;
 const t = (name, fn) => { fn(); passed++; console.log('  ok  ' + name); };
@@ -73,6 +75,9 @@ t('listas de citas', () => {
   assert.equal(l.length, 3);
   assert.deepEqual(l[1], { b: 43, c: 3, v: 18, c2: 3, v2: 18 });
   assert.equal(formatear(l[2]), 'Romanos 5:8');
+  const m = parsearLista('Pr 14:1; 24:3-4');
+  assert.deepEqual(m.map((r) => formatear(r)), ['Proverbios 14:1', 'Proverbios 24:3-4']);
+  assert.deepEqual(parsearLista('Gn 3:14-15, 21').map((r) => formatear(r)), ['Génesis 3:14-15', 'Génesis 3:21']);
 });
 
 t('escribe citas', () => {
@@ -150,6 +155,58 @@ t('el texto de una marca para el cuaderno', () => {
   assert.equal(textoDeMarca(m, (id) => textos[id]), 'amó Dios al mundo Porque');
 });
 
+t('fondo, color de letra, recuadro y subrayado se combinan', () => {
+  const marca = (desde, hasta, color, estilo, creada) => ({ ...crearMarca({ version: 'rv', desde: { id: 1, o: desde }, hasta: { id: 1, o: hasta }, color, estilo }), creada });
+  const s = segmentos(TEXTO, 1, [
+    marca(0, 38, 'amarillo', 'resaltar', 1),
+    marca(21, 29, 'rojo', 'letra', 2),
+    marca(21, 24, 'azul', 'recuadro', 3),
+    marca(25, 29, 'verde', 'ondulado', 4),
+  ]);
+  const amo = s.find((x) => x.texto === 'amó');
+  assert.equal(amo.fondo, 'amarillo');
+  assert.equal(amo.letra, 'rojo');
+  assert.equal(amo.caja, 'azul');
+  const dios = s.find((x) => x.texto === 'Dios');
+  assert.equal(dios.linea, 'verde');
+  const e = estiloSegmento(dios);
+  assert.ok(e.clase.includes('m-f') && e.clase.includes('m-l') && e.clase.includes('m-u') && e.clase.includes('m-ondulado'));
+  assert.equal(e.vars['--l'], 'var(--t-rojo)');
+});
+
+t('el símbolo va una vez, delante de la palabra, y no altera el texto', () => {
+  const m = crearMarca({ version: 'rv', desde: { id: 1, o: 25 }, hasta: { id: 1, o: 29 }, color: 'amarillo', estilo: 'simbolo', simbolo: '△' });
+  const s = segmentos(TEXTO, 1, [m]);
+  assert.equal(s.map((x) => x.texto).join(''), TEXTO);
+  const dios = s.find((x) => x.texto === 'Dios');
+  assert.deepEqual(dios.simbolos, [{ s: '△', color: 'amarillo' }]);
+  assert.equal(estiloSegmento(dios).simbolo, '△');
+  assert.equal(segmentoDeMarca(m).simbolos[0].s, '△');
+});
+
+t('palabras clave: se marcan solas donde aparece la palabra', () => {
+  const k = crearClave({ palabra: 'dios', color: 'amarillo', estilo: 'recuadro', simbolo: '△', version: 'rv' });
+  const comp = compilarClaves([k], { version: 'rv', b: 43 });
+  const marcas = marcasDeClaves('Y dijo Dios: sea la luz. Y vió Dios', 43001001, comp);
+  assert.equal(marcas.filter((m) => m.estilo === 'recuadro').length, 2);
+  assert.equal(marcas.filter((m) => m.estilo === 'simbolo').length, 2);
+  assert.equal(marcas[0].desde.o, 7);
+  // no se aplica a otra versión, a otro libro ni si su juego está apagado
+  assert.equal(compilarClaves([k], { version: 'kjv', b: 43 }).length, 0);
+  const soloJuan = { ...k, alcance: 43, juego: 'Juan' };
+  assert.equal(compilarClaves([soloJuan], { version: 'rv', b: 1 }).length, 0);
+  assert.equal(compilarClaves([soloJuan], { version: 'rv', b: 43, juegosOcultos: ['Juan'] }).length, 0);
+  assert.deepEqual(juegos([soloJuan, k]), ['Juan']);
+  // derivadas y frases
+  const pacto = compilarClaves([crearClave({ palabra: 'pacto', raiz: true, version: 'rv' })], { version: 'rv', b: 1 });
+  assert.equal(marcasDeClaves('mi pacto y mis pactos', 1, pacto).length, 2);
+  const frase = compilarClaves([crearClave({ palabra: 'hijo del hombre', version: 'rv' })], { version: 'rv', b: 40 });
+  assert.equal(marcasDeClaves('el Hijo del hombre vino', 1, frase).length, 1);
+  const libros = []; libros[0] = [['Dios crió. Y dijo Dios', 'la tierra']]; libros[42] = [['con Dios']];
+  assert.equal(contarClave(libros, { ...k, alcance: 0 }), 3);
+  assert.equal(contarClave(libros, { ...k, alcance: 43 }), 1);
+});
+
 // ---------- Búsqueda ----------
 const MINI = [];
 MINI[0] = [['En el principio crió Dios los cielos y la tierra.', 'Y la tierra estaba desordenada y vacía.']];
@@ -223,6 +280,23 @@ t('etiquetas y filtros del cuaderno', () => {
   const md = exportarMarkdown(notas);
   assert.ok(md.indexOf('Juan 3:16') < md.indexOf('Romanos 5:8'));
   assert.ok(md.includes('Apunte libre'));
+});
+
+t('todos los devocionales tienen pasajes válidos y campos completos', () => {
+  for (const d of DEVOCIONALES) {
+    assert.ok(parsearLista(d.texto).length, `${d.id}: texto ${d.texto}`);
+    assert.ok(parsearLista(d.memoria).length, `${d.id}: memoria ${d.memoria}`);
+    for (const campo of ['titulo', 'contexto', 'idea', 'reflexion', 'aplicacion', 'oracion']) assert.ok(d[campo], `${d.id}: ${campo}`);
+    assert.equal(d.preguntas.length, 3, d.id);
+    if (d.para === 'hijos') assert.ok(d.pequenos && d.adolescentes, d.id);
+  }
+  assert.equal(new Set(DEVOCIONALES.map((d) => d.id)).size, DEVOCIONALES.length, 'ids únicos');
+  for (const p of DESTINATARIOS) assert.ok(devocionalesPara(p.id).length >= 8, p.id);
+  assert.equal(delDia('esposa', new Date(2026, 0, 1)).para, 'esposa');
+  const diario = [{ para: 'hijos', fecha: '2026-03-01', hecho: true }, { para: 'hijos', fecha: '2026-03-02', hecho: true }];
+  assert.equal(rachaDevocional(diario, 'hijos', new Date(2026, 2, 2)), 2);
+  assert.equal(rachaDevocional(diario, 'hijos', new Date(2026, 2, 3)), 2);
+  assert.equal(rachaDevocional(diario, 'hijos', new Date(2026, 2, 5)), 0);
 });
 
 // ---------- Planes ----------

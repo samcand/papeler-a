@@ -6,6 +6,7 @@
  *   #/palabra/amor      estudio de una palabra
  *   #/cuaderno/notas    notas, resaltados y marcadores
  *   #/plan              planes de lectura y avance
+ *   #/familia/esposa    devocionales para la familia
  *   #/ajustes           apariencia, versiones y respaldo
  */
 
@@ -19,6 +20,7 @@ import { vistaPalabra } from './vistas/palabra.js';
 import { vistaCuaderno } from './vistas/cuaderno.js';
 import { vistaPlan } from './vistas/plan.js';
 import { vistaAjustes } from './vistas/ajustes.js';
+import { vistaFamilia } from './vistas/familia.js';
 import { instalarVistazo } from './vistas/vistazo.js';
 
 const RUTAS = {
@@ -27,6 +29,7 @@ const RUTAS = {
   palabra: vistaPalabra,
   cuaderno: vistaCuaderno,
   plan: vistaPlan,
+  familia: vistaFamilia,
   ajustes: vistaAjustes,
 };
 

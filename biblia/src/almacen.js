@@ -5,7 +5,7 @@
  * Usa "Exportar respaldo" en Ajustes para guardarlo o pasarlo a otro equipo.
  */
 
-import { nuevoId, borrarTramo } from './marcas.js';
+import { nuevoId, borrarTramo, estiloDe } from './marcas.js';
 
 const CLAVE = 'estudio-biblico.v1';
 
@@ -14,6 +14,8 @@ const INICIAL = {
   notas: [],       // ver notas.js
   marcas: [],      // ver marcas.js
   marcadores: [],  // { id, desde, hasta, carpeta, creado }
+  claves: [],      // palabras clave marcadas en automático, ver claves.js
+  diario: [],      // diario devocional: { id, devocional, fecha, respuestas, oracion }
   leidos: [],      // capítulos leídos: "b.c"
   historial: [],   // últimos pasajes abiertos: claves "b.c.v"
   plan: null,      // { id, inicio, hechos: [dias] }
@@ -28,7 +30,10 @@ const INICIAL = {
     votos: 5,                // referencias cruzadas con al menos estos votos
     panel: true,             // panel de estudio visible
     color: 'amarillo',
-    estilo: 'resaltar',
+    estilo: 'resaltar',     // herramienta de marcado activa
+    simbolo: '△',
+    juegosOcultos: [],      // juegos de palabras clave apagados
+    clavesVisibles: true,
   },
 };
 
@@ -64,7 +69,7 @@ class Almacen {
 
   /** Guarda una copia para poder deshacer el último cambio de marcas o notas. */
   punto() {
-    this.deshacer.push(JSON.stringify({ notas: this.estado.notas, marcas: this.estado.marcas, marcadores: this.estado.marcadores }));
+    this.deshacer.push(JSON.stringify({ notas: this.estado.notas, marcas: this.estado.marcas, marcadores: this.estado.marcadores, claves: this.estado.claves }));
     if (this.deshacer.length > 30) this.deshacer.shift();
   }
 
@@ -82,7 +87,36 @@ class Almacen {
   ajustar(cambios) { Object.assign(this.estado.ajustes, cambios); this.guardar(); }
 
   // ---------- Marcas ----------
-  agregarMarca(marca) { this.punto(); this.estado.marcas.push(marca); this.guardar(); }
+  /** Agrega una marca. Si ya hay otra en el mismo tramo que pinta lo mismo (fondo, letra…), la reemplaza. */
+  agregarMarca(marca) {
+    this.punto();
+    const prop = estiloDe(marca.estilo).prop;
+    const mismoTramo = (m) => m.version === marca.version && m.desde.id === marca.desde.id && m.desde.o === marca.desde.o
+      && m.hasta.id === marca.hasta.id && m.hasta.o === marca.hasta.o;
+    this.estado.marcas = this.estado.marcas.filter((m) => !(mismoTramo(m) && estiloDe(m.estilo).prop === prop && prop !== 'simbolo'));
+    this.estado.marcas.push(marca);
+    this.guardar();
+  }
+
+  // ---------- Palabras clave ----------
+  agregarClave(clave) { this.punto(); this.estado.claves.push(clave); this.guardar(); }
+  quitarClave(id) { this.punto(); this.estado.claves = this.estado.claves.filter((k) => k.id !== id); this.guardar(); }
+  cambiarClave(id, cambios) {
+    const k = this.estado.claves.find((x) => x.id === id);
+    if (k) { Object.assign(k, cambios); this.guardar(); }
+  }
+  alternarJuego(juego) {
+    const ocultos = this.ajustes.juegosOcultos;
+    this.ajustar({ juegosOcultos: ocultos.includes(juego) ? ocultos.filter((j) => j !== juego) : [...ocultos, juego] });
+  }
+
+  // ---------- Diario devocional ----------
+  guardarDiario(entrada) {
+    const i = this.estado.diario.findIndex((d) => d.devocional === entrada.devocional && d.fecha === entrada.fecha);
+    if (i >= 0) this.estado.diario[i] = { ...this.estado.diario[i], ...entrada };
+    else this.estado.diario.push({ id: nuevoId('d'), ...entrada });
+    this.guardar();
+  }
   quitarMarca(id) { this.punto(); this.estado.marcas = this.estado.marcas.filter((m) => m.id !== id); this.guardar(); }
   borrarTramo(version, desde, hasta) {
     this.punto();
@@ -164,6 +198,8 @@ class Almacen {
       this.estado.notas = unir(this.estado.notas, datos.notas);
       this.estado.marcas = unir(this.estado.marcas, datos.marcas);
       this.estado.marcadores = unir(this.estado.marcadores, datos.marcadores);
+      this.estado.claves = unir(this.estado.claves, datos.claves);
+      this.estado.diario = unir(this.estado.diario, datos.diario);
       this.estado.leidos = [...new Set([...this.estado.leidos, ...(datos.leidos || [])])];
     }
     this.guardar();
