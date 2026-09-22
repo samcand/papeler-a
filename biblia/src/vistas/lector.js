@@ -21,6 +21,9 @@ import {
 } from '../marcas.js';
 import { compilarClaves, marcasDeClaves, juegos } from '../claves.js';
 import { editarClave } from './editor-clave.js';
+import { citasEn, fragmento } from '../biblioteca.js';
+import { enLinea } from '../notas.js';
+import * as estante from '../estante.js';
 import { notasEn, notaAHtml } from '../notas.js';
 import { editarNota } from './editor-nota.js';
 import { elegirPasaje, listaLibros, cuadriculaCapitulos } from './selector.js';
@@ -565,6 +568,8 @@ async function pintarPanel() {
   const otras = el('div', { class: 'otras-versiones' });
   const palabras = el('div', { class: 'chips' });
   const notas = notasEn(almacen.estado.notas, desde, hasta);
+  const enBiblioteca = el('div', { class: 'en-biblioteca' }, el('p', { class: 'tenue small' }, 'Buscando en tus libros…'));
+  pintarBiblioteca(enBiblioteca, desde, hasta);
 
   render(panel,
     el('div', { class: 'panel-cab' },
@@ -581,6 +586,7 @@ async function pintarPanel() {
       ? notas.map(tarjetaNota)
       : el('p', { class: 'tenue small' }, 'Aún no hay notas aquí. Pulsa ✎ Nota o selecciona palabras.')),
     bloque('En otras versiones', otras),
+    bloque('En tu biblioteca', enBiblioteca, 'Párrafos de tus libros que citan este pasaje'),
     bloque('Estudiar palabras', palabras, 'Toca una palabra para ver dónde más aparece'));
 
   // Referencias cruzadas (unión de las de cada versículo seleccionado)
@@ -611,6 +617,27 @@ async function pintarPanel() {
     .filter((p) => p.length > 3 && !VACIAS.has(normalizar(p))).map((p) => p.toLowerCase()))].slice(0, 24);
   if (!est || est.sel?.desde !== desde) return;
   render(palabras, unicas.map((p) => el('a', { class: 'chip', href: `#/palabra/${encodeURIComponent(p)}` }, p)));
+}
+
+/** Lo que dicen los libros de la biblioteca sobre el pasaje seleccionado. */
+async function pintarBiblioteca(contenedor, desde, hasta) {
+  let libros = [];
+  try { libros = await estante.libros(); } catch { /* sin IndexedDB (modo privado) */ }
+  if (!libros.length) {
+    render(contenedor, el('p', { class: 'tenue small' }, 'Importa comentarios o libros en ', el('a', { href: '#/biblioteca' }, 'Biblioteca'), ' y aquí verás lo que dicen sobre este pasaje.'));
+    return;
+  }
+  const hallazgos = citasEn(libros, desde, hasta, { limite: 15 });
+  if (!hallazgos.length) { render(contenedor, el('p', { class: 'tenue small' }, `Ninguno de tus ${libros.length} libros cita este pasaje.`)); return; }
+  const items = await Promise.all(hallazgos.map(async (h) => {
+    const ps = await estante.parrafos(h.libro.id);
+    const texto = ps[h.parrafo] || '';
+    return el('li', {},
+      el('a', { class: 'libro-cita', href: `#/biblioteca/${encodeURIComponent(h.libro.id)}?p=${h.parrafo}` },
+        el('strong', {}, h.libro.titulo), h.libro.autor ? el('span', { class: 'tenue' }, ` · ${h.libro.autor}`) : null),
+      el('div', { class: 'xref-texto', html: enLinea(fragmento(texto, { largo: 280 })) }));
+  }));
+  render(contenedor, el('ol', { class: 'xrefs' }, items));
 }
 
 function bloque(titulo, contenido, ayuda) {

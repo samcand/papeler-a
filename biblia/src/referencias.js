@@ -161,7 +161,7 @@ export function deClave(clave) {
  * Para no confundir "he 2 hijos" con Hebreos 2, el libro debe ir con mayúscula
  * o la cita debe llevar dos puntos ("he 2:3").
  */
-const RE_DETECTAR = /((?:\b[123]\s?)?\b[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]{1,20}\.?)\s(\d{1,3})(?:[:.](\d{1,3})(?:\s?[-–]\s?(\d{1,3})(?:[:.](\d{1,3}))?)?|\s?[-–]\s?(\d{1,3}))?(?![\d:])/g;
+const RE_DETECTAR = /((?:\b[123]\s?)?\b[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]{1,20}\.?)\s(\d{1,3})(?:[:.](\d{1,3})(?:\s?[-–]\s?(\d{1,3})(?:[:.](\d{1,3}))?)?|\s?[-–]\s?(\d{1,3}))?(?!\d|[:.]\d)/g;
 
 export function detectar(texto) {
   const hallazgos = [];

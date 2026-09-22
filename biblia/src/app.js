@@ -7,6 +7,7 @@
  *   #/cuaderno/notas    notas, resaltados y marcadores
  *   #/plan              planes de lectura y avance
  *   #/familia/esposa    devocionales para la familia
+ *   #/biblioteca        tus libros, con sus citas bíblicas indexadas
  *   #/ajustes           apariencia, versiones y respaldo
  */
 
@@ -21,6 +22,7 @@ import { vistaCuaderno } from './vistas/cuaderno.js';
 import { vistaPlan } from './vistas/plan.js';
 import { vistaAjustes } from './vistas/ajustes.js';
 import { vistaFamilia } from './vistas/familia.js';
+import { vistaBiblioteca } from './vistas/biblioteca.js';
 import { instalarVistazo } from './vistas/vistazo.js';
 
 const RUTAS = {
@@ -30,6 +32,7 @@ const RUTAS = {
   cuaderno: vistaCuaderno,
   plan: vistaPlan,
   familia: vistaFamilia,
+  biblioteca: vistaBiblioteca,
   ajustes: vistaAjustes,
 };
 

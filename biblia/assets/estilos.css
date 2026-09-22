@@ -539,6 +539,27 @@ mark.hallado { background: var(--m-amarillo); color: inherit; border-radius: 3px
 .devo-memoria cite { display: block; font: 600 .9rem var(--ui); color: var(--acento); margin-top: 6px; font-style: normal; }
 .aplicacion { background: color-mix(in oklab, var(--ok) 8%, transparent); border-radius: var(--radio); padding: 12px 14px; }
 
+/* Biblioteca */
+.zona-soltar {
+  display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center;
+  padding: 26px 16px; margin: 12px 0 16px; border: 2px dashed var(--linea); border-radius: var(--radio);
+  background: var(--fondo-2); cursor: pointer;
+}
+.zona-soltar:hover, .zona-soltar.encima { border-color: var(--acento); }
+.estante { list-style: none; padding: 0; margin: 12px 0; }
+.libro-tarjeta { display: flex; align-items: center; gap: 12px; padding: 10px 14px; }
+.libro-tarjeta a { color: var(--texto); }
+.lomo {
+  width: 34px; height: 46px; border-radius: 3px 6px 6px 3px; flex: none;
+  display: grid; place-items: center; font: 700 1.1rem var(--lectura); color: #1b1406;
+  background: linear-gradient(90deg, color-mix(in oklab, var(--acento) 70%, #000) 0 4px, var(--acento) 4px);
+}
+.libro-texto p { font: var(--letra)/1.7 var(--lectura); }
+.libro-texto p.destacado { background: var(--sel); border-radius: 8px; padding: 6px 10px; margin-left: -10px; margin-right: -10px; }
+.titulo-libro { font-family: var(--lectura); margin-top: 12px; }
+.libro-cita { font-size: .88rem; }
+.en-biblioteca .xref-texto { font-size: .9rem; }
+
 /* Avisos */
 #toasts { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); z-index: 100; display: flex; flex-direction: column; gap: 6px; align-items: center; pointer-events: none; }
 .toast { background: var(--texto); color: var(--fondo); padding: 9px 16px; border-radius: 999px; font-size: .9rem; box-shadow: var(--sombra); transition: opacity .3s, transform .3s; }

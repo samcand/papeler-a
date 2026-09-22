@@ -10,6 +10,8 @@ import { analizarConsulta, coincide, buscar, estudiarPalabra } from '../biblia/s
 import { notaAHtml, enLinea, leerEtiquetas, filtrarNotas, notasEn, exportarMarkdown, todasLasEtiquetas } from '../biblia/src/notas.js';
 import { repartir, generarPlan, PLANES, describirDia, racha, avanceBiblia, diaDeHoy } from '../biblia/src/plan.js';
 import { limpiarTexto, leerOsis } from '../tools/biblia-datos.mjs';
+import { partirTexto, parrafosDeHtml, parrafosDeDocx, rutasEpub, indexar, citasEn, fragmento, tituloDeArchivo, buscarEnLibros } from '../biblia/src/biblioteca.js';
+import { normalizar } from '../biblia/src/referencias.js';
 import { DEVOCIONALES, DESTINATARIOS, devocionalesPara, delDia, rachaDevocional } from '../biblia/src/devocionales.js';
 
 let passed = 0;
@@ -100,6 +102,7 @@ t('rango y clave de URL ida y vuelta', () => {
 t('detecta citas dentro de una nota', () => {
   const h = detectar('Compara con Ro 5:8 y también 1 Jn 4:10. Ver Salmos 23 y he 2:3; pero "he 2 hijos" no.');
   assert.deepEqual(h.map((x) => x.texto), ['Ro 5:8', '1 Jn 4:10', 'Salmos 23', 'he 2:3']);
+  assert.deepEqual(detectar('está en Romanos 5:8: Cristo murió. Y Juan 3:16.').map((x) => x.texto), ['Romanos 5:8', 'Juan 3:16']);
 });
 
 // ---------- Resaltados ----------
@@ -297,6 +300,42 @@ t('todos los devocionales tienen pasajes válidos y campos completos', () => {
   assert.equal(rachaDevocional(diario, 'hijos', new Date(2026, 2, 2)), 2);
   assert.equal(rachaDevocional(diario, 'hijos', new Date(2026, 2, 3)), 2);
   assert.equal(rachaDevocional(diario, 'hijos', new Date(2026, 2, 5)), 0);
+});
+
+// ---------- Biblioteca ----------
+t('parte textos, HTML y Word en párrafos', () => {
+  assert.deepEqual(partirTexto('Primer párrafo\ncortado a mano.\n\nSegundo, con justifi-\ncación.'), ['Primer párrafo cortado a mano.', 'Segundo, con justificación.']);
+  assert.deepEqual(parrafosDeHtml('<html><head><title>x</title><style>p{}</style></head><body><h1>Cap&iacute;tulo 1</h1><p>Ver <b>Ro</b> 5:8 &amp; m&#225;s.</p><script>no</script></body></html>'),
+    ['Capítulo 1', 'Ver Ro 5:8 & más.']);
+  const xml = '<w:body><w:p><w:r><w:t>Gracia en </w:t></w:r><w:r><w:t xml:space="preserve">Ef 2:8</w:t></w:r></w:p><w:p></w:p><w:p><w:r><w:t>Otro</w:t></w:r></w:p></w:body>';
+  assert.deepEqual(parrafosDeDocx(xml), ['Gracia en Ef 2:8', 'Otro']);
+  assert.equal(tituloDeArchivo('calvino_institucion-tomo1.epub'), 'Calvino institucion tomo1');
+});
+
+t('ordena los capítulos de un EPUB según el spine', () => {
+  const container = '<container><rootfiles><rootfile full-path="OEBPS/content.opf"/></rootfiles></container>';
+  const opf = '<package><metadata><dc:title>Comentario a Romanos</dc:title><dc:creator>Matthew Henry</dc:creator></metadata><manifest>'
+    + '<item id="c2" href="cap2.xhtml"/><item id="c1" href="texto/cap%201.xhtml"/></manifest><spine><itemref idref="c1"/><itemref idref="c2"/></spine></package>';
+  const r = rutasEpub(container, (ruta) => (ruta === 'OEBPS/content.opf' ? opf : ''));
+  assert.deepEqual(r.rutas, ['OEBPS/texto/cap 1.xhtml', 'OEBPS/cap2.xhtml']);
+  assert.equal(r.titulo, 'Comentario a Romanos');
+  assert.equal(r.autor, 'Matthew Henry');
+});
+
+t('indexa las citas y encuentra qué dicen los libros de un pasaje', () => {
+  const ps = ['Introducción sin citas.', 'La gracia de Romanos 5:8 muestra el amor.', 'Todo Romanos 5 trata de la paz.', 'Ver también Juan 3:16.'];
+  const indice = indexar(ps);
+  assert.equal(indice.length, 3);
+  const libros = [{ id: 'a', titulo: 'Comentario', indice }];
+  const r = citasEn(libros, 45005008, 45005008);
+  assert.deepEqual(r.map((x) => x.parrafo), [1, 2], 'la cita exacta primero, el capítulo después');
+  assert.equal(citasEn(libros, 43003016, 43003017).length, 1);
+  assert.equal(citasEn(libros, 1001001, 1001001).length, 0);
+  const largo = 'x'.repeat(400) + ' Romanos 5:8 ' + 'y'.repeat(400);
+  const f = fragmento(largo, { largo: 100 });
+  assert.ok(f.includes('Romanos 5:8') && f.startsWith('…') && f.endsWith('…'));
+  const hallados = buscarEnLibros([{ id: 'a', titulo: 'C', parrafos: ps }], 'gracia amor', normalizar);
+  assert.deepEqual(hallados.map((h) => h.parrafo), [1]);
 });
 
 // ---------- Planes ----------
