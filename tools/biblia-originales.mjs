@@ -148,6 +148,8 @@ async function main() {
   const lexH = {};
   for (const [k, e] of Object.entries(hebreo)) {
     lexH[Number(k.slice(1))] = [e.lemma, e.xlit || '', (e.strongs_def || '').trim(), (e.kjv_def || '').trim(), (e.derivation || '').trim(), glosaKjv(e.strongs_def) || glosaKjv(e.kjv_def)];
+    // la fuente trae algún carácter dañado (U+FFFD), p. ej. en H7374
+    lexH[Number(k.slice(1))] = lexH[Number(k.slice(1))].map((x) => String(x).replace(/\s*\uFFFD/g, ''));
   }
   const lexG = {};
   const lemaAStrong = new Map();
