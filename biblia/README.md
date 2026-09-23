@@ -126,3 +126,12 @@ biblia/
 
 Las pruebas (`npm test`) cubren el analizador de citas, los resaltados, la
 búsqueda, las notas, los planes y la integridad de los datos.
+
+## Capturas
+
+| | |
+| --- | --- |
+| ![RV1909 con Strong](docs/capturas/1-strong-rv1909.png) | ![Comentario de Matthew Henry](docs/capturas/2-comentario-matthew-henry.png) |
+| ![Armonía de los evangelios](docs/capturas/5-armonia-bautismo.png) | ![Proyector](docs/capturas/7-proyector.png) |
+
+Más en [`docs/capturas/`](docs/capturas/).
