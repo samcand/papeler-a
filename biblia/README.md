@@ -8,14 +8,26 @@ dispositivo.
 
 ## Cómo abrirla
 
+1. Instala **Node.js** (versión LTS) desde https://nodejs.org — solo una vez.
+2. Descarga el proyecto: en GitHub, botón verde **Code → Download ZIP**
+   (en la rama `claude/bible-study-app-notes-28wpxd`) y descomprímelo.
+3. Doble clic en **`Estudio Biblico (Windows).bat`** o, en Mac,
+   **`Estudio Biblico (Mac).command`** (la primera vez: clic derecho → Abrir).
+   Se abre el navegador en la app. Deja abierta la ventana negra mientras la usas.
+
+Desde la terminal es lo mismo:
+
 ```bash
 npm start            # desde la raíz del repositorio
 ```
 
-y entra a **http://localhost:8080/biblia/**. Debe abrirse por `http://` (no
-con doble clic en el archivo). Se puede instalar como app (Chrome/Edge/Android:
-"Instalar"; iPhone: Compartir → "Añadir a pantalla de inicio") y funciona sin
-conexión. También se puede publicar tal cual en GitHub Pages: son archivos estáticos.
+y entra a **http://localhost:8080/biblia/** (si el 8080 está ocupado, la
+ventana dice qué puerto usó: 8081, 8082…). Debe abrirse por `http://`, no con
+doble clic en `index.html`: el navegador bloquea la app desde `file://`.
+
+Se puede instalar como app (Chrome/Edge/Android: "Instalar"; iPhone:
+Compartir → "Añadir a pantalla de inicio") y funciona sin conexión. También se
+puede publicar tal cual en GitHub Pages: son archivos estáticos.
 
 ## Qué incluye
 

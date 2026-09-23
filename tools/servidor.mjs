@@ -5,17 +5,23 @@
  * bloquea los módulos de JavaScript cargados desde file://). Esto evita
  * depender de Python, que en Windows no siempre está instalado.
  *
- *   npm start            -> http://localhost:8080
+ *   npm start            -> http://localhost:8080 (si está ocupado, prueba 8081, 8082…)
  *   npm start -- 3000    -> otro puerto
+ *   node tools/servidor.mjs --abrir /biblia/   -> además abre el navegador en esa página
  */
 
 import { createServer } from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import { extname, join, normalize, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { exec } from 'node:child_process';
 
 const RAIZ = resolve(fileURLToPath(new URL('..', import.meta.url)));
-const PUERTO = Number(process.argv[2]) || Number(process.env.PORT) || 8080;
+const argumentos = process.argv.slice(2);
+const iAbrir = argumentos.indexOf('--abrir');
+const ABRIR = iAbrir >= 0 ? (argumentos[iAbrir + 1] && !argumentos[iAbrir + 1].startsWith('--') ? argumentos[iAbrir + 1] : '/') : null;
+const PEDIDO = Number(argumentos.find((a) => /^\d+$/.test(a))) || Number(process.env.PORT) || 8080;
+let PUERTO = PEDIDO;
 
 const TIPOS = {
   '.html': 'text/html; charset=utf-8',
@@ -49,6 +55,11 @@ const servidor = createServer(async (peticion, respuesta) => {
     }
 
     const info = await stat(destino).catch(() => null);
+    // "/biblia" sin barra final: redirigir a "/biblia/" para que carguen sus archivos
+    if (info?.isDirectory() && !ruta.endsWith('/')) {
+      respuesta.writeHead(301, { location: url.pathname + '/' + url.search }).end();
+      return;
+    }
     if (!info || info.isDirectory()) {
       respuesta.writeHead(404, { 'content-type': 'text/plain; charset=utf-8' })
         .end(`No existe: ${ruta}`);
@@ -66,8 +77,27 @@ const servidor = createServer(async (peticion, respuesta) => {
   }
 });
 
-servidor.listen(PUERTO, () => {
+// Si el puerto está ocupado (otra copia abierta, otro programa), prueba el siguiente
+servidor.on('error', (error) => {
+  if (error.code === 'EADDRINUSE' && PUERTO < PEDIDO + 20) {
+    PUERTO++;
+    servidor.listen(PUERTO);
+    return;
+  }
+  console.error(`\n  No se pudo iniciar el servidor: ${error.message}\n`);
+  process.exit(1);
+});
+
+servidor.on('listening', () => {
+  if (PUERTO !== PEDIDO) console.log(`\n  (El puerto ${PEDIDO} estaba ocupado; se usa el ${PUERTO})`);
   console.log(`\n  Alabanza corriendo en        http://localhost:${PUERTO}`);
   console.log(`  Estudio Bíblico corriendo en http://localhost:${PUERTO}/biblia/\n`);
-  console.log('  Ctrl+C para detenerlo.\n');
+  console.log('  Deja esta ventana abierta mientras usas la app. Ctrl+C para detenerlo.\n');
+  if (ABRIR) {
+    const url = `http://localhost:${PUERTO}${ABRIR.startsWith('/') ? ABRIR : `/${ABRIR}`}`;
+    const orden = process.platform === 'win32' ? `start "" "${url}"` : process.platform === 'darwin' ? `open "${url}"` : `xdg-open "${url}"`;
+    exec(orden, () => {});
+  }
 });
+
+servidor.listen(PUERTO);
