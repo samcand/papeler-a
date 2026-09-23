@@ -39,6 +39,10 @@ conexión. También se puede publicar tal cual en GitHub Pages: son archivos est
 | **Memorizar** | Versículos para memorizar con repetición espaciada (cajas de Leitner: 1, 3, 7, 14, 30 y 90 días), pistas de iniciales o huecos, escribir de memoria y comprobar. Se agregan desde la Guía del pasaje o los devocionales. |
 | **Familia** | Devocionales para hijos (con versión para pequeños y adolescentes), esposa, esposo y pareja; diario de respuestas y peticiones, racha, lectura en voz alta e impresión. |
 | **Idiomas originales** | Columna hebrea (OSHB) o griega (SBLGNT) donde cada palabra se toca para ver lema, número Strong, morfología explicada en español con notas exegéticas (aoristo, wayyiqtol, piel…), definición y traducciones. Modo **interlineal** con transliteración, glosa y código bajo cada palabra. Concordancia completa por número Strong (`H2617`, `G26`), con formas, morfología y distribución por libro. |
+| **Comentarios clásicos** | En la Guía del pasaje, lo que dicen **Matthew Henry** (completo y conciso) y **Jamieson-Fausset-Brown** del versículo que estudias (en inglés), con sus citas enlazadas y "✎ Citar" para guardar un párrafo en tus notas. La Guía del capítulo muestra la introducción del comentario y el índice de sus secciones. |
+| **RV1909 con Strong** | El botón **Strong** pone el número Strong sobre cada palabra de la RV1909 (amó<sup>G25</sup>). Al tocar la palabra se ve el hebreo o griego que traduce, su morfología en ese versículo, la definición y cómo la traduce la RV1909 en toda la Biblia. La alineación es automática (ver abajo): conviene confirmarla con el interlineal. |
+| **Armonía de los evangelios** | `#/armonia`: 194 perícopas en orden cronológico. Cada suceso se compara en columnas (Mateo, Marcos, Lucas, Juan) en RV1909, KJV o griego, con las palabras compartidas resaltadas (en griego por lema) y lo propio de cada evangelista sin resaltar. La Guía del pasaje muestra los paralelos del versículo. |
+| **Proyección** | "📽 Proyectar" abre una segunda ventana para el proyector o el televisor (en Chrome, directamente en la otra pantalla). Los pasajes se parten en diapositivas y la letra se ajusta sola; en el modo púlpito, el texto y cada punto se proyectan al avanzar. Barra de control con anterior/siguiente y pantalla en negro; en el proyector: ← → cambiar, B negro, T tema (noche, azul, claro, croma verde), F pantalla completa. |
 | **Ajustes** | Tema oscuro, claro o sepia; tamaño y tipo de letra; versiones; umbral de votos de las referencias; exportar e importar un respaldo. |
 
 La caja de arriba entiende citas en español: `Jn 3:16`, `1 Co 13`,
@@ -58,6 +62,8 @@ cita, busca las palabras. Atajo: `/`.
 | Diccionarios de Strong | [Open Scriptures](https://github.com/openscriptures/strongs) | Dominio público (edición JSON CC-BY-SA) |
 | Léxico griego de Dodson | [Biblical Humanities](https://github.com/biblicalhumanities/Dodson-Greek-Lexicon) | Dominio público |
 | ~200 000 referencias cruzadas | [OpenBible.info](https://www.openbible.info/labs/cross-references/) | CC-BY |
+| Matthew Henry (completo y conciso), Jamieson-Fausset-Brown | [CrossWire Bible Society](https://gitlab.com/crosswire-bible-society) (módulos OSIS) | Dominio público |
+| Números Strong de la RV1909 | Alineación propia (`tools/biblia-strong.mjs`) sobre los textos de arriba | Igual que sus fuentes |
 
 La Reina-Valera 1960 tiene derechos de autor (Sociedades Bíblicas Unidas), por
 eso no viene incluida.
@@ -69,14 +75,27 @@ abrir un capítulo solo descargue ese libro. Para regenerarlos:
 npm run biblia:datos                        # descarga las fuentes de GitHub
 node tools/biblia-datos.mjs ./mis-fuentes   # o usa copias locales
 node tools/biblia-originales.mjs            # hebreo y griego con morfología y léxicos
+npm run biblia:comentarios                  # Matthew Henry y JFB desde CrossWire
+npm run biblia:strong                       # alinea la RV1909 con los números Strong (~1 min)
 ```
+
+**Cómo se alinea la RV1909 con Strong.** No existe una RV1909 etiquetada de
+dominio público, así que `tools/biblia-strong.mjs` la aprende de los propios
+textos: el hebreo (OSHB) y el griego (SBLGNT) llevan un número Strong en cada
+palabra, y un modelo estadístico de traducción (IBM Model 1 con EM) descubre
+qué palabra española corresponde a cada palabra original, versículo por
+versículo (probando la numeración hebrea cuando difiere, como en Joel o
+Malaquías). Se numeran las palabras de contenido (un 34 % del texto); las
+gramaticales (de, la, que…) y las dudosas quedan sin número.
 
 ## Estructura
 
 ```
 biblia/
   index.html, sw.js, manifest.webmanifest, assets/
-  datos/            texto por versión y libro, referencias cruzadas, índice
+  datos/            texto por versión y libro, referencias cruzadas, índice,
+                    com/ (comentarios), rvs/ (Strong de la RV1909)
+  proyector.html    la ventana que se ve en el proyector
   biblioteca/       libros incluidos con la app (ver su README)
   docs/             100 ideas profesionales para las próximas versiones
   src/
@@ -96,6 +115,10 @@ biblia/
     diagrama.js     diagrama de bloques: cláusulas, sangría y relaciones lógicas
     introducciones.js introducción a los 66 libros
     memoria.js      repetición espaciada para memorizar versículos
+    comentarios.js  Matthew Henry y JFB por versículo
+    strongs.js      números Strong de cada palabra de la RV1909
+    armonia.js      armonía de los evangelios (194 perícopas) y palabras comunes
+    proyeccion.js   diapositivas y control de la segunda pantalla (proyector.html)
     texto.js        carga de datos y referencias cruzadas
     almacen.js      tus datos en localStorage, deshacer, respaldo
     vistas/         pantallas (lector, buscar, palabra, cuaderno, plan, ajustes)

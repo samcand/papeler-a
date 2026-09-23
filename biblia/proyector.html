@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="es" data-tema="noche">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Proyector — Estudio Bíblico</title>
+  <link rel="icon" href="assets/icono.svg" type="image/svg+xml" />
+  <style>
+    :root { --fondo: #05070c; --texto: #f4f1e8; --acento: #e3b65b; --tenue: #9aa3b5; }
+    [data-tema="azul"] { --fondo: #0b1e3a; --texto: #ffffff; --acento: #9cc9ff; --tenue: #a9bddb; }
+    [data-tema="claro"] { --fondo: #fbfaf6; --texto: #1c1b19; --acento: #8a5a12; --tenue: #6a6760; }
+    [data-tema="verde"] { --fondo: #00b140; --texto: #ffffff; --acento: #ffffff; --tenue: #eaffea; } /* croma para transmisiones */
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; background: var(--fondo); color: var(--texto); overflow: hidden; cursor: none; }
+    body { font-family: Georgia, 'Iowan Old Style', 'Palatino Linotype', serif; transition: background .3s; }
+    main { position: absolute; inset: 5vh 6vw; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+    #titulo { font-size: 1.6em; color: var(--acento); margin: 0 0 .4em; font-weight: 600; letter-spacing: .01em; }
+    #subtitulo { font-size: .9em; color: var(--tenue); margin: 0 0 .8em; }
+    #texto { margin: 0; line-height: 1.32; white-space: pre-line; text-wrap: balance; }
+    #ref { margin-top: .9em; font-size: .62em; color: var(--acento); letter-spacing: .04em; }
+    #ref small { color: var(--tenue); font-size: .75em; margin-left: .6em; }
+    .negro main { opacity: 0; }
+    main { transition: opacity .35s; }
+    #espera { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; color: var(--tenue); font: 18px system-ui, sans-serif; cursor: default; }
+    #espera strong { display: block; color: var(--texto); font-size: 26px; margin-bottom: 10px; }
+    #espera kbd { border: 1px solid var(--tenue); border-radius: 4px; padding: 1px 6px; font-size: 14px; }
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+  <div id="espera">
+    <div>
+      <strong>📽 Proyector listo</strong>
+      Lleva esta ventana a la pantalla del proyector y pulsa <kbd>F</kbd> para pantalla completa.<br />
+      Desde la app, toca «📽 Proyectar» en un pasaje o en el modo púlpito.<br /><br />
+      <kbd>←</kbd> <kbd>→</kbd> cambiar · <kbd>B</kbd> negro · <kbd>T</kbd> tema · <kbd>F</kbd> pantalla completa
+    </div>
+  </div>
+  <main id="lienzo" hidden>
+    <h1 id="titulo" hidden></h1>
+    <p id="subtitulo" hidden></p>
+    <p id="texto"></p>
+    <div id="ref" hidden></div>
+  </main>
+  <script type="module" src="src/proyector.js"></script>
+</body>
+</html>

@@ -14,6 +14,7 @@ import { formatear, aClave } from '../referencias.js';
 import { lexico, originalCompleto, bibliaCompleta } from '../texto.js';
 import { explicarHebreo, explicarGriego } from '../morfologia.js';
 import { estudioOriginal } from '../concordancia.js';
+import { traducciones } from '../strongs.js';
 
 const SUGERIDAS = [['H2617', 'jésed'], ['H1285', 'berit'], ['H7965', 'shalom'], ['H3068', 'YHWH'], ['H6663', 'tsadaq'],
   ['G26', 'agápē'], ['G5485', 'járis'], ['G4102', 'pístis'], ['G1344', 'dikaióō'], ['G3341', 'metánoia'], ['G1577', 'ekklēsía']];
@@ -50,6 +51,16 @@ export async function vistaOriginal(app, ruta) {
   const enlazar = (texto) => String(texto || '').split(/([GH]\d+)/).map((t) => (/^[GH]\d+$/.test(t) ? el('a', { href: `#/original/${t}` }, t) : t));
   const derivadas = Object.entries(lex).filter(([, x]) => new RegExp(`\\b${letra}${n}\\b`).test(x[4] || '')).slice(0, 20);
 
+  // Cómo la traduce la RV1909 (según la alineación automática palabra por palabra)
+  const usos = (await traducciones().catch(() => ({})))[codigo] || [];
+  const total = usos.reduce((s, [, x]) => s + x, 0);
+  const enRV1909 = usos.length ? el('div', { class: 'traducciones-rv' },
+    el('span', { class: 'tenue' }, `Traducciones en la RV1909 (${total}): `),
+    el('div', { class: 'barras-traduccion' }, usos.map(([w, x]) => el('a', {
+      class: 'barra-traduccion', href: `#/concordancia/${encodeURIComponent(w)}?v=rv1909`, title: `${x} veces (${Math.round((100 * x) / total)}%)`,
+      style: { '--p': `${Math.max(4, (100 * x) / usos[0][1])}%` },
+    }, el('span', {}, w), el('span', { class: 'tenue' }, x))))) : null;
+
   const ficha = el('section', { class: 'tarjeta ficha-grande' },
     el('div', { class: 'ficha-cab' },
       el('span', { class: 'ficha-palabra', lang: idioma, dir }, e[0]),
@@ -57,6 +68,7 @@ export async function vistaOriginal(app, ruta) {
         el('div', {}, el('strong', {}, e[1]), el('span', { class: 'tenue' }, ` · ${codigo}`)),
         el('div', { class: 'gran-idea-mini' }, e[5]))),
     el('p', {}, el('span', { class: 'tenue' }, 'Definición (Strong): '), e[2]),
+    enRV1909,
     e[3] ? el('p', {}, el('span', { class: 'tenue' }, 'Traducciones en la KJV: '), e[3]) : null,
     e[4] ? el('p', { class: 'tenue' }, 'Derivación: ', enlazar(e[4])) : null,
     derivadas.length ? el('div', {}, el('span', { class: 'tenue small' }, 'Palabras que derivan de esta: '),

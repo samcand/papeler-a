@@ -806,3 +806,71 @@ body.modo-pulpito .barra { display: none; }
   .lector { display: block; }
   body { background: #fff; color: #000; }
 }
+
+/* ---------------------------------------------------------------- Números Strong sobre la RV1909 */
+.con-strong .pe { cursor: pointer; border-radius: 3px; }
+.con-strong .pe:hover { background: var(--sel); }
+.con-strong .pe.activa { background: color-mix(in oklab, var(--acento) 30%, transparent); }
+.con-strong .pe.fin::after {
+  content: attr(data-n); font: 600 .5em var(--ui); color: var(--acento); opacity: .75;
+  vertical-align: super; margin-left: 1px; letter-spacing: -.02em; user-select: none; pointer-events: none;
+}
+.ficha-espanol { font: 600 1.15em var(--lectura); }
+.traducciones-rv { margin: .6em 0; }
+.barras-traduccion { display: flex; flex-direction: column; gap: 3px; margin-top: 6px; max-width: 460px; }
+.barra-traduccion {
+  display: flex; justify-content: space-between; gap: 12px; padding: 3px 8px; border-radius: 6px; color: var(--texto); text-decoration: none;
+  background: linear-gradient(90deg, color-mix(in oklab, var(--acento) 28%, transparent) var(--p), transparent var(--p));
+}
+.barra-traduccion:hover { outline: 1px solid var(--linea); }
+
+/* ---------------------------------------------------------------- Comentarios clásicos */
+.comentario-cuerpo { max-height: 62vh; overflow: auto; margin-top: 8px; padding-right: 4px; font: .93em/1.55 var(--lectura); }
+.com-seccion + .com-seccion { border-top: 1px solid var(--linea); margin-top: 10px; padding-top: 8px; }
+.com-seccion.recortada { max-height: 16em; overflow: auto; }
+.com-cab { display: flex; justify-content: space-between; align-items: center; gap: 8px; font: 600 .8em var(--ui); color: var(--tenue); margin-bottom: 4px; }
+.comentario-cuerpo h5 { font: 600 .95em var(--ui); color: var(--acento); margin: .8em 0 .3em; }
+.comentario-cuerpo p { margin: .45em 0; }
+.comentario-cuerpo .vers { font-variant: small-caps; }
+.comentario-cuerpo .c-nota { color: var(--tenue); font-size: .9em; }
+.comentario-cuerpo .c-bosquejo { margin: .2em 0; padding-left: 1.2em; }
+.comentario-cuerpo .poema { padding-left: 1.2em; font-style: italic; }
+
+/* ---------------------------------------------------------------- Pasajes paralelos y armonía */
+.lista-paralelos { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+.lista-paralelos .paralelo-titulo { font-weight: 600; }
+.lista-paralelos .chips { margin: 4px 0; }
+.lista-paralelos.compacta { gap: 4px; font-size: .92em; }
+.tabla-armonia { width: 100%; border-collapse: collapse; font-size: .92em; }
+.tabla-armonia th { text-align: left; font: 600 .78em var(--ui); color: var(--tenue); text-transform: uppercase; letter-spacing: .04em; padding: 6px; border-bottom: 1px solid var(--linea); }
+.tabla-armonia td { padding: 6px; border-bottom: 1px solid color-mix(in oklab, var(--linea) 60%, transparent); vertical-align: top; }
+.tabla-armonia .suceso { font-weight: 600; }
+.cita-armonia { white-space: nowrap; font-size: .9em; }
+.bloque-armonia { margin: 1.4em 0; overflow-x: auto; }
+.bloque-armonia h2 { font-size: 1.05em; color: var(--acento); }
+.pagina.ancha { max-width: 1500px; }
+.titulo-armonia { margin: 0; font-size: 1.4em; }
+.columnas-armonia { display: grid; gap: 14px; grid-template-columns: repeat(var(--n, 1), minmax(0, 1fr)); }
+.columnas-armonia.cols-2 { --n: 2; } .columnas-armonia.cols-3 { --n: 3; } .columnas-armonia.cols-4 { --n: 4; }
+.col-armonia { background: var(--tarjeta); border: 1px solid var(--linea); border-radius: var(--radio); padding: 12px 14px; min-width: 0; }
+.col-armonia header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px; border-bottom: 1px solid var(--linea); padding-bottom: 6px; margin-bottom: 8px; }
+.col-armonia h3 { margin: 0; font-size: 1.05em; }
+.texto-armonia { font: calc(var(--letra) * .92) / 1.65 var(--lectura); }
+.texto-armonia sup { color: var(--tenue); font: .6em var(--ui); }
+.resaltar .comun { background: var(--m-azul); border-radius: 3px; }
+.resaltar .comun.todos { background: var(--m-verde); }
+.leyenda-armonia { display: inline-flex; gap: 8px; align-items: center; }
+.leyenda-armonia span { padding: 1px 6px; border-radius: 4px; border: 1px solid var(--linea); }
+.leyenda-armonia .comun { background: var(--m-azul); }
+.leyenda-armonia .comun.todos { background: var(--m-verde); }
+@media (max-width: 900px) { .columnas-armonia.cols-3, .columnas-armonia.cols-4 { --n: 2; } }
+@media (max-width: 600px) { .columnas-armonia { --n: 1 !important; } }
+
+/* ---------------------------------------------------------------- Control de proyección */
+.control-proyeccion {
+  position: fixed; right: 16px; bottom: 16px; z-index: 60; display: flex; align-items: center; gap: 6px;
+  max-width: calc(100vw - 32px); padding: 6px 8px 6px 12px; border-radius: 999px;
+  background: var(--tarjeta); border: 1px solid var(--linea); box-shadow: var(--sombra); font: .9em var(--ui);
+}
+.control-proyeccion .cp-texto { max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600; }
+.modo-pulpito .control-proyeccion { bottom: 12px; right: 12px; }

@@ -14,6 +14,7 @@
  *   #/diagrama/<id>     diagrama de bloques (análisis estructural) de un pasaje
  *   #/libro/45          introducción a un libro de la Biblia
  *   #/memoria           memorizar versículos con repetición espaciada
+ *   #/armonia/57        armonía de los evangelios: un suceso en columnas
  *   #/ajustes           apariencia, versiones y respaldo
  */
 
@@ -35,6 +36,7 @@ import { vistaConcordancia } from './vistas/concordancia.js';
 import { vistaDiagrama } from './vistas/diagrama.js';
 import { vistaLibro } from './vistas/libro.js';
 import { vistaMemoria } from './vistas/memoria.js';
+import { vistaArmonia } from './vistas/armonia.js';
 import { instalarVistazo } from './vistas/vistazo.js';
 
 const RUTAS = {
@@ -51,6 +53,7 @@ const RUTAS = {
   diagrama: vistaDiagrama,
   libro: vistaLibro,
   memoria: vistaMemoria,
+  armonia: vistaArmonia,
   ajustes: vistaAjustes,
 };
 

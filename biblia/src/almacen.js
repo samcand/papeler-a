@@ -39,6 +39,8 @@ const INICIAL = {
     simbolo: '△',
     juegosOcultos: [],      // juegos de palabras clave apagados
     clavesVisibles: true,
+    strongs: false,          // números Strong sobre la RV1909
+    comentario: 'mhc',       // comentario clásico que se muestra en la guía
   },
 };
 

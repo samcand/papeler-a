@@ -21,6 +21,11 @@ import { partirEnClausulas, sugerirRelacion, sangrar, unirConSiguiente, partirLi
 import { INTRODUCCIONES } from '../biblia/src/introducciones.js';
 import { repasar, pendientes, pista, comparar as compararMemoria, INTERVALOS } from '../biblia/src/memoria.js';
 import { DEVOCIONALES, DESTINATARIOS, devocionalesPara, delDia, rachaDevocional } from '../biblia/src/devocionales.js';
+import { claveDeOsis, convertir, equilibrar, pulir } from '../tools/biblia-comentarios.mjs';
+import { raiz as raizStrong, palabras as palabrasStrong } from '../tools/biblia-strong.mjs';
+import { palabrasDe, trocearConStrong } from '../biblia/src/strongs.js';
+import { PERICOPAS, EVANGELIOS, rangoDe, pericopasDe, palabrasComunes, testigos } from '../biblia/src/armonia.js';
+import { diapositivasDeVersos } from '../biblia/src/proyeccion.js';
 
 let passed = 0;
 const t = (name, fn) => { fn(); passed++; console.log('  ok  ' + name); };
@@ -612,6 +617,117 @@ t('los datos generados están completos', () => {
   const xref = JSON.parse(readFileSync(new URL('xref/43.json', raiz)));
   assert.ok(xref['3:16'].length > 5);
   assert.ok(xref['3:16'].every((r, i, l) => i === 0 || l[i - 1][2] >= r[2]), 'ordenadas por votos');
+});
+
+// ---------- Comentarios clásicos ----------
+t('convierte citas OSIS de los comentarios a claves de la app', () => {
+  assert.equal(claveDeOsis('John.3.16'), '43.3.16');
+  assert.equal(claveDeOsis('John.3.1-John.3.21'), '43.3.1-21');
+  assert.equal(claveDeOsis('Rom.8.28-Rom.9.1'), '45.8.28-9.1');
+  assert.equal(claveDeOsis('Gen.1'), '1.1');
+  assert.equal(claveDeOsis('Foo.1.1'), null);
+});
+
+t('equilibra etiquetas partidas por los hitos de versículo', () => {
+  assert.equal(equilibrar('texto suelto</p><p>otro'), '<p>texto suelto</p><p>otro</p>');
+  assert.equal(equilibrar('<p><b>1. Nicodemo--</b>sincero</p>'), '<p><b>1. Nicodemo--</b>sincero</p>');
+  assert.equal(pulir('<p> </p><h5>CHAPTER 3</h5><p>Hola</p>'), '<p>Hola</p>');
+  assert.equal(pulir('<p><sup>1</sup> In the beginning</p><p>Comentario</p>', { sinTextoBiblico: true }), '<p>Comentario</p>');
+});
+
+t('reparte un comentario OSIS por capítulo y sección', () => {
+  const xml = `<osis><osisText><header><work>x</work></header>
+    <div type="book" osisID="John"><chapter sID="John.3" osisID="John.3" n="3"/>
+    <p>Intro del capítulo, <reference osisRef="John.3.16">ver. 16</reference>.</p>
+    <p><verse sID="John.3.1-2" osisID="John.3.1 John.3.2" n="1-2"/><hi type="bold">1-2. Nicodemus--</hi>a ruler &amp; teacher.<verse eID="John.3.1-2"/></p>
+    <p><verse sID="John.3.16" osisID="John.3.16" n="16"/>God <hi type="italic">so</hi> loved.</p></div></osisText></osis>`;
+  const libros = convertir(xml);
+  const cap = libros[43][3];
+  assert.match(pulir(cap.i.join('')), /Intro del capítulo, <a class="ref" data-ref="43.3.16">ver. 16<\/a>/);
+  assert.deepEqual(cap.s.map((x) => [x.v1, x.v2]), [[1, 2], [16, 16]]);
+  assert.equal(pulir(cap.s[0].html.join('')), '<p><b>1-2. Nicodemus--</b>a ruler &amp; teacher.</p>');
+  assert.equal(pulir(cap.s[1].html.join('')), '<p>God <i>so</i> loved.</p>');
+});
+
+t('los comentarios generados cubren la Biblia', () => {
+  const raiz = new URL('../biblia/datos/com/', import.meta.url);
+  if (!existsSync(new URL('jfb/43.json', raiz))) { console.log('    (sin comentarios generados, se omite)'); return; }
+  for (const id of ['mhc', 'mhcc', 'jfb']) {
+    const juan = JSON.parse(readFileSync(new URL(`${id}/43.json`, raiz)));
+    const s = juan[3].s.find(([a, z]) => a <= 16 && z >= 16);
+    assert.ok(s && s[2].length > 100, `${id} comenta Juan 3:16`);
+    assert.ok(!/<(?!\/?(p|h5|b|i|u|sup|ul|li|a|span|br)\b)/.test(s[2]), `${id}: solo marcado permitido`);
+  }
+});
+
+// ---------- Números Strong en la RV1909 ----------
+t('palabras y raíces para la alineación Strong', () => {
+  assert.deepEqual(palabrasStrong('Porque de tal manera amó Dios'), ['Porque', 'de', 'tal', 'manera', 'amó', 'Dios']);
+  assert.equal(raizStrong('Amó'), 'amo');
+  assert.equal(raizStrong('misericordias'), 'miseri');
+  const p = palabrasDe('¡Oh Jehová, Señor!');
+  assert.deepEqual(p.map((x) => [x.w, x.inicio, x.fin]), [['Oh', 1, 3], ['Jehová', 4, 10], ['Señor', 12, 17]]);
+});
+
+t('trocea un segmento marcado sin perder el número Strong', () => {
+  const texto = 'amó Dios al mundo';
+  const ps = palabrasDe(texto);
+  const nums = ['G25', 'G2316', '', 'G2889'];
+  // una marca que corta "Dios" por la mitad: "amó Di" | "os al mundo"
+  const a = trocearConStrong('amó Di', 0, ps, nums);
+  const b = trocearConStrong('os al mundo', 6, ps, nums);
+  assert.deepEqual(a.map((x) => [x.texto, x.s || '', Boolean(x.fin)]), [['amó', 'G25', true], [' ', '', false], ['Di', 'G2316', false]]);
+  assert.deepEqual(b.map((x) => [x.texto, x.s || '', Boolean(x.fin)]), [['os', 'G2316', true], [' al ', '', false], ['mundo', 'G2889', true]]);
+  assert.equal([...a, ...b].map((x) => x.texto).join(''), texto);
+});
+
+t('la alineación RV1909–Strong acierta en palabras clave', () => {
+  const raiz = new URL('../biblia/datos/rvs/', import.meta.url);
+  if (!existsSync(new URL('43.json', raiz))) { console.log('    (sin alineación generada, se omite)'); return; }
+  const juan = JSON.parse(readFileSync(new URL('43.json', raiz)));
+  const texto = JSON.parse(readFileSync(new URL('../rv1909/43.json', raiz)))[2][15];
+  const nums = juan[2][15].split(',');
+  const de = (w) => nums[palabrasStrong(texto).indexOf(w)];
+  assert.equal(de('amó'), '25');
+  assert.equal(de('Dios'), '2316');
+  assert.equal(de('mundo'), '2889');
+  assert.equal(de('unigénito'), '3439');
+  assert.equal(de('de') || '', '');
+  const tr = JSON.parse(readFileSync(new URL('traducciones.json', raiz)));
+  assert.equal(tr.H3068[0][0], 'jehová');
+  assert.equal(tr.G4102[0][0], 'fe');
+});
+
+// ---------- Armonía de los evangelios ----------
+t('la armonía de los evangelios es válida', () => {
+  assert.ok(PERICOPAS.length > 150);
+  for (const p of PERICOPAS) {
+    assert.ok(testigos(p) >= 1, p.t);
+    for (const e of EVANGELIOS) if (p[e.k]) assert.equal(Math.floor(rangoDe(p[e.k]).desde / 1e6), e.b, `${p.t}: ${p[e.k]}`);
+  }
+  const bautismo = pericopasDe(idVerso(41, 1, 10));
+  assert.ok(bautismo.some((p) => p.t === 'Bautismo de Jesús' && p.mt === 'Mt 3:13-17' && p.lc === 'Lc 3:21-22'));
+  const cinco = pericopasDe(idVerso(43, 6, 10)).find((p) => /cinco mil/.test(p.t));
+  assert.equal(testigos(cinco), 4);
+});
+
+t('palabras comunes entre relatos paralelos', () => {
+  const comunes = palabrasComunes(['Y fué bautizado Jesús en el Jordán', 'Jesús fué bautizado por Juan', 'el cielo se abrió'], { vacias: new Set(['fue']) });
+  assert.ok(comunes.has('jesus') && comunes.has('bautizado'));
+  assert.ok(!comunes.has('jordan') && !comunes.has('cielo') && !comunes.has('fue'));
+});
+
+// ---------- Proyección ----------
+t('parte un pasaje en diapositivas legibles', () => {
+  const versos = [
+    { v: 1, texto: 'a'.repeat(120) }, { v: 2, texto: 'b'.repeat(120) }, { v: 3, texto: 'c'.repeat(200) }, { v: 4, texto: 'd'.repeat(50) },
+  ];
+  const d = diapositivasDeVersos(versos, { ref: 'Juan 1:1-4', version: 'RV1909' });
+  assert.deepEqual(d.map((x) => x.ref), ['Juan 1:1-2', 'Juan 1:3-4']);
+  assert.ok(d[0].texto.startsWith('⁽1⁾ '));
+  assert.equal(d[0].version, 'RV1909');
+  const uno = diapositivasDeVersos([{ v: 16, texto: 'Porque de tal manera' }], { ref: 'Juan 3:16' });
+  assert.deepEqual(uno, [{ ref: 'Juan 3:16', version: '', texto: 'Porque de tal manera' }]);
 });
 
 console.log(`\n${passed} pruebas de estudio bíblico pasaron`);

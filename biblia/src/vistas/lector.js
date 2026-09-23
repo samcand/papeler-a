@@ -12,7 +12,7 @@
 import { el, render, toast, $$ } from '../ui.js';
 import { almacen } from '../almacen.js';
 import { libro, idVerso, partesId, capituloVecino } from '../libros.js';
-import { deClave, formatearRango, aClave, refDesdeRango, normalizar, parsearLista, rango } from '../referencias.js';
+import { deClave, formatearRango, aClave, refDesdeRango, normalizar, parsearLista, rango, parsear } from '../referencias.js';
 import {
   capitulo, precargar, referenciasDe, textoRango, version, versiones, tieneLibro, versiculosEn, textoSiCargado,
   lexico, esOriginal,
@@ -32,6 +32,10 @@ import { tarjetaIntroduccion } from './libro.js';
 import { notasEn, notaAHtml } from '../notas.js';
 import { editarNota } from './editor-nota.js';
 import { elegirPasaje, listaLibros, cuadriculaCapitulos } from './selector.js';
+import { COMENTARIOS, comentario, comentarioSobre, htmlANodos } from '../comentarios.js';
+import { strongsCapitulo, palabrasDe, trocearConStrong, traducciones, VERSION_CON_STRONG } from '../strongs.js';
+import { pericopasDe, PERICOPAS, EVANGELIOS, rangoDe, testigos } from '../armonia.js';
+import { proyectar, diapositivasDeVersos } from '../proyeccion.js';
 
 const ORIGINAL = 'original';
 let est = null;
@@ -146,6 +150,11 @@ function pintarCabecera() {
         'aria-pressed': Boolean(a.conectores),
         onClick: () => { almacen.ajustar({ conectores: !a.conectores }); pintarCabecera(); pintarCapitulo(); pintarPanel(); },
       }, 'Conectores'),
+      a.principal === VERSION_CON_STRONG || a.paralelas.includes(VERSION_CON_STRONG) ? el('button', {
+        class: `chip ${a.strongs ? 'activo' : ''}`, title: 'Número Strong sobre cada palabra de la RV1909 (alineación automática). Toca una palabra para ver el hebreo o el griego que traduce',
+        'aria-pressed': Boolean(a.strongs),
+        onClick: () => { almacen.ajustar({ strongs: !a.strongs }); pintarCabecera(); pintarCapitulo(); },
+      }, 'Strong') : null,
       el('button', {
         class: `chip ${a.textoLimpio ? 'activo' : ''}`, title: 'Ocultar todas las marcas, notas y palabras clave',
         'aria-pressed': Boolean(a.textoLimpio),
@@ -202,6 +211,7 @@ async function pintarCapitulo() {
   const datos = await Promise.all(cols.map((v) => capitulo(v, b, c)));
   await precargar(a.principal, b);
   const lex = cols.some(esOriginal) ? await lexico(b <= 39 ? 'H' : 'G').catch(() => ({})) : {};
+  const strongs = a.strongs && cols.includes(VERSION_CON_STRONG) ? await strongsCapitulo(b, c).catch(() => null) : null;
   if (!est || est.b !== b || est.c !== c) return; // el usuario ya se fue a otro capítulo
 
   const desde = idVerso(b, c, 1), hasta = idVerso(b, c, 999);
@@ -239,7 +249,9 @@ async function pintarCapitulo() {
       dataset: { id },
     },
     el('sup', { class: 'num', 'aria-hidden': 'true' }, v),
-    el('span', { class: 't' }, segs.map(trozo)),
+    strongs && cols[i] === VERSION_CON_STRONG
+      ? el('span', { class: 't con-strong' }, ((ps) => segs.map((s) => trozo(s, ps, strongs[v - 1] || [])))(palabrasDe(texto)))
+      : el('span', { class: 't' }, segs.map((s) => trozo(s))),
     notasV.length ? el('button', {
       class: 'ind-nota', type: 'button', dataset: { nota: notasV[0].id },
       title: notasV.map((n) => n.titulo || n.cuerpo.slice(0, 60)).join('\n'),
@@ -285,13 +297,21 @@ function palabraOriginal(w, k, lex, idVersion) {
     el('span', { class: 'po-m' }, idVersion === 'heb' ? morfo.replace(/^[HA]/, '') : morfo.replace(/-+$/g, '').replace(/-{2,}/g, '-')));
 }
 
-/** Un trozo de versículo con sus marcas. El símbolo va en ::before para no alterar el texto seleccionable. */
-function trozo(s) {
-  if (!s.marcas.length) return s.texto;
+/**
+ * Un trozo de versículo con sus marcas. El símbolo va en ::before para no alterar
+ * el texto seleccionable; igual el número Strong, en ::after de cada palabra.
+ */
+function trozo(s, palabras, numeros) {
+  const contenido = numeros
+    ? trocearConStrong(s.texto, s.inicio, palabras, numeros).map((p) => (p.s
+      ? el('span', { class: `pe ${p.fin ? 'fin' : ''}`, dataset: { k: p.k, n: p.s } }, p.texto)
+      : p.texto))
+    : [s.texto];
+  if (!s.marcas.length) return contenido;
   const { clase, vars, simbolo } = estiloSegmento(s);
   const dataset = { marcas: s.marcas.join(' ') };
   if (simbolo) dataset.sim = simbolo;
-  return el('span', { class: clase, style: vars, dataset }, s.texto);
+  return el('span', { class: clase, style: vars, dataset }, contenido);
 }
 
 function desplazarA(id, destello) {
@@ -319,9 +339,12 @@ function alHacerClic(e) {
   if (!vs) return;
   const id = Number(vs.dataset.id);
   const ver = vs.closest('[data-version]')?.dataset.version || almacen.ajustes.principal;
-  const po = e.target.closest('.po');
-  for (const x of $$('.po.activa', est.texto)) x.classList.remove('activa');
-  est.palabra = po ? { version: ver, id, k: Number(po.dataset.k) } : null;
+  const pe = e.target.closest('.con-strong .pe');
+  const po = e.target.closest('.po') || pe;
+  for (const x of $$('.po.activa, .pe.activa', est.texto)) x.classList.remove('activa');
+  est.palabra = pe ? { version: ver, id, k: Number(pe.dataset.k), strong: pe.dataset.n }
+    : po ? { version: ver, id, k: Number(po.dataset.k) } : null;
+  if (pe) for (const x of $$(`.pe[data-k="${pe.dataset.k}"]`, vs)) x.classList.add('activa');
   if (po) {
     po.classList.add('activa');
     est.sel = { version: almacen.ajustes.principal, desde: id, hasta: id };
@@ -634,7 +657,10 @@ async function pintarPanel() {
   const enBiblioteca = el('div', { class: 'en-biblioteca' }, el('p', { class: 'tenue small' }, 'Buscando en tus libros…'));
   pintarBiblioteca(enBiblioteca, desde, hasta);
   const fichaOriginal = est.palabra && est.palabra.id === desde ? el('div', { class: 'ficha-original' }, el('p', { class: 'tenue small' }, 'Cargando léxico…')) : null;
-  if (fichaOriginal) pintarFichaOriginal(fichaOriginal, est.palabra);
+  if (fichaOriginal) (est.palabra.strong ? pintarFichaStrong : pintarFichaOriginal)(fichaOriginal, est.palabra);
+  const comentarios = el('div', { class: 'comentarios' });
+  pintarComentarios(comentarios, desde, hasta);
+  const paralelas = partesId(desde).b >= 40 && partesId(desde).b <= 43 ? pericopasDe(desde).filter((p) => testigos(p) >= 2) : [];
 
   render(panel,
     el('div', { class: 'panel-cab' },
@@ -648,10 +674,13 @@ async function pintarPanel() {
       el('button', { class: 'btn chico', onClick: () => { est.modo = 'versos'; copiar(); } }, '⧉ Copiar'),
       el('button', { class: 'btn chico', title: 'Preparar un sermón sobre este pasaje', onClick: () => nuevoSermon({ pasaje: titulo }) }, '🎤 Sermón'),
       el('a', { class: 'btn chico', title: 'Diagrama de bloques: estructura y argumento del pasaje', href: `#/diagrama/nuevo?ref=${aClave(refDesdeRango(desde, hasta))}` }, '▤ Diagrama'),
-      el('button', { class: 'btn chico', title: 'Agregar a tus versículos para memorizar', onClick: () => toast(almacen.agregarMemoria(desde, hasta) ? `${titulo} agregado para memorizar` : 'Ya lo estás memorizando') }, '🧠 Memorizar')),
-    fichaOriginal ? bloque('Palabra original', fichaOriginal, 'Léxico de Strong, morfología de OSHB / MorphGNT') : null,
+      el('button', { class: 'btn chico', title: 'Agregar a tus versículos para memorizar', onClick: () => toast(almacen.agregarMemoria(desde, hasta) ? `${titulo} agregado para memorizar` : 'Ya lo estás memorizando') }, '🧠 Memorizar'),
+      el('button', { class: 'btn chico', title: 'Mostrar el pasaje en la segunda pantalla (proyector o televisor)', onClick: () => proyectarPasaje(ver, desde, hasta) }, '📽 Proyectar')),
+    fichaOriginal ? bloque('Palabra original', fichaOriginal, est.palabra.strong ? 'Alineación automática RV1909 → hebreo/griego; léxico de Strong' : 'Léxico de Strong, morfología de OSHB / MorphGNT') : null,
+    paralelas.length ? bloque('Pasajes paralelos', pintarParalelos(paralelas), 'Armonía de los evangelios: el mismo suceso en cada evangelista') : null,
     bloque(`Mis referencias${misReferencias(desde, hasta).length ? ` (${misReferencias(desde, hasta).length})` : ''}`, pintarMisReferencias(desde, hasta), 'Conexiones que tú has hecho entre pasajes, con la razón'),
     bloque('Referencias cruzadas', refs, 'OpenBible.info · ordenadas por votos'),
+    bloque('Comentarios', comentarios, 'Comentarios clásicos de dominio público (en inglés): Matthew Henry y Jamieson-Fausset-Brown'),
     bloque(`Mis notas${notas.length ? ` (${notas.length})` : ''}`, notas.length
       ? notas.map(tarjetaNota)
       : el('p', { class: 'tenue small' }, 'Aún no hay notas aquí. Pulsa ✎ Nota o selecciona palabras.')),
@@ -846,6 +875,9 @@ function pintarPanelCapitulo() {
     el('div', { class: 'panel-acciones' },
       el('button', { class: 'btn chico primario', onClick: () => editarNota({ desde, hasta }).then(repintar) }, '✎ Nota del capítulo')),
     tarjetaIntroduccion(b, { compacta: true }),
+    bloque('Comentario del capítulo', (() => { const caja = el('div', { class: 'comentarios' }); pintarComentarios(caja, desde, hasta, { capitulo: true }); return caja; })(),
+      'Introducción y secciones del comentario clásico elegido (en inglés)'),
+    b >= 40 && b <= 43 ? bloqueArmoniaCapitulo(b, c) : null,
     bloque(`Notas del capítulo${notas.length ? ` (${notas.length})` : ''}`, notas.length ? notas.map(tarjetaNota) : el('p', { class: 'tenue small' }, 'Sin notas todavía.')),
     bloque(`Resaltados${marcas.length ? ` (${marcas.length})` : ''}`, marcas.length
       ? el('ul', { class: 'lista-marcas' }, marcas.map((m) => el('li', {},
@@ -900,3 +932,116 @@ export function muestraDe(m) {
 }
 
 const recortar = (t, n) => (t.length > n ? t.slice(0, n - 1) + '…' : t);
+
+// ---------------------------------------------------------------- Comentarios, paralelos, Strong, proyección
+
+/** Comentario clásico del pasaje (o, en la guía del capítulo, su introducción y el índice de secciones). */
+async function pintarComentarios(contenedor, desde, hasta, { capitulo: modoCapitulo = false } = {}) {
+  const actual = comentario(almacen.ajustes.comentario);
+  const cuerpo = el('div', { class: 'comentario-cuerpo', lang: 'en' }, el('p', { class: 'tenue small' }, 'Cargando comentario…'));
+  render(contenedor,
+    el('div', { class: 'chips' }, COMENTARIOS.map((x) => el('button', {
+      class: `chip ${x.id === actual.id ? 'activo' : ''}`, title: `${x.nombre} (${x.año}). ${x.descripcion}`,
+      onClick: () => { almacen.ajustar({ comentario: x.id }); pintarComentarios(contenedor, desde, hasta, { capitulo: modoCapitulo }); },
+    }, x.abrev))),
+    cuerpo);
+  const { b, c } = partesId(desde);
+  let datos;
+  try {
+    datos = await comentarioSobre(actual.id, desde, modoCapitulo ? desde : hasta, { conIntro: modoCapitulo });
+  } catch {
+    render(cuerpo, el('p', { class: 'tenue small' }, 'No se pudo cargar el comentario (¿sin conexión?).'));
+    return;
+  }
+  if (!contenedor.isConnected) return;
+  const rotulo = (s) => (s.v1 === s.v2 ? `v. ${s.v1}` : s.v2 >= 999 ? `v. ${s.v1} ss.` : `vv. ${s.v1}–${s.v2}`);
+  const claveDe = (s) => aClave(refDesdeRango(idVerso(b, c, s.v1), idVerso(b, c, Math.min(s.v2, versiculosEn(b, c) || s.v2))));
+  const citar = (s) => {
+    const texto = htmlANodos(s.html).textContent.replace(/\s+/g, ' ').trim();
+    const corto = texto.length > 1500 ? `${texto.slice(0, 1500)}…` : texto;
+    editarNota({ desde: idVerso(b, c, s.v1), hasta: idVerso(b, c, Math.min(s.v2, versiculosEn(b, c) || s.v2)), cuerpo: `> ${corto}\n\n— ${actual.nombre}` }).then(repintar);
+  };
+  if (modoCapitulo) {
+    const todas = (await comentarioSobre(actual.id, desde, idVerso(b, c, 999))).secciones;
+    render(cuerpo,
+      datos.intro ? el('div', { class: 'com-seccion recortada' }, htmlANodos(datos.intro)) : null,
+      todas.length ? el('div', { class: 'chips' }, todas.map((s) => el('a', { class: 'chip', href: `#/leer/${claveDe(s)}`, title: 'Ver el comentario de esta sección' }, rotulo(s)))) : null,
+      !datos.intro && !todas.length ? el('p', { class: 'tenue small' }, `${actual.abrev} no tiene comentario para este capítulo.`) : null);
+    return;
+  }
+  if (!datos.intro && !datos.secciones.length) {
+    render(cuerpo, el('p', { class: 'tenue small' }, `${actual.abrev} no comenta este versículo por separado. Prueba otro comentario.`));
+    return;
+  }
+  render(cuerpo,
+    datos.intro ? el('div', { class: 'com-seccion' }, el('div', { class: 'com-cab' }, 'Introducción al capítulo'), htmlANodos(datos.intro)) : null,
+    datos.secciones.map((s) => el('div', { class: 'com-seccion' },
+      el('div', { class: 'com-cab' },
+        el('a', { class: 'ref', href: `#/leer/${claveDe(s)}`, dataset: { ref: claveDe(s) } }, `${actual.abrev} · ${rotulo(s)}`),
+        el('button', { class: 'btn chico', title: 'Guardar una cita de este comentario en una nota', onClick: () => citar(s) }, '✎ Citar')),
+      htmlANodos(s.html))));
+}
+
+function enlaceCita(cita) {
+  const r = parsear(cita);
+  const k = r ? aClave(r) : '';
+  return el('a', { class: 'chip ref', href: `#/leer/${k}`, dataset: { ref: k } }, cita);
+}
+
+function pintarParalelos(lista) {
+  return el('ul', { class: 'lista-paralelos' }, lista.map((p) => el('li', {},
+    el('a', { class: 'paralelo-titulo', href: `#/armonia/${p.n}` }, p.t),
+    el('div', { class: 'chips' }, EVANGELIOS.filter((e) => p[e.k]).map((e) => enlaceCita(p[e.k]))),
+    el('a', { class: 'btn chico', href: `#/armonia/${p.n}` }, '⫼ Comparar en columnas'))));
+}
+
+/** Perícopas de la armonía que caen en este capítulo del evangelio. */
+function bloqueArmoniaCapitulo(b, c) {
+  const e = EVANGELIOS.find((x) => x.b === b);
+  const desde = idVerso(b, c, 1), hasta = idVerso(b, c, 999);
+  const lista = PERICOPAS.filter((p) => { const r = rangoDe(p[e.k]); return r && r.desde <= hasta && r.hasta >= desde; });
+  if (!lista.length) return null;
+  return bloque(`Armonía de los evangelios (${lista.length})`, el('ul', { class: 'lista-paralelos compacta' }, lista.map((p) => el('li', {},
+    el('a', { href: `#/armonia/${p.n}` }, p.t), ' ',
+    el('span', { class: 'tenue small' }, EVANGELIOS.filter((x) => p[x.k] && x.b !== b).map((x) => p[x.k]).join(' · ') || `solo en ${e.nombre}`)))),
+  'Toca una perícopa para comparar los relatos en columnas');
+}
+
+/** Ficha de una palabra de la RV1909 con número Strong: la palabra original que traduce. */
+async function pintarFichaStrong(contenedor, { id, k, strong }) {
+  const { b, c, v } = partesId(id);
+  const letra = strong[0], n = Number(strong.slice(1));
+  const idOriginal = letra === 'H' ? 'heb' : 'gri';
+  const idioma = letra === 'H' ? 'he' : 'el';
+  const [lex, tr, cap, rv] = await Promise.all([
+    lexico(letra), traducciones().catch(() => ({})), capitulo(idOriginal, b, c).catch(() => []), capitulo(VERSION_CON_STRONG, b, c),
+  ]);
+  const e = lex[n];
+  const espanol = palabrasDe(rv[v - 1] || '')[k]?.w || '';
+  const originales = (cap[v - 1] || []).filter((t) => t[1] === n);
+  const usos = tr[strong] || [];
+  const totalUsos = usos.reduce((s, [, x]) => s + x, 0);
+  render(contenedor,
+    el('div', { class: 'ficha-cab' },
+      el('span', { class: 'ficha-espanol' }, espanol),
+      el('span', { class: 'tenue' }, ' → '),
+      el('span', { class: 'ficha-palabra', lang: idioma, dir: letra === 'H' ? 'rtl' : 'ltr' }, originales.map((t) => t[0]).join(' · ') || e?.[0] || ''),
+      el('a', { class: 'chip activo', href: `#/original/${strong}` }, strong)),
+    el('div', { class: 'ficha-lema' },
+      el('span', { lang: idioma }, e?.[0] || ''), e?.[1] ? el('span', { class: 'tenue' }, ` · ${e[1]}`) : null,
+      e?.[5] ? el('strong', {}, ` — ${e[5]}`) : null),
+    originales[0]?.[2] ? el('p', { class: 'small' }, el('span', { class: 'tenue' }, 'Morfología aquí: '),
+      (letra === 'H' ? explicarHebreo : explicarGriego)(originales[0][2]) || originales[0][2]) : null,
+    e?.[2] ? el('p', { class: 'small' }, el('span', { class: 'tenue' }, 'Strong: '), e[2]) : null,
+    usos.length ? el('p', { class: 'small' }, el('span', { class: 'tenue' }, `En la RV1909 (${totalUsos} veces): `),
+      usos.slice(0, 8).map(([w, x], i) => [i ? ', ' : '', el('a', { href: `#/concordancia/${encodeURIComponent(w)}?v=rv1909` }, w), el('span', { class: 'tenue' }, ` ${x}`)])) : null,
+    e?.[3] ? el('p', { class: 'small' }, el('span', { class: 'tenue' }, 'En la KJV: '), e[3]) : null,
+    el('div', { class: 'acciones' },
+      el('a', { class: 'btn chico', href: `#/original/${strong}` }, 'Estudio completo de la palabra →'),
+      el('span', { class: 'tenue small' }, 'Alineación automática: confírmala con el interlineal.')));
+}
+
+async function proyectarPasaje(ver, desde, hasta) {
+  const versos = await textoRango(ver, desde, hasta);
+  proyectar(diapositivasDeVersos(versos, { ref: formatearRango(desde, hasta), version: version(ver)?.abrev || '' }));
+}

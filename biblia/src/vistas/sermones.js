@@ -10,8 +10,9 @@
 
 import { el, render, toast, descargar, fecha as formatoFecha } from '../ui.js';
 import { almacen } from '../almacen.js';
-import { formatear, aClave } from '../referencias.js';
-import { textoRango } from '../texto.js';
+import { formatear, aClave, parsearLista, rango } from '../referencias.js';
+import { textoRango, version } from '../texto.js';
+import { proyectar, diapositivasDeVersos } from '../proyeccion.js';
 import { notasEn, leerEtiquetas } from '../notas.js';
 import {
   PASOS, ESTADOS, RUTAS_A_CRISTO, crearSermon, nuevoPunto, moverPunto, ideaExegetica, progreso,
@@ -335,13 +336,31 @@ async function modoPulpito(app, s) {
     { titulo: pasaje ? formatear(pasaje.ref) : 'Texto', cuerpo: [el('p', { class: 'texto-biblico' }, versos.map((x) => el('span', {}, el('sup', {}, x.v), ' ', x.texto, ' ')))] },
     s.introduccion && { titulo: 'Introducción', cuerpo: parrafos(s.introduccion) },
     ...s.bosquejo.map((p, i) => ({
-      titulo: `${romano(i + 1)}. ${p.titulo || 'Punto'}`, pasaje: p.pasaje,
+      titulo: `${romano(i + 1)}. ${p.titulo || 'Punto'}`, pasaje: p.pasaje, punto: { n: romano(i + 1), titulo: p.titulo || '' },
       cuerpo: [...parrafos(p.explicacion),
         p.ilustracion ? el('div', { class: 'pulpito-bloque ilustracion' }, el('span', {}, 'Ilustración'), parrafos(p.ilustracion)) : null,
         p.aplicacion ? el('div', { class: 'pulpito-bloque aplicacion' }, el('span', {}, 'Aplicación'), parrafos(p.aplicacion)) : null],
     })),
     s.conclusion && { titulo: 'Conclusión', cuerpo: parrafos(s.conclusion) },
   ].filter(Boolean);
+
+  // Proyección: al cambiar de sección, la pantalla de la congregación muestra el texto o el punto
+  let enPantalla = false;
+  const abrev = version(almacen.ajustes.principal)?.abrev || '';
+  const diapositivas = async (sec, i) => {
+    if (i === 0 && pasaje) return diapositivasDeVersos(versos, { ref: formatear(pasaje.ref), version: abrev });
+    if (sec.punto) {
+      const lista = [{ titulo: sec.punto.n, texto: sec.punto.titulo, ref: sec.pasaje || '' }];
+      const r = sec.pasaje ? parsearLista(sec.pasaje)[0] : null;
+      if (r) {
+        const { desde, hasta } = rango(r);
+        lista.push(...diapositivasDeVersos(await textoRango(almacen.ajustes.principal, desde, hasta), { ref: formatear(r), version: abrev }));
+      }
+      return lista;
+    }
+    return [{ titulo: s.titulo || '', texto: s.homiletica || s.titulo || sec.titulo, ref: pasaje ? formatear(pasaje.ref) : '' }];
+  };
+  const proyectarSeccion = async () => proyectar(await diapositivas(secciones[actual], actual));
 
   let actual = 0;
   let inicio = null;
@@ -372,6 +391,7 @@ async function modoPulpito(app, s) {
       sec.cuerpo);
     render(indice, secciones.map((x, i) => el('button', { class: i === actual ? 'activa' : '', onClick: () => { actual = i; pintar(); } }, x.titulo)));
     escenario.scrollTop = 0;
+    if (enPantalla) proyectarSeccion();
   };
   const mover = (paso) => { actual = Math.max(0, Math.min(secciones.length - 1, actual + paso)); pintar(); };
   const teclas = (e) => {
@@ -395,6 +415,10 @@ async function modoPulpito(app, s) {
       el('button', { class: 'btn chico', onClick: () => { letra = Math.min(60, letra + 2); pintar(); } }, 'A+'),
       el('button', { class: 'btn chico', onClick: alternarReloj, title: 'Iniciar o pausar (barra espaciadora)' }, '⏯'),
       el('button', { class: 'btn chico', onClick: () => { acumulado = 0; inicio = null; tic(); }, title: 'Reiniciar cronómetro' }, '↺'),
+      el('button', {
+        class: 'btn chico', title: 'Proyectar en la segunda pantalla: el texto y cada punto aparecen al avanzar',
+        onClick: (e) => { enPantalla = !enPantalla; e.currentTarget.classList.toggle('activo', enPantalla); if (enPantalla) proyectarSeccion(); },
+      }, '📽'),
       reloj),
     indice,
     el('div', { class: 'pulpito-zonas' },

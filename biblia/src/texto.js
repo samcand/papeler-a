@@ -12,7 +12,7 @@ import { idVerso, partesId } from './libros.js';
 const BASE = new URL('../datos/', import.meta.url);
 const cache = new Map();
 
-function cargarJson(ruta) {
+export function cargarJson(ruta) {
   if (!cache.has(ruta)) {
     cache.set(ruta, fetch(new URL(ruta, BASE)).then((r) => {
       if (!r.ok) throw new Error(`No se pudo cargar ${ruta} (${r.status})`);

@@ -65,6 +65,7 @@ export function vistaLibro(app, ruta) {
     el('div', { class: 'acciones' },
       el('a', { class: 'btn primario', href: `#/leer/${b}.1` }, `📖 Leer ${L.nombre}`),
       el('a', { class: 'btn', href: `#/concordancia?v=${almacen.ajustes.principal}` }, '📇 Concordancia'),
-      el('a', { class: 'btn', href: `#/buscar?en=l${b}` }, `🔎 Buscar en ${L.nombre}`)),
+      el('a', { class: 'btn', href: `#/buscar?en=l${b}` }, `🔎 Buscar en ${L.nombre}`),
+      b >= 40 && b <= 43 ? el('a', { class: 'btn', href: '#/armonia' }, '⫼ Armonía de los evangelios') : null),
     el('p', { class: 'tenue small' }, 'Se presenta la posición tradicional y, en "Debates", las alternativas principales de la erudición. Las fechas son aproximadas.')));
 }
