@@ -2,7 +2,7 @@
  * ajustes.js — Apariencia, versiones, referencias cruzadas y respaldo.
  */
 
-import { el, render, toast, descargar, leerArchivo } from '../ui.js';
+import { el, render, toast, descargar, leerArchivo, confirmar } from '../ui.js';
 import { almacen } from '../almacen.js';
 import { versiones, indiceCargado } from '../texto.js';
 import { exportarMarkdown } from '../notas.js';
@@ -62,9 +62,9 @@ export function vistaAjustes(app) {
         el('button', { class: 'btn', onClick: () => importar(false, refrescar) }, '⬆ Importar (sumar)'),
         el('button', { class: 'btn', onClick: () => importar(true, refrescar) }, '⬆ Importar (reemplazar)'),
         el('button', { class: 'btn', onClick: () => descargar('notas-biblicas.md', exportarMarkdown(e.notas), 'text/markdown') }, '⬇ Notas en Markdown'),
-        el('button', { class: 'btn peligro', onClick: () => {
-          if (!confirm('¿Borrar TODAS tus notas, resaltados, marcadores y progreso? Exporta un respaldo antes.')) return;
-          if (!confirm('¿Seguro? Esto no se puede deshacer.')) return;
+        el('button', { class: 'btn peligro', onClick: async () => {
+          if (!(await confirmar('¿Borrar TODAS tus notas, resaltados, marcadores y progreso? Exporta un respaldo antes.', { aceptar: 'Borrar todo', peligro: true }))) return;
+          if (!(await confirmar('¿Seguro? Esto no se puede deshacer.', { aceptar: 'Sí, borrar', peligro: true }))) return;
           almacen.borrarTodo(); toast('Datos borrados'); refrescar();
         } }, 'Borrar todo'))),
 
@@ -90,7 +90,7 @@ function campo(etiqueta, control) {
 }
 
 async function importar(reemplazar, refrescar) {
-  if (reemplazar && !confirm('Reemplazar borra tus datos actuales y deja solo los del archivo. ¿Continuar?')) return;
+  if (reemplazar && !(await confirmar('Reemplazar borra tus datos actuales y deja solo los del archivo. ¿Continuar?', { aceptar: 'Reemplazar', peligro: true }))) return;
   const texto = await leerArchivo('.json,application/json');
   if (!texto) return;
   try {

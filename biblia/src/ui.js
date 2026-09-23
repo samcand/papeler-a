@@ -36,6 +36,48 @@ export function toast(mensaje, tipo = 'info') {
   setTimeout(() => { nodo.classList.add('fuera'); setTimeout(() => nodo.remove(), 300); }, 2600);
 }
 
+/**
+ * Confirmación dentro de la app (en lugar de confirm(), que algunos visores
+ * bloquean y que en el teléfono se ve fuera de lugar). Devuelve una promesa.
+ */
+function dialogoPropio(contenido, alAbrir) {
+  const d = el('dialog', { class: 'dialogo dialogo-chico' });
+  document.body.append(d);
+  return new Promise((resolve) => {
+    let valor = null;
+    const cerrar = (v) => { valor = v; d.close(); };
+    render(d, contenido(cerrar));
+    d.addEventListener('close', () => { d.remove(); resolve(valor); }, { once: true });
+    d.showModal();
+    alAbrir?.(d);
+  });
+}
+
+export function confirmar(mensaje, { aceptar = 'Aceptar', peligro = false } = {}) {
+  return dialogoPropio((cerrar) => el('form', { method: 'dialog', onSubmit: (e) => { e.preventDefault(); cerrar(true); } },
+    el('p', { class: 'dialogo-mensaje' }, mensaje),
+    el('footer', { class: 'dialogo-pie' },
+      el('span', { class: 'grow' }),
+      el('button', { type: 'button', class: 'btn', onClick: () => cerrar(false) }, 'Cancelar'),
+      el('button', { type: 'submit', class: `btn ${peligro ? 'peligro' : 'primario'}` }, aceptar))),
+  (d) => d.querySelector('[type=submit]')?.focus()).then(Boolean);
+}
+
+export function preguntar(mensaje, valor = '', { aceptar = 'Aceptar', multilinea = false, marcador = '' } = {}) {
+  let campo;
+  return dialogoPropio((cerrar) => {
+    campo = multilinea
+      ? el('textarea', { class: 'input', rows: 4, placeholder: marcador }, valor)
+      : el('input', { class: 'input', value: valor, placeholder: marcador });
+    return el('form', { method: 'dialog', onSubmit: (e) => { e.preventDefault(); cerrar(campo.value); } },
+      el('label', { class: 'dialogo-mensaje' }, mensaje, campo),
+      el('footer', { class: 'dialogo-pie' },
+        el('span', { class: 'grow' }),
+        el('button', { type: 'button', class: 'btn', onClick: () => cerrar(null) }, 'Cancelar'),
+        el('button', { type: 'submit', class: 'btn primario' }, aceptar)));
+  }, () => { campo.focus(); campo.select?.(); });
+}
+
 export function boton(texto, alPulsar, { clase = '', titulo, attrs = {} } = {}) {
   return el('button', { class: `btn ${clase}`.trim(), type: 'button', onClick: alPulsar, title: titulo || null, ...attrs }, texto);
 }

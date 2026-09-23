@@ -3,7 +3,7 @@
  * todo el libro o en toda la Biblia (método inductivo).
  */
 
-import { el, render, $, toast } from '../ui.js';
+import { el, render, $, toast, confirmar } from '../ui.js';
 import { almacen } from '../almacen.js';
 import { LIBROS } from '../libros.js';
 import { COLORES, ESTILOS, SIMBOLOS } from '../marcas.js';
@@ -73,8 +73,8 @@ export function editarClave(clave = {}, bActual = 0) {
       campo('Dónde', alcance),
       campo('Juego de marcado', juego), lista,
       el('footer', { class: 'dialogo-pie' },
-        existente ? el('button', { type: 'button', class: 'btn peligro', onClick: () => {
-          if (!confirm('¿Quitar esta palabra clave?')) return;
+        existente ? el('button', { type: 'button', class: 'btn peligro', onClick: async () => {
+          if (!(await confirmar('¿Quitar esta palabra clave?', { aceptar: 'Quitar', peligro: true }))) return;
           almacen.quitarClave(clave.id); resultado = { borrada: true }; dialogo.close();
         } }, 'Quitar') : null,
         el('span', { class: 'grow' }),

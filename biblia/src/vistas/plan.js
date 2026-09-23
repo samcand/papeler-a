@@ -3,7 +3,7 @@
  * y el mapa de toda la Biblia con los capítulos que ya leíste.
  */
 
-import { el, render, toast } from '../ui.js';
+import { el, render, toast, confirmar } from '../ui.js';
 import { almacen } from '../almacen.js';
 import { LIBROS } from '../libros.js';
 import { indiceCargado } from '../texto.js';
@@ -81,7 +81,7 @@ function planActivo(plan, estado, refrescar) {
         el('input', { type: 'checkbox', checked: hechos.has(i), onChange: () => { almacen.alternarDia(i); refrescar(); } }),
         el('span', { class: 'dia-n' }, `Día ${i + 1}`)),
       el('a', { href: `#/leer/${caps[0][0]}.${caps[0][1]}` }, describirDia(caps)))))),
-    el('button', { class: 'btn peligro chico', onClick: () => { if (confirm('¿Dejar este plan? Se pierde el progreso del plan (no tus capítulos leídos).')) { almacen.dejarPlan(); refrescar(); } } }, 'Dejar el plan'));
+    el('button', { class: 'btn peligro chico', onClick: async () => { if (await confirmar('¿Dejar este plan? Se pierde el progreso del plan (no tus capítulos leídos).', { aceptar: 'Dejar el plan', peligro: true })) { almacen.dejarPlan(); refrescar(); } } }, 'Dejar el plan'));
 }
 
 function mapaBiblia(refrescar) {
@@ -99,8 +99,8 @@ function mapaBiblia(refrescar) {
         href: `#/leer/${l.n}.${k + 1}`,
         title: `${l.nombre} ${k + 1}`,
       })))))),
-    a.hechos ? el('button', { class: 'btn chico', onClick: () => {
-      if (!confirm('¿Borrar el registro de capítulos leídos?')) return;
+    a.hechos ? el('button', { class: 'btn chico', onClick: async () => {
+      if (!(await confirmar('¿Borrar el registro de capítulos leídos?', { aceptar: 'Borrar', peligro: true }))) return;
       almacen.estado.leidos = [];
       almacen.guardar();
       refrescar();

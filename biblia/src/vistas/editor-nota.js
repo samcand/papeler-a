@@ -5,7 +5,7 @@
  * convierte la nota en un apunte libre (un bosquejo, un sermón).
  */
 
-import { el, render, $, toast } from '../ui.js';
+import { el, render, $, toast, confirmar } from '../ui.js';
 import { almacen } from '../almacen.js';
 import { notaAHtml, leerEtiquetas, todasLasEtiquetas } from '../notas.js';
 import { formatearRango, parsear, rango } from '../referencias.js';
@@ -71,8 +71,8 @@ export function editarNota(nota = {}) {
       cerrar();
     }
 
-    function borrar() {
-      if (!confirm('¿Borrar esta nota?')) return;
+    async function borrar() {
+      if (!(await confirmar('¿Borrar esta nota?', { aceptar: 'Borrar', peligro: true }))) return;
       almacen.borrarNota(nota.id);
       toast('Nota borrada');
       guardada = null;

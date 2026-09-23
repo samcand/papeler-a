@@ -9,7 +9,7 @@
  * Tab / Mayús+Tab sangran la línea con el foco; las flechas mueven el foco.
  */
 
-import { el, render, toast, descargar } from '../ui.js';
+import { el, render, toast, descargar, confirmar, preguntar } from '../ui.js';
 import { almacen } from '../almacen.js';
 import { deClave, rango, formatearRango, aClave, refDesdeRango, parsear } from '../referencias.js';
 import { textoRango, version } from '../texto.js';
@@ -99,8 +99,8 @@ function pintarEditor(app, d) {
         boton('↑', 'Subir', () => cambiar(moverLinea(d.lineas, i, -1), i - 1), i === 0),
         boton('↓', 'Bajar', () => cambiar(moverLinea(d.lineas, i, 1), i + 1), i === d.lineas.length - 1),
         boton('⤓', 'Unir con la siguiente', () => cambiar(unirConSiguiente(d.lineas, i), i), i === d.lineas.length - 1),
-        boton('✎', 'Nota', () => {
-          const nota = prompt('Nota para esta línea (observación, término griego o hebreo, pregunta…):', l.nota || '');
+        boton('✎', 'Nota', async () => {
+          const nota = await preguntar('Nota para esta línea (observación, término griego o hebreo, pregunta…):', l.nota || '');
           if (nota == null) return;
           const nuevas = d.lineas.map((x) => ({ ...x }));
           nuevas[i].nota = nota.trim();
@@ -123,12 +123,12 @@ function pintarEditor(app, d) {
     onClick: () => { tijera = !tijera; botonTijera.classList.toggle('activo', tijera); botonTijera.textContent = tijera ? '✂ Partiendo… (toca una palabra)' : '✂ Partir línea'; pintar(); },
   }, '✂ Partir línea');
 
-  const alSermon = () => {
+  const alSermon = async () => {
     const puntos = puntosPrincipales(d.lineas);
     const texto = diagramaATexto(d.lineas);
     // ¿Hay ya un sermón sobre este mismo pasaje?
     const existente = almacen.estado.sermones.find((s) => pasajesDe(s).some((p) => p.desde <= d.hasta && p.hasta >= d.desde));
-    const destino = existente && confirm(`¿Agregar el diagrama al sermón "${existente.titulo || existente.pasaje}"? (Cancelar crea uno nuevo)`) ? existente : null;
+    const destino = existente && (await confirmar(`¿Agregar el diagrama al sermón "${existente.titulo || existente.pasaje}"? (Cancelar crea uno nuevo)`, { aceptar: 'Agregar' })) ? existente : null;
     const s = destino ? structuredClone(destino) : crearSermon({ pasaje: formatearRango(d.desde, d.hasta) });
     s.estructura = [s.estructura, `Diagrama de bloques:\n${texto}`].filter(Boolean).join('\n\n');
     if (!s.bosquejo.length && puntos.length > 1 && puntos.length <= 6) {
@@ -150,7 +150,7 @@ function pintarEditor(app, d) {
         el('button', { class: 'btn primario', onClick: alSermon }, '🎤 Llevar al sermón'),
         el('button', { class: 'btn', onClick: () => descargar(`diagrama-${formatearRango(d.desde, d.hasta).replace(/[^\p{L}\p{N}]+/gu, '-')}.txt`, `${formatearRango(d.desde, d.hasta)}\n\n${diagramaATexto(d.lineas)}\n`, 'text/plain') }, '⬇ Texto'),
         el('button', { class: 'btn', onClick: () => window.print() }, '🖨'),
-        el('button', { class: 'btn peligro', onClick: () => { if (confirm('¿Borrar este diagrama?')) { almacen.borrarDiagrama(d.id); location.hash = '#/diagrama'; } } }, 'Borrar'))),
+        el('button', { class: 'btn peligro', onClick: async () => { if (await confirmar('¿Borrar este diagrama?', { aceptar: 'Borrar', peligro: true })) { almacen.borrarDiagrama(d.id); location.hash = '#/diagrama'; } } }, 'Borrar'))),
     el('details', { class: 'ayuda-busqueda' },
       el('summary', {}, 'Cómo diagramar'),
       el('ol', {},

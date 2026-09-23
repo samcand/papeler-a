@@ -41,6 +41,9 @@ const INICIAL = {
     clavesVisibles: true,
     strongs: false,          // números Strong sobre la RV1909
     comentario: 'mhc',       // comentario clásico que se muestra en la guía
+    pincel: false,           // tocar palabras para marcarlas una por una
+    pincelFrase: false,
+    pincelBorrar: false,
   },
 };
 

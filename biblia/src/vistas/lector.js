@@ -9,7 +9,7 @@
  *   · ← y → cambian de capítulo; Esc quita la selección; Ctrl+Z deshace.
  */
 
-import { el, render, toast, $$ } from '../ui.js';
+import { el, render, toast, $$, preguntar } from '../ui.js';
 import { almacen } from '../almacen.js';
 import { libro, idVerso, partesId, capituloVecino } from '../libros.js';
 import { deClave, formatearRango, aClave, refDesdeRango, normalizar, parsearLista, rango, parsear } from '../referencias.js';
@@ -85,11 +85,13 @@ function montar(app) {
     el('section', { class: 'lectura' }, cab, texto, pie),
     panel);
   const barra = el('div', { class: 'barra-marcas', role: 'toolbar', 'aria-label': 'Resaltar y anotar' });
-  document.body.append(barra);
+  const paleta = el('div', { class: 'barra-marcas abajo paleta-pincel', role: 'toolbar', 'aria-label': 'Pincel: marcar palabra por palabra' });
+  document.body.append(barra, paleta);
   render(app, raiz);
 
-  est = { raiz, cab, texto, pie, nav, panel, barra, b: 0, c: 0, sel: null, textoSel: null, navLibro: null, modo: null, palabra: null };
+  est = { raiz, cab, texto, pie, nav, panel, barra, paleta, b: 0, c: 0, sel: null, textoSel: null, navLibro: null, modo: null, palabra: null, pincelInicio: null };
   construirBarra();
+  pintarPaleta();
 
   texto.addEventListener('click', alHacerClic);
   texto.addEventListener('mouseup', () => setTimeout(revisarSeleccion, 10));
@@ -104,6 +106,8 @@ function limpiar() {
   document.removeEventListener('keydown', alTeclear);
   window.removeEventListener('resize', ocultarBarraSiTexto);
   est.barra.remove();
+  est.paleta.remove();
+  document.body.classList.remove('con-pincel');
   est = null;
 }
 
@@ -145,6 +149,11 @@ function pintarCabecera() {
         class: `chip ${a.paralelas.includes(o.id) ? 'activo' : ''}`, title: `Mostrar ${o.nombre} en paralelo`,
         'aria-pressed': a.paralelas.includes(o.id), onClick: () => alternar(o.id),
       }, `+ ${o.nombre}`)),
+      el('button', {
+        class: `chip chip-pincel ${a.pincel ? 'activo' : ''}`, title: 'Pincel: toca cada palabra para marcarla con el color y el estilo elegidos (tócala otra vez para quitarlo)',
+        'aria-pressed': Boolean(a.pincel),
+        onClick: () => alternarPincel(),
+      }, '🖍 Pincel'),
       el('button', {
         class: `chip ${a.conectores ? 'activo' : ''}`, title: 'Resaltar conectores lógicos (porque, por tanto, para que, mas…) para seguir el argumento',
         'aria-pressed': Boolean(a.conectores),
@@ -327,6 +336,7 @@ function desplazarA(id, destello) {
 // ---------------------------------------------------------------- Selección
 
 function alHacerClic(e) {
+  if (almacen.ajustes.pincel && pincelar(e)) return;
   const indicador = e.target.closest('.ind-nota');
   if (indicador) {
     const nota = almacen.estado.notas.find((n) => n.id === indicador.dataset.nota);
@@ -623,7 +633,7 @@ async function copiar() {
     await navigator.clipboard.writeText(cita);
     toast('Copiado con la cita');
   } catch {
-    prompt('Copia el texto:', cita);
+    preguntar('Copia el texto:', cita, { multilinea: true, aceptar: 'Cerrar' });
   }
 }
 
@@ -727,13 +737,13 @@ function misReferencias(desde, hasta) {
 
 function pintarMisReferencias(desde, hasta) {
   const lista = misReferencias(desde, hasta);
-  const agregar = () => {
-    const cita = prompt(`Enlazar ${formatearRango(desde, hasta)} con… (p. ej. Is 53:5)`);
+  const agregar = async () => {
+    const cita = await preguntar(`Enlazar ${formatearRango(desde, hasta)} con…`, '', { marcador: 'p. ej. Is 53:5', aceptar: 'Siguiente' });
     if (!cita) return;
     const r = parsearLista(cita)[0];
     if (!r) { toast('No reconozco esa cita', 'error'); return; }
     const destino = rango(r);
-    const nota = prompt('¿Por qué están relacionados? (cumplimiento, cita, tema, contraste, tipología…)', '') ?? '';
+    const nota = (await preguntar('¿Por qué están relacionados?', '', { marcador: 'cumplimiento, cita, tema, contraste, tipología…', aceptar: 'Guardar' })) ?? '';
     almacen.agregarReferencia({ desde, hasta, a: destino.desde, aHasta: destino.hasta, nota: nota.trim() });
     toast('Referencia guardada');
     pintarPanel();
@@ -1044,4 +1054,115 @@ async function pintarFichaStrong(contenedor, { id, k, strong }) {
 async function proyectarPasaje(ver, desde, hasta) {
   const versos = await textoRango(ver, desde, hasta);
   proyectar(diapositivasDeVersos(versos, { ref: formatearRango(desde, hasta), version: version(ver)?.abrev || '' }));
+}
+
+// ---------------------------------------------------------------- Pincel: marcar palabra por palabra
+
+function alternarPincel(valor = !almacen.ajustes.pincel) {
+  almacen.ajustar({ pincel: valor });
+  est.pincelInicio = null;
+  if (valor) limpiarSeleccion();
+  pintarCabecera();
+  pintarPaleta();
+}
+
+/** Punto del texto (versión, versículo y posición del carácter) bajo el dedo o el cursor. */
+function puntoBajo(e) {
+  let nodo = null, desplazamiento = 0;
+  if (document.caretPositionFromPoint) {
+    const p = document.caretPositionFromPoint(e.clientX, e.clientY);
+    if (p) { nodo = p.offsetNode; desplazamiento = p.offset; }
+  } else if (document.caretRangeFromPoint) {
+    const r = document.caretRangeFromPoint(e.clientX, e.clientY);
+    if (r) { nodo = r.startContainer; desplazamiento = r.startOffset; }
+  }
+  if (!nodo) return null;
+  const elemento = nodo.nodeType === 1 ? nodo : nodo.parentElement;
+  if (!elemento?.closest('.vs .t') || elemento.closest('.tokens')) return null;
+  return punto(nodo, desplazamiento, 'inicio');
+}
+
+/** La palabra que contiene (o sigue a) la posición o del versículo. */
+function palabraEn(vs, o) {
+  const lista = palabrasDe(vs.querySelector('.t')?.textContent || '');
+  return lista.find((p) => o >= p.inicio && o < p.fin) || lista.find((p) => p.inicio >= o) || lista[lista.length - 1] || null;
+}
+
+/** Con el pincel activo, un toque marca (o desmarca) la palabra tocada. Devuelve true si lo atendió. */
+function pincelar(e) {
+  const vs = e.target.closest('.vs');
+  if (!vs || e.target.closest('.ind-nota, .num')) return false;
+  if (vs.closest('[data-version]') && esOriginal(vs.closest('[data-version]').dataset.version)) return false;
+  const p = puntoBajo(e);
+  if (!p || p.id !== Number(vs.dataset.id)) return false;
+  const w = palabraEn(vs, p.o ?? 0);
+  if (!w) return true;
+  e.preventDefault();
+  const a = almacen.ajustes;
+  const aqui = { version: p.version, id: p.id, inicio: w.inicio, fin: w.fin };
+
+  if (a.pincelFrase && !est.pincelInicio) {
+    est.pincelInicio = aqui;
+    for (const x of $$('.pincel-inicio', est.texto)) x.classList.remove('pincel-inicio');
+    vs.classList.add('pincel-inicio');
+    pintarPaleta(`Desde «${w.w}»: ahora toca la última palabra`);
+    return true;
+  }
+  let desde = { id: aqui.id, o: aqui.inicio }, hasta = { id: aqui.id, o: aqui.fin };
+  if (a.pincelFrase && est.pincelInicio) {
+    const i = est.pincelInicio;
+    est.pincelInicio = null;
+    for (const x of $$('.pincel-inicio', est.texto)) x.classList.remove('pincel-inicio');
+    if (i.version === aqui.version) {
+      const x = { id: i.id, o: i.inicio }, xf = { id: i.id, o: i.fin };
+      const antes = x.id < desde.id || (x.id === desde.id && x.o < desde.o);
+      if (antes) desde = x; else hasta = xf;
+    }
+  }
+  if (a.pincelBorrar) {
+    almacen.borrarTramo(aqui.version, desde, hasta);
+  } else {
+    // tocar otra vez la misma palabra con la misma herramienta la quita
+    const igual = almacen.estado.marcas.find((m) => m.version === aqui.version && m.estilo === a.estilo
+      && m.desde.id === desde.id && m.desde.o === desde.o && m.hasta.id === hasta.id && m.hasta.o === hasta.o);
+    if (igual) almacen.quitarMarca(igual.id);
+    else almacen.agregarMarca(crearMarca({ version: aqui.version, desde, hasta, color: a.color, estilo: a.estilo, simbolo: a.simbolo }));
+  }
+  pintarPaleta();
+  repintar();
+  return true;
+}
+
+/** La paleta fija abajo mientras el pincel está activo: herramienta, color y modo. */
+function pintarPaleta(aviso = '') {
+  if (!est) return;
+  const a = almacen.ajustes;
+  const activo = Boolean(a.pincel);
+  document.body.classList.toggle('con-pincel', activo);
+  est.paleta.classList.toggle('visible', activo);
+  if (!activo) { render(est.paleta); return; }
+  const volver = () => pintarPaleta();
+  render(est.paleta,
+    el('div', { class: 'fila-barra' },
+      el('strong', { class: 'small' }, '🖍 Pincel'),
+      el('span', { class: 'tenue small grow' }, aviso || (a.pincelBorrar ? 'Toca una palabra para borrar sus marcas' : a.pincelFrase ? 'Toca la primera y la última palabra' : 'Toca una palabra para marcarla; otra vez para quitarla')),
+      el('button', { type: 'button', class: 'btn chico primario', onClick: () => alternarPincel(false) }, 'Listo')),
+    el('div', { class: 'fila-barra' },
+      el('button', { type: 'button', class: `chip ${!a.pincelFrase && !a.pincelBorrar ? 'activo' : ''}`, onClick: () => { almacen.ajustar({ pincelFrase: false, pincelBorrar: false }); est.pincelInicio = null; volver(); } }, 'Palabra'),
+      el('button', { type: 'button', class: `chip ${a.pincelFrase ? 'activo' : ''}`, onClick: () => { almacen.ajustar({ pincelFrase: true, pincelBorrar: false }); est.pincelInicio = null; volver(); } }, 'Frase'),
+      el('button', { type: 'button', class: `chip ${a.pincelBorrar ? 'activo' : ''}`, onClick: () => { almacen.ajustar({ pincelBorrar: !a.pincelBorrar }); volver(); } }, '⌫ Borrar'),
+      el('button', { type: 'button', class: 'chip', title: 'Deshacer lo último (Ctrl+Z)', onClick: () => { almacen.deshacerUltimo?.(); repintar(); } }, '↶')),
+    el('div', { class: 'fila-barra herramientas' }, ESTILOS.map((x) => el('button', {
+      type: 'button', class: `herr ${a.estilo === x.id ? 'activa' : ''} herr-${x.id}`, title: x.nombre, 'aria-pressed': a.estilo === x.id,
+      onClick: () => { almacen.ajustar({ estilo: x.id, pincelBorrar: false }); volver(); },
+    }, x.icono))),
+    a.estilo === 'simbolo'
+      ? el('div', { class: 'fila-barra simbolos' }, SIMBOLOS.map((x) => el('button', {
+        type: 'button', class: `simbolo-btn ${a.simbolo === x.s ? 'activa' : ''}`, title: x.nombre, style: { '--s': `var(--u-${x.color})` },
+        onClick: () => { almacen.ajustar({ simbolo: x.s, color: x.color, pincelBorrar: false }); volver(); },
+      }, x.s)))
+      : el('div', { class: 'fila-barra colores' }, COLORES.map((c) => el('button', {
+        type: 'button', class: `muestra m-${c.id} ${a.color === c.id ? 'activa' : ''}`, title: c.nombre, 'aria-label': c.nombre,
+        onClick: () => { almacen.ajustar({ color: c.id, pincelBorrar: false }); volver(); },
+      }))));
 }

@@ -874,3 +874,15 @@ body.modo-pulpito .barra { display: none; }
 }
 .control-proyeccion .cp-texto { max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600; }
 .modo-pulpito .control-proyeccion { bottom: 12px; right: 12px; }
+
+/* ---------------------------------------------------------------- Pincel: marcar palabra por palabra */
+.paleta-pincel { z-index: 70; }
+.paleta-pincel .grow { flex: 1; min-width: 8em; }
+body.con-pincel .lectura { padding-bottom: 240px; }
+body.con-pincel .texto .vs .t { cursor: cell; -webkit-user-select: none; user-select: none; }
+body.con-pincel .texto .vs.sel { background: none; }
+.pincel-inicio { outline: 2px dashed var(--acento); outline-offset: 2px; border-radius: 4px; }
+.chip-pincel.activo { box-shadow: 0 0 0 2px color-mix(in oklab, var(--acento) 40%, transparent); }
+body.con-pincel #toasts { bottom: calc(250px + env(safe-area-inset-bottom)); }
+.dialogo-chico { max-width: min(440px, calc(100vw - 32px)); }
+.dialogo-mensaje { display: flex; flex-direction: column; gap: 10px; margin: 4px 0 12px; font-size: 1rem; line-height: 1.45; }

@@ -8,7 +8,7 @@
  *   #/sermones/<id>/pulpito        modo púlpito
  */
 
-import { el, render, toast, descargar, fecha as formatoFecha } from '../ui.js';
+import { el, render, toast, descargar, fecha as formatoFecha, confirmar, preguntar } from '../ui.js';
 import { almacen } from '../almacen.js';
 import { formatear, aClave, parsearLista, rango } from '../referencias.js';
 import { textoRango, version } from '../texto.js';
@@ -37,8 +37,8 @@ function subpestanas(actual) {
 
 // ---------------------------------------------------------------- Archivo
 
-function nuevo(datos = {}) {
-  const pasaje = datos.pasaje ?? prompt('Texto del sermón (p. ej. Romanos 5:1-11):', '');
+async function nuevo(datos = {}) {
+  const pasaje = datos.pasaje ?? await preguntar('Texto del sermón', '', { marcador: 'p. ej. Romanos 5:1-11', aceptar: 'Crear' });
   if (pasaje == null) return;
   const s = crearSermon({ pasaje: pasaje.trim(), ...datos });
   almacen.guardarSermon(s);
@@ -212,7 +212,7 @@ function pintarEditor(app, s, pasoActual) {
           el('input', { class: 'input', style: { width: '140px' }, value: p.pasaje, placeholder: 'vv. (Ro 5:1-2)', onInput: (e) => { p.pasaje = e.target.value; guardar(); } }),
           el('button', { class: 'btn icono chico', title: 'Subir', disabled: i === 0, onClick: () => { s.bosquejo = moverPunto(s.bosquejo, p.id, -1); actualizar(); } }, '↑'),
           el('button', { class: 'btn icono chico', title: 'Bajar', disabled: i === s.bosquejo.length - 1, onClick: () => { s.bosquejo = moverPunto(s.bosquejo, p.id, 1); actualizar(); } }, '↓'),
-          el('button', { class: 'btn icono chico peligro', title: 'Quitar', onClick: () => { if (confirm('¿Quitar este punto?')) { s.bosquejo = s.bosquejo.filter((x) => x.id !== p.id); actualizar(); } } }, '✕')),
+          el('button', { class: 'btn icono chico peligro', title: 'Quitar', onClick: async () => { if (await confirmar('¿Quitar este punto?', { aceptar: 'Quitar', peligro: true })) { s.bosquejo = s.bosquejo.filter((x) => x.id !== p.id); actualizar(); } } }, '✕')),
         campo('explicacion', 'Explicación', { filas: 4, obj: p }),
         el('div', { class: 'campo' },
           campo('ilustracion', 'Ilustración', { filas: 2, obj: p }),
@@ -286,7 +286,7 @@ function pintarEditor(app, s, pasoActual) {
         el('a', { class: 'btn primario', href: `#/sermones/${s.id}/pulpito` }, '🎤 Púlpito'),
         el('button', { class: 'btn', onClick: exportar, title: 'Manuscrito y notas en Markdown (se abre en Word o Google Docs)' }, '⬇ Exportar'),
         el('button', { class: 'btn', onClick: hoja, title: 'Hoja para la congregación con espacios para llenar y preguntas para grupos pequeños' }, '📄 Hoja y grupo'),
-        el('button', { class: 'btn peligro', onClick: () => { if (confirm('¿Borrar este sermón?')) { almacen.borrarSermon(s.id); location.hash = '#/sermones'; } } }, 'Borrar'))),
+        el('button', { class: 'btn peligro', onClick: async () => { if (await confirmar('¿Borrar este sermón?', { aceptar: 'Borrar', peligro: true })) { almacen.borrarSermon(s.id); location.hash = '#/sermones'; } } }, 'Borrar'))),
     el('nav', { class: 'pasos-sermon' }, PASOS.map((p, i) => el('a', {
       href: `#/sermones/${s.id}?paso=${p.id}`, class: `${p.id === pasoActual ? 'activa' : ''} ${progreso(s).hechos[p.id] ? 'hecho' : ''}`,
     }, el('span', { class: 'num-paso' }, i + 1), p.nombre))),
@@ -320,7 +320,7 @@ function pintarIlustraciones(app, q = '') {
     lista.length ? lista.map((il) => el('article', { class: 'tarjeta tarjeta-nota' },
       el('div', { class: 'tarjeta-cab' },
         el('strong', {}, il.titulo),
-        el('button', { class: 'btn icono chico peligro', title: 'Borrar', onClick: () => { if (confirm('¿Borrar esta ilustración?')) { almacen.borrarIlustracion(il.id); refrescar(); } } }, '✕')),
+        el('button', { class: 'btn icono chico peligro', title: 'Borrar', onClick: async () => { if (await confirmar('¿Borrar esta ilustración?', { aceptar: 'Borrar', peligro: true })) { almacen.borrarIlustracion(il.id); refrescar(); } } }, '✕')),
       el('p', {}, il.texto),
       el('div', { class: 'tenue small' }, [il.pasajes, (il.etiquetas || []).map((e) => `#${e}`).join(' '),
         il.usada?.length ? `usada ${il.usada.length} ${il.usada.length === 1 ? 'vez' : 'veces'} (última: ${il.usada.at(-1).fecha})` : 'sin usar'].filter(Boolean).join(' · '))))

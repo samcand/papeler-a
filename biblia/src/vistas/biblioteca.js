@@ -7,7 +7,7 @@
  *   #/biblioteca?q=justificación    buscar en toda la biblioteca
  */
 
-import { el, render, toast, fecha } from '../ui.js';
+import { el, render, toast, fecha, confirmar, preguntar } from '../ui.js';
 import { enLinea } from '../notas.js';
 import { normalizar } from '../referencias.js';
 import { buscarEnLibros, fragmento } from '../biblioteca.js';
@@ -84,13 +84,13 @@ async function pintarEstante(app, q) {
               .filter(Boolean).join(' · '))),
         el('div', { class: 'acciones' },
           el('button', { class: 'btn chico', title: 'Cambiar título y autor', onClick: async () => {
-            const titulo = prompt('Título', l.titulo); if (titulo == null) return;
-            const autor = prompt('Autor', l.autor || ''); if (autor == null) return;
+            const titulo = await preguntar('Título', l.titulo); if (titulo == null) return;
+            const autor = await preguntar('Autor', l.autor || ''); if (autor == null) return;
             await estante.cambiar(l.id, { titulo: titulo.trim() || l.titulo, autor: autor.trim() });
             pintarEstante(app, q);
           } }, '✎'),
           l.origen !== 'incluido' ? el('button', { class: 'btn chico peligro', title: 'Quitar de la biblioteca', onClick: async () => {
-            if (!confirm(`¿Quitar "${l.titulo}" de la biblioteca?`)) return;
+            if (!(await confirmar(`¿Quitar "${l.titulo}" de la biblioteca?`, { aceptar: 'Quitar', peligro: true }))) return;
             await estante.borrar(l.id);
             pintarEstante(app, q);
           } }, '✕') : null))))]
