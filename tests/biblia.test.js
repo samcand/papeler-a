@@ -16,6 +16,7 @@ import { crearSermon, nuevoPunto, moverPunto, ideaExegetica, progreso, duracionE
 import { explicarHebreo, explicarGriego, notaExegetica } from '../biblia/src/morfologia.js';
 import { strongDeLema, leerOshb, leerMorphgnt, glosaKjv } from '../tools/biblia-originales.mjs';
 import { estudioOriginal, formaBase, morfologiaPrincipal } from '../biblia/src/concordancia.js';
+import { reglasDeConectores } from '../biblia/src/conectores.js';
 import { DEVOCIONALES, DESTINATARIOS, devocionalesPara, delDia, rachaDevocional } from '../biblia/src/devocionales.js';
 
 let passed = 0;
@@ -417,6 +418,16 @@ t('concordancia del original por número Strong', () => {
   assert.equal(morfologiaPrincipal('HC/Vqw3ms'), 'HVqw3ms');
   assert.equal(morfologiaPrincipal('HR/Ncfsa'), 'HNcfsa');
   assert.equal(morfologiaPrincipal('V-3AAI-S--'), 'V-3AAI-S--');
+});
+
+t('conectores lógicos marcados en el texto', () => {
+  const comp = compilarClaves(reglasDeConectores('rv'), { version: 'rv', b: 45 });
+  const texto = 'Justificados pues por la fe, tenemos paz para con Dios: porque Cristo murió, para que vivamos; mas Dios encarece su caridad. Mucho más ahora. Sí, si creéis.';
+  const marcas = marcasDeClaves(texto, 1, comp);
+  const hallados = marcas.map((m) => texto.slice(m.desde.o, m.hasta.o).toLowerCase());
+  for (const w of ['porque', 'para que', 'mas']) assert.ok(hallados.includes(w), w);
+  assert.ok(!hallados.includes('más'), '"mas" (contraste) no es "más" (cantidad)');
+  assert.equal(hallados.filter((w) => w === 'si').length, 1, '"sí" no es condicional');
 });
 
 // ---------- Planes ----------

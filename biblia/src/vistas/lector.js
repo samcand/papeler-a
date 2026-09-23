@@ -22,6 +22,7 @@ import {
   COLORES, ESTILOS, SIMBOLOS, crearMarca, segmentos, estiloSegmento, segmentoDeMarca, estiloDe, marcasEnRango, textoDeMarca,
 } from '../marcas.js';
 import { compilarClaves, marcasDeClaves, juegos } from '../claves.js';
+import { CONECTORES, reglasDeConectores } from '../conectores.js';
 import { editarClave } from './editor-clave.js';
 import { citasEn, fragmento } from '../biblioteca.js';
 import { enLinea } from '../notas.js';
@@ -139,6 +140,16 @@ function pintarCabecera() {
         class: `chip ${a.paralelas.includes(o.id) ? 'activo' : ''}`, title: `Mostrar ${o.nombre} en paralelo`,
         'aria-pressed': a.paralelas.includes(o.id), onClick: () => alternar(o.id),
       }, `+ ${o.nombre}`)),
+      el('button', {
+        class: `chip ${a.conectores ? 'activo' : ''}`, title: 'Resaltar conectores lógicos (porque, por tanto, para que, mas…) para seguir el argumento',
+        'aria-pressed': Boolean(a.conectores),
+        onClick: () => { almacen.ajustar({ conectores: !a.conectores }); pintarCabecera(); pintarCapitulo(); pintarPanel(); },
+      }, 'Conectores'),
+      el('button', {
+        class: `chip ${a.textoLimpio ? 'activo' : ''}`, title: 'Ocultar todas las marcas, notas y palabras clave',
+        'aria-pressed': Boolean(a.textoLimpio),
+        onClick: () => { almacen.ajustar({ textoLimpio: !a.textoLimpio }); pintarCabecera(); pintarCapitulo(); },
+      }, 'Texto limpio'),
       a.paralelas.includes(ORIGINAL) ? el('button', {
         class: `chip ${a.interlineal ? 'activo' : ''}`, title: 'Ver debajo de cada palabra original su transliteración, glosa y morfología',
         'aria-pressed': Boolean(a.interlineal),
@@ -194,10 +205,16 @@ async function pintarCapitulo() {
 
   const desde = idVerso(b, c, 1), hasta = idVerso(b, c, 999);
   const notas = notasEn(almacen.estado.notas, desde, hasta);
-  const marcas = cols.map((v) => marcasEnRango(almacen.estado.marcas, v, desde, hasta));
-  const claves = cols.map((v) => (a.clavesVisibles
-    ? compilarClaves(almacen.estado.claves, { version: v, b, juegosOcultos: a.juegosOcultos })
-    : []));
+  // "Texto limpio" oculta todas las marcas; los conectores se dibujan como palabras clave automáticas
+  const marcas = cols.map((v) => (a.textoLimpio ? [] : marcasEnRango(almacen.estado.marcas, v, desde, hasta)));
+  const claves = cols.map((v) => {
+    if (a.textoLimpio) return [];
+    const reglas = [
+      ...(a.clavesVisibles ? almacen.estado.claves : []),
+      ...(a.conectores && v === 'rv1909' ? reglasDeConectores(v) : []),
+    ];
+    return compilarClaves(reglas, { version: v, b, juegosOcultos: a.juegosOcultos });
+  });
   const total = Math.max(...datos.map((d) => d.length));
   const meta = cols.map((v) => version(v));
   const atributos = (m) => ({ lang: m.idioma, dir: m.dir || 'ltr' });
@@ -215,7 +232,7 @@ async function pintarCapitulo() {
     }
     const segs = segmentos(texto, id, claves[i].length ? [...marcasDeClaves(texto, id, claves[i]), ...marcas[i]] : marcas[i]);
     const principal = i === 0;
-    const notasV = principal ? notas.filter((n) => n.desde <= id && (n.hasta || n.desde) >= id) : [];
+    const notasV = principal && !a.textoLimpio ? notas.filter((n) => n.desde <= id && (n.hasta || n.desde) >= id) : [];
     return el('span', {
       class: `vs ${principal && almacen.tieneMarcador(id) ? 'marcado' : ''}`,
       dataset: { id },
@@ -794,6 +811,10 @@ function pintarPanelCapitulo() {
         m.version !== principal ? el('span', { class: 'etiqueta-version' }, version(m.version)?.abrev) : null,
         el('button', { class: 'btn icono chico', title: 'Quitar', onClick: () => { almacen.quitarMarca(m.id); repintar(); } }, '✕'))))
       : el('p', { class: 'tenue small' }, 'Selecciona texto para resaltarlo.')),
+    almacen.ajustes.conectores ? bloque('Conectores', el('ul', { class: 'lista-claves' }, CONECTORES.map((c) => el('li', {},
+      muestraDe({ id: c.tipo, estilo: 'recuadro', color: c.color }),
+      el('span', {}, ` ${c.nombre}: `), el('span', { class: 'tenue small' }, c.palabras.slice(0, 4).join(', '))))),
+    'Marcas automáticas del argumento. "Pues" y "como" son ambiguos: confirma su función en el contexto.') : null,
     bloquePalabrasClave(b),
     bloque('Este libro', el('div', { class: 'datos-libro' },
       el('div', {}, el('strong', {}, L.capitulos), ' capítulos'),

@@ -35,9 +35,9 @@ export function compilarClaves(reglas, { version, b, juegosOcultos = [] }) {
     if (!regla.activa || regla.version !== version) continue;
     if (regla.alcance && regla.alcance !== b) continue;
     if (regla.juego && juegosOcultos.includes(regla.juego)) continue;
-    const q = analizarConsulta(consultaDe(regla));
+    const q = analizarConsulta(consultaDe(regla), { tildes: Boolean(regla.tildes) });
     const termino = q.grupos[0]?.[0];
-    if (termino) salida.push({ regla, re: new RegExp(termino.re.source, 'g') });
+    if (termino) salida.push({ regla, re: new RegExp(termino.re.source, 'g'), tildes: Boolean(regla.tildes) });
   }
   return salida;
 }
@@ -49,10 +49,12 @@ export function compilarClaves(reglas, { version, b, juegosOcultos = [] }) {
 export function marcasDeClaves(texto, id, compiladas) {
   if (!compiladas.length) return [];
   const plano = normalizar(texto);
+  const minusculas = texto.toLowerCase();
   const marcas = [];
-  for (const { regla, re } of compiladas) {
+  for (const { regla, re, tildes } of compiladas) {
     re.lastIndex = 0;
-    for (const m of plano.matchAll(re)) {
+    // con tildes: "mas" (contraste) no es "más" (cantidad), "si" no es "sí"
+    for (const m of (tildes ? minusculas : plano).matchAll(re)) {
       const base = { version: regla.version, color: regla.color, creada: 0, clave: regla.id };
       marcas.push({ ...base, id: `${regla.id}-${id}-${m.index}`, estilo: regla.estilo,
         desde: { id, o: m.index }, hasta: { id, o: m.index + m[0].length } });

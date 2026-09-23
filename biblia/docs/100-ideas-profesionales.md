@@ -35,7 +35,7 @@ homilética). Fuentes al final.
 
 11. 🔜 **Diagrama de bloques** editable: sangrar cláusulas subordinadas bajo la principal arrastrando líneas.
 12. 🔜 **Arcos y corchetes** (phrase arcing) con relaciones lógicas etiquetadas: causa, propósito, concesión, contraste, inferencia.
-13. 🔜 **Detección de conectores** ("porque", "pues", "por tanto", "mas") resaltados automáticamente para seguir el argumento.
+13. 🆕 **Detección de conectores** ("porque", "pues", "por tanto", "mas") resaltados automáticamente para seguir el argumento.
 14. 🔜 **Quiasmos y paralelismos**: plantilla A-B-C-B'-A' que se dibuja sobre el texto.
 15. 🔜 **Mapa de párrafos** (perícopas) con títulos propios y vista del libro completo en una pantalla.
 16. 🔜 **Bosquejo del libro** propio, sincronizado con el lector: al leer, se ve en qué sección del argumento estás.
@@ -81,7 +81,7 @@ homilética). Fuentes al final.
 47. 🔜 **Lista de observaciones** por pasaje: quién, qué, cuándo, dónde, por qué, cómo.
 48. 🔜 **Tabla de contrastes y comparaciones** generada a partir de lo marcado.
 49. ✅ **Deshacer** y goma parcial.
-50. 🔜 **Capas de marcado**: ver solo tus marcas de estudio, solo las de predicación, o ninguna (texto limpio).
+50. 🆕 **Capas de marcado**: juegos de palabras clave que se encienden y apagan, y botón de texto limpio. 🔜 capas para marcas hechas a mano.
 
 ## 6. Preparación del sermón
 
