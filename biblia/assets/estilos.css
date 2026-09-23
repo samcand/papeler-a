@@ -640,6 +640,38 @@ body.modo-pulpito .barra { display: none; }
 .resultado-original { font: 1.15rem/1.8 'SBL Hebrew', 'SBL Greek', 'Noto Serif Hebrew', Georgia, serif; }
 .lista-morfologia { padding-left: 1.1em; margin: 0; }
 
+/* Concordancia */
+.letras { display: flex; flex-wrap: wrap; gap: 3px; margin: 12px 0; }
+.letra { width: 34px; height: 34px; border-radius: 8px; border: 1px solid var(--linea); background: var(--tarjeta); color: var(--texto); cursor: pointer; font: 600 .95rem var(--ui); }
+.letra.activa { background: var(--acento); border-color: var(--acento); color: #1b1406; }
+.indice-palabras { columns: 4 190px; column-gap: 22px; }
+.entrada-indice { display: flex; justify-content: space-between; gap: 8px; padding: 2px 4px; border-radius: 5px; break-inside: avoid; color: var(--texto); font-family: var(--lectura); }
+.entrada-indice:hover { background: var(--sel); text-decoration: none; }
+.entrada-n { color: var(--tenue); font: .8rem var(--ui); font-variant-numeric: tabular-nums; }
+.indice-palabras .btn { margin-top: 10px; }
+.titulo-concordancia { font-family: var(--lectura); font-size: 2.2rem; text-transform: uppercase; letter-spacing: .04em; margin-top: 8px; }
+.vecinos { display: flex; justify-content: space-between; align-items: center; margin: 10px 0; }
+.kwic { font-family: var(--lectura); font-size: 1rem; margin-top: 12px; }
+.kwic-libro { font: 700 .8rem var(--ui); text-transform: uppercase; letter-spacing: .08em; color: var(--acento); padding: 14px 0 4px; border-bottom: 1px solid var(--linea); position: sticky; top: 53px; background: var(--fondo); z-index: 2; }
+.kwic-fila { display: grid; grid-template-columns: 7.5em minmax(0, 1fr) auto minmax(0, 1fr); gap: 0 6px; align-items: baseline; padding: 3px 0; border-bottom: 1px dashed color-mix(in oklab, var(--linea) 60%, transparent); }
+.kwic-fila:hover { background: color-mix(in oklab, var(--sel) 60%, transparent); }
+.kwic-ref { font: 600 .82rem var(--ui); white-space: nowrap; }
+.kwic-izq { overflow: hidden; white-space: nowrap; direction: rtl; text-align: right; }
+.kwic-izq > span { direction: ltr; unicode-bidi: embed; }
+.kwic-der { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.kwic-palabra { background: var(--m-amarillo); color: inherit; font-weight: 700; padding: 0 2px; border-radius: 3px; }
+.colocaciones > div { margin-bottom: 6px; }
+.chip-doble { gap: 6px; }
+.chip-doble a { color: inherit; }
+@media (max-width: 760px) {
+  .kwic-fila { grid-template-columns: 5.5em minmax(0, 1fr) auto minmax(0, 1fr); font-size: .9rem; }
+  .indice-palabras { columns: 2 140px; }
+}
+@media print {
+  .kwic-fila { break-inside: avoid; }
+  .kwic-libro { position: static; }
+}
+
 /* Avisos */
 #toasts { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); z-index: 100; display: flex; flex-direction: column; gap: 6px; align-items: center; pointer-events: none; }
 .toast { background: var(--texto); color: var(--fondo); padding: 9px 16px; border-radius: 999px; font-size: .9rem; box-shadow: var(--sombra); transition: opacity .3s, transform .3s; }
@@ -647,7 +679,12 @@ body.modo-pulpito .barra { display: none; }
 .toast.fuera { opacity: 0; transform: translateY(8px); }
 
 /* ---------- Pantallas medianas: el navegador de libros se esconde ---------- */
-@media (max-width: 1380px) {
+@media (max-width: 1640px) {
+  .logo span { display: none; }
+  .pestanas a { font-size: .84rem; padding: 6px 7px; }
+  .ir { min-width: 190px; }
+}
+@media (max-width: 1300px) {
   .pestanas a span { display: none; }
   .pestanas a { font-size: 1.1rem; padding: 6px 9px; }
 }

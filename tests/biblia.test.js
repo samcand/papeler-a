@@ -15,7 +15,7 @@ import { normalizar } from '../biblia/src/referencias.js';
 import { crearSermon, nuevoPunto, moverPunto, ideaExegetica, progreso, duracionEstimada, palabrasPredicadas, avisos, pasajesDe, sermonAMarkdown, romano, cobertura } from '../biblia/src/sermones.js';
 import { explicarHebreo, explicarGriego, notaExegetica } from '../biblia/src/morfologia.js';
 import { strongDeLema, leerOshb, leerMorphgnt, glosaKjv } from '../tools/biblia-originales.mjs';
-import { estudioOriginal, formaBase, morfologiaPrincipal } from '../biblia/src/concordancia.js';
+import { estudioOriginal, formaBase, morfologiaPrincipal, indicePalabras, claveOrden, concordancia, ordenarLineas, colocaciones, concordanciaATexto } from '../biblia/src/concordancia.js';
 import { reglasDeConectores } from '../biblia/src/conectores.js';
 import { DEVOCIONALES, DESTINATARIOS, devocionalesPara, delDia, rachaDevocional } from '../biblia/src/devocionales.js';
 
@@ -428,6 +428,51 @@ t('conectores lógicos marcados en el texto', () => {
   for (const w of ['porque', 'para que', 'mas']) assert.ok(hallados.includes(w), w);
   assert.ok(!hallados.includes('más'), '"mas" (contraste) no es "más" (cantidad)');
   assert.equal(hallados.filter((w) => w === 'si').length, 1, '"sí" no es condicional');
+});
+
+t('concordancia: índice alfabético con frecuencias y hápax', () => {
+  const libros = [];
+  libros[0] = [['En el principio crió Dios los cielos.', 'Y dijo Dios: Sea la luz.']];
+  libros[42] = [['En el principio era el Verbo, y el Verbo era con Dios.']];
+  const i = indicePalabras(libros);
+  const dios = i.palabras.find((p) => p.clave === 'dios');
+  assert.equal(dios.n, 3);
+  assert.equal(dios.forma, 'Dios', 'los nombres propios conservan la mayúscula');
+  assert.equal(i.palabras.find((p) => p.clave === 'en').forma, 'en', 'la mayúscula del inicio del versículo no cuenta');
+  assert.equal(dios.libros, 2);
+  assert.equal(i.palabras.find((p) => p.clave === 'crio').forma, 'crió', 'la clave va sin tilde, la forma con tilde');
+  assert.ok(i.palabras.findIndex((p) => p.clave === 'cielos') < i.palabras.findIndex((p) => p.clave === 'dios'), 'orden alfabético');
+  assert.ok(i.hapax >= 5);
+  assert.equal(indicePalabras(libros, { filtro: (b) => b >= 40 }).palabras.find((p) => p.clave === 'dios').n, 1);
+  const n = indicePalabras([[['nada, niño y ñame; nube']]]).palabras.map((p) => p.clave);
+  assert.deepEqual(n, ['nada', 'niño', 'nube', 'ñame', 'y'], 'la ñ es letra propia y va después de la n');
+});
+
+t('concordancia: cada aparición con su contexto, ordenable', () => {
+  const libros = [];
+  libros[42] = [['Y el Verbo era con Dios, y el Verbo era Dios.'], [], [
+    'Porque de tal manera amó Dios al mundo.', 'Porque no envió Dios á su Hijo al mundo para que condene al mundo.']];
+  const r = concordancia(libros, 'mundo');
+  assert.equal(r.apariciones, 3);
+  assert.equal(r.versiculos, 2);
+  assert.deepEqual([r.lineas[0].izq, r.lineas[0].palabra, r.lineas[0].der], ['Porque de tal manera amó Dios al ', 'mundo', '.']);
+  assert.equal(concordancia(libros, 'dios').apariciones, 4);
+  assert.equal(concordancia(libros, 'verb', { modo: 'raiz' }).apariciones, 2);
+  assert.equal(concordancia(libros, 'el verbo', { modo: 'frase' }).apariciones, 2);
+  assert.equal(concordancia(libros, 'dios', { filtro: (b) => b !== 43 }).apariciones, 0);
+  // contexto recortado a palabras completas
+  const corto = concordancia(libros, 'condene', { ancho: 20 }).lineas[0];
+  assert.ok(corto.cortadoIzq);
+  assert.equal(corto.izq, 'al mundo para que ', 'empieza en palabra completa');
+  // orden por contexto derecho: "al mundo." antes que "al mundo para"
+  const der = ordenarLineas(r.lineas, 'derecha').map((l) => l.der.trim().slice(0, 4));
+  assert.deepEqual(der, ['.', '.', 'para']);
+  const izq = ordenarLineas(concordancia(libros, 'dios').lineas, 'izquierda').map((l) => l.izq.trim().split(' ').at(-1));
+  assert.deepEqual(izq, ['amó', 'con', 'envió', 'era']);
+  const col = colocaciones(r.lineas);
+  assert.deepEqual(col.antes[0], ['al', 3]);
+  const txt = concordanciaATexto(r.lineas, { titulo: 'MUNDO' });
+  assert.ok(txt.startsWith('MUNDO\n=====') && txt.includes('MUNDO.'));
 });
 
 // ---------- Planes ----------

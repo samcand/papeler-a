@@ -485,6 +485,10 @@ function construirBarra() {
       accion('🔖', 'Marcador', alternarMarcador, 'solo-versos'),
       accion('⧉', 'Copiar con la cita', copiar),
       accion('🔤', 'Estudiar esta palabra', estudiarPalabra, 'solo-palabra'),
+      accion('📇', 'Concordancia de lo seleccionado', () => {
+        const t = est.textoSel?.texto;
+        if (t) location.hash = `#/concordancia/${encodeURIComponent(t.toLowerCase())}?v=${est.textoSel.version}`;
+      }, 'solo-texto'),
       accion('🔎', 'Buscar lo seleccionado en toda la Biblia', buscarSeleccion, 'solo-texto'),
       accion('✕', 'Cerrar (Esc)', limpiarSeleccion, 'icono')));
 }
@@ -648,7 +652,7 @@ async function pintarPanel() {
       : el('p', { class: 'tenue small' }, 'Aún no hay notas aquí. Pulsa ✎ Nota o selecciona palabras.')),
     bloque('En otras versiones', otras),
     bloque('En tu biblioteca', enBiblioteca, 'Párrafos de tus libros que citan este pasaje'),
-    bloque('Estudiar palabras', palabras, 'Toca una palabra para ver dónde más aparece'));
+    bloque('Concordancia', palabras, 'Toca una palabra para ver cada aparición en la Biblia; 🔤 abre su estudio'));
 
   // Referencias cruzadas (unión de las de cada versículo seleccionado)
   const ids = [];
@@ -677,7 +681,9 @@ async function pintarPanel() {
   const unicas = [...new Set(principal.map((x) => x.texto).join(' ').split(/[^\p{L}]+/u)
     .filter((p) => p.length > 3 && !VACIAS.has(normalizar(p))).map((p) => p.toLowerCase()))].slice(0, 24);
   if (!est || est.sel?.desde !== desde) return;
-  render(palabras, unicas.map((p) => el('a', { class: 'chip', href: `#/palabra/${encodeURIComponent(p)}` }, p)));
+  render(palabras, unicas.map((p) => el('span', { class: 'chip chip-doble' },
+    el('a', { href: `#/concordancia/${encodeURIComponent(p)}?v=${ver}`, title: 'Concordancia' }, p),
+    el('a', { href: `#/palabra/${encodeURIComponent(p)}?v=${ver}`, title: 'Estudio de la palabra', class: 'tenue' }, '🔤'))));
 }
 
 /** Ficha léxica de una palabra hebrea o griega tocada en el texto. */

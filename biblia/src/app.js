@@ -10,6 +10,7 @@
  *   #/biblioteca        tus libros, con sus citas bíblicas indexadas
  *   #/sermones          taller de sermones y modo púlpito
  *   #/original/H2617    palabra hebrea o griega: léxico y concordancia
+ *   #/concordancia/amor concordancia: índice alfabético y cada aparición con su contexto
  *   #/ajustes           apariencia, versiones y respaldo
  */
 
@@ -27,6 +28,7 @@ import { vistaFamilia } from './vistas/familia.js';
 import { vistaBiblioteca } from './vistas/biblioteca.js';
 import { vistaSermones } from './vistas/sermones.js';
 import { vistaOriginal } from './vistas/original.js';
+import { vistaConcordancia } from './vistas/concordancia.js';
 import { instalarVistazo } from './vistas/vistazo.js';
 
 const RUTAS = {
@@ -39,6 +41,7 @@ const RUTAS = {
   biblioteca: vistaBiblioteca,
   sermones: vistaSermones,
   original: vistaOriginal,
+  concordancia: vistaConcordancia,
   ajustes: vistaAjustes,
 };
 

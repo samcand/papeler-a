@@ -110,6 +110,7 @@ export async function vistaPalabra(app, ruta) {
       el('h3', {}, 'Suele aparecer junto a'),
       el('p', { class: 'tenue small' }, 'Palabras que comparten versículo con más frecuencia. Tócalas para ver esos pasajes.'),
       el('div', { class: 'chips' }, e.acompanantes.map(([w, n]) => el('a', { class: 'chip', href: `#/buscar?q=${encodeURIComponent(`${consulta} ${w}`)}&v=${ver}` }, `${w} `, el('span', { class: 'tenue' }, n))))) : null,
+    el('p', {}, el('a', { class: 'btn', href: `#/concordancia/${encodeURIComponent(palabra)}?v=${ver}${raiz ? '&modo=raiz' : ''}` }, '📇 Ver en la concordancia (con contexto, ordenable y para imprimir)')),
     el('section', {},
       el('h3', {}, `Todos los versículos (${e.versiculos})`),
       lista));

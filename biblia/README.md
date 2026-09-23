@@ -26,6 +26,7 @@ conexión. También se puede publicar tal cual en GitHub Pages: son archivos est
 | **Resaltar y subrayar** | Selecciona cualquier fragmento (de una palabra a varios versículos) y elige entre 6 colores, subrayado o negrita. La goma (⌫) borra solo la parte seleccionada. Ctrl+Z deshace. |
 | **Notas** | Sobre un versículo, un rango o un capítulo, o apuntes libres (bosquejos, sermones). Markdown sencillo, etiquetas (`#gracia`), y las citas que escribas ("ver Ro 5:8") se vuelven enlaces con vista previa al pasar el cursor. |
 | **Buscar** | En toda la Biblia o por testamento, sección o libro: palabras, `"frase exacta"`, `amor|caridad`, `justific*` y `-excluir`. Sin distinguir tildes. Gráfico de resultados por libro. |
+| **Concordancia** | Índice alfabético de las 27 000 palabras distintas de la RV1909 (o de la KJV) con su frecuencia, filtro por letra, las más frecuentes y los hápax. Cada palabra muestra todas sus apariciones en una línea con el contexto a ambos lados, ordenables por orden bíblico o por la palabra que sigue o precede; forma exacta, todas las formas o frase; filtro por testamento, sección o libro; distribución, formas, palabras que la acompañan y vecinas en el índice. Se descarga en texto o se imprime. |
 | **Palabras** | Estudio de una palabra: apariciones, libros y secciones donde se concentra, primera y última mención, y con qué palabras suele aparecer. |
 | **Cuaderno** | Todas tus notas (con buscador y filtro por etiqueta y libro), tus resaltados por color y tus marcadores. Exporta tus notas a Markdown. |
 | **Plan** | Planes de lectura (Biblia en un año, NT en 90 días, evangelios, Salmos, cartas de Pablo…), lectura de hoy, racha, y un mapa de los 1189 capítulos con lo que ya leíste. |
@@ -88,7 +89,7 @@ biblia/
     sermones.js     flujo homilético, duración, avisos, exportación
     devocionales.js devocionales para la familia
     morfologia.js   códigos morfológicos hebreos y griegos explicados en español
-    concordancia.js concordancia del original por número Strong
+    concordancia.js concordancia: índice alfabético, líneas con contexto y por número Strong
     texto.js        carga de datos y referencias cruzadas
     almacen.js      tus datos en localStorage, deshacer, respaldo
     vistas/         pantallas (lector, buscar, palabra, cuaderno, plan, ajustes)

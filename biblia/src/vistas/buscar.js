@@ -11,7 +11,7 @@ import { bibliaCompleta, versiones } from '../texto.js';
 import { buscar } from '../busqueda.js';
 import { filtrarNotas } from '../notas.js';
 
-const ALCANCES = [
+export const ALCANCES = [
   { id: 'todo', nombre: 'Toda la Biblia', f: () => true },
   { id: 'at', nombre: 'Antiguo Testamento', f: (b) => b <= 39 },
   { id: 'nt', nombre: 'Nuevo Testamento', f: (b) => b >= 40 },

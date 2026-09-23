@@ -31,6 +31,8 @@ homilética). Fuentes al final.
 9. 🔜 **LXX en paralelo** para el AT citado en el NT, con marcas donde el NT sigue a la LXX y no al TM.
 10. 🔜 **Pronunciación y transliteración** académica (SBL) de palabras hebreas y griegas.
 
+**Concordancia** 🆕: índice alfabético de todas las palabras con frecuencia y hápax, y cada aparición con su contexto (formato de concordancia impresa), ordenable, filtrable, imprimible y descargable. Complementa la concordancia del original por número Strong (idea 6).
+
 ## 2. Estructura y análisis del discurso
 
 11. 🔜 **Diagrama de bloques** editable: sangrar cláusulas subordinadas bajo la principal arrastrando líneas.
