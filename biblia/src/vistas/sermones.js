@@ -30,7 +30,8 @@ export async function vistaSermones(app, ruta) {
 function subpestanas(actual) {
   return el('nav', { class: 'subpestanas' },
     el('a', { href: '#/sermones', class: actual === 'archivo' ? 'activa' : '' }, 'Sermones', el('span', { class: 'cuenta' }, almacen.estado.sermones.length)),
-    el('a', { href: '#/sermones/ilustraciones', class: actual === 'ilustraciones' ? 'activa' : '' }, 'Ilustraciones', el('span', { class: 'cuenta' }, almacen.estado.ilustraciones.length)));
+    el('a', { href: '#/sermones/ilustraciones', class: actual === 'ilustraciones' ? 'activa' : '' }, 'Ilustraciones', el('span', { class: 'cuenta' }, almacen.estado.ilustraciones.length)),
+    el('a', { href: '#/diagrama' }, 'Diagramas de bloques', el('span', { class: 'cuenta' }, almacen.estado.diagramas.length)));
 }
 
 // ---------------------------------------------------------------- Archivo
@@ -143,7 +144,8 @@ function pintarEditor(app, s, pasoActual) {
     ],
     exegesis: () => [
       el('div', { class: 'acciones' },
-        el('button', { class: 'btn chico', onClick: traerNotas }, '⤓ Traer mis notas de este pasaje')),
+        el('button', { class: 'btn chico', onClick: traerNotas }, '⤓ Traer mis notas de este pasaje'),
+        pasajesDe(s)[0]?.ref.v != null ? el('a', { class: 'btn chico', href: `#/diagrama/nuevo?ref=${aClave(pasajesDe(s)[0].ref)}` }, '▤ Diagrama de bloques del pasaje') : null),
       campo('contexto', 'Contexto histórico y literario', { filas: 4, placeholder: 'Autor, destinatarios, ocasión; qué viene antes y después; género literario…' }),
       campo('estructura', 'Estructura y flujo del argumento', { filas: 5, placeholder: 'Divisiones del pasaje, conectores (porque, pues, por tanto), quiasmos, paralelismos…' }),
       campo('observaciones', 'Observaciones', { filas: 6, placeholder: '¿Quién? ¿Qué? ¿Cuándo? ¿Dónde? ¿Por qué? ¿Cómo? Repeticiones, contrastes, comparaciones…' }),

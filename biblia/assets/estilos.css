@@ -672,6 +672,39 @@ body.modo-pulpito .barra { display: none; }
   .kwic-libro { position: static; }
 }
 
+/* Diagrama de bloques */
+.diagrama { font-family: var(--lectura); font-size: 1.05rem; margin-top: 12px; }
+.linea-diagrama { display: grid; grid-template-columns: 2.2em minmax(0, 1fr) auto; align-items: center; gap: 6px; padding: 3px 4px; border-radius: 8px; outline: none; }
+.linea-diagrama.nuevo-verso { border-top: 1px dashed var(--linea); margin-top: 4px; padding-top: 6px; }
+.linea-diagrama:hover, .linea-diagrama.foco { background: color-mix(in oklab, var(--sel) 70%, transparent); }
+.num-diagrama { font: 700 .75rem var(--ui); color: var(--tenue); text-align: right; }
+.cuerpo-linea { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.guias { display: inline-flex; align-self: stretch; }
+.guia { width: 26px; border-left: 2px solid color-mix(in oklab, var(--acento-2) 45%, transparent); }
+.relacion-sel { font: .75rem var(--ui); padding: 2px 4px; border-radius: 6px; border: 1px solid var(--linea); background: var(--fondo-2); color: var(--tenue); max-width: 150px; }
+.texto-linea { flex: 1; min-width: 12em; }
+.palabra-linea.cortable { cursor: crosshair; border-left: 2px solid transparent; }
+.palabra-linea.cortable:hover { border-left-color: var(--peligro); background: color-mix(in oklab, var(--peligro) 12%, transparent); }
+.nota-linea { font: italic .82rem var(--ui); color: var(--acento-2); }
+.acciones-linea { display: flex; gap: 2px; opacity: 0; transition: opacity .15s; }
+.linea-diagrama:hover .acciones-linea, .linea-diagrama.foco .acciones-linea { opacity: 1; }
+.rel-naranja { border-color: var(--u-naranja) !important; color: var(--u-naranja) !important; }
+.rel-rojo { border-color: var(--u-rojo) !important; color: var(--u-rojo) !important; }
+.rel-verde { border-color: var(--u-verde) !important; color: var(--u-verde) !important; }
+.rel-azul { border-color: var(--u-azul) !important; color: var(--u-azul) !important; }
+.rel-cafe { border-color: var(--u-cafe) !important; color: var(--u-cafe) !important; }
+.rel-morado { border-color: var(--u-morado) !important; color: var(--u-morado) !important; }
+.rel-amarillo { border-color: var(--u-amarillo) !important; color: var(--u-amarillo) !important; }
+.rel-rosa { border-color: var(--u-rosa) !important; color: var(--u-rosa) !important; }
+.rel-gris { border-color: var(--u-gris) !important; color: var(--u-gris) !important; }
+.leyenda-relaciones { display: flex; flex-wrap: wrap; gap: 6px; }
+@media (max-width: 760px) {
+  .linea-diagrama { grid-template-columns: 1.6em minmax(0, 1fr); }
+  .acciones-linea { grid-column: 2; opacity: 1; }
+  .guia { width: 14px; }
+}
+@media print { .acciones-linea, .relacion-sel:not(.rel-naranja):not(.rel-rojo):not(.rel-verde):not(.rel-azul):not(.rel-cafe):not(.rel-morado):not(.rel-amarillo):not(.rel-rosa):not(.rel-gris) { display: none; } }
+
 /* Avisos */
 #toasts { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); z-index: 100; display: flex; flex-direction: column; gap: 6px; align-items: center; pointer-events: none; }
 .toast { background: var(--texto); color: var(--fondo); padding: 9px 16px; border-radius: 999px; font-size: .9rem; box-shadow: var(--sombra); transition: opacity .3s, transform .3s; }

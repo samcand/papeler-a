@@ -644,7 +644,8 @@ async function pintarPanel() {
       el('button', { class: 'btn chico primario', onClick: nuevaNota }, '✎ Nota'),
       el('button', { class: `btn chico ${almacen.tieneMarcador(desde) ? 'activo' : ''}`, onClick: alternarMarcador }, almacen.tieneMarcador(desde) ? '🔖 Quitar' : '🔖 Marcador'),
       el('button', { class: 'btn chico', onClick: () => { est.modo = 'versos'; copiar(); } }, '⧉ Copiar'),
-      el('button', { class: 'btn chico', title: 'Preparar un sermón sobre este pasaje', onClick: () => nuevoSermon({ pasaje: titulo }) }, '🎤 Sermón')),
+      el('button', { class: 'btn chico', title: 'Preparar un sermón sobre este pasaje', onClick: () => nuevoSermon({ pasaje: titulo }) }, '🎤 Sermón'),
+      el('a', { class: 'btn chico', title: 'Diagrama de bloques: estructura y argumento del pasaje', href: `#/diagrama/nuevo?ref=${aClave(refDesdeRango(desde, hasta))}` }, '▤ Diagrama')),
     fichaOriginal ? bloque('Palabra original', fichaOriginal, 'Léxico de Strong, morfología de OSHB / MorphGNT') : null,
     bloque('Referencias cruzadas', refs, 'OpenBible.info · ordenadas por votos'),
     bloque(`Mis notas${notas.length ? ` (${notas.length})` : ''}`, notas.length

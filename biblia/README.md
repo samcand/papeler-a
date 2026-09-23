@@ -33,6 +33,7 @@ conexión. También se puede publicar tal cual en GitHub Pages: son archivos est
 | **Marcado** | Además del resaltado: color de letra, subrayado doble u ondulado, tachado, recuadro, círculo, negrita, cursiva y 25 símbolos del estudio inductivo (△ Dios, ✝ Cristo, ☁ Espíritu, ▣ pacto…). Se combinan sobre el mismo texto. |
 | **Palabras clave** | Marca una palabra una vez ("pacto" en rojo con ▣) y aparece marcada en todo el libro o toda la Biblia. Se agrupan en juegos que se encienden y apagan. El botón **Conectores** marca solo los conectores lógicos (causa, conclusión, propósito, contraste, condición, comparación, tiempo) para seguir el argumento, y **Texto limpio** oculta todas las marcas. |
 | **Biblioteca** | Importa tus libros (EPUB, Word, HTML, Markdown, texto). La app indexa cada cita bíblica y la Guía del pasaje muestra "En tu biblioteca": qué dice cada libro del versículo que estudias. |
+| **Diagrama de bloques** | Análisis estructural de un pasaje: el texto partido en cláusulas, la principal a la izquierda y las dependientes sangradas, con la relación lógica (causa, inferencia, propósito, medio, contraste, concesión…) sugerida por los conectores. Partir, unir, sangrar con Tab, notas por línea; se lleva al sermón con un bosquejo sugerido. |
 | **Sermones** | Taller en 9 pasos (texto, exégesis, idea exegética, tres preguntas, propósito, idea homilética, bosquejo, introducción y conclusión, revisión) con avisos de revisión, duración estimada, banco de ilustraciones, cobertura del canon, exportación y **modo púlpito** con cronómetro. |
 | **Familia** | Devocionales para hijos (con versión para pequeños y adolescentes), esposa, esposo y pareja; diario de respuestas y peticiones, racha, lectura en voz alta e impresión. |
 | **Idiomas originales** | Columna hebrea (OSHB) o griega (SBLGNT) donde cada palabra se toca para ver lema, número Strong, morfología explicada en español con notas exegéticas (aoristo, wayyiqtol, piel…), definición y traducciones. Modo **interlineal** con transliteración, glosa y código bajo cada palabra. Concordancia completa por número Strong (`H2617`, `G26`), con formas, morfología y distribución por libro. |
@@ -90,6 +91,7 @@ biblia/
     devocionales.js devocionales para la familia
     morfologia.js   códigos morfológicos hebreos y griegos explicados en español
     concordancia.js concordancia: índice alfabético, líneas con contexto y por número Strong
+    diagrama.js     diagrama de bloques: cláusulas, sangría y relaciones lógicas
     texto.js        carga de datos y referencias cruzadas
     almacen.js      tus datos en localStorage, deshacer, respaldo
     vistas/         pantallas (lector, buscar, palabra, cuaderno, plan, ajustes)

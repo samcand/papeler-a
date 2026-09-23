@@ -11,6 +11,7 @@
  *   #/sermones          taller de sermones y modo púlpito
  *   #/original/H2617    palabra hebrea o griega: léxico y concordancia
  *   #/concordancia/amor concordancia: índice alfabético y cada aparición con su contexto
+ *   #/diagrama/<id>     diagrama de bloques (análisis estructural) de un pasaje
  *   #/ajustes           apariencia, versiones y respaldo
  */
 
@@ -29,6 +30,7 @@ import { vistaBiblioteca } from './vistas/biblioteca.js';
 import { vistaSermones } from './vistas/sermones.js';
 import { vistaOriginal } from './vistas/original.js';
 import { vistaConcordancia } from './vistas/concordancia.js';
+import { vistaDiagrama } from './vistas/diagrama.js';
 import { instalarVistazo } from './vistas/vistazo.js';
 
 const RUTAS = {
@@ -42,6 +44,7 @@ const RUTAS = {
   sermones: vistaSermones,
   original: vistaOriginal,
   concordancia: vistaConcordancia,
+  diagrama: vistaDiagrama,
   ajustes: vistaAjustes,
 };
 

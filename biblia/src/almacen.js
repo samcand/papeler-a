@@ -17,6 +17,9 @@ const INICIAL = {
   claves: [],      // palabras clave marcadas en automático, ver claves.js
   diario: [],      // diario devocional: { id, devocional, fecha, respuestas, oracion }
   sermones: [],    // taller de sermones, ver sermones.js
+  diagramas: [],   // diagramas de bloques, ver diagrama.js
+  referencias: [], // referencias cruzadas propias: { id, desde, hasta, a, aHasta, nota, creada }
+  memoria: [],     // versículos para memorizar: { id, desde, hasta, caja, proxima, repasos, creada }
   ilustraciones: [], // banco de ilustraciones: { id, titulo, texto, etiquetas, pasajes, usada: [] }
   leidos: [],      // capítulos leídos: "b.c"
   historial: [],   // últimos pasajes abiertos: claves "b.c.v"
@@ -122,6 +125,32 @@ class Almacen {
   }
   borrarSermon(id) { this.punto(); this.estado.sermones = this.estado.sermones.filter((x) => x.id !== id); this.guardar(); }
 
+  // ---------- Diagramas ----------
+  guardarDiagrama(d) {
+    const i = this.estado.diagramas.findIndex((x) => x.id === d.id);
+    const copia = { ...d, editado: Date.now() };
+    if (i >= 0) this.estado.diagramas[i] = copia; else this.estado.diagramas.push(copia);
+    this.guardar();
+  }
+  borrarDiagrama(id) { this.punto(); this.estado.diagramas = this.estado.diagramas.filter((x) => x.id !== id); this.guardar(); }
+
+  // ---------- Referencias propias ----------
+  agregarReferencia(r) { this.punto(); this.estado.referencias.push({ id: nuevoId('r'), creada: Date.now(), ...r }); this.guardar(); }
+  quitarReferencia(id) { this.punto(); this.estado.referencias = this.estado.referencias.filter((x) => x.id !== id); this.guardar(); }
+
+  // ---------- Memorización ----------
+  agregarMemoria(desde, hasta) {
+    if (this.estado.memoria.some((m) => m.desde === desde && m.hasta === hasta)) return false;
+    this.estado.memoria.push({ id: nuevoId('mv'), desde, hasta, caja: 0, proxima: Date.now(), repasos: 0, creada: Date.now() });
+    this.guardar();
+    return true;
+  }
+  guardarMemoria(m) {
+    const i = this.estado.memoria.findIndex((x) => x.id === m.id);
+    if (i >= 0) { this.estado.memoria[i] = m; this.guardar(); }
+  }
+  quitarMemoria(id) { this.estado.memoria = this.estado.memoria.filter((x) => x.id !== id); this.guardar(); }
+
   // ---------- Ilustraciones ----------
   guardarIlustracion(il) {
     const i = this.estado.ilustraciones.findIndex((x) => x.id === il.id);
@@ -221,6 +250,9 @@ class Almacen {
       this.estado.claves = unir(this.estado.claves, datos.claves);
       this.estado.diario = unir(this.estado.diario, datos.diario);
       this.estado.sermones = unir(this.estado.sermones, datos.sermones);
+      this.estado.diagramas = unir(this.estado.diagramas, datos.diagramas);
+      this.estado.referencias = unir(this.estado.referencias, datos.referencias);
+      this.estado.memoria = unir(this.estado.memoria, datos.memoria);
       this.estado.ilustraciones = unir(this.estado.ilustraciones, datos.ilustraciones);
       this.estado.leidos = [...new Set([...this.estado.leidos, ...(datos.leidos || [])])];
     }

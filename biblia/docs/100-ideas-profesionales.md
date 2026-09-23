@@ -35,8 +35,8 @@ homilética). Fuentes al final.
 
 ## 2. Estructura y análisis del discurso
 
-11. 🔜 **Diagrama de bloques** editable: sangrar cláusulas subordinadas bajo la principal arrastrando líneas.
-12. 🔜 **Arcos y corchetes** (phrase arcing) con relaciones lógicas etiquetadas: causa, propósito, concesión, contraste, inferencia.
+11. 🆕 **Diagrama de bloques** editable: sangrar cláusulas subordinadas bajo la principal arrastrando líneas.
+12. 🆕 **Relaciones lógicas etiquetadas** en el diagrama (causa, propósito, concesión, contraste, inferencia…). 🔜 dibujarlas como arcos.
 13. 🆕 **Detección de conectores** ("porque", "pues", "por tanto", "mas") resaltados automáticamente para seguir el argumento.
 14. 🔜 **Quiasmos y paralelismos**: plantilla A-B-C-B'-A' que se dibuja sobre el texto.
 15. 🔜 **Mapa de párrafos** (perícopas) con títulos propios y vista del libro completo en una pantalla.

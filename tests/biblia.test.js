@@ -17,6 +17,7 @@ import { explicarHebreo, explicarGriego, notaExegetica } from '../biblia/src/mor
 import { strongDeLema, leerOshb, leerMorphgnt, glosaKjv } from '../tools/biblia-originales.mjs';
 import { estudioOriginal, formaBase, morfologiaPrincipal, indicePalabras, claveOrden, concordancia, ordenarLineas, colocaciones, concordanciaATexto } from '../biblia/src/concordancia.js';
 import { reglasDeConectores } from '../biblia/src/conectores.js';
+import { partirEnClausulas, sugerirRelacion, sangrar, unirConSiguiente, partirLinea, moverLinea, diagramaATexto, puntosPrincipales } from '../biblia/src/diagrama.js';
 import { DEVOCIONALES, DESTINATARIOS, devocionalesPara, delDia, rachaDevocional } from '../biblia/src/devocionales.js';
 
 let passed = 0;
@@ -473,6 +474,37 @@ t('concordancia: cada aparición con su contexto, ordenable', () => {
   assert.deepEqual(col.antes[0], ['al', 3]);
   const txt = concordanciaATexto(r.lineas, { titulo: 'MUNDO' });
   assert.ok(txt.startsWith('MUNDO\n=====') && txt.includes('MUNDO.'));
+});
+
+t('diagrama de bloques: cláusulas, sangría y relaciones', () => {
+  assert.equal(sugerirRelacion('porque de tal manera'), 'causa');
+  assert.equal(sugerirRelacion('Para que todo aquel'), 'proposito');
+  assert.equal(sugerirRelacion('así que, hermanos'), 'inferencia');
+  assert.equal(sugerirRelacion('Y dijo'), '');
+  const l = partirEnClausulas([
+    { v: 1, texto: 'Justificados pues por la fe, tenemos paz para con Dios por medio de nuestro Señor Jesucristo:' },
+    { v: 2, texto: 'Por el cual también tenemos entrada por la fe á esta gracia, mas nos gloriamos en la esperanza.' },
+  ]);
+  assert.deepEqual(l.map((x) => x.texto), [
+    'Justificados pues por la fe, tenemos paz para con Dios por medio de nuestro Señor Jesucristo:',
+    'Por el cual también tenemos entrada por la fe á esta gracia,',
+    'mas nos gloriamos en la esperanza.',
+  ]);
+  assert.equal(l[2].relacion, 'contraste');
+  assert.equal(l[2].sangria, 1);
+  const s1 = sangrar(l, 0, 1);
+  assert.equal(s1[0].sangria, 1);
+  assert.equal(l[0].sangria, 0, 'no muta');
+  assert.equal(sangrar(l, 0, -1)[0].sangria, 0, 'no baja de cero');
+  const partida = partirLinea(l, 0, 5);
+  assert.equal(partida.length, 4);
+  assert.equal(partida[1].texto, 'tenemos paz para con Dios por medio de nuestro Señor Jesucristo:');
+  assert.equal(unirConSiguiente(partida, 0)[0].texto, l[0].texto);
+  assert.equal(moverLinea(l, 2, -1)[1].texto, 'mas nos gloriamos en la esperanza.');
+  const txt = diagramaATexto(l);
+  assert.ok(txt.includes('  1 Justificados') && txt.includes('      [contraste] mas nos'));
+  assert.equal(l[1].relacion, 'medio', '"por el cual" sugiere medio');
+  assert.deepEqual(puntosPrincipales(l).map((p) => p.v), [1]);
 });
 
 // ---------- Planes ----------
