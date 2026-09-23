@@ -18,6 +18,7 @@ import { strongDeLema, leerOshb, leerMorphgnt, glosaKjv } from '../tools/biblia-
 import { estudioOriginal, formaBase, morfologiaPrincipal, indicePalabras, claveOrden, concordancia, ordenarLineas, colocaciones, concordanciaATexto } from '../biblia/src/concordancia.js';
 import { reglasDeConectores } from '../biblia/src/conectores.js';
 import { partirEnClausulas, sugerirRelacion, sangrar, unirConSiguiente, partirLinea, moverLinea, diagramaATexto, puntosPrincipales } from '../biblia/src/diagrama.js';
+import { INTRODUCCIONES } from '../biblia/src/introducciones.js';
 import { DEVOCIONALES, DESTINATARIOS, devocionalesPara, delDia, rachaDevocional } from '../biblia/src/devocionales.js';
 
 let passed = 0;
@@ -505,6 +506,21 @@ t('diagrama de bloques: cláusulas, sangría y relaciones', () => {
   assert.ok(txt.includes('  1 Justificados') && txt.includes('      [contraste] mas nos'));
   assert.equal(l[1].relacion, 'medio', '"por el cual" sugiere medio');
   assert.deepEqual(puntosPrincipales(l).map((p) => p.v), [1]);
+});
+
+t('las 66 introducciones están completas y sus citas son válidas', () => {
+  for (let b = 1; b <= 66; b++) {
+    const i = INTRODUCCIONES[b];
+    assert.ok(i, `falta el libro ${b}`);
+    for (const campo of ['autor', 'fecha', 'destinatarios', 'genero', 'proposito', 'tema', 'clave', 'cristo']) assert.ok(i[campo], `${b}: ${campo}`);
+    const clave = parsear(i.clave);
+    assert.ok(clave && clave.b === b, `${b}: versículo clave ${i.clave}`);
+    assert.ok(i.estructura.length >= 2, `${b}: estructura`);
+    for (const [titulo, cita] of i.estructura) {
+      const r = parsear(cita);
+      assert.ok(r && r.b === b, `${b}: ${titulo} → ${cita}`);
+    }
+  }
 });
 
 // ---------- Planes ----------

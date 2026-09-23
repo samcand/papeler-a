@@ -12,6 +12,7 @@
  *   #/original/H2617    palabra hebrea o griega: léxico y concordancia
  *   #/concordancia/amor concordancia: índice alfabético y cada aparición con su contexto
  *   #/diagrama/<id>     diagrama de bloques (análisis estructural) de un pasaje
+ *   #/libro/45          introducción a un libro de la Biblia
  *   #/ajustes           apariencia, versiones y respaldo
  */
 
@@ -31,6 +32,7 @@ import { vistaSermones } from './vistas/sermones.js';
 import { vistaOriginal } from './vistas/original.js';
 import { vistaConcordancia } from './vistas/concordancia.js';
 import { vistaDiagrama } from './vistas/diagrama.js';
+import { vistaLibro } from './vistas/libro.js';
 import { instalarVistazo } from './vistas/vistazo.js';
 
 const RUTAS = {
@@ -45,6 +47,7 @@ const RUTAS = {
   original: vistaOriginal,
   concordancia: vistaConcordancia,
   diagrama: vistaDiagrama,
+  libro: vistaLibro,
   ajustes: vistaAjustes,
 };
 

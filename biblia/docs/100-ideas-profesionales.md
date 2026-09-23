@@ -48,7 +48,7 @@ homilética). Fuentes al final.
 
 ## 3. Contexto histórico, canónico y teológico
 
-21. 🔜 **Introducción a cada libro**: autor, fecha, destinatarios, ocasión, propósito, estructura y debates críticos principales.
+21. 🆕 **Introducción a cada libro**: autor, fecha, destinatarios, ocasión, propósito, estructura y debates críticos principales.
 22. 🔜 **Línea de tiempo bíblica** navegable, anclada a los pasajes.
 23. 🔜 **Atlas** con lugares del pasaje, rutas (Éxodo, viajes de Pablo) y topografía.
 24. 🔜 **Personajes**: ficha con todas sus apariciones, genealogía y relaciones.

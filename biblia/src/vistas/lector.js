@@ -28,6 +28,7 @@ import { citasEn, fragmento } from '../biblioteca.js';
 import { enLinea } from '../notas.js';
 import * as estante from '../estante.js';
 import { nuevoSermon } from './sermones.js';
+import { tarjetaIntroduccion } from './libro.js';
 import { notasEn, notaAHtml } from '../notas.js';
 import { editarNota } from './editor-nota.js';
 import { elegirPasaje, listaLibros, cuadriculaCapitulos } from './selector.js';
@@ -258,7 +259,8 @@ async function pintarCapitulo() {
   }
 
   render(est.texto,
-    el('h1', { class: 'cap-titulo' }, libro(b).capitulos === 1 ? libro(b).nombre : `${libro(b).nombre} ${c}`),
+    el('h1', { class: 'cap-titulo' }, libro(b).capitulos === 1 ? libro(b).nombre : `${libro(b).nombre} ${c}`,
+      c === 1 ? el('a', { class: 'intro-enlace', href: `#/libro/${b}`, title: `Introducción a ${libro(b).nombre}` }, 'ⓘ') : null),
     cuerpo,
     cols.some(esOriginal)
       ? el('p', { class: 'tenue small nota-versificacion' }, 'Toca una palabra hebrea o griega para ver su lema, número Strong, morfología y definición. El texto original puede numerar algunos versículos distinto (p. ej. Joel y Malaquías en hebreo).')
@@ -808,6 +810,7 @@ function pintarPanelCapitulo() {
     el('p', { class: 'tenue small' }, 'Toca un versículo para ver sus referencias cruzadas y otras versiones. Selecciona palabras para resaltarlas, subrayarlas o anotarlas.'),
     el('div', { class: 'panel-acciones' },
       el('button', { class: 'btn chico primario', onClick: () => editarNota({ desde, hasta }).then(repintar) }, '✎ Nota del capítulo')),
+    tarjetaIntroduccion(b, { compacta: true }),
     bloque(`Notas del capítulo${notas.length ? ` (${notas.length})` : ''}`, notas.length ? notas.map(tarjetaNota) : el('p', { class: 'tenue small' }, 'Sin notas todavía.')),
     bloque(`Resaltados${marcas.length ? ` (${marcas.length})` : ''}`, marcas.length
       ? el('ul', { class: 'lista-marcas' }, marcas.map((m) => el('li', {},

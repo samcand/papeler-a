@@ -4,18 +4,18 @@
  * vez que se abre cada libro (o todo de una vez al hacer una búsqueda).
  */
 
-const VERSION = 'estudio-biblico-v8';
+const VERSION = 'estudio-biblico-v9';
 const DATOS = 'estudio-biblico-datos-v1';
 const ARCHIVOS = [
   './', './index.html', './manifest.webmanifest', './assets/estilos.css', './assets/icono.svg',
   './datos/indice.json',
   './src/app.js', './src/ui.js', './src/almacen.js', './src/libros.js', './src/referencias.js',
   './src/texto.js', './src/marcas.js', './src/notas.js', './src/busqueda.js', './src/plan.js',
-  './src/claves.js', './src/devocionales.js', './src/biblioteca.js', './src/estante.js', './src/zip.js', './src/sermones.js', './src/morfologia.js', './src/concordancia.js', './src/conectores.js', './src/diagrama.js',
+  './src/claves.js', './src/devocionales.js', './src/biblioteca.js', './src/estante.js', './src/zip.js', './src/sermones.js', './src/morfologia.js', './src/concordancia.js', './src/conectores.js', './src/diagrama.js', './src/introducciones.js',
   './biblioteca/indice.json',
   './src/vistas/lector.js', './src/vistas/buscar.js', './src/vistas/palabra.js', './src/vistas/cuaderno.js',
   './src/vistas/plan.js', './src/vistas/ajustes.js', './src/vistas/editor-nota.js',
-  './src/vistas/selector.js', './src/vistas/vistazo.js', './src/vistas/editor-clave.js', './src/vistas/familia.js', './src/vistas/biblioteca.js', './src/vistas/sermones.js', './src/vistas/original.js', './src/vistas/concordancia.js', './src/vistas/diagrama.js',
+  './src/vistas/selector.js', './src/vistas/vistazo.js', './src/vistas/editor-clave.js', './src/vistas/familia.js', './src/vistas/biblioteca.js', './src/vistas/sermones.js', './src/vistas/original.js', './src/vistas/concordancia.js', './src/vistas/diagrama.js', './src/vistas/libro.js',
 ];
 
 self.addEventListener('install', (e) => {

@@ -22,6 +22,7 @@ conexión. También se puede publicar tal cual en GitHub Pages: son archivos est
 | Pantalla | Para qué sirve |
 | --- | --- |
 | **Leer** | El texto en Reina-Valera 1909, con KJV, hebreo (AT) o griego (NT) en columnas paralelas. Navegador de libros y capítulos, capítulo anterior/siguiente con ← →, modo párrafo o un versículo por línea. |
+| **Introducción a cada libro** | Los 66 libros con autor, fecha, destinatarios, género, propósito, tema, versículo clave, estructura enlazada, cómo apunta a Cristo y los debates críticos principales. En la guía de cada capítulo y en `#/libro/45`. |
 | **Guía del pasaje** | Al tocar un versículo: sus referencias cruzadas con el texto a la vista (ordenadas por votos), tus notas, el mismo versículo en las otras versiones y sus palabras para estudiarlas. |
 | **Resaltar y subrayar** | Selecciona cualquier fragmento (de una palabra a varios versículos) y elige entre 6 colores, subrayado o negrita. La goma (⌫) borra solo la parte seleccionada. Ctrl+Z deshace. |
 | **Notas** | Sobre un versículo, un rango o un capítulo, o apuntes libres (bosquejos, sermones). Markdown sencillo, etiquetas (`#gracia`), y las citas que escribas ("ver Ro 5:8") se vuelven enlaces con vista previa al pasar el cursor. |
@@ -92,6 +93,7 @@ biblia/
     morfologia.js   códigos morfológicos hebreos y griegos explicados en español
     concordancia.js concordancia: índice alfabético, líneas con contexto y por número Strong
     diagrama.js     diagrama de bloques: cláusulas, sangría y relaciones lógicas
+    introducciones.js introducción a los 66 libros
     texto.js        carga de datos y referencias cruzadas
     almacen.js      tus datos en localStorage, deshacer, respaldo
     vistas/         pantallas (lector, buscar, palabra, cuaderno, plan, ajustes)
