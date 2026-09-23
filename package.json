@@ -10,6 +10,8 @@
     "docs": "node tools/gen-docs.mjs",
     "serve:python": "python3 -m http.server 8080",
     "biblia:datos": "node tools/biblia-datos.mjs",
-    "biblia:originales": "node tools/biblia-originales.mjs"
+    "biblia:originales": "node tools/biblia-originales.mjs",
+    "biblia:comentarios": "node tools/biblia-comentarios.mjs",
+    "biblia:strong": "node --max-old-space-size=8000 tools/biblia-strong.mjs"
   }
 }
