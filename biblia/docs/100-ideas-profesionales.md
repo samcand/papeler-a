@@ -65,7 +65,7 @@ homilética). Fuentes al final.
 32. 🆕 **Biblioteca propia**: importar libros (.txt, .md, .html, .epub) y que la app detecte todas las citas bíblicas que contienen.
 33. 🆕 **"En tu biblioteca"** en la Guía del pasaje: qué dicen tus libros sobre el versículo que estás leyendo, con el párrafo a la vista.
 34. 🔜 **Tesoro del Conocimiento Bíblico** (TSK) como segunda fuente de referencias [dominio público].
-35. 🔜 **Referencias propias**: crear enlaces entre pasajes con una nota de por qué están relacionados.
+35. 🆕 **Referencias propias**: crear enlaces entre pasajes con una nota de por qué están relacionados.
 36. 🔜 **Cadenas temáticas** (tipo Thompson): seguir un tema de referencia en referencia.
 37. 🔜 **Red visual de referencias**: grafo de un versículo con sus conexiones de primer y segundo grado.
 38. 🔜 **Búsqueda en la biblioteca** con operadores, limitada a un autor o una obra.
@@ -96,7 +96,7 @@ homilética). Fuentes al final.
 57. 🔜 **Aplicaciones por audiencia**: jóvenes, matrimonios, líderes, no creyentes.
 58. 🆕 **Cristocentricidad**: recordatorio de rutas hacia Cristo (tipología, promesa-cumplimiento, tema, contraste).
 59. 🆕 **Estimación de duración** del manuscrito según tu velocidad de lectura.
-60. 🔜 **Hoja para la congregación** y **preguntas para grupos pequeños** generadas desde el bosquejo.
+60. 🆕 **Hoja para la congregación** y **preguntas para grupos pequeños** generadas desde el bosquejo.
 
 ## 7. Púlpito y entrega
 
@@ -132,7 +132,7 @@ homilética). Fuentes al final.
 84. 🆕 **Diario devocional**: respuestas a las preguntas y peticiones de oración guardadas por fecha.
 85. 🆕 **Registro de constancia** del culto familiar (días cumplidos, racha).
 86. 🔜 **Catecismo familiar** (preguntas y respuestas cortas) con repaso espaciado.
-87. 🔜 **Memorización** con tarjetas y repetición espaciada para toda la familia.
+87. 🆕 **Memorización** con tarjetas y repetición espaciada para toda la familia.
 88. 🔜 **Lista de oración familiar** con respuestas registradas.
 89. 🔜 **Modo niños**: letra grande, ilustraciones y lectura en voz alta.
 90. 🔜 **Culto familiar semanal** generado a partir del sermón del domingo (continuidad púlpito–hogar).

@@ -12,7 +12,7 @@
 import { el, render, toast, $$ } from '../ui.js';
 import { almacen } from '../almacen.js';
 import { libro, idVerso, partesId, capituloVecino } from '../libros.js';
-import { deClave, formatearRango, aClave, refDesdeRango, normalizar } from '../referencias.js';
+import { deClave, formatearRango, aClave, refDesdeRango, normalizar, parsearLista, rango } from '../referencias.js';
 import {
   capitulo, precargar, referenciasDe, textoRango, version, versiones, tieneLibro, versiculosEn, textoSiCargado,
   lexico, esOriginal,
@@ -647,8 +647,10 @@ async function pintarPanel() {
       el('button', { class: `btn chico ${almacen.tieneMarcador(desde) ? 'activo' : ''}`, onClick: alternarMarcador }, almacen.tieneMarcador(desde) ? '🔖 Quitar' : '🔖 Marcador'),
       el('button', { class: 'btn chico', onClick: () => { est.modo = 'versos'; copiar(); } }, '⧉ Copiar'),
       el('button', { class: 'btn chico', title: 'Preparar un sermón sobre este pasaje', onClick: () => nuevoSermon({ pasaje: titulo }) }, '🎤 Sermón'),
-      el('a', { class: 'btn chico', title: 'Diagrama de bloques: estructura y argumento del pasaje', href: `#/diagrama/nuevo?ref=${aClave(refDesdeRango(desde, hasta))}` }, '▤ Diagrama')),
+      el('a', { class: 'btn chico', title: 'Diagrama de bloques: estructura y argumento del pasaje', href: `#/diagrama/nuevo?ref=${aClave(refDesdeRango(desde, hasta))}` }, '▤ Diagrama'),
+      el('button', { class: 'btn chico', title: 'Agregar a tus versículos para memorizar', onClick: () => toast(almacen.agregarMemoria(desde, hasta) ? `${titulo} agregado para memorizar` : 'Ya lo estás memorizando') }, '🧠 Memorizar')),
     fichaOriginal ? bloque('Palabra original', fichaOriginal, 'Léxico de Strong, morfología de OSHB / MorphGNT') : null,
+    bloque(`Mis referencias${misReferencias(desde, hasta).length ? ` (${misReferencias(desde, hasta).length})` : ''}`, pintarMisReferencias(desde, hasta), 'Conexiones que tú has hecho entre pasajes, con la razón'),
     bloque('Referencias cruzadas', refs, 'OpenBible.info · ordenadas por votos'),
     bloque(`Mis notas${notas.length ? ` (${notas.length})` : ''}`, notas.length
       ? notas.map(tarjetaNota)
@@ -687,6 +689,39 @@ async function pintarPanel() {
   render(palabras, unicas.map((p) => el('span', { class: 'chip chip-doble' },
     el('a', { href: `#/concordancia/${encodeURIComponent(p)}?v=${ver}`, title: 'Concordancia' }, p),
     el('a', { href: `#/palabra/${encodeURIComponent(p)}?v=${ver}`, title: 'Estudio de la palabra', class: 'tenue' }, '🔤'))));
+}
+
+/** Referencias propias que tocan el pasaje (como origen o como destino). */
+function misReferencias(desde, hasta) {
+  return almacen.estado.referencias.filter((r) => (r.desde <= hasta && r.hasta >= desde) || (r.a <= hasta && r.aHasta >= desde));
+}
+
+function pintarMisReferencias(desde, hasta) {
+  const lista = misReferencias(desde, hasta);
+  const agregar = () => {
+    const cita = prompt(`Enlazar ${formatearRango(desde, hasta)} con… (p. ej. Is 53:5)`);
+    if (!cita) return;
+    const r = parsearLista(cita)[0];
+    if (!r) { toast('No reconozco esa cita', 'error'); return; }
+    const destino = rango(r);
+    const nota = prompt('¿Por qué están relacionados? (cumplimiento, cita, tema, contraste, tipología…)', '') ?? '';
+    almacen.agregarReferencia({ desde, hasta, a: destino.desde, aHasta: destino.hasta, nota: nota.trim() });
+    toast('Referencia guardada');
+    pintarPanel();
+  };
+  return el('div', {},
+    lista.length ? el('ul', { class: 'lista-marcas' }, lista.map((r) => {
+      const esOrigen = r.desde <= hasta && r.hasta >= desde;
+      const [a, z] = esOrigen ? [r.a, r.aHasta] : [r.desde, r.hasta];
+      const clave = aClave(refDesdeRango(a, z));
+      return el('li', {},
+        el('span', {}, esOrigen ? '→' : '←'),
+        el('div', { class: 'grow' },
+          el('a', { class: 'ref', href: `#/leer/${clave}`, dataset: { ref: clave } }, formatearRango(a, z, { abreviado: true })),
+          r.nota ? el('div', { class: 'tenue small' }, r.nota) : null),
+        el('button', { class: 'btn icono chico', title: 'Quitar', onClick: () => { almacen.quitarReferencia(r.id); pintarPanel(); } }, '✕'));
+    })) : null,
+    el('button', { class: 'btn chico', onClick: agregar }, '+ Enlazar con otro pasaje'));
 }
 
 /** Ficha léxica de una palabra hebrea o griega tocada en el texto. */

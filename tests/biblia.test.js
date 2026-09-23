@@ -12,13 +12,14 @@ import { repartir, generarPlan, PLANES, describirDia, racha, avanceBiblia, diaDe
 import { limpiarTexto, leerOsis } from '../tools/biblia-datos.mjs';
 import { partirTexto, parrafosDeHtml, parrafosDeDocx, rutasEpub, indexar, citasEn, fragmento, tituloDeArchivo, buscarEnLibros } from '../biblia/src/biblioteca.js';
 import { normalizar } from '../biblia/src/referencias.js';
-import { crearSermon, nuevoPunto, moverPunto, ideaExegetica, progreso, duracionEstimada, palabrasPredicadas, avisos, pasajesDe, sermonAMarkdown, romano, cobertura } from '../biblia/src/sermones.js';
+import { conEspacio, preguntasDeGrupo, hojaCongregacion, crearSermon, nuevoPunto, moverPunto, ideaExegetica, progreso, duracionEstimada, palabrasPredicadas, avisos, pasajesDe, sermonAMarkdown, romano, cobertura } from '../biblia/src/sermones.js';
 import { explicarHebreo, explicarGriego, notaExegetica } from '../biblia/src/morfologia.js';
 import { strongDeLema, leerOshb, leerMorphgnt, glosaKjv } from '../tools/biblia-originales.mjs';
 import { estudioOriginal, formaBase, morfologiaPrincipal, indicePalabras, claveOrden, concordancia, ordenarLineas, colocaciones, concordanciaATexto } from '../biblia/src/concordancia.js';
 import { reglasDeConectores } from '../biblia/src/conectores.js';
 import { partirEnClausulas, sugerirRelacion, sangrar, unirConSiguiente, partirLinea, moverLinea, diagramaATexto, puntosPrincipales } from '../biblia/src/diagrama.js';
 import { INTRODUCCIONES } from '../biblia/src/introducciones.js';
+import { repasar, pendientes, pista, comparar as compararMemoria, INTERVALOS } from '../biblia/src/memoria.js';
 import { DEVOCIONALES, DESTINATARIOS, devocionalesPara, delDia, rachaDevocional } from '../biblia/src/devocionales.js';
 
 let passed = 0;
@@ -521,6 +522,42 @@ t('las 66 introducciones están completas y sus citas son válidas', () => {
       assert.ok(r && r.b === b, `${b}: ${titulo} → ${cita}`);
     }
   }
+});
+
+t('memorización con repetición espaciada', () => {
+  const ahora = new Date(2026, 0, 10, 20, 0).getTime();
+  let t0 = { id: 'x', caja: 0, proxima: ahora };
+  const t1 = repasar(t0, 'bien', ahora);
+  assert.equal(t1.caja, 1);
+  assert.equal(new Date(t1.proxima).getDate(), 11, 'mañana');
+  const t2 = repasar({ ...t1, caja: 4 }, 'bien', ahora);
+  assert.equal(t2.caja, 5);
+  assert.equal(Math.round((t2.proxima - new Date(2026, 0, 10, 4).getTime()) / 86400000), INTERVALOS[5]);
+  assert.equal(repasar(t2, 'mal', ahora).caja, 0);
+  assert.equal(repasar(t2, 'casi', ahora).caja, 5);
+  assert.equal(pendientes([t1, t0], ahora).length, 1);
+  assert.equal(pista('Jehová es mi pastor', 'iniciales'), 'J_ e_ m_ p_');
+  assert.equal(pista('uno dos tres cuatro cinco seis', 'huecos', { caja: 0 }), 'uno dos tres ______ cinco seis');
+  assert.equal(compararMemoria('Jehova es mi pastor nada me faltara', 'JEHOVÁ es mi pastor; nada me faltará.', normalizar), 100);
+  assert.ok(compararMemoria('Jehova es pastor', 'JEHOVÁ es mi pastor; nada me faltará.', normalizar) < 60);
+});
+
+t('hoja para la congregación y preguntas de grupo', () => {
+  assert.equal(conEspacio('La paz con Dios'), 'La paz con ________');
+  assert.equal(conEspacio('Cristo murió por mí.'), 'Cristo ________ por mí.', 'salta las palabras cortas del final');
+  assert.equal(conEspacio('Esperanza en la prueba'), 'Esperanza en la ________');
+  const s = crearSermon({ pasaje: 'Ro 5:1-11', titulo: 'Paz <con> Dios' });
+  s.sujeto = '¿Qué resultados trae la justificación';
+  s.homiletica = 'Justificado por fe, tienes paz.';
+  s.bosquejo = [nuevoPunto({ titulo: 'Paz con Dios', pasaje: 'Ro 5:1', aplicacion: 'Descansa en su paz.' })];
+  const g = preguntasDeGrupo(s);
+  assert.deepEqual(g.map((x) => x.titulo), ['Observación', 'Interpretación', 'Aplicación']);
+  assert.ok(g[0].preguntas.some((q) => q.startsWith('¿Qué resultados trae la justificación?')));
+  assert.ok(g[1].preguntas.some((q) => q.includes('«Paz con Dios»')));
+  assert.ok(g[2].preguntas[0].startsWith('Descansa en su paz.'));
+  const html = hojaCongregacion(s, { textoPasaje: '1 Justificados pues por la fe' });
+  assert.ok(html.includes('Paz &lt;con&gt; Dios'), 'escapa el HTML');
+  assert.ok(html.includes('Para el grupo pequeño') && html.includes('________'));
 });
 
 // ---------- Planes ----------

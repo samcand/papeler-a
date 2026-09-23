@@ -13,6 +13,7 @@
  *   #/concordancia/amor concordancia: índice alfabético y cada aparición con su contexto
  *   #/diagrama/<id>     diagrama de bloques (análisis estructural) de un pasaje
  *   #/libro/45          introducción a un libro de la Biblia
+ *   #/memoria           memorizar versículos con repetición espaciada
  *   #/ajustes           apariencia, versiones y respaldo
  */
 
@@ -33,6 +34,7 @@ import { vistaOriginal } from './vistas/original.js';
 import { vistaConcordancia } from './vistas/concordancia.js';
 import { vistaDiagrama } from './vistas/diagrama.js';
 import { vistaLibro } from './vistas/libro.js';
+import { vistaMemoria } from './vistas/memoria.js';
 import { instalarVistazo } from './vistas/vistazo.js';
 
 const RUTAS = {
@@ -48,6 +50,7 @@ const RUTAS = {
   concordancia: vistaConcordancia,
   diagrama: vistaDiagrama,
   libro: vistaLibro,
+  memoria: vistaMemoria,
   ajustes: vistaAjustes,
 };
 

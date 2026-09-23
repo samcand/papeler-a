@@ -15,7 +15,7 @@ import { textoRango } from '../texto.js';
 import { notasEn, leerEtiquetas } from '../notas.js';
 import {
   PASOS, ESTADOS, RUTAS_A_CRISTO, crearSermon, nuevoPunto, moverPunto, ideaExegetica, progreso,
-  duracionEstimada, palabrasPredicadas, avisos, pasajesDe, sermonAMarkdown, romano, cobertura, citaPrincipal,
+  duracionEstimada, palabrasPredicadas, avisos, pasajesDe, sermonAMarkdown, romano, cobertura, citaPrincipal, hojaCongregacion,
 } from '../sermones.js';
 
 export async function vistaSermones(app, ruta) {
@@ -257,6 +257,17 @@ function pintarEditor(app, s, pasoActual) {
         PASOS[i + 1] ? el('a', { class: 'btn primario', href: `#/sermones/${s.id}?paso=${PASOS[i + 1].id}` }, `${PASOS[i + 1].nombre} ›`) : el('a', { class: 'btn primario', href: `#/sermones/${s.id}/pulpito` }, '🎤 Modo púlpito')));
   }
 
+  const hoja = async () => {
+    const pasaje = pasajesDe(s)[0];
+    const versos = pasaje ? await textoRango(almacen.ajustes.principal, pasaje.desde, pasaje.hasta) : [];
+    const html = hojaCongregacion(s, { textoPasaje: versos.map((x) => `${x.v} ${x.texto}`).join(' ') });
+    const ventana = window.open('', '_blank');
+    if (!ventana) { descargar(`hoja-${(s.titulo || 'sermon').replace(/[^\p{L}\p{N}]+/gu, '-').toLowerCase()}.html`, html, 'text/html'); return; }
+    ventana.document.write(html);
+    ventana.document.close();
+    setTimeout(() => ventana.print(), 400);
+  };
+
   const exportar = async () => {
     const pasaje = pasajesDe(s)[0];
     const versos = pasaje ? await textoRango(almacen.ajustes.principal, pasaje.desde, pasaje.hasta) : [];
@@ -273,6 +284,7 @@ function pintarEditor(app, s, pasoActual) {
       el('div', { class: 'acciones' },
         el('a', { class: 'btn primario', href: `#/sermones/${s.id}/pulpito` }, '🎤 Púlpito'),
         el('button', { class: 'btn', onClick: exportar, title: 'Manuscrito y notas en Markdown (se abre en Word o Google Docs)' }, '⬇ Exportar'),
+        el('button', { class: 'btn', onClick: hoja, title: 'Hoja para la congregación con espacios para llenar y preguntas para grupos pequeños' }, '📄 Hoja y grupo'),
         el('button', { class: 'btn peligro', onClick: () => { if (confirm('¿Borrar este sermón?')) { almacen.borrarSermon(s.id); location.hash = '#/sermones'; } } }, 'Borrar'))),
     el('nav', { class: 'pasos-sermon' }, PASOS.map((p, i) => el('a', {
       href: `#/sermones/${s.id}?paso=${p.id}`, class: `${p.id === pasoActual ? 'activa' : ''} ${progreso(s).hechos[p.id] ? 'hecho' : ''}`,

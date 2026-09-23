@@ -14,7 +14,9 @@ export function vistaPlan(app) {
   const estado = almacen.estado.plan;
   const plan = estado && PLANES.find((p) => p.id === estado.id);
   render(app, el('div', { class: 'pagina' },
-    el('h1', {}, 'Plan de lectura'),
+    el('div', { class: 'titulo-pagina' },
+      el('h1', {}, 'Plan de lectura'),
+      el('a', { class: 'btn', href: '#/memoria' }, `🧠 Memorizar${almacen.estado.memoria.filter((m) => m.proxima <= Date.now()).length ? ` (${almacen.estado.memoria.filter((m) => m.proxima <= Date.now()).length} para hoy)` : ''}`)),
     plan ? planActivo(plan, estado, refrescar) : elegirPlan(refrescar),
     mapaBiblia(refrescar)));
 }

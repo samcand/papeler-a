@@ -191,3 +191,70 @@ export function citaPrincipal(s) {
   const r = parsearLista(s.pasaje || '')[0];
   return r ? formatear(r) : (s.pasaje || '');
 }
+
+/** Deja en blanco la palabra clave de un título para la hoja de la congregación: "La paz con ________". */
+export function conEspacio(titulo) {
+  const palabras = String(titulo || '').trim().split(/\s+/);
+  if (palabras.length < 2) return titulo || '';
+  let i = palabras.length - 1;
+  // la última palabra con contenido (no "de", "la"…)
+  while (i > 0 && palabras[i].replace(/[^\p{L}]/gu, '').length < 4) i--;
+  const puntuacion = palabras[i].match(/[^\p{L}\p{N}]+$/u)?.[0] || '';
+  palabras[i] = '_'.repeat(Math.max(8, palabras[i].length + 2)) + puntuacion;
+  return palabras.join(' ');
+}
+
+/**
+ * Preguntas para grupos pequeños a partir del sermón: observación,
+ * interpretación y aplicación (el método inductivo que la congregación ya conoce).
+ */
+export function preguntasDeGrupo(s) {
+  const cita = citaPrincipal(s);
+  const obs = [
+    `Lean ${cita} en voz alta, despacio. ¿Qué palabras o ideas se repiten?`,
+    '¿Quién habla, a quién y en qué situación? ¿Qué pasó justo antes de este pasaje?',
+  ];
+  if (s.sujeto) obs.push(`${s.sujeto.trim().replace(/\?*$/, '?')} ¿Cómo lo responde el mismo texto?`);
+  const interp = (s.bosquejo || []).filter((p) => p.titulo?.trim()).map((p) =>
+    `${p.pasaje ? `Según ${p.pasaje}, ` : ''}¿qué significa «${p.titulo.trim()}»? ¿Por qué el autor lo dice así?`);
+  if (s.homiletica) interp.push(`La idea central fue: «${s.homiletica.trim().replace(/[.!]+$/, '')}». ¿Dónde la ven en el texto?`);
+  interp.push('¿Cómo nos muestra este pasaje a Cristo y su obra?');
+  const apli = (s.bosquejo || []).filter((p) => p.aplicacion?.trim()).map((p) => `${p.aplicacion.trim()} ¿Qué paso concreto darás esta semana?`);
+  if (s.diferencia) apli.push(`${s.diferencia.trim()} ¿Cómo se ve esto en tu casa, trabajo o estudios?`);
+  apli.push('¿Por qué necesitas orar a partir de este pasaje? Oren unos por otros.');
+  return [
+    { titulo: 'Observación', preguntas: obs },
+    { titulo: 'Interpretación', preguntas: interp },
+    { titulo: 'Aplicación', preguntas: apli },
+  ];
+}
+
+const esc = (t) => String(t ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+/** Hoja imprimible (HTML completo): texto, gran idea, bosquejo con espacios y preguntas de grupo. */
+export function hojaCongregacion(s, { textoPasaje = '', iglesia = '' } = {}) {
+  const puntos = (s.bosquejo || []).filter((p) => p.titulo?.trim());
+  const grupos = preguntasDeGrupo(s);
+  return `<!doctype html><html lang="es"><head><meta charset="utf-8"><title>${esc(s.titulo || 'Sermón')}</title>
+<style>
+  body { font: 11.5pt/1.5 Georgia, 'Times New Roman', serif; color: #111; max-width: 720px; margin: 24px auto; padding: 0 20px; }
+  h1 { font-size: 20pt; margin: 0; } h2 { font: 700 10pt system-ui, sans-serif; text-transform: uppercase; letter-spacing: .08em; color: #555; margin: 22px 0 6px; border-bottom: 1px solid #ccc; }
+  .meta { color: #555; font: 10pt system-ui, sans-serif; margin: 4px 0 14px; }
+  blockquote { margin: 0; padding: 8px 14px; background: #f5f3ee; border-left: 3px solid #b8860b; }
+  .idea { font-size: 14pt; font-weight: 700; margin: 14px 0; }
+  ol.bosquejo > li { margin: 10px 0 18px; } .notas { border-bottom: 1px dotted #999; height: 1.6em; }
+  ol.preguntas li { margin: 6px 0 16px; } .pie { margin-top: 30px; font: 9pt system-ui, sans-serif; color: #777; }
+  @page { margin: 16mm; } .corte { break-before: page; }
+</style></head><body>
+<h1>${esc(s.titulo || 'Sermón')}</h1>
+<div class="meta">${esc([citaPrincipal(s), s.serie, s.fecha, iglesia].filter(Boolean).join(' · '))}</div>
+${textoPasaje ? `<blockquote>${esc(textoPasaje)}</blockquote>` : ''}
+${s.homiletica ? `<p class="idea">${esc(s.homiletica)}</p>` : ''}
+${puntos.length ? `<h2>Bosquejo</h2><ol class="bosquejo">${puntos.map((p) => `<li><strong>${esc(conEspacio(p.titulo))}</strong>${p.pasaje ? ` <em>(${esc(p.pasaje)})</em>` : ''}<div class="notas"></div><div class="notas"></div></li>`).join('')}</ol>` : ''}
+<h2>Mis notas</h2><div class="notas"></div><div class="notas"></div><div class="notas"></div>
+<div class="corte"></div>
+<h2>Para el grupo pequeño</h2>
+${grupos.map((g) => `<h3>${esc(g.titulo)}</h3><ol class="preguntas">${g.preguntas.map((q) => `<li>${esc(q)}</li>`).join('')}</ol>`).join('')}
+<p class="pie">Preparado con Estudio Bíblico</p>
+</body></html>`;
+}

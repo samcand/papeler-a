@@ -720,6 +720,19 @@ body.modo-pulpito .barra { display: none; }
 
 .intro-enlace { font: 1rem var(--ui); margin-left: 10px; vertical-align: middle; text-decoration: none; }
 
+/* Memorización */
+.tarjeta-memoria .ref-memoria { font-family: var(--lectura); font-size: 1.8rem; margin: 4px 0 10px; }
+.texto-memoria { font: 1.3rem/1.7 var(--lectura); min-height: 3em; letter-spacing: .01em; }
+.tarjeta-memoria textarea { width: 100%; margin: 8px 0; }
+.calificar { margin-top: 12px; border-top: 1px solid var(--linea); padding-top: 10px; }
+.lista-memoria { list-style: none; padding: 0; }
+.lista-memoria li { display: flex; align-items: center; gap: 12px; padding: 7px 0; border-bottom: 1px solid var(--linea); }
+.lista-memoria .ref { min-width: 9em; }
+.cajas { display: inline-flex; gap: 2px; }
+.caja { width: 12px; height: 12px; border-radius: 3px; background: var(--linea); }
+.caja.llena { background: var(--ok); }
+.ok { color: var(--ok); } .mal { color: var(--peligro); }
+
 /* Avisos */
 #toasts { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); z-index: 100; display: flex; flex-direction: column; gap: 6px; align-items: center; pointer-events: none; }
 .toast { background: var(--texto); color: var(--fondo); padding: 9px 16px; border-radius: 999px; font-size: .9rem; box-shadow: var(--sombra); transition: opacity .3s, transform .3s; }

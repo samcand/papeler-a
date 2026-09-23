@@ -23,7 +23,7 @@ conexión. También se puede publicar tal cual en GitHub Pages: son archivos est
 | --- | --- |
 | **Leer** | El texto en Reina-Valera 1909, con KJV, hebreo (AT) o griego (NT) en columnas paralelas. Navegador de libros y capítulos, capítulo anterior/siguiente con ← →, modo párrafo o un versículo por línea. |
 | **Introducción a cada libro** | Los 66 libros con autor, fecha, destinatarios, género, propósito, tema, versículo clave, estructura enlazada, cómo apunta a Cristo y los debates críticos principales. En la guía de cada capítulo y en `#/libro/45`. |
-| **Guía del pasaje** | Al tocar un versículo: sus referencias cruzadas con el texto a la vista (ordenadas por votos), tus notas, el mismo versículo en las otras versiones y sus palabras para estudiarlas. |
+| **Guía del pasaje** | Al tocar un versículo: tus referencias propias (enlaces entre pasajes con la razón, en ambos sentidos), sus referencias cruzadas con el texto a la vista (ordenadas por votos), tus notas, el mismo versículo en las otras versiones y sus palabras para estudiarlas. |
 | **Resaltar y subrayar** | Selecciona cualquier fragmento (de una palabra a varios versículos) y elige entre 6 colores, subrayado o negrita. La goma (⌫) borra solo la parte seleccionada. Ctrl+Z deshace. |
 | **Notas** | Sobre un versículo, un rango o un capítulo, o apuntes libres (bosquejos, sermones). Markdown sencillo, etiquetas (`#gracia`), y las citas que escribas ("ver Ro 5:8") se vuelven enlaces con vista previa al pasar el cursor. |
 | **Buscar** | En toda la Biblia o por testamento, sección o libro: palabras, `"frase exacta"`, `amor|caridad`, `justific*` y `-excluir`. Sin distinguir tildes. Gráfico de resultados por libro. |
@@ -35,7 +35,8 @@ conexión. También se puede publicar tal cual en GitHub Pages: son archivos est
 | **Palabras clave** | Marca una palabra una vez ("pacto" en rojo con ▣) y aparece marcada en todo el libro o toda la Biblia. Se agrupan en juegos que se encienden y apagan. El botón **Conectores** marca solo los conectores lógicos (causa, conclusión, propósito, contraste, condición, comparación, tiempo) para seguir el argumento, y **Texto limpio** oculta todas las marcas. |
 | **Biblioteca** | Importa tus libros (EPUB, Word, HTML, Markdown, texto). La app indexa cada cita bíblica y la Guía del pasaje muestra "En tu biblioteca": qué dice cada libro del versículo que estudias. |
 | **Diagrama de bloques** | Análisis estructural de un pasaje: el texto partido en cláusulas, la principal a la izquierda y las dependientes sangradas, con la relación lógica (causa, inferencia, propósito, medio, contraste, concesión…) sugerida por los conectores. Partir, unir, sangrar con Tab, notas por línea; se lleva al sermón con un bosquejo sugerido. |
-| **Sermones** | Taller en 9 pasos (texto, exégesis, idea exegética, tres preguntas, propósito, idea homilética, bosquejo, introducción y conclusión, revisión) con avisos de revisión, duración estimada, banco de ilustraciones, cobertura del canon, exportación y **modo púlpito** con cronómetro. |
+| **Sermones** | Taller en 9 pasos (texto, exégesis, idea exegética, tres preguntas, propósito, idea homilética, bosquejo, introducción y conclusión, revisión) con avisos de revisión, duración estimada, banco de ilustraciones, cobertura del canon, exportación, **hoja para la congregación** (bosquejo con espacios para llenar y preguntas de observación, interpretación y aplicación para grupos pequeños) y **modo púlpito** con cronómetro. |
+| **Memorizar** | Versículos para memorizar con repetición espaciada (cajas de Leitner: 1, 3, 7, 14, 30 y 90 días), pistas de iniciales o huecos, escribir de memoria y comprobar. Se agregan desde la Guía del pasaje o los devocionales. |
 | **Familia** | Devocionales para hijos (con versión para pequeños y adolescentes), esposa, esposo y pareja; diario de respuestas y peticiones, racha, lectura en voz alta e impresión. |
 | **Idiomas originales** | Columna hebrea (OSHB) o griega (SBLGNT) donde cada palabra se toca para ver lema, número Strong, morfología explicada en español con notas exegéticas (aoristo, wayyiqtol, piel…), definición y traducciones. Modo **interlineal** con transliteración, glosa y código bajo cada palabra. Concordancia completa por número Strong (`H2617`, `G26`), con formas, morfología y distribución por libro. |
 | **Ajustes** | Tema oscuro, claro o sepia; tamaño y tipo de letra; versiones; umbral de votos de las referencias; exportar e importar un respaldo. |
@@ -94,6 +95,7 @@ biblia/
     concordancia.js concordancia: índice alfabético, líneas con contexto y por número Strong
     diagrama.js     diagrama de bloques: cláusulas, sangría y relaciones lógicas
     introducciones.js introducción a los 66 libros
+    memoria.js      repetición espaciada para memorizar versículos
     texto.js        carga de datos y referencias cruzadas
     almacen.js      tus datos en localStorage, deshacer, respaldo
     vistas/         pantallas (lector, buscar, palabra, cuaderno, plan, ajustes)

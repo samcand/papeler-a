@@ -115,7 +115,8 @@ async function pintarDevocional(app, d) {
     seccion('Aplicación', el('p', {}, d.aplicacion), 'aplicacion'),
     seccion('Oración', el('p', { class: 'devo-oracion' }, d.oracion)),
     seccion('Para memorizar', memoria.map((b) => el('blockquote', { class: 'devo-memoria' },
-      b.versos.map((x) => `${x.texto} `), el('cite', {}, `— ${formatear(b.ref)}`))), 'memoria'),
+      b.versos.map((x) => `${x.texto} `), el('cite', {}, `— ${formatear(b.ref)}`),
+      el('button', { class: 'btn chico no-imprimir', onClick: () => { const { desde, hasta } = rango(b.ref); toast(almacen.agregarMemoria(desde, hasta) ? 'Agregado a tus versículos para memorizar' : 'Ya lo estás memorizando'); } }, '🧠 Memorizar'))), 'memoria'),
     seccion('Peticiones de oración', el('textarea', {
       class: 'input', rows: 3, placeholder: 'Peticiones de la familia, motivos de gratitud…',
       onInput: (e) => { entrada.peticion = e.target.value; guardar(); },
