@@ -616,6 +616,30 @@ body.modo-pulpito .barra { display: none; }
 .pulpito-bloque.aplicacion { border-color: var(--ok); }
 .pulpito-bloque > span { display: block; font: 700 .45em var(--ui); text-transform: uppercase; letter-spacing: .1em; color: var(--tenue); }
 
+/* Idiomas originales */
+.po { cursor: pointer; border-radius: 4px; }
+.po:hover { background: var(--sel); }
+.po.activa { background: color-mix(in oklab, var(--acento) 30%, transparent); }
+.tokens.interlineal { display: flex; flex-wrap: wrap; gap: 6px 10px; }
+.interlineal .po {
+  display: inline-flex; flex-direction: column; align-items: center; text-align: center;
+  padding: 2px 4px; border: 1px solid transparent; min-width: 2.5em;
+}
+.interlineal .po:hover { border-color: var(--linea); }
+.po-w { font-size: 1.15em; line-height: 1.4; }
+.po-x { font: italic .62em var(--ui); color: var(--tenue); direction: ltr; }
+.po-g { font: .66em var(--ui); color: var(--acento); direction: ltr; max-width: 9em; }
+.po-m { font: .56em ui-monospace, Menlo, monospace; color: var(--tenue); direction: ltr; }
+.interlineal + .ind-nota { display: none; }
+.celda[lang='he'] .tokens.interlineal { direction: rtl; }
+.ficha-cab { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.ficha-palabra { font: 2rem/1.3 'SBL Hebrew', 'Ezra SIL', 'SBL Greek', 'Noto Serif Hebrew', Georgia, serif; }
+.ficha-grande .ficha-palabra { font-size: 3rem; }
+.ficha-lema { font-family: var(--lectura); margin: 4px 0 8px; }
+.nota-exegetica { border-left: 3px solid var(--acento-2); padding-left: 8px; }
+.resultado-original { font: 1.15rem/1.8 'SBL Hebrew', 'SBL Greek', 'Noto Serif Hebrew', Georgia, serif; }
+.lista-morfologia { padding-left: 1.1em; margin: 0; }
+
 /* Avisos */
 #toasts { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); z-index: 100; display: flex; flex-direction: column; gap: 6px; align-items: center; pointer-events: none; }
 .toast { background: var(--texto); color: var(--fondo); padding: 9px 16px; border-radius: 999px; font-size: .9rem; box-shadow: var(--sombra); transition: opacity .3s, transform .3s; }

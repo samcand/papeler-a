@@ -20,12 +20,12 @@ homilética). Fuentes al final.
 
 ## 1. Exégesis e idiomas originales
 
-1. 🔜 **Interlineal hebreo/griego** alineado palabra por palabra con la RV1909 [datos morfológicos: OSHB / MorphGNT, licencias abiertas].
-2. 🔜 **Números Strong y léxico** (BDB abreviado, Thayer) al tocar una palabra del original [léxicos de dominio público].
-3. 🔜 **Análisis morfológico** de cada palabra: tiempo, voz, modo, caso, binyán, con explicación didáctica del matiz (aoristo, perfecto, piel/hifil).
+1. 🆕 **Interlineal hebreo/griego**: cada palabra con transliteración, glosa y código morfológico (OSHB y SBLGNT/MorphGNT). 🔜 alineación palabra a palabra con la RV1909.
+2. 🆕 **Números Strong y léxico** (BDB abreviado, Thayer) al tocar una palabra del original [léxicos de dominio público].
+3. 🆕 **Análisis morfológico** de cada palabra: tiempo, voz, modo, caso, binyán, con explicación didáctica del matiz (aoristo, perfecto, piel/hifil).
 4. 🔜 **Búsqueda morfológica**: "todos los aoristos imperativos de Pablo", "hifil de שׁוּב en los profetas".
-5. 🔜 **Estudio de palabra en el original**: rango semántico, glosas por contexto, frecuencia por autor y gráfico de uso a lo largo del canon.
-6. 🔜 **Concordancia de la palabra original** traducida: cómo tradujo la RV1909 cada aparición de ἀγάπη o חֶסֶד.
+5. 🆕 **Estudio de palabra en el original**: rango semántico, glosas por contexto, frecuencia por autor y gráfico de uso a lo largo del canon.
+6. 🆕 **Concordancia de la palabra original**: cada aparición de ἀγάπη o חֶסֶד con el versículo en español al lado y las traducciones de la KJV. 🔜 recuento de cómo la tradujo la RV1909.
 7. 🔜 **Aparato crítico** resumido: variantes textuales relevantes (NA/UBS vs. TR) con su peso [aparato abierto SBLGNT].
 8. ✅ **Texto original en paralelo** (WLC hebreo, Textus Receptus griego).
 9. 🔜 **LXX en paralelo** para el AT citado en el NT, con marcas donde el NT sigue a la LXX y no al TM.

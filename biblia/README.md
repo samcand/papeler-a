@@ -34,6 +34,7 @@ conexión. También se puede publicar tal cual en GitHub Pages: son archivos est
 | **Biblioteca** | Importa tus libros (EPUB, Word, HTML, Markdown, texto). La app indexa cada cita bíblica y la Guía del pasaje muestra "En tu biblioteca": qué dice cada libro del versículo que estudias. |
 | **Sermones** | Taller en 9 pasos (texto, exégesis, idea exegética, tres preguntas, propósito, idea homilética, bosquejo, introducción y conclusión, revisión) con avisos de revisión, duración estimada, banco de ilustraciones, cobertura del canon, exportación y **modo púlpito** con cronómetro. |
 | **Familia** | Devocionales para hijos (con versión para pequeños y adolescentes), esposa, esposo y pareja; diario de respuestas y peticiones, racha, lectura en voz alta e impresión. |
+| **Idiomas originales** | Columna hebrea (OSHB) o griega (SBLGNT) donde cada palabra se toca para ver lema, número Strong, morfología explicada en español con notas exegéticas (aoristo, wayyiqtol, piel…), definición y traducciones. Modo **interlineal** con transliteración, glosa y código bajo cada palabra. Concordancia completa por número Strong (`H2617`, `G26`), con formas, morfología y distribución por libro. |
 | **Ajustes** | Tema oscuro, claro o sepia; tamaño y tipo de letra; versiones; umbral de votos de las referencias; exportar e importar un respaldo. |
 
 La caja de arriba entiende citas en español: `Jn 3:16`, `1 Co 13`,
@@ -48,6 +49,10 @@ cita, busca las palabras. Atajo: `/`.
 | King James Version (1769) | scrollmapper/bible_databases | Dominio público |
 | Códice de Leningrado (hebreo, AT) | scrollmapper/bible_databases | Dominio público |
 | Textus Receptus (griego, NT) | scrollmapper/bible_databases | Dominio público |
+| Hebreo con lemas y morfología | [Open Scriptures Hebrew Bible](https://github.com/openscriptures/morphhb) | WLC: dominio público; análisis: CC-BY 4.0 |
+| Griego SBLGNT con análisis | [MorphGNT](https://github.com/morphgnt/sblgnt) | Texto: licencia SBLGNT; análisis: CC-BY-SA |
+| Diccionarios de Strong | [Open Scriptures](https://github.com/openscriptures/strongs) | Dominio público (edición JSON CC-BY-SA) |
+| Léxico griego de Dodson | [Biblical Humanities](https://github.com/biblicalhumanities/Dodson-Greek-Lexicon) | Dominio público |
 | ~200 000 referencias cruzadas | [OpenBible.info](https://www.openbible.info/labs/cross-references/) | CC-BY |
 
 La Reina-Valera 1960 tiene derechos de autor (Sociedades Bíblicas Unidas), por
@@ -59,6 +64,7 @@ abrir un capítulo solo descargue ese libro. Para regenerarlos:
 ```bash
 npm run biblia:datos                        # descarga las fuentes de GitHub
 node tools/biblia-datos.mjs ./mis-fuentes   # o usa copias locales
+node tools/biblia-originales.mjs            # hebreo y griego con morfología y léxicos
 ```
 
 ## Estructura
@@ -81,6 +87,8 @@ biblia/
     estante.js      los libros en IndexedDB
     sermones.js     flujo homilético, duración, avisos, exportación
     devocionales.js devocionales para la familia
+    morfologia.js   códigos morfológicos hebreos y griegos explicados en español
+    concordancia.js concordancia del original por número Strong
     texto.js        carga de datos y referencias cruzadas
     almacen.js      tus datos en localStorage, deshacer, respaldo
     vistas/         pantallas (lector, buscar, palabra, cuaderno, plan, ajustes)

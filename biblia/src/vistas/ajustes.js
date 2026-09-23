@@ -81,7 +81,7 @@ export function vistaAjustes(app) {
 
     el('section', { class: 'tarjeta' },
       el('h2', {}, 'Acerca de'),
-      el('p', { class: 'small' }, 'Textos: Reina-Valera 1909 y King James Version (dominio público); Códice de Leningrado (Westminster Leningrad Codex) y Textus Receptus, vía el proyecto scrollmapper/bible_databases. Referencias cruzadas: OpenBible.info, licencia CC-BY.'),
+      el('p', { class: 'small' }, 'Textos: Reina-Valera 1909 y King James Version (dominio público); Códice de Leningrado (Westminster Leningrad Codex) y Textus Receptus, vía el proyecto scrollmapper/bible_databases. Interlineal: Open Scriptures Hebrew Bible (lemas y morfología CC-BY 4.0) y SBL Greek New Testament (© Society of Biblical Literature y Logos Bible Software) con el análisis de MorphGNT (CC-BY-SA). Léxicos: Strong (dominio público; edición de Open Scriptures, CC-BY-SA) y Dodson (dominio público). Referencias cruzadas: OpenBible.info, licencia CC-BY.'),
       el('p', { class: 'tenue small' }, meta?.generado ? `Datos generados el ${meta.generado}.` : ''))));
 }
 

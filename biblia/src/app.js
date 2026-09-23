@@ -9,6 +9,7 @@
  *   #/familia/esposa    devocionales para la familia
  *   #/biblioteca        tus libros, con sus citas bíblicas indexadas
  *   #/sermones          taller de sermones y modo púlpito
+ *   #/original/H2617    palabra hebrea o griega: léxico y concordancia
  *   #/ajustes           apariencia, versiones y respaldo
  */
 
@@ -25,6 +26,7 @@ import { vistaAjustes } from './vistas/ajustes.js';
 import { vistaFamilia } from './vistas/familia.js';
 import { vistaBiblioteca } from './vistas/biblioteca.js';
 import { vistaSermones } from './vistas/sermones.js';
+import { vistaOriginal } from './vistas/original.js';
 import { instalarVistazo } from './vistas/vistazo.js';
 
 const RUTAS = {
@@ -36,6 +38,7 @@ const RUTAS = {
   familia: vistaFamilia,
   biblioteca: vistaBiblioteca,
   sermones: vistaSermones,
+  original: vistaOriginal,
   ajustes: vistaAjustes,
 };
 
@@ -94,7 +97,9 @@ function cajaIr() {
     const texto = entrada.value.trim();
     if (!texto) return;
     const refs = parsearLista(texto);
-    if (refs.length) {
+    if (/^[HGhg]\d{1,4}$/.test(texto)) {
+      ir(`#/original/${texto.toUpperCase()}`);
+    } else if (refs.length) {
       ir(`#/leer/${aClave(refs[0])}`);
     } else {
       ir(`#/buscar?q=${encodeURIComponent(texto)}`);

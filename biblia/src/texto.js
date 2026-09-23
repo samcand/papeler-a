@@ -32,13 +32,39 @@ export async function cargarIndice() {
 export const indiceCargado = () => indice;
 
 export const versiones = () => indice?.versiones || [];
-export const version = (id) => versiones().find((v) => v.id === id);
+
+/**
+ * Textos originales con análisis palabra por palabra (para el interlineal).
+ * Cada versículo es una lista de [palabra, strong, morfología(, lema)].
+ */
+export const ORIGINALES = [
+  { id: 'heb', nombre: 'Hebreo (WLC con morfología de Open Scriptures)', abrev: 'HEB', idioma: 'he', dir: 'rtl', licencia: 'Texto de dominio público; lemas y morfología CC-BY 4.0 (OSHB)' },
+  { id: 'gri', nombre: 'Griego (SBL Greek New Testament con MorphGNT)', abrev: 'SBLGNT', idioma: 'el', licencia: 'SBLGNT © SBL y Logos (licencia de uso libre); análisis CC-BY-SA (MorphGNT)' },
+];
+export const esOriginal = (id) => id === 'heb' || id === 'gri';
+export const version = (id) => versiones().find((v) => v.id === id) || ORIGINALES.find((v) => v.id === id);
 
 /** ¿Esta versión tiene este libro? (el hebreo solo el AT, el griego solo el NT) */
 export function tieneLibro(idVersion, b) {
-  if (idVersion === 'wlc') return b <= 39;
-  if (idVersion === 'tr') return b >= 40;
+  if (idVersion === 'wlc' || idVersion === 'heb') return b <= 39;
+  if (idVersion === 'tr' || idVersion === 'gri') return b >= 40;
   return true;
+}
+
+/** Léxico de Strong: { número: [lema, transliteración, definición, KJV, derivación, glosa] } */
+export const lexico = (letra) => cargarJson(`lexico/${letra}.json`);
+
+/** Todos los libros de un original (para la concordancia de una palabra). */
+export async function originalCompleto(idVersion, alAvanzar) {
+  const libros = new Array(66);
+  let hechos = 0;
+  const desde = idVersion === 'heb' ? 1 : 40;
+  const hasta = idVersion === 'heb' ? 39 : 66;
+  await Promise.all(Array.from({ length: hasta - desde + 1 }, (_, k) => libroCompleto(idVersion, desde + k).then((l) => {
+    libros[desde + k - 1] = l;
+    alAvanzar?.(++hechos / (hasta - desde + 1));
+  })));
+  return libros;
 }
 
 /** Capítulos de un libro: capitulos[c-1][v-1] = texto. */

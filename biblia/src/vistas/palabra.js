@@ -41,8 +41,10 @@ export async function vistaPalabra(app, ruta) {
         el('button', { class: 'btn primario', type: 'submit' }, 'Estudiar'))),
     salida));
 
+  if (/^[HGhg]\d{1,4}$/.test(palabra)) { location.hash = `#/original/${palabra.toUpperCase()}`; return; }
   if (!palabra) {
     render(salida,
+      el('p', {}, '¿Buscas la palabra en hebreo o griego? ', el('a', { href: '#/original' }, 'Estudia el original por número Strong'), ' (H2617, G26…) o toca una palabra en la columna del original del lector.'),
       el('p', { class: 'tenue' }, 'Descubre dónde y cómo usa la Biblia una palabra: en qué libros se concentra, su primera mención y con qué otras palabras suele aparecer. También puedes seleccionar una palabra mientras lees y pulsar 🔤.'),
       el('div', { class: 'chips' }, SUGERIDAS.map((w) => el('a', { class: 'chip', href: `#/palabra/${encodeURIComponent(w)}` }, w))));
     return;

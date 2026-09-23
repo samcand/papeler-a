@@ -13,6 +13,9 @@ import { limpiarTexto, leerOsis } from '../tools/biblia-datos.mjs';
 import { partirTexto, parrafosDeHtml, parrafosDeDocx, rutasEpub, indexar, citasEn, fragmento, tituloDeArchivo, buscarEnLibros } from '../biblia/src/biblioteca.js';
 import { normalizar } from '../biblia/src/referencias.js';
 import { crearSermon, nuevoPunto, moverPunto, ideaExegetica, progreso, duracionEstimada, palabrasPredicadas, avisos, pasajesDe, sermonAMarkdown, romano, cobertura } from '../biblia/src/sermones.js';
+import { explicarHebreo, explicarGriego, notaExegetica } from '../biblia/src/morfologia.js';
+import { strongDeLema, leerOshb, leerMorphgnt, glosaKjv } from '../tools/biblia-originales.mjs';
+import { estudioOriginal, formaBase, morfologiaPrincipal } from '../biblia/src/concordancia.js';
 import { DEVOCIONALES, DESTINATARIOS, devocionalesPara, delDia, rachaDevocional } from '../biblia/src/devocionales.js';
 
 let passed = 0;
@@ -371,6 +374,49 @@ t('cobertura del canon predicado', () => {
   assert.equal(c.nt, 2);
   assert.equal(c.porSeccion.find((x) => x.nombre === 'Cartas de Pablo').n, 2);
   assert.ok(c.sinPredicar.includes('Génesis') && !c.sinPredicar.includes('Romanos'));
+});
+
+// ---------- Idiomas originales ----------
+t('explica la morfología hebrea y griega en español', () => {
+  assert.equal(explicarHebreo('HVqp3ms'), 'verbo qal perfecto (qatal) 3.ª persona masculino singular');
+  assert.equal(explicarHebreo('HC/Vqw3mp'), 'conjunción + verbo qal imperfecto consecutivo (wayyiqtol) 3.ª persona masculino plural');
+  assert.equal(explicarHebreo('HR/Ncfsa'), 'preposición + sustantivo común femenino singular absoluto');
+  assert.equal(explicarHebreo('HTd/Ncmpa'), 'partícula artículo definido + sustantivo común masculino plural absoluto');
+  assert.ok(explicarHebreo('ANcmsd/Td').endsWith('(arameo)'));
+  assert.equal(explicarGriego('V-3AAI-S--'), 'verbo aoristo voz activa indicativo 3.ª persona singular');
+  assert.equal(explicarGriego('N-----ASM-'), 'sustantivo acusativo singular masculino');
+  assert.equal(explicarGriego('V--PAPNSM-'), 'verbo presente voz activa participio nominativo singular masculino');
+  assert.ok(notaExegetica('V-2AAD-S--', 'el').startsWith('Imperativo aoristo'));
+  assert.ok(notaExegetica('HC/Vqw3ms', 'he').startsWith('Wayyiqtol'));
+});
+
+t('lee el hebreo de OSHB y el griego de MorphGNT', () => {
+  assert.equal(strongDeLema('b/7225'), 7225);
+  assert.equal(strongDeLema('1254 a'), 1254);
+  assert.equal(strongDeLema('c/d/776'), 776);
+  const xml = '<chapter><verse osisID="Gen.1.1"><w lemma="b/7225" morph="HR/Ncfsa">בְּ/רֵאשִׁ֖ית</w><w lemma="1254 a" morph="HVqp3ms">בָּרָ֣א</w><seg type="x-maqqef">־</seg><note type="variant"><rdg><w lemma="1">x</w></rdg></note><w lemma="d/776" morph="HTd/Ncbsa">הָ/אָֽרֶץ</w><seg type="x-sof-pasuq">׃</seg></verse></chapter>';
+  const h = leerOshb(xml);
+  assert.deepEqual(h[0][0].map((w) => w[0]), ['בְּרֵאשִׁ֖ית', 'בָּרָ֣א־', 'הָאָֽרֶץ׃']);
+  assert.deepEqual(h[0][0].map((w) => w[1]), [7225, 1254, 776]);
+  const g = leerMorphgnt('040316 C- -------- γὰρ γαρ γάρ γάρ\n040316 V- 3AAI-S-- ⸀ἠγάπησεν ἠγάπησεν ἠγάπησεν ἀγαπάω', (l) => ({ 'γάρ': 1063, 'ἀγαπάω': 25 })[l] || 0);
+  assert.deepEqual(g[2][15].map((w) => [w[0], w[1], w[2]]), [['γὰρ', 1063, 'C---------'], ['ἠγάπησεν', 25, 'V-3AAI-S--']]);
+  assert.equal(glosaKjv('(feast of) charity(-ably), dear, love'), 'charity');
+});
+
+t('concordancia del original por número Strong', () => {
+  const libros = [];
+  libros[42] = [[], [], [[['Οὕτως', 3779, 'D---------'], ['ἠγάπησεν', 25, 'V-3AAI-S--'], ['ὁ', 3588, 'RA----NSM-']], [['ἀγαπᾷ', 25, 'V-3PAI-S--']]]];
+  libros[61] = [[[['ἀγαπῶμεν,', 25, 'V-1PAS-P--'], ['ἀγαπῶμεν', 25, 'V-1PAS-P--']]]];
+  const r = estudioOriginal(libros, 25);
+  assert.equal(r.apariciones, 4);
+  assert.equal(r.versiculos, 3);
+  assert.equal(r.porLibro[42], 2);
+  assert.deepEqual(r.lugares[0], { b: 43, c: 3, v: 1, k: 1 });
+  assert.deepEqual(r.formas[0], ['αγαπωμεν', 2], 'agrupa sin acentos ni puntuación');
+  assert.equal(formaBase('הָאָֽרֶץ׃'), 'הָאָרֶץ');
+  assert.equal(morfologiaPrincipal('HC/Vqw3ms'), 'HVqw3ms');
+  assert.equal(morfologiaPrincipal('HR/Ncfsa'), 'HNcfsa');
+  assert.equal(morfologiaPrincipal('V-3AAI-S--'), 'V-3AAI-S--');
 });
 
 // ---------- Planes ----------
