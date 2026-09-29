@@ -17,8 +17,32 @@ npm start                 # http://localhost:8080
 # y abre http://localhost:8080/recordatorios/
 ```
 
-Se instala como app (Chrome/Edge/Android: “Instalar”; iPhone: Compartir →
-“Añadir a pantalla de inicio”) y a partir de ahí funciona sin conexión.
+## En tus dispositivos
+
+La misma dirección sirve para todos. En cada uno se instala una vez y después
+abre como una app, a pantalla completa y **sin conexión**:
+
+| Dispositivo | Qué hacer |
+| --- | --- |
+| **Android (Chrome)** | Menú ⋮ → *Instalar aplicación* (o el aviso que sale solo). |
+| **iPhone / iPad (Safari)** | Compartir → *Añadir a pantalla de inicio*. Tiene que ser **Safari**: en iOS, Chrome no instala. |
+| **Windows / Mac (Chrome o Edge)** | El icono de instalar en la barra de direcciones. |
+| **Cualquier navegador** | Abrirla y ya: instalar solo añade el icono y quita la barra. |
+
+Dos cosas que conviene saber antes, porque no se arreglan con ajustes:
+
+- **Cada dispositivo guarda lo suyo.** No hay cuenta ni nube, así que lo que
+  escribas en el móvil no aparece solo en el portátil. Para pasarlo: *Ajustes →
+  Respaldo → Descargar copia*, y en el otro *Fusionar copia de otro
+  dispositivo* (gana lo modificado más tarde; lo que solo existe en uno se
+  conserva). La copia puede ir cifrada con contraseña.
+- **El teléfono no va a sonar si la app está cerrada.** Sin servidor no hay
+  notificaciones push. Para lo que no se puede olvidar, exporta el `.ics` y
+  ábrelo en el calendario del móvil: ahí sí hay alarma de verdad, con las
+  repeticiones incluidas.
+
+Si borras los datos del sitio en un navegador, se van los de ese navegador.
+Exporta de vez en cuando.
 
 ## Lo básico, que tiene que estar bien
 
@@ -611,7 +635,7 @@ descargar. Si la semana fue floja se nota, que es justo para lo que sirve.
 
 ## Lo que queda
 
-La pestaña **Lo que queda** es la hoja de ruta real de la app: **119 hechas y 12
+La pestaña **Lo que queda** es la hoja de ruta real de la app: **120 hechas y 12
 descartadas**, y hoy no queda nada pendiente. Las diez últimas (111-120) salieron
 de revisar una lista de 50 ideas de productividad personal y resumirlas en cuatro
 piezas genéricas —notas, colecciones, objetivos y gastos— en vez de treinta
@@ -651,7 +675,7 @@ Alt y las flechas.
 ## Pruebas
 
 ```bash
-npm test                  # 419 pruebas de lógica, sin navegador
+npm test                  # 426 pruebas de lógica, sin navegador
 npm run test:navegador    # recorre la app en Chromium (necesita Playwright)
 ```
 
