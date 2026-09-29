@@ -8,6 +8,7 @@
 import { aISO, hoy, sumarDias } from './fechas.js';
 import { siguienteFecha } from './recurrencia.js';
 import { PilaDeshacer, aPapelera, purgar, restaurar } from './papelera.js';
+import { ANIDADOS, LISTAS_POR_CLAVE, LISTAS_POR_ID, lapida, purgarLapidas } from './fusion.js';
 import { esAplazamiento } from './dia.js';
 import { CONFIG_POMODORO } from './tiempo.js';
 import { completar, crearTarea, uid } from './modelo.js';
@@ -27,6 +28,10 @@ const CLAVE = 'recordatorios.v1';
 
 const ESTADO_INICIAL = {
   version: 1,
+  // Cuándo se tocó este dispositivo por última vez y qué se borró en él: sin
+  // estas dos cosas no se puede sincronizar sin resucitar lo tirado.
+  actualizadoEn: null,
+  borrados: [],
   tareas: [],
   proyectos: [],
   filtros: [],
@@ -102,6 +107,9 @@ class Store {
     this.estado = this.cargar();
     this.oyentes = new Set();
     this.pila = new PilaDeshacer(15);
+    // La foto de partida: cargar la app no es editarla.
+    this.sellos = null;
+    this.sellar(true);
   }
 
   /**
@@ -167,6 +175,7 @@ class Store {
       rutinasHechas: guardado.rutinasHechas || base.rutinasHechas,
       viajes: guardado.viajes || base.viajes,
       papelera: purgar(guardado.papelera || [], aISO(hoy())),
+      borrados: purgarLapidas(guardado.borrados || []),
       pomodoro: { ...base.pomodoro, ...(guardado.pomodoro || {}), config: { ...base.pomodoro.config, ...(guardado.pomodoro?.config || {}) } },
       // El cronómetro sobrevive a cerrar la app: al volver sigue contando.
       cronometro: { ...base.cronometro, ...(guardado.cronometro || {}) },
@@ -194,7 +203,84 @@ class Store {
     return base;
   }
 
+  /**
+   * Las listas cuyas fichas llevan fecha de edición. Los registros que solo
+   * crecen (historial, tiempo medido) no la necesitan: nadie los edita.
+   */
+  listasSelladas() {
+    return [
+      ...LISTAS_POR_ID.map((lista) => [lista, 'id', this.estado[lista]]),
+      ...Object.entries(LISTAS_POR_CLAVE).map(([lista, clave]) => [lista, clave, this.estado[lista]]),
+      ...Object.entries(ANIDADOS).map(([ruta, clave]) => [
+        ruta, clave, ruta.split('.').reduce((o, k) => (o ? o[k] : undefined), this.estado),
+      ]),
+    ].filter(([, , lista]) => Array.isArray(lista));
+  }
+
+  /**
+   * Pone la fecha de edición en lo que de verdad cambió, y deja una lápida
+   * por lo que desapareció.
+   *
+   * Se hace aquí, comparando con la foto anterior, en vez de a mano en cada
+   * uno de los cuarenta métodos que tocan el estado. A mano se olvida uno —y
+   * el que se olvide es justo el que va a perder datos al sincronizar.
+   *
+   * `silencioso` rehace la foto sin apuntar nada: es lo que hace falta al
+   * cargar la app o al restaurar una copia, donde no hubo edición ninguna.
+   */
+  sellar(silencioso = false, ahora = new Date().toISOString()) {
+    const previo = this.sellos;
+    const nuevo = new Map();
+
+    for (const [nombre, clave, lista] of this.listasSelladas()) {
+      for (const ficha of lista) {
+        if (!ficha || ficha[clave] === undefined) continue;
+        const id = `${nombre}/${ficha[clave]}`;
+        const antes = previo?.get(id);
+        let firma = JSON.stringify(ficha);
+        // Lo que aparece de nuevo también se sella: puede ser una ficha recién
+        // creada o una que vuelve de la papelera, y esta última tiene que ser
+        // más nueva que su propia lápida o la fusión la borraría otra vez.
+        if (previo && !silencioso && antes !== firma) {
+          ficha.actualizadoEn = ahora;
+          firma = JSON.stringify(ficha);
+        }
+        nuevo.set(id, firma);
+      }
+    }
+
+    if (previo && !silencioso) {
+      const vivos = new Set(nuevo.keys());
+      for (const id of previo.keys()) {
+        if (vivos.has(id)) continue;
+        const corte = id.lastIndexOf('/');
+        this.estado.borrados.push(lapida(id.slice(0, corte), id.slice(corte + 1), ahora));
+      }
+      this.estado.borrados = purgarLapidas(this.estado.borrados, 180, ahora);
+    }
+
+    this.sellos = nuevo;
+  }
+
+  /** Vuelve a mirar el estado sin apuntar cambios: se parte de cero otra vez. */
+  refrescarSellos() { this.sellos = null; this.sellar(true); }
+
+  /**
+   * Cambia el estado entero por uno ya fusionado (lo que baja de la nube). Lo
+   * que llega ya trae sus propias fechas: volver a sellarlas aquí haría que
+   * este dispositivo ganara siempre.
+   */
+  reemplazarEstado(estado) {
+    this.estado = this.fusionar(estado);
+    this.refrescarSellos();
+    this.guardar();
+    return this.estado;
+  }
+
   guardar() {
+    const ahora = new Date().toISOString();
+    this.sellar(false, ahora);
+    this.estado.actualizadoEn = ahora;
     try {
       localStorage.setItem(CLAVE, JSON.stringify(this.estado));
     } catch (err) {
@@ -661,6 +747,9 @@ class Store {
       return nuevas.length;
     }
     this.estado = this.fusionar(datos);
+    // Restaurar una copia no es borrar: si se apuntaran lápidas por todo lo
+    // que ya no está, la nube se llevaría el vacío a los demás dispositivos.
+    this.refrescarSellos();
     this.guardar();
     return (datos.tareas || []).length;
   }
@@ -670,6 +759,8 @@ class Store {
     this.estado = clonar(ESTADO_INICIAL);
     this.estado.filtros = clonar(FILTROS_PREDEFINIDOS);
     this.estado.plantillas = clonar(PLANTILLAS_INICIALES);
+    // Igual que al restaurar: vaciar este aparato no vacía los otros.
+    this.refrescarSellos();
     this.guardar();
   }
 }

@@ -3,13 +3,13 @@
  * Un recordatorio que solo aparece con cobertura no sirve de mucho.
  */
 
-const VERSION = 'recordatorios-v12';
+const VERSION = 'recordatorios-v13';
 const ARCHIVOS = [
   './', './index.html', './manifest.webmanifest',
   './assets/estilos.css', './assets/icono.svg',
   './assets/icono-180.png', './assets/icono-192.png',
   './assets/icono-512.png', './assets/icono-mascara.png',
-  './src/app.js', './src/store.js', './src/modelo.js', './src/fechas.js',
+  './src/app.js', './src/store.js', './src/fusion.js', './src/nube.js', './src/sincronizador.js', './src/modelo.js', './src/fechas.js',
   './src/recurrencia.js', './src/naturales.js', './src/filtros.js', './src/calendario.js',
   './src/tiempo.js', './src/inversiones.js', './src/proyectos.js',
   './src/calibracion.js', './src/plantillasLista.js', './src/papelera.js', './src/dia.js',

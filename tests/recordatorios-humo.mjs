@@ -1230,6 +1230,148 @@ else {
   else console.log('  ok  vista de móvil');
 }
 
+/* ------------------------------------------------------------------ *
+ * La nube: dos dispositivos de verdad contra un servidor de verdad
+ * ------------------------------------------------------------------ */
+
+// Un Worker de mentira con las mismas reglas que nube/worker.js. Prueba el
+// camino entero: cifrar, subir, bajar, descifrar y fusionar, en dos navegadores
+// con almacenamientos separados. Es la única forma de saber que dos aparatos
+// convergen; leyendo el código no se ve.
+const { createServer } = await import('node:http');
+const cajaNube = new Map();
+const servidorNube = createServer(async (peticion, respuesta) => {
+  const cabeceras = {
+    'access-control-allow-origin': '*',
+    'access-control-allow-methods': 'GET, PUT, OPTIONS',
+    'access-control-allow-headers': 'content-type, x-codigo, x-version',
+    'content-type': 'application/json; charset=utf-8',
+  };
+  if (peticion.method === 'OPTIONS') { respuesta.writeHead(204, cabeceras).end(); return; }
+  const codigo = peticion.headers['x-codigo'];
+  if (!/^[a-f0-9]{32,64}$/i.test(codigo || '')) { respuesta.writeHead(401, cabeceras).end('{"error":"código"}'); return; }
+
+  if (peticion.method === 'GET') {
+    const guardado = cajaNube.get(codigo);
+    respuesta.writeHead(200, cabeceras).end(JSON.stringify(guardado || { version: 0, datos: null }));
+    return;
+  }
+  const trozos = [];
+  for await (const t of peticion) trozos.push(t);
+  const guardado = cajaNube.get(codigo) || { version: 0 };
+  if (Number(peticion.headers['x-version'] || 0) !== guardado.version) {
+    respuesta.writeHead(409, cabeceras).end(JSON.stringify({ error: 'vieja', version: guardado.version }));
+    return;
+  }
+  const version = guardado.version + 1;
+  cajaNube.set(codigo, { version, datos: Buffer.concat(trozos).toString('utf8') });
+  respuesta.writeHead(200, cabeceras).end(JSON.stringify({ version }));
+});
+await new Promise((listo) => servidorNube.listen(0, listo));
+const URL_NUBE = `http://localhost:${servidorNube.address().port}`;
+const CODIGO = 'a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6';
+
+/** Abre un "dispositivo": un navegador con su propio almacenamiento. */
+async function dispositivo(nombre) {
+  const contexto = await navegador.newContext();
+  const pag = await contexto.newPage();
+  await pag.goto(BASE + '#/hoy');
+  await pag.waitForTimeout(400);
+  await pag.evaluate(([url, codigo]) => {
+    localStorage.setItem('recordatorios.nube', JSON.stringify({
+      url, codigo, clave: 'la-contrasena', encendida: true, version: 0,
+    }));
+  }, [URL_NUBE, CODIGO]);
+  await pag.reload();
+  await pag.waitForTimeout(600);
+  return { nombre, pag, contexto };
+}
+
+const sincronizar = async (d) => d.pag.evaluate(async () => {
+  const { sincronizador } = await import('./src/sincronizador.js');
+  const r = await sincronizador.ahora('prueba');
+  return r ? { frase: r.frase, error: null } : { frase: null, error: sincronizador.config.ultimoError };
+});
+
+const titulos = (d) => d.pag.evaluate(async () => {
+  const { store } = await import('./src/store.js');
+  return store.tareas.map((t) => t.titulo);
+});
+
+const compu = await dispositivo('compu');
+const movil = await dispositivo('móvil');
+
+// 1. Lo que escribes en uno aparece en el otro.
+await compu.pag.evaluate(async () => {
+  const { store } = await import('./src/store.js');
+  store.agregar({ titulo: 'Llamar al banco' });
+});
+const subida = await sincronizar(compu);
+if (subida.error) errores.push('no se pudo subir a la nube: ' + subida.error);
+else {
+  await sincronizar(movil);
+  const enElMovil = await titulos(movil);
+  if (!enElMovil.includes('Llamar al banco')) {
+    errores.push('la tarea del computador no llegó al móvil: ' + JSON.stringify(enElMovil.slice(0, 5)));
+  } else console.log('  ok  nube: lo escrito en un dispositivo llega al otro');
+
+  // 2. Lo que se sube va cifrado: el servidor no ve títulos.
+  const crudo = [...cajaNube.values()].map((x) => x.datos).join('');
+  if (crudo.includes('Llamar al banco')) errores.push('¡la nube guardó el título en claro!');
+  else console.log('  ok  nube: el servidor solo recibe bytes cifrados');
+
+  // 3. Lo borrado en un aparato no vuelve desde el otro.
+  const idBorrada = await movil.pag.evaluate(async () => {
+    const { store } = await import('./src/store.js');
+    const t = store.tareas.find((x) => x.titulo === 'Llamar al banco');
+    store.borrar(t.id);
+    return t.id;
+  });
+  await sincronizar(movil);
+  await sincronizar(compu);
+  const quedan = await titulos(compu);
+  if (quedan.includes('Llamar al banco')) {
+    errores.push(`la tarea borrada en el móvil (${idBorrada}) resucitó en el computador`);
+  } else console.log('  ok  nube: lo borrado en un dispositivo no resucita en el otro');
+
+  // 4. Las metas, los gastos y las notas también cruzan, no solo las tareas.
+  await compu.pag.evaluate(async () => {
+    const { store } = await import('./src/store.js');
+    const { objetivoNuevo } = await import('./src/objetivos.js');
+    store.agregarEn('objetivos', objetivoNuevo({ que: 'Leer 24 libros', meta: 24 }));
+    store.agregarEn('gastos', { id: 'g1', concepto: 'Café', monto: 4 });
+    store.agregarEn('notas', { id: 'n1', titulo: 'Idea suelta' });
+  });
+  await sincronizar(compu);
+  await sincronizar(movil);
+  const cruzado = await movil.pag.evaluate(async () => {
+    const { store } = await import('./src/store.js');
+    return {
+      metas: (store.estado.objetivos || []).map((o) => o.que),
+      gastos: (store.estado.gastos || []).length,
+      notas: (store.estado.notas || []).length,
+    };
+  });
+  if (!cruzado.metas.includes('Leer 24 libros') || !cruzado.gastos || !cruzado.notas) {
+    errores.push('no cruzó todo lo que debía: ' + JSON.stringify(cruzado));
+  } else console.log('  ok  nube: cruzan metas, gastos y notas, no solo tareas');
+
+  // 5. Sin servidor, la app no se rompe: lo dice y sigue.
+  await new Promise((listo) => servidorNube.close(listo));
+  const caido = await sincronizar(compu);
+  const sigueViva = await compu.pag.evaluate(async () => {
+    const { store } = await import('./src/store.js');
+    store.agregar({ titulo: 'Escrita sin conexión' });
+    return store.tareas.some((t) => t.titulo === 'Escrita sin conexión');
+  });
+  if (!caido.error || !sigueViva) {
+    errores.push('sin servidor debería avisar y seguir funcionando: ' + JSON.stringify(caido));
+  } else console.log(`  ok  nube: sin conexión avisa ("${caido.error.slice(0, 40)}…") y la app sigue`);
+}
+
+await compu.contexto.close();
+await movil.contexto.close();
+
 await navegador.close();
 cerrar();
 

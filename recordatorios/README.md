@@ -5,7 +5,9 @@ alrededor de **tu** trabajo —inversiones, docencia, investigación y el equipo
 alabanza— y de la vida que hay alrededor: notas, objetivos, gastos, rutinas,
 personas, el carro y los viajes.
 
-Sin servidor, sin cuenta y sin internet. Todo se guarda en tu dispositivo.
+Sin cuentas y sin internet: todo se guarda en tu dispositivo. Y si quieres
+tenerlo igual en todos, [la nube](#la-nube-opcional-y-tuya) sube tu información
+**ya cifrada** a un servidor tuyo que no puede leerla.
 
 **En la web**, sin instalar nada:
 <https://samcand.github.io/papeler-a/recordatorios/>
@@ -31,18 +33,48 @@ abre como una app, a pantalla completa y **sin conexión**:
 
 Dos cosas que conviene saber antes, porque no se arreglan con ajustes:
 
-- **Cada dispositivo guarda lo suyo.** No hay cuenta ni nube, así que lo que
-  escribas en el móvil no aparece solo en el portátil. Para pasarlo: *Ajustes →
-  Respaldo → Descargar copia*, y en el otro *Fusionar copia de otro
-  dispositivo* (gana lo modificado más tarde; lo que solo existe en uno se
-  conserva). La copia puede ir cifrada con contraseña.
-- **El teléfono no va a sonar si la app está cerrada.** Sin servidor no hay
-  notificaciones push. Para lo que no se puede olvidar, exporta el `.ics` y
-  ábrelo en el calendario del móvil: ahí sí hay alarma de verdad, con las
-  repeticiones incluidas.
+- **Para que todos tengan lo mismo hay que encender la nube** (abajo). Sin
+  ella, cada dispositivo guarda lo suyo y se pasa a mano con *Ajustes →
+  Respaldo*.
+- **El teléfono no va a sonar si la app está cerrada.** No hay notificaciones
+  push. Para lo que no se puede olvidar, exporta el `.ics` y ábrelo en el
+  calendario del móvil: ahí sí hay alarma de verdad, con las repeticiones
+  incluidas.
 
-Si borras los datos del sitio en un navegador, se van los de ese navegador.
-Exporta de vez en cuando.
+## La nube (opcional, y tuya)
+
+Sincroniza tus dispositivos **sin entregarle los datos a nadie**: lo que sube
+va cifrado con una contraseña que solo está en tus aparatos, a un servidor de
+cuarenta líneas que montas tú. Ni quien lo aloje puede leer lo que hay dentro.
+
+Montarlo son diez minutos y no hay que instalar nada: las instrucciones están
+en [`nube/worker.js`](../nube/worker.js), que es el servidor entero. Resumidas:
+creas una cuenta gratis en Cloudflare, un almacén KV, pegas ese archivo en un
+Worker y copias la dirección en *Ajustes → Nube*, junto con un código de
+sincronización (el botón lo genera) y una contraseña. Lo mismo en cada
+dispositivo.
+
+A partir de ahí sincroniza sola: al abrir la app, unos segundos después de
+cambiar algo y al volver la conexión. Sin internet la app funciona igual y lo
+pendiente sube después.
+
+Cómo se resuelven los líos, que es lo que importa cuando llevas dos meses
+usándola:
+
+- **Nunca reemplaza: une.** De dos versiones de la misma ficha gana la editada
+  más tarde; lo que solo existe en un aparato se conserva.
+- **Lo que borras se queda borrado.** Cada borrado deja una «lápida» con su
+  fecha, así que la tarea que tiraste en el móvil no vuelve desde el portátil.
+  Y si la restauras de la papelera después, vuelve a propósito.
+- **Si dos dispositivos suben a la vez**, el segundo recibe un aviso, vuelve a
+  bajar, vuelve a unir y vuelve a subir. El peor caso es sincronizar dos veces.
+- **El cronómetro y el pomodoro no se sincronizan**: describen lo que estás
+  haciendo *en este aparato*.
+- **Sin la contraseña no hay recuperación.** Tampoco para ti. Apúntala.
+
+Si borras los datos del sitio en un navegador, se van los de ese navegador —
+pero con la nube encendida vuelven al sincronizar. Exporta de vez en cuando
+igualmente.
 
 ## Lo básico, que tiene que estar bien
 
@@ -635,7 +667,7 @@ descargar. Si la semana fue floja se nota, que es justo para lo que sirve.
 
 ## Lo que queda
 
-La pestaña **Lo que queda** es la hoja de ruta real de la app: **120 hechas y 12
+La pestaña **Lo que queda** es la hoja de ruta real de la app: **121 hechas y 12
 descartadas**, y hoy no queda nada pendiente. Las diez últimas (111-120) salieron
 de revisar una lista de 50 ideas de productividad personal y resumirlas en cuatro
 piezas genéricas —notas, colecciones, objetivos y gastos— en vez de treinta
@@ -675,7 +707,7 @@ Alt y las flechas.
 ## Pruebas
 
 ```bash
-npm test                  # 426 pruebas de lógica, sin navegador
+npm test                  # 465 pruebas de lógica, sin navegador
 npm run test:navegador    # recorre la app en Chromium (necesita Playwright)
 ```
 

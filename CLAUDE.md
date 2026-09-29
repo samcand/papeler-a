@@ -18,9 +18,16 @@ necesita instalarse para funcionar, probablemente no va aquí.
 
 ## Las reglas que de verdad importan
 
-1. **Sin servidor y sin cuentas.** Todo vive en el navegador de quien la usa
-   (`localStorage`, y los adjuntos en IndexedDB). Nada sale del dispositivo.
-   Cualquier idea que exija un servidor se descarta **y se anota por qué** en
+1. **Sin cuentas, y nada legible sale del dispositivo.** Todo vive en el
+   navegador de quien la usa (`localStorage`, y los adjuntos en IndexedDB). La
+   app funciona entera sin conexión y sin registrarse en ningún sitio.
+
+   La única excepción es la sincronización entre dispositivos (`nube.js`), y
+   cumple la regla igual: sube el estado **ya cifrado** con una contraseña que
+   nunca sale del aparato, a un servidor de cuarenta líneas que el dueño monta
+   y que solo sabe guardar bytes (`nube/worker.js`). Ni ese servidor ni quien
+   lo aloje pueden leer nada. Una función nueva que necesite que el servidor
+   *entienda* los datos se descarta **y se anota por qué** en
    `recordatorios/src/ideas.js`; una decisión sin motivo se vuelve a discutir
    cada tres meses.
 2. **Sin dependencias.** Ni en tiempo de ejecución ni para construir. El QR, el
@@ -42,6 +49,9 @@ necesita instalarse para funcionar, probablemente no va aquí.
 recordatorios/src/*.js        lógica pura, un archivo por tema, sin tocar el DOM
 recordatorios/src/views/*.js  una por pantalla: vista(root, ctx)
 recordatorios/src/store.js    todo el estado, guardado en localStorage
+recordatorios/src/fusion.js   unir el estado de dos dispositivos (fechas y lápidas)
+recordatorios/src/nube.js     cifrar, subir y bajar; sincronizador.js decide cuándo
+nube/worker.js                el servidor entero: guarda un bloque cifrado y ya
 recordatorios/src/ideas.js    la hoja de ruta (hecho / pendiente / descartado)
 src/ui.js                     el(), render(), button()… compartido por las dos apps
 tests/*.test.js               pruebas normales de Node, sin framework
@@ -107,6 +117,20 @@ console.log(`\n${passed} pruebas de lo que sea OK`);
 - `tests/recordatorios-humo.mjs` recorre la app de verdad en Chromium. Ha
   encontrado fallos que la lectura del código no encontró; vale la pena
   añadirle unas líneas cuando se hace una pantalla nueva.
+
+## Si añades una colección al estado
+
+`fusion.js` tiene la lista de lo que se sincroniza. Una colección nueva que no
+se apunte ahí **deja de cruzar entre dispositivos en silencio**, que es la peor
+forma de fallar. Hay una prueba que compara las dos listas y se pone roja si se
+te olvida; cuando salte, apunta la colección en `LISTAS_POR_ID` (o en
+`REGISTROS` si solo crece y nadie la edita) y actualiza la prueba.
+
+Las fechas de edición y las lápidas de lo borrado las pone `store.sellar()`
+sola, comparando con la foto anterior en cada guardado. No hace falta tocarla
+al añadir métodos nuevos; sí hace falta llamar a `refrescarSellos()` si
+reemplazas el estado entero sin que eso sea una edición (restaurar una copia,
+vaciar la app, aplicar lo que baja de la nube).
 
 ## Al terminar algo
 

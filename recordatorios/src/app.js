@@ -8,6 +8,7 @@ import { resumenEsperas } from './esperas.js';
 import { programarDelDia, programarResumen } from './notificaciones.js';
 import { resumenDelDia, textoNotificacion } from './resumen.js';
 import { store } from './store.js';
+import { sincronizador } from './sincronizador.js';
 import { entradaRapida } from './componentes.js';
 import { panelDeVida } from './panel.js';
 import { resumenRutinas } from './rutinas.js';
@@ -664,6 +665,9 @@ window.addEventListener('DOMContentLoaded', () => {
     clearTimeout(window.__refrescoArmazon);
     window.__refrescoArmazon = setTimeout(refrescarArmazon, 120);
   });
+
+  // Si la nube está encendida, baja lo que haya y deja puesta la subida.
+  sincronizador.iniciar();
 
   if (store.estado.ajustes.notificaciones) {
     programarDelDia(store.tareas);

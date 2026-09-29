@@ -597,6 +597,12 @@ body.concentrado .contenido { max-width: none; display: grid; place-items: cente
 .meta-pie { align-items: flex-start; gap: 10px; }
 .meta-botones { flex: 0 0 auto; align-items: center; }
 
+/* ---- La nube ---- */
+.card.nube { border-left: 3px solid var(--line); }
+.card.nube.lista { border-left-color: var(--ok, #35c48b); }
+.card.nube.sincronizando { border-left-color: var(--accent-2, #4a9eff); }
+.card.nube.error { border-left-color: var(--danger); }
+
 /* ---- Objetivos y rutinas ---- */
 .card.objetivo.atrasado { border-left: 3px solid var(--danger); }
 .card.rutina.completa { border-left: 3px solid var(--ok, #35c48b); }

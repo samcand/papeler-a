@@ -10,7 +10,10 @@ import { enClase, pedirPermiso, permiso, programarDelDia } from '../notificacion
 import { ACCIONES, CONDICIONES, REGLAS_EJEMPLO, reglaVacia, textoRegla } from '../automatizacion.js';
 import { tituloVista } from '../componentes.js';
 import { archivadas, candidatasAArchivar, diasRestantes } from '../papelera.js';
-import { cifrar, descifrar, esArchivoCifrado, fusionarEstados } from '../compartir.js';
+import { cifrar, descifrar, esArchivoCifrado } from '../compartir.js';
+import { fusionar } from '../fusion.js';
+import { codigoNuevo, configurada, frase as fraseNube } from '../nube.js';
+import { sincronizador } from '../sincronizador.js';
 import { espacioUsado, tamañoLegible } from '../adjuntos.js';
 import { store } from '../store.js';
 
@@ -147,6 +150,8 @@ export function vistaAjustes(root) {
             pintar();
           }))),
 
+      tarjetaNube(),
+
       el('section', { class: 'card' },
         el('h2', { class: 'card-title' }, 'Respaldo'),
         el('p', { class: 'muted small' }, 'Los datos viven en este navegador. Si borras los datos del sitio, se van. Exporta de vez en cuando.'),
@@ -195,11 +200,10 @@ export function vistaAjustes(root) {
             }
             try {
               const otro = JSON.parse(contenido);
-              const { estado, frase } = fusionarEstados(store.estado, otro);
-              if (!window.confirm(`${frase}\n\nGana siempre la versión modificada más tarde. ¿Fusionar?`)) return;
+              const { estado, frase } = fusionar(store.estado, otro);
+              if (!window.confirm(`${frase}\n\nGana la versión modificada más tarde, y lo que borraste sigue borrado. ¿Fusionar?`)) return;
               store.instantanea('Fusionar copia');
-              store.estado = store.fusionar(estado);
-              store.guardar();
+              store.reemplazarEstado(estado);
               toast(frase);
               pintar();
             } catch (err) { toast('El archivo no se pudo leer', 'warn'); }
@@ -234,6 +238,80 @@ export function vistaAjustes(root) {
   };
 
   /** La papelera: treinta días para arrepentirse. */
+  /* --------------------------- la nube --------------------------- */
+
+  /**
+   * Lo que se sube va cifrado con esta contraseña, y la contraseña no sale de
+   * aquí. Por eso la pantalla insiste tanto: si se pierde, lo de arriba es
+   * ruido para siempre, también para su dueño.
+   */
+  function tarjetaNube() {
+    const c = sincronizador.config;
+    const lista = configurada(c);
+    const estado = sincronizador.estado;
+
+    const campo = (etiqueta, control, pista) => el('label', { class: 'field' },
+      el('span', { class: 'field-label' }, etiqueta), control,
+      pista ? el('span', { class: 'field-hint' }, pista) : null);
+
+    const guardar = (cambios) => { sincronizador.guardar(cambios); pintar(); };
+
+    return el('section', { class: `card nube ${estado}` },
+      el('div', { class: 'fila entre' },
+        el('h2', { class: 'card-title', style: 'margin:0' }, '☁️ Nube (entre tus dispositivos)'),
+        el('span', { class: `small ${estado === 'error' ? 'negativo' : 'muted'}`.trim() },
+          estado === 'sincronizando' ? 'Sincronizando…' : fraseNube(c))),
+
+      el('p', { class: 'muted small' },
+        'Sube tu información ya cifrada a un servidor tuyo. Ni Cloudflare ni nadie '
+        + 'con acceso a ese servidor puede leerla: la contraseña solo está en tus aparatos. '
+        + 'Las instrucciones para montarlo están en la carpeta nube/ del proyecto.'),
+
+      campo('Dirección de tu Worker',
+        input(c.url, (v) => sincronizador.guardar({ url: v.trim() }), { placeholder: 'https://recordatorios.tu-cuenta.workers.dev' }),
+        'La que te dio Cloudflare al publicarlo.'),
+
+      campo('Código de sincronización',
+        el('div', { class: 'fila' },
+          el('div', { class: 'grow' }, input(c.codigo, (v) => sincronizador.guardar({ codigo: v.trim() }), { placeholder: '32 caracteres' })),
+          button('Generar', () => guardar({ codigo: codigoNuevo() }), { variant: 'ghost chico' })),
+        'El mismo en todos tus dispositivos. Genéralo aquí y cópialo a los demás.'),
+
+      campo('Contraseña que cifra',
+        el('input', {
+          class: 'input', type: 'password', value: c.clave, autocomplete: 'off',
+          onChange: (e) => sincronizador.guardar({ clave: e.target.value }),
+        }),
+        'La misma en todos. Apúntala donde no se pierda: sin ella, lo que hay arriba no se puede recuperar.'),
+
+      el('div', { class: 'fila', style: 'margin-top:12px' },
+        button(c.encendida ? 'Apagar la nube' : 'Encender la nube', () => {
+          if (!c.encendida && !lista) { toast('Faltan la dirección, el código o la contraseña', 'warn'); return; }
+          guardar({ encendida: !c.encendida });
+          if (!c.encendida) sincronizador.ahora('la encendiste');
+        }, { variant: c.encendida ? 'ghost' : 'primary' }),
+
+        button('Sincronizar ahora', async () => {
+          const r = await sincronizador.ahora('a mano');
+          toast(r ? r.frase : (sincronizador.config.ultimoError || 'No se pudo sincronizar'), r ? 'info' : 'warn');
+          pintar();
+        }, { variant: 'ok', attrs: c.encendida ? {} : { disabled: true } }),
+
+        button('Copiar el código', async () => {
+          try {
+            await navigator.clipboard.writeText(c.codigo);
+            toast('Código copiado');
+          } catch { window.prompt('Copia este código:', c.codigo); }
+        }, { variant: 'ghost chico', attrs: c.codigo ? {} : { disabled: true } })),
+
+      c.ultimoError ? el('p', { class: 'negativo small' }, c.ultimoError) : null,
+
+      el('p', { class: 'muted small', style: 'margin-top:10px' },
+        'Sincroniza al abrir la app, unos segundos después de cambiar algo y al volver la conexión. '
+        + 'Sin internet la app funciona igual y lo pendiente sube luego. '
+        + 'El cronómetro y el pomodoro no se sincronizan: son de este aparato.'));
+  }
+
   function panelPapelera() {
     const papelera = store.estado.papelera || [];
     return el('section', { class: 'card' },
